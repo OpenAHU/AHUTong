@@ -1,0 +1,4 @@
+rootProject.name = "AHUTong"
+include ':app'
+include ':arch'
+include ':library'

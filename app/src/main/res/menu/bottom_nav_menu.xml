@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/schedule_fragment"
+        android:icon="@drawable/bottom_nav_schedule"
+        android:title="@string/title_schedule"/>
+    <item
+        android:id="@+id/discovery_fragment"
+        android:icon="@drawable/bottom_nav_discovery"
+        android:title="@string/title_discovery"/>
+    <item
+        android:id="@+id/mine_fragment"
+        android:icon="@drawable/bottom_nav_mine"
+        android:title="@string/title_mine"/>
+</menu>

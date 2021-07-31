@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ahu_navigation"
+    app:startDestination="@id/home_fragment">
+    <fragment
+        tools:layout="@layout/fragment_home"
+        android:id="@+id/home_fragment"
+        android:name="com.ahu.ahutong.ui.page.HomeFragment">
+        <action
+            android:id="@+id/action_home_fragment_to_discovery_fragment2"
+            app:destination="@id/discovery_fragment" />
+        <action
+            android:id="@+id/action_home_fragment_to_schedule_fragment"
+            app:destination="@id/schedule_fragment" />
+        <action
+            android:id="@+id/action_home_fragment_to_mine_fragment"
+            app:destination="@id/mine_fragment" />
+    </fragment>
+
+    <fragment
+        tools:layout="@layout/fragment_schedule"
+        android:id="@+id/schedule_fragment"
+        android:name="com.ahu.ahutong.ui.page.ScheduleFragment"/>
+
+    <fragment
+        tools:layout="@layout/fragment_discovery"
+        android:id="@+id/discovery_fragment"
+        android:name="com.ahu.ahutong.ui.page.DiscoveryFragment"/>
+
+    <fragment
+        tools:layout="@layout/fragment_mine"
+        android:id="@+id/mine_fragment"
+        android:name="com.ahu.ahutong.ui.page.MineFragment"/>
+</navigation>
