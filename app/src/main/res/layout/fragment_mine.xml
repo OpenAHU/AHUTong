@@ -7,8 +7,6 @@
         <variable
             name="proxy"
             type="com.ahu.ahutong.ui.page.MineFragment.ClickProxy" />
-        <import type="com.ahu.ahutong.data.AHUCache"
-            alias="cache"/>
     </data>
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -34,23 +32,16 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tv_username"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center"
+                    android:gravity="start"
+                    android:paddingHorizontal="20dp"
                     android:singleLine="true"
                     android:textColor="@color/black"
                     android:textSize="35sp"
+                    android:text="@{state.user.name}"
                     tool:text="Sink" />
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/avatar"
-                    android:layout_width="90dp"
-                    android:layout_height="90dp"
-                    android:layout_marginEnd="40dp"
-                    app:shapeAppearanceOverlay="@style/circleImageViewStyle"
-                    android:src="@mipmap/avatar" />
             </LinearLayout>
 
             <LinearLayout
@@ -87,6 +78,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
+                        android:text="@{state.login ?  @string/mine_tv_logout : @string/mine_tv_identity}"
                         tool:text="@string/mine_tv_identity" />
                     <androidx.appcompat.widget.AppCompatImageView
                         android:layout_width="20dp"

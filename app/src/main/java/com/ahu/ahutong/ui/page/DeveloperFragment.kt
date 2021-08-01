@@ -1,10 +1,18 @@
 package com.ahu.ahutong.ui.page
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.model.Developer
 import com.ahu.ahutong.databinding.FragmentDeveloperBinding
+import com.ahu.ahutong.databinding.ItemDeveloperBinding
+import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.page.state.DeveloperViewModel
 
 /**
@@ -22,6 +30,31 @@ class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>(){
     override fun getDataBindingConfig(): DataBindingConfig {
         return DataBindingConfig(R.layout.fragment_developer, BR.state, mState)
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        dataBinding.recyclerDeveloper.layoutManager = LinearLayoutManager(requireContext())
+        dataBinding.recyclerDeveloper.adapter = object: BaseAdapter<Developer, ItemDeveloperBinding>(mState.developers){
+            override fun layout(): Int {
+                return R.layout.item_developer
+            }
+            override fun bindingData(binding: ItemDeveloperBinding, data: Developer) {
+                binding.dev = data
+                binding.proxy = ClickProxy()
+            }
+        }
+    }
+
+
+    inner class ClickProxy {
+        fun gotoQQ(view: View, uri: String) {
+            val i1 = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+            i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            i1.action = Intent.ACTION_VIEW
+            view.context.startActivity(i1)
+        }
+    }
+
 
 
 

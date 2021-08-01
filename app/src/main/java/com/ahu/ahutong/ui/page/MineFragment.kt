@@ -2,6 +2,7 @@ package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
@@ -41,11 +42,16 @@ class MineFragment private constructor(): BaseFragment<FragmentMineBinding>() {
         }
         //login or logout
         fun login(view: View){
-
+            if (mState.isLogin()){
+                //注销 (TODO)
+            }else {
+                //登录（TODO）
+                Toast.makeText(requireContext(), "登录", Toast.LENGTH_SHORT).show()
+            }
         }
         //jump to developer fragment
         fun developer(view: View){
-
+            nav().navigate(R.id.action_home_fragment_to_developer_fragment)
         }
         //jump to setting fragment
         fun setting(view: View){
