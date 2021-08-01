@@ -4,7 +4,6 @@
         <variable
             name="state"
             type="com.ahu.ahutong.ui.page.state.ScheduleViewModel" />
-
     </data>
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -30,6 +29,12 @@
                     tools:title="@string/title_schedule" />
             </com.google.android.material.appbar.AppBarLayout>
 
+            <com.ahu.ahutong.ui.widget.schedule.ScheduleView
+                android:id="@+id/scheduleView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/appbar"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

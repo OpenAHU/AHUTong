@@ -4,6 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
@@ -14,6 +17,7 @@ import com.ahu.ahutong.databinding.FragmentDeveloperBinding
 import com.ahu.ahutong.databinding.ItemDeveloperBinding
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.page.state.DeveloperViewModel
+import java.lang.Exception
 
 /**
  *
@@ -29,6 +33,7 @@ class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>(){
 
     override fun getDataBindingConfig(): DataBindingConfig {
         return DataBindingConfig(R.layout.fragment_developer, BR.state, mState)
+            .addBindingParam(BR.proxy, ClickProxy())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -47,11 +52,19 @@ class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>(){
 
 
     inner class ClickProxy {
+        val back: (() -> Unit) = {
+            nav().popBackStack()
+        }
         fun gotoQQ(view: View, uri: String) {
-            val i1 = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-            i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            i1.action = Intent.ACTION_VIEW
-            view.context.startActivity(i1)
+            try {
+                val i1 = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                i1.action = Intent.ACTION_VIEW
+                view.context.startActivity(i1)
+            }catch (e: Exception){
+                Toast.makeText(requireContext(), "您并没有安装QQ或者Tim", Toast.LENGTH_SHORT).show()
+            }
+
         }
     }
 

@@ -16,9 +16,6 @@
         <item name="colorAccent">@color/teal_200</item>
         <item name="android:textColorPrimary">@color/black</item>
     </style>
-    <style name="circleImageViewStyle">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">50%</item>
-    </style>
+
 
 </resources>

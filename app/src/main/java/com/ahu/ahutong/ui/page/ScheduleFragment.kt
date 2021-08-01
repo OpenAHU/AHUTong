@@ -2,6 +2,7 @@ package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
@@ -9,6 +10,9 @@ import com.ahu.ahutong.MainActivity
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentScheduleBinding
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
+import com.ahu.ahutong.ui.widget.schedule.bean.DefaultDataUtils
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * @Author SinkDev
@@ -27,7 +31,16 @@ class ScheduleFragment private constructor(): BaseFragment<FragmentScheduleBindi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as MainActivity).setSupportActionBar(dataBinding.toolbar)
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).parse("2021-08-02") ?: Date()
+        dataBinding.scheduleView
+            .startTime(date)
+            .data(emptyList())
+            .theme(DefaultDataUtils.getDefaultTheme())
+            .loadSchedule()
+
+        dataBinding.scheduleView.setEmptyCourseListener { _, location ->
+            Toast.makeText(requireContext(), "${location.startTime} - ${location.weekDay}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     companion object{

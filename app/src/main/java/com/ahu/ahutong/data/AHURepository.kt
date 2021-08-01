@@ -3,7 +3,6 @@ package com.ahu.ahutong.data
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
-import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.api.APIDataSource
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.model.Course
@@ -29,11 +28,8 @@ import java.util.concurrent.TimeUnit
  * @Email: 468766131@qq.com
  */
 object AHURepository {
-    private var dataSource = APIDataSource()
+     var dataSource = APIDataSource()
 
-    fun setDataSource(dataSource: BaseDataSource){
-        AHURepository.dataSource = APIDataSource()
-    }
 
     /**
      * 搜索垃圾

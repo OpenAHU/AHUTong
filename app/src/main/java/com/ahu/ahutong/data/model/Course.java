@@ -26,11 +26,11 @@ public class Course implements Serializable {
      */
 
     @SerializedName("weekday")
-    private String weekday;
+    private Integer weekday;
     @SerializedName("startWeek")
-    private String startWeek;
+    private Integer startWeek;
     @SerializedName("endWeek")
-    private String endWeek;
+    private Integer endWeek;
     @SerializedName("extra")
     private String extra;
     @SerializedName("location")
@@ -40,35 +40,35 @@ public class Course implements Serializable {
     @SerializedName("teacher")
     private String teacher;
     @SerializedName("length")
-    private String length;
+    private Integer length;
     @SerializedName("startTime")
-    private String startTime;
+    private Integer startTime;
     @SerializedName("singleDouble")
     private String singleDouble;
     @SerializedName("courseId")
     private String courseId;
 
-    public String getWeekday() {
+    public Integer getWeekday() {
         return weekday;
     }
 
-    public void setWeekday(String weekday) {
+    public void setWeekday(Integer weekday) {
         this.weekday = weekday;
     }
 
-    public String getStartWeek() {
+    public Integer getStartWeek() {
         return startWeek;
     }
 
-    public void setStartWeek(String startWeek) {
+    public void setStartWeek(Integer startWeek) {
         this.startWeek = startWeek;
     }
 
-    public String getEndWeek() {
+    public Integer getEndWeek() {
         return endWeek;
     }
 
-    public void setEndWeek(String endWeek) {
+    public void setEndWeek(Integer endWeek) {
         this.endWeek = endWeek;
     }
 
@@ -104,19 +104,19 @@ public class Course implements Serializable {
         this.teacher = teacher;
     }
 
-    public String getLength() {
+    public Integer getLength() {
         return length;
     }
 
-    public void setLength(String length) {
+    public void setLength(Integer length) {
         this.length = length;
     }
 
-    public String getStartTime() {
+    public Integer getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(Integer startTime) {
         this.startTime = startTime;
     }
 
@@ -135,5 +135,6 @@ public class Course implements Serializable {
     public void setCourseId(String courseId) {
         this.courseId = courseId;
     }
+
 }
 

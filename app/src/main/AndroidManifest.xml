@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AHUTong">
         <activity android:name=".MainActivity"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
