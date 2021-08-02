@@ -26,11 +26,11 @@ public class Course implements Serializable {
      */
 
     @SerializedName("weekday")
-    private Integer weekday;
+    private String weekday;
     @SerializedName("startWeek")
-    private Integer startWeek;
+    private String startWeek;
     @SerializedName("endWeek")
-    private Integer endWeek;
+    private String endWeek;
     @SerializedName("extra")
     private String extra;
     @SerializedName("location")
@@ -40,35 +40,35 @@ public class Course implements Serializable {
     @SerializedName("teacher")
     private String teacher;
     @SerializedName("length")
-    private Integer length;
+    private String length;
     @SerializedName("startTime")
-    private Integer startTime;
+    private String startTime;
     @SerializedName("singleDouble")
     private String singleDouble;
     @SerializedName("courseId")
     private String courseId;
 
     public Integer getWeekday() {
-        return weekday;
+        return Integer.parseInt(weekday);
     }
 
-    public void setWeekday(Integer weekday) {
+    public void setWeekday(String weekday) {
         this.weekday = weekday;
     }
 
     public Integer getStartWeek() {
-        return startWeek;
+        return Integer.parseInt(startWeek);
     }
 
-    public void setStartWeek(Integer startWeek) {
+    public void setStartWeek(String startWeek) {
         this.startWeek = startWeek;
     }
 
     public Integer getEndWeek() {
-        return endWeek;
+        return Integer.parseInt(endWeek);
     }
 
-    public void setEndWeek(Integer endWeek) {
+    public void setEndWeek(String endWeek) {
         this.endWeek = endWeek;
     }
 
@@ -105,18 +105,18 @@ public class Course implements Serializable {
     }
 
     public Integer getLength() {
-        return length;
+        return Integer.parseInt(length);
     }
 
-    public void setLength(Integer length) {
+    public void setLength(String length) {
         this.length = length;
     }
 
     public Integer getStartTime() {
-        return startTime;
+        return Integer.parseInt(startTime);
     }
 
-    public void setStartTime(Integer startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 

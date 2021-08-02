@@ -26,10 +26,6 @@ class APIDataSource: BaseDataSource {
         schoolYear: String,
         schoolTerm: String
     ): AHUResponse<List<Exam>> {
-        SinkLog.i("check argument start")
-        if (!schoolTerm.isCampus()){
-            throw IllegalArgumentException("schoolTerm must be 1 or 2")
-        }
         return AHUService.API.getExamInfo(schoolYear, schoolTerm)
     }
 

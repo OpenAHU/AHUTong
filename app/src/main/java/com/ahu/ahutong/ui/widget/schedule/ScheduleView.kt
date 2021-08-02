@@ -124,7 +124,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
 
     private fun initTableBody() {
         for (i in 1..7) {
-            //创建纵向课
+            //创建纵向课程容器
             val linearLayout = LinearLayout(context)
             linearLayout.orientation = VERTICAL
             //填充课程
@@ -139,7 +139,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
                     )
                 }
             }
-         contentLinearLayout.addView(linearLayout, courseWidth.toInt(), -1)
+            contentLinearLayout.addView(linearLayout, courseWidth.toInt(), -1)
         }
     }
 
@@ -256,7 +256,10 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     }
 
     /**
-     * 设置Date
+     * 设置当前Date
+     * @param week Int
+     * @param weekday Int
+     * @return ScheduleView
      */
     fun date(week: Int, weekday: Int): ScheduleView {
         this.week = week
@@ -266,6 +269,8 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
 
     /**
      * 设置课表数据
+     * @param data List<Course>
+     * @return ScheduleView
      */
     fun data(data: List<Course>): ScheduleView {
         //清空数据
@@ -291,16 +296,22 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         return this
     }
 
+
     /**
      * 设置主题
+     * @param theme ScheduleTheme
+     * @return ScheduleView
      */
     fun theme(theme: ScheduleTheme): ScheduleView {
         this.theme = theme
         return this
     }
 
+
     /**
      * 是否显示非本周课
+     * @param isShowAllCourses Boolean
+     * @return ScheduleView
      */
     fun showAllCourse(isShowAllCourses: Boolean): ScheduleView {
         SinkLog.i("set show all courses is $isShowAllCourses")
@@ -310,6 +321,8 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
 
     /**
      * 开学时间
+     * @param startTime Date
+     * @return ScheduleView
      */
     fun startTime(startTime: Date): ScheduleView {
         val calendar = Calendar.getInstance()
@@ -321,8 +334,10 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         return this
     }
 
+
     /**
      * 设置空课监听器
+     * @param listener Function2<[@kotlin.ParameterName] View, [@kotlin.ParameterName] CourseDate, Unit>
      */
     fun setEmptyCourseListener(listener: (view: View, location: CourseDate) -> Unit) {
         this.mEmptyCourseListener = listener
@@ -331,8 +346,8 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
 
     /**
      * 设置有课监听器
+     * @param listener Function3<[@kotlin.ParameterName] View, [@kotlin.ParameterName] ScheduleCourse, [@kotlin.ParameterName] CourseDate, Unit>
      */
-
     fun setCourseListener(listener: (view: View, scheduleCourse: ScheduleCourse, location: CourseDate) -> Unit) {
         this.mCourseListener = listener
     }

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import com.ahu.ahutong.data.api.APIDataSource
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.ext.isCampus
 import com.ahu.ahutong.ext.isEmptyRoomTime
@@ -80,7 +81,7 @@ object AHURepository {
     fun getSchedule(
         schoolYear: String,
         schoolTerm: String,
-        isRefresh: Boolean
+        isRefresh: Boolean = false
     ): LiveData<Result<List<Course>>> {
         SinkLog.i("check argument start")
         if (!schoolTerm.isCampus()) {
@@ -170,8 +171,8 @@ object AHURepository {
      * @param isRefresh Boolean 是否直接获取服务器上的
      * @return LiveData<Result<List<News>>>
      */
-    fun getNews(isRefresh: Boolean): LiveData<Result<List<News>>> {
-        if (isRefresh){
+    fun getNews(isRefresh: Boolean = false): LiveData<Result<List<News>>> {
+        if (isRefresh) {
             //直接返回网络信息
             return getNews()
         }
@@ -211,8 +212,8 @@ object AHURepository {
      * @param isRefresh Boolean 是否直接获取服务器上的
      * @return LiveData<Result<List<News>>>
      */
-    fun getGrade(isRefresh: Boolean): LiveData<Result<Grade>> {
-        if (isRefresh){
+    fun getGrade(isRefresh: Boolean = false): LiveData<Result<Grade>> {
+        if (isRefresh) {
             //直接返回网络信息
             return getGrade()
         }
@@ -227,9 +228,10 @@ object AHURepository {
     private fun getGrade(): LiveData<Result<Grade>> {
         return liveData(Dispatchers.IO) {
             val result = try {
+                SinkLog.i("Get grade start")
                 val response = dataSource.getGrade()
                 if (response.isSuccessful) {
-                    SinkLog.i("get Grade success")
+                    SinkLog.i("Get grade success")
                     //保存数据
                     AHUCache.saveGrade(response.data)
                     Result.success(response.data)
@@ -245,6 +247,58 @@ object AHURepository {
         }
     }
 
+    /**
+     * 获取考试信息 本地优先
+     * @param schoolYear String
+     * @param schoolTerm String
+     * @param isRefresh Boolean
+     * @return LiveData<Result<List<Exam>>>
+     */
+    fun getExamInfo(schoolYear: String, schoolTerm: String, isRefresh: Boolean = false): LiveData<Result<List<Exam>>> {
+        SinkLog.i("check argument start")
+        if (!schoolTerm.isCampus()){
+            throw IllegalArgumentException("schoolTerm must be 1 or 2")
+        }
+
+        if (isRefresh) {
+            //直接返回网络信息
+            return getExamInfo(schoolYear, schoolTerm)
+        }
+        val examInfo = AHUCache.getExamInfo()
+        if (examInfo.isNullOrEmpty()) {
+            return getExamInfo(schoolYear, schoolTerm)
+        }
+        return MutableLiveData(Result.success(examInfo))
+    }
+    /**
+     * 获取考试信息 From Web
+     * @param schoolYear String
+     * @param schoolTerm String
+     * @return LiveData<Result<List<Exam>>>
+     */
+    private fun getExamInfo(schoolYear: String, schoolTerm: String): LiveData<Result<List<Exam>>> {
+        return liveData(Dispatchers.IO) {
+            val result = try {
+                SinkLog.i("Get exam info start")
+                val response = dataSource.getExamInfo(schoolYear, schoolTerm)
+                if (response.isSuccessful) {
+                    SinkLog.i("Get exam info success")
+                    //保存数据
+                    AHUCache.saveExamInfo(response.data)
+                    Result.success(response.data)
+                } else {
+                    SinkLog.e("Get exam info fail, $response")
+                    Result.failure(Throwable(response.msg))
+                }
+            } catch (e: Exception) {
+                SinkLog.e("Get exam info fail, $e")
+                Result.failure(e)
+            }
+            //发射结果
+            emit(result)
+
+        }
+    }
 
 
 }
