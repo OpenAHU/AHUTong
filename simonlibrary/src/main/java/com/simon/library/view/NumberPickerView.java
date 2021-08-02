@@ -11,6 +11,7 @@ import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -20,10 +21,11 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class  NumberPickerView extends View {
+public class NumberPickerView extends View {
 
     // default text color of not selected item
     private static final int DEFAULT_TEXT_COLOR_NORMAL = 0XFF333333;
@@ -49,7 +51,7 @@ public class  NumberPickerView extends View {
     // default divider's color
     private static final int DEFAULT_DIVIDER_COLOR = 0XFFF56313;
 
-    private float DIVIDER_HEIGHT = 2f;
+    private float mDividerHeight = 2f; // dividerHeight
 
     // default divider's margin to the left & right of this view
     private static final int DEFAULT_DIVIDER_MARGIN_HORIZONTAL = 0;
@@ -106,7 +108,7 @@ public class  NumberPickerView extends View {
     private int mScaledTouchSlop = 8;
     private String mHintText;
 
-   // private String mAlterHint;
+    // private String mAlterHint;
     //friction used by scroller when fling
     private float mFriction = 1f;
     private float mTextSizeNormalCenterYOffset = 0f;
@@ -147,24 +149,22 @@ public class  NumberPickerView extends View {
     }
 
 
-
-
-    public void setDividerHeight(float height){
-        DIVIDER_HEIGHT=height;
+    public void setDividerHeight(float height) {
+        mDividerHeight = height;
     }
-    public void setDividerMarginL(int marginL){
-        mDividerMarginL=marginL;
+
+    public void setDividerMarginL(int marginL) {
+        mDividerMarginL = marginL;
     }
-    public void setDividerMarginR(int marginR){
-        mDividerMarginR=marginR;
+
+    public void setDividerMarginR(int marginR) {
+        mDividerMarginR = marginR;
     }
 
     private OnValueChangeListener mOnValueChangeListener; //compatible for NumberPicker
 
 
     // The current scroll state of the NumberPickerView.
-
-
     public NumberPickerView(Context context) {
         super(context);
         init(context);
@@ -179,7 +179,6 @@ public class  NumberPickerView extends View {
         super(context, attrs, defStyleAttr);
         init(context);
     }
-
 
 
     private void init(Context context) {
@@ -204,7 +203,7 @@ public class  NumberPickerView extends View {
         mPaintDivider.setColor(mDividerColor);
         mPaintDivider.setAntiAlias(true);
         mPaintDivider.setStyle(Paint.Style.STROKE);
-        mPaintDivider.setStrokeWidth(DIVIDER_HEIGHT);
+        mPaintDivider.setStrokeWidth(mDividerHeight);
 
 
         mPaintText.setColor(mTextColorNormal);
@@ -223,8 +222,8 @@ public class  NumberPickerView extends View {
             updateValueForInit();
         }
         initHandler();
-        String[] text={"sdsdsd","jfskjsfj","dgrghrghrhr","sjfkhsfkf","pwkfpwkfpwfpk","ejfoejfoejg"};
-        setDisplayedValues(text,true);
+        String[] text = {"sdsdsd", "jfskjsfj", "dgrghrghrhr", "sjfkhsfkf", "pwkfpwkfpwfpk", "ejfoejfoejg"};
+        setDisplayedValues(text, true);
     }
 
     @SuppressLint("HandlerLeak")
@@ -264,7 +263,7 @@ public class  NumberPickerView extends View {
                                 willPickIndex = getWillPickIndexByGlobalY(mCurrDrawGlobalY);
                             }
                             Message changeMsg = getMsg(HANDLER_WHAT_LISTENER_VALUE_CHANGED, mPrevPickedIndex, willPickIndex, msg.obj);
-                            mHandlerInMainThread.sendMessageDelayed(changeMsg, duration * 2);
+                            mHandlerInMainThread.sendMessageDelayed(changeMsg, duration * 2L);
                         }
                         break;
                     case HANDLER_WHAT_LISTENER_VALUE_CHANGED:
@@ -273,7 +272,8 @@ public class  NumberPickerView extends View {
                 }
             }
         };
-        mHandlerInMainThread = new Handler() {
+        //Main Handler
+        mHandlerInMainThread = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
@@ -365,7 +365,7 @@ public class  NumberPickerView extends View {
         if (currPickedIndex != mPrevPickedIndex && DEFAULT_RESPOND_CHANGE_ON_DETACH) {
             try {
                 if (mOnValueChangeListener != null) {
-                    mOnValueChangeListener.onValueChange(NumberPickerView.this, mPrevPickedIndex , currPickedIndex );
+                    mOnValueChangeListener.onValueChange(NumberPickerView.this, mPrevPickedIndex, currPickedIndex);
                 }
 
             } catch (Exception e) {
@@ -427,7 +427,7 @@ public class  NumberPickerView extends View {
      */
     public void smoothScrollToValue(int fromValue, int toValue, boolean needRespond) {
         int deltaIndex;
-            deltaIndex = toValue - fromValue;
+        deltaIndex = toValue - fromValue;
         setValue(fromValue);
         if (fromValue == toValue) {
             return;
@@ -447,7 +447,7 @@ public class  NumberPickerView extends View {
         if (oldVal != newVal) {
             if (!(respondChange instanceof Boolean) || (Boolean) respondChange) {
                 if (mOnValueChangeListener != null) {
-                    mOnValueChangeListener.onValueChange(NumberPickerView.this, oldVal , newVal );
+                    mOnValueChangeListener.onValueChange(NumberPickerView.this, oldVal, newVal);
                 }
             }
         }
@@ -468,12 +468,12 @@ public class  NumberPickerView extends View {
      */
     private void scrollByIndexSmoothly(int deltaIndex, boolean needRespond) {
 
-            int willPickRawIndex = getPickedIndexRelativeToRaw();
-            if (willPickRawIndex + deltaIndex > mMaxShowIndex) {
-                deltaIndex = mMaxShowIndex - willPickRawIndex;
-            } else if (willPickRawIndex + deltaIndex < mMinShowIndex) {
-                deltaIndex = mMinShowIndex - willPickRawIndex;
-            }
+        int willPickRawIndex = getPickedIndexRelativeToRaw();
+        if (willPickRawIndex + deltaIndex > mMaxShowIndex) {
+            deltaIndex = mMaxShowIndex - willPickRawIndex;
+        } else if (willPickRawIndex + deltaIndex < mMinShowIndex) {
+            deltaIndex = mMinShowIndex - willPickRawIndex;
+        }
 
         int duration;
         int dy;
@@ -514,18 +514,17 @@ public class  NumberPickerView extends View {
 
     //compatible for android.widget.NumberPicker
     public void setValue(int value) {
-        setPickedIndexRelativeToRaw(value );
+        setPickedIndexRelativeToRaw(value);
     }
 
     //compatible for android.widget.NumberPicker
     public int getValue() {
-        return getPickedIndexRelativeToRaw() ;
+        return getPickedIndexRelativeToRaw();
     }
 
     public String getContentByCurrValue() {
-        return mDisplayedValues[getValue() ];
+        return mDisplayedValues[getValue()];
     }
-
 
 
     public void setHintText(String hintText) {
@@ -638,15 +637,13 @@ public class  NumberPickerView extends View {
         if (friction <= 0) {
             throw new IllegalArgumentException("you should set a a positive float friction, now friction is " + friction);
         }
-        mFriction = ViewConfiguration.get(getContext()).getScrollFriction() / friction;
+        mFriction = ViewConfiguration.getScrollFriction() / friction;
     }
 
     //compatible for NumberPicker
     public void setOnValueChangedListener(OnValueChangeListener listener) {
         mOnValueChangeListener = listener;
     }
-
-
 
 
     public void setContentTextTypeface(Typeface typeface) {
@@ -848,8 +845,9 @@ public class  NumberPickerView extends View {
     private float dividerY1;
     private float dividerOffset;
     private float mViewCenterX;
-    public void setDividerPadding(float offset){
-        dividerOffset=offset;
+
+    public void setDividerPadding(float offset) {
+        dividerOffset = offset;
     }
 
     //defaultPickedIndex relative to the shown part
@@ -955,30 +953,29 @@ public class  NumberPickerView extends View {
         drawHint(canvas);
         drawEdgeEffect(canvas);
     }
-    private void drawEdgeEffect(Canvas canvas){
+
+    private void drawEdgeEffect(Canvas canvas) {
         Paint mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setStrokeWidth(3);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(Color.YELLOW);
 
-        LinearGradient top = new LinearGradient(0,0,0,100, Color.WHITE,Color.TRANSPARENT, Shader.TileMode.CLAMP);
+        LinearGradient top = new LinearGradient(0, 0, 0, 100, Color.WHITE, Color.TRANSPARENT, Shader.TileMode.CLAMP);
         mPaint.setShader(top);
-        canvas.drawRect(0,0,getWidth(),400,mPaint);
+        canvas.drawRect(0, 0, getWidth(), 400, mPaint);
 
 
-
-        Paint mp=new Paint();
+        Paint mp = new Paint();
         mp.setAntiAlias(true);
         mp.setStrokeWidth(3);
         mp.setStyle(Paint.Style.FILL);
         mp.setColor(Color.BLUE);
 
-        LinearGradient bottom =new LinearGradient(0,getHeight()-100,0,getHeight(), Color.TRANSPARENT,Color.WHITE,Shader.TileMode.CLAMP);
+        LinearGradient bottom = new LinearGradient(0, getHeight() - 100, 0, getHeight(), Color.TRANSPARENT, Color.WHITE, Shader.TileMode.CLAMP);
         mp.setShader(bottom);
-        canvas.drawRect(0,getHeight()-400,getWidth(),getHeight(),mp);
+        canvas.drawRect(0, getHeight() - 400, getWidth(), getHeight(), mp);
     }
-
 
 
     private void drawContent(Canvas canvas) {
@@ -1009,25 +1006,24 @@ public class  NumberPickerView extends View {
             }
             mPaintText.setColor(textColor);
             mPaintText.setTextSize(textSize);
-            int height=mItemHeight/2;
+            int height = mItemHeight / 2;
             if (0 <= index && index < getOneRecycleSize()) {
                 CharSequence str = mDisplayedValues[index + mMinShowIndex];
 
                 canvas.drawText(str.toString(), mViewCenterX,
-                        y +height + textSizeCenterYOffset, mPaintText);
+                        y + height + textSizeCenterYOffset, mPaintText);
             }
         }
     }
-
 
 
     private void drawLine(Canvas canvas) {
         //true to show the two dividers
         if (DEFAULT_SHOW_DIVIDER) {
             canvas.drawLine(getPaddingLeft() + mDividerMarginL,
-                    dividerY0+dividerOffset, mViewWidth - getPaddingRight() - mDividerMarginR, dividerY0+dividerOffset, mPaintDivider);
+                    dividerY0 + dividerOffset, mViewWidth - getPaddingRight() - mDividerMarginR, dividerY0 + dividerOffset, mPaintDivider);
             canvas.drawLine(getPaddingLeft() + mDividerMarginL,
-                    dividerY1-dividerOffset, mViewWidth - getPaddingRight() - mDividerMarginR, dividerY1-dividerOffset, mPaintDivider);
+                    dividerY1 - dividerOffset, mViewWidth - getPaddingRight() - mDividerMarginR, dividerY1 - dividerOffset, mPaintDivider);
         }
     }
 
@@ -1035,9 +1031,9 @@ public class  NumberPickerView extends View {
         if (TextUtils.isEmpty(mHintText)) {
             return;
         }
-        float offsetX= (mMaxWidthOfDisplayedValues + mWidthOfHintText) >> 1;
+        float offsetX = (mMaxWidthOfDisplayedValues + mWidthOfHintText) >> 1;
         canvas.drawText(mHintText,
-                mViewCenterX +offsetX + mMarginStartOfHint,
+                mViewCenterX + offsetX + mMarginStartOfHint,
                 (dividerY0 + dividerY1) / 2 + mTextSizeHintCenterYOffset, mPaintHint);
     }
 
@@ -1122,9 +1118,6 @@ public class  NumberPickerView extends View {
     }
 
 
-
-
-
     public void stopScrolling() {
         if (mScroller != null) {
             if (!mScroller.isFinished()) {
@@ -1169,9 +1162,7 @@ public class  NumberPickerView extends View {
     }
 
     private int getEvaluateColor(float fraction, int startColor, int endColor) {
-
         int a, r, g, b;
-
         int sA = (startColor & 0xff000000) >>> 24;
         int sR = (startColor & 0x00ff0000) >>> 16;
         int sG = (startColor & 0x0000ff00) >>> 8;
@@ -1193,6 +1184,5 @@ public class  NumberPickerView extends View {
     private float getEvaluateSize(float fraction, float startSize, float endSize) {
         return startSize + (endSize - startSize) * fraction;
     }
-
 
 }

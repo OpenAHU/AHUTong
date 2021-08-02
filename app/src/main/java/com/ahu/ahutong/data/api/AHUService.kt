@@ -76,6 +76,13 @@ interface AHUService {
     @GET("/api/grade")
     suspend fun getGrade(): AHUResponse<Grade>
 
+    /**
+     * 获取院系新闻
+     * @return AHUResponse<News>
+     */
+    @GET("/api/departmentNews")
+    suspend fun getNews(): AHUResponse<List<News>>
+
     companion object{
         private const val BASE_URL = ""
         // Cookie 本地存储
