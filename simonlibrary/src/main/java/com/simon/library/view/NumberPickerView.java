@@ -239,8 +239,6 @@ public class NumberPickerView extends View {
             updateValueForInit();
         }
         initHandler();
-        String[] text = {"sdsdsd", "jfskjsfj", "dgrghrghrhr", "sjfkhsfkf", "pwkfpwkfpwfpk", "ejfoejfoejg"};
-        setDisplayedValues(text, true);
     }
 
     @SuppressLint("HandlerLeak")
@@ -316,8 +314,8 @@ public class NumberPickerView extends View {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+    protected void onSizeChanged(int w, int h, int oldWidth, int oldHeight) {
+        super.onSizeChanged(w, h, oldWidth, oldHeight);
         mViewWidth = w;
         mViewHeight = h;
         mItemHeight = mViewHeight / mShownCount;
