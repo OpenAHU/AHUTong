@@ -3,11 +3,8 @@ package com.simon.library.view;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
-import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -27,44 +24,43 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class NumberPickerView extends View {
 
-    // default text color of not selected item
+    // 默认的未选中文本的颜色
     private static final int DEFAULT_TEXT_COLOR_NORMAL = 0XFF333333;
 
-    // default text color of selected item
+    // 默认的选中文本的颜色
     private static final int DEFAULT_TEXT_COLOR_SELECTED = 0XFFF56313;
 
-    // default text size of normal item
+    // 默认的未选中文本大小
     private static final int DEFAULT_TEXT_SIZE_NORMAL_SP = 14;
 
-    // default text size of selected item
+    // 默认的选中文本大小
     private static final int DEFAULT_TEXT_SIZE_SELECTED_SP = 16;
 
-    // default text size of hint text, the middle item's right text
+    // 默认的内容右侧文本的大小
     private static final int DEFAULT_TEXT_SIZE_HINT_SP = 14;
 
-    // distance between selected text and hint text
+    // 默认的右侧内容与内容的距离
     private static final int DEFAULT_MARGIN_START_OF_HINT_DP = 8;
 
-    // distance between hint text and right of this view, used in wrap_content mode
+    // 在 wrap_content 模式下，右侧文字和控件右侧的距离
     private static final int DEFAULT_MARGIN_END_OF_HINT_DP = 8;
 
-    // default divider's color
+    // 默认的选中线颜色
     private static final int DEFAULT_DIVIDER_COLOR = 0XFFF56313;
 
-    private float mDividerHeight = 2f; // dividerHeight
+    private float mDividerHeight = 2f; // 选中线高度
 
-    // default divider's margin to the left & right of this view
+    // 默认的选中线左右距离
     private static final int DEFAULT_DIVIDER_MARGIN_HORIZONTAL = 0;
 
-    // default shown items' count, now we display 3 items, the 2nd one is selected
+    // 默认的展示数量，偶数会被做处理
     private static final int DEFAULT_SHOWN_COUNT = 3;
 
+    //==以下三个属性均与handler有关==//
     // message's what argument to refresh current state, used by mHandler
     private static final int HANDLER_WHAT_REFRESH = 1;
-
     // message's what argument to respond value changed event, used by mHandler
     private static final int HANDLER_WHAT_LISTENER_VALUE_CHANGED = 2;
-
     // message's what argument to request layout, used by mHandlerInMainThread
     private static final int HANDLER_WHAT_REQUEST_LAYOUT = 3;
 
@@ -143,20 +139,39 @@ public class NumberPickerView extends View {
 
     private final Map<String, Integer> mTextWidthCache = new ConcurrentHashMap<>();
 
-    // compatible for NumberPicker
+    /**
+     * 内容选中的回调
+     */
     public interface OnValueChangeListener {
+        /**
+         *
+         * @param picker 控件本身
+         * @param oldVal 选中前的内容下标
+         * @param newVal 选中后的内容下标
+         */
         void onValueChange(NumberPickerView picker, int oldVal, int newVal);
     }
 
-
+    /**
+     * 设置选中线的粗细
+     * @param height 粗细
+     */
     public void setDividerHeight(float height) {
         mDividerHeight = height;
     }
 
+    /**
+     * 设置选中线距离左侧的距离
+     * @param marginL 距离
+     */
     public void setDividerMarginL(int marginL) {
         mDividerMarginL = marginL;
     }
 
+    /**
+     * 设置选中线距离右侧的距离
+     * @param marginR 距离
+     */
     public void setDividerMarginR(int marginR) {
         mDividerMarginR = marginR;
     }
@@ -178,6 +193,8 @@ public class NumberPickerView extends View {
     public NumberPickerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
+        setVerticalFadingEdgeEnabled(true);
+        setFadingEdgeLength(50);
     }
 
 
@@ -375,10 +392,16 @@ public class NumberPickerView extends View {
         mPrevPickedIndex = currPickedIndex;
     }
 
-    public int getOneRecycleSize() {
+    private int getOneRecycleSize() {
         return mMaxShowIndex - mMinShowIndex + 1;
     }
 
+    /**
+     * 设置展示的内容
+     * @param newDisplayedValues 内容集合
+     * @param pickedIndex 被选中内容的下标
+     * @param needRefresh 是否立即刷新view
+     */
     public void setDisplayedValuesAndPickedIndex(String[] newDisplayedValues, int pickedIndex, boolean needRefresh) {
         stopScrolling();
         if (newDisplayedValues == null) {
@@ -399,31 +422,39 @@ public class NumberPickerView extends View {
         }
     }
 
+    /**
+     * 设置展示的内容
+     * @param newDisplayedValues 展示的内容
+     * @param needRefresh 是否立即刷新view
+     */
     public void setDisplayedValues(String[] newDisplayedValues, boolean needRefresh) {
         setDisplayedValuesAndPickedIndex(newDisplayedValues, 0, needRefresh);
     }
 
 
     /**
-     * get the "fromValue" by using getValue(), if your picker's minValue is not 0,
-     * make sure you can get the accurate value by getValue(), or you can use
-     * smoothScrollToValue(int fromValue, int toValue, boolean needRespond)
-     *
-     * @param toValue     the value you want picker to scroll to
-     * @param needRespond set if you want picker to respond onValueChange listener
+     *从当前下标移到到某个下标
+     * @param toValue     你想要移到到的下标
+     * @param needRespond 是否想要回调onValueChange
      */
     public void smoothScrollToValue(int toValue, boolean needRespond) {
         smoothScrollToValue(getValue(), toValue, needRespond);
     }
 
+    /**
+     * 从某个下标移到到另一个下标
+     * @param fromValue 开始的下标
+     * @param toValue 要移到到的下标
+     */
     public void smoothScrollToValue(int fromValue, int toValue) {
         smoothScrollToValue(fromValue, toValue, true);
     }
 
     /**
-     * @param fromValue   need to set the fromValue, can be greater than mMaxValue or less than mMinValue
-     * @param toValue     the value you want picker to scroll to
-     * @param needRespond need Respond to the ValueChange callback When Scrolling, default is false
+     * 从某个下标移到到另一个下标
+     * @param fromValue 开始的下标
+     * @param toValue 要移到到的下标
+     * @param needRespond 是否想要回调onValueChange
      */
     public void smoothScrollToValue(int fromValue, int toValue, boolean needRespond) {
         int deltaIndex;
@@ -512,21 +543,34 @@ public class NumberPickerView extends View {
         postInvalidate();
     }
 
-    //compatible for android.widget.NumberPicker
+    /**
+     * 设置下标
+     * @param value 下标
+     */
     public void setValue(int value) {
         setPickedIndexRelativeToRaw(value);
     }
 
-    //compatible for android.widget.NumberPicker
+    /**
+     * 获取下标
+     * @return 下标
+     */
     public int getValue() {
         return getPickedIndexRelativeToRaw();
     }
 
+    /**
+     * 获取当前选中的内容
+     * @return 选中的内容
+     */
     public String getContentByCurrValue() {
         return mDisplayedValues[getValue()];
     }
 
-
+    /**
+     * 设置展示内容右侧的内容
+     * @param hintText 右侧的内容
+     */
     public void setHintText(String hintText) {
         if (isStringEqual(mHintText, hintText)) {
             return;
@@ -537,7 +581,10 @@ public class NumberPickerView extends View {
         mHandlerInMainThread.sendEmptyMessage(HANDLER_WHAT_REQUEST_LAYOUT);
     }
 
-
+    /**
+     * 设置未选中文字的颜色
+     * @param normalTextColor 颜色
+     */
     public void setNormalTextColor(int normalTextColor) {
         if (mTextColorNormal == normalTextColor) {
             return;
@@ -546,6 +593,10 @@ public class NumberPickerView extends View {
         postInvalidate();
     }
 
+    /**
+     * 设置选中文字的颜色
+     * @param selectedTextColor 颜色
+     */
     public void setSelectedTextColor(int selectedTextColor) {
         if (mTextColorSelected == selectedTextColor) {
             return;
@@ -554,6 +605,10 @@ public class NumberPickerView extends View {
         postInvalidate();
     }
 
+    /**
+     * 设置内容右侧文字的颜色
+     * @param hintTextColor 颜色
+     */
     public void setHintTextColor(int hintTextColor) {
         if (mTextColorHint == hintTextColor) {
             return;
@@ -563,6 +618,10 @@ public class NumberPickerView extends View {
         postInvalidate();
     }
 
+    /**
+     * 设置选中线颜色
+     * @param dividerColor 颜色
+     */
     public void setDividerColor(int dividerColor) {
         if (mDividerColor == dividerColor) {
             return;
@@ -572,7 +631,7 @@ public class NumberPickerView extends View {
         postInvalidate();
     }
 
-    public void setPickedIndexRelativeToRaw(int pickedIndexToRaw) {
+    private void setPickedIndexRelativeToRaw(int pickedIndexToRaw) {
         if (mMinShowIndex > -1) {
             if (mMinShowIndex <= pickedIndexToRaw && pickedIndexToRaw <= mMaxShowIndex) {
                 mPrevPickedIndex = pickedIndexToRaw;
@@ -597,7 +656,7 @@ public class NumberPickerView extends View {
     }
 
 
-    public void setMinAndMaxShowIndex(int minShowIndex, int maxShowIndex, boolean needRefresh) {
+    private void setMinAndMaxShowIndex(int minShowIndex, int maxShowIndex, boolean needRefresh) {
         if (minShowIndex > maxShowIndex) {
             throw new IllegalArgumentException("minShowIndex should be less than maxShowIndex, minShowIndex is "
                     + minShowIndex + ", maxShowIndex is " + maxShowIndex + ".");
@@ -627,11 +686,10 @@ public class NumberPickerView extends View {
     }
 
     /**
-     * set the friction of scroller, it will effect the scroller's acceleration when fling
-     *
-     * @param friction default is ViewConfiguration.get(mContext).getScrollFriction()
-     *                 if setFriction(2 * ViewConfiguration.get(mContext).getScrollFriction()),
-     *                 the friction will be twice as much as before
+     * 设置滑动的阻力
+     * @param friction 默认的是 ViewConfiguration.get(mContext).getScrollFriction()
+     *                 如果你使用 setFriction(2 * ViewConfiguration.get(mContext).getScrollFriction())
+     *                 阻力将是原来的二倍
      */
     public void setFriction(float friction) {
         if (friction <= 0) {
@@ -640,16 +698,26 @@ public class NumberPickerView extends View {
         mFriction = ViewConfiguration.getScrollFriction() / friction;
     }
 
-    //compatible for NumberPicker
+    /**
+     * 设置选中回调
+     * @param listener 回调的接口
+     */
     public void setOnValueChangedListener(OnValueChangeListener listener) {
         mOnValueChangeListener = listener;
     }
 
-
+    /**
+     * 设置内容的字体
+     * @param typeface 字体
+     */
     public void setContentTextTypeface(Typeface typeface) {
         mPaintText.setTypeface(typeface);
     }
 
+    /**
+     * 设置内容右侧文字的字体
+     * @param typeface 字体
+     */
     public void setHintTextTypeface(Typeface typeface) {
         mPaintHint.setTypeface(typeface);
     }
@@ -846,6 +914,10 @@ public class NumberPickerView extends View {
     private float dividerOffset;
     private float mViewCenterX;
 
+    /**
+     * 设置选中线的高度（相对VIEW中心）
+     * @param offset 高度
+     */
     public void setDividerPadding(float offset) {
         dividerOffset = offset;
     }
@@ -951,31 +1023,31 @@ public class NumberPickerView extends View {
         drawContent(canvas);
         drawLine(canvas);
         drawHint(canvas);
-        drawEdgeEffect(canvas);
+        //drawEdgeEffect(canvas);发现系统自带了设置边缘渐变，故删除
     }
 
-    private void drawEdgeEffect(Canvas canvas) {
-        Paint mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setStrokeWidth(3);
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(Color.YELLOW);
-
-        LinearGradient top = new LinearGradient(0, 0, 0, 100, Color.WHITE, Color.TRANSPARENT, Shader.TileMode.CLAMP);
-        mPaint.setShader(top);
-        canvas.drawRect(0, 0, getWidth(), 400, mPaint);
-
-
-        Paint mp = new Paint();
-        mp.setAntiAlias(true);
-        mp.setStrokeWidth(3);
-        mp.setStyle(Paint.Style.FILL);
-        mp.setColor(Color.BLUE);
-
-        LinearGradient bottom = new LinearGradient(0, getHeight() - 100, 0, getHeight(), Color.TRANSPARENT, Color.WHITE, Shader.TileMode.CLAMP);
-        mp.setShader(bottom);
-        canvas.drawRect(0, getHeight() - 400, getWidth(), getHeight(), mp);
-    }
+//    private void drawEdgeEffect(Canvas canvas) {
+//        Paint mPaint = new Paint();
+//        mPaint.setAntiAlias(true);
+//        mPaint.setStrokeWidth(3);
+//        mPaint.setStyle(Paint.Style.FILL);
+//        mPaint.setColor(Color.YELLOW);
+//
+//        LinearGradient top = new LinearGradient(0, 0, 0, 100, Color.WHITE, Color.TRANSPARENT, Shader.TileMode.CLAMP);
+//        mPaint.setShader(top);
+//        canvas.drawRect(0, 0, getWidth(), 400, mPaint);
+//
+//
+//        Paint mp = new Paint();
+//        mp.setAntiAlias(true);
+//        mp.setStrokeWidth(3);
+//        mp.setStyle(Paint.Style.FILL);
+//        mp.setColor(Color.BLUE);
+//
+//        LinearGradient bottom = new LinearGradient(0, getHeight() - 100, 0, getHeight(), Color.TRANSPARENT, Color.WHITE, Shader.TileMode.CLAMP);
+//        mp.setShader(bottom);
+//        canvas.drawRect(0, getHeight() - 400, getWidth(), getHeight(), mp);
+//    }
 
 
     private void drawContent(Canvas canvas) {
@@ -1117,7 +1189,9 @@ public class NumberPickerView extends View {
         }
     }
 
-
+    /**
+     * 某些情况可能需要停止滑动，故提供这个方法
+     */
     public void stopScrolling() {
         if (mScroller != null) {
             if (!mScroller.isFinished()) {
@@ -1142,7 +1216,7 @@ public class NumberPickerView extends View {
         return msg;
     }
 
-    //===tool functions===//
+    //===下面是工具方法===//
     private boolean isStringEqual(String a, String b) {
         if (a == null) {
             return b == null;
