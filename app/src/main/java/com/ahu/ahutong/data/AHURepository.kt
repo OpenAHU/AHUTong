@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit
 object AHURepository {
     var dataSource = APIDataSource()
 
-
     /**
      * 搜索垃圾
      * @param keyword String

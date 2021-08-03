@@ -10,9 +10,13 @@
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/fragment_mine.xml" value="0.24087591240875914" />
         <entry key="app/src/main/res/layout/fragment_schedule.xml" value="0.21666666666666667" />
+        <entry key="app/src/main/res/layout/item_banner.xml" value="0.16770833333333332" />
         <entry key="app/src/main/res/layout/item_developer.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/item_schdule_course.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/item_schedule_header.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_weekday.xml" value="0.13697916666666668" />
+        <entry key="app/src/main/res/layout/layoput.xml" value="0.2140625" />
+        <entry key="app/src/main/res/layout/layout_banner.xml" value="0.2140625" />
         <entry key="app/src/main/res/layout/layout_schedule.xml" value="0.21666666666666667" />
         <entry key="app/src/main/res/xml/network_config.xml" value="0.1" />
       </map>
