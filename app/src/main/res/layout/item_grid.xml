@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="dev"
+            type="com.ahu.ahutong.data.model.GridItem" />
+
+        <variable
+            name="proxy"
+            type="com.ahu.ahutong.ui.adapter.DiscoveryAdapter.ClickProxy" />
+    </data>
+
+    <LinearLayout
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:onClick="@{(thisView) -> proxy.gotoPage(thisView, dev.URL)}"
+        android:orientation="vertical">
+
+        <ImageView
+            android:src="@{dev.imgres}"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{dev.text}" />
+    </LinearLayout>
+
+</layout>
