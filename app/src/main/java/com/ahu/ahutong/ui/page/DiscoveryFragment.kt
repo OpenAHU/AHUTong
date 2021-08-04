@@ -8,6 +8,7 @@ import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Banner
+import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.databinding.FragmentDiscoveryBinding
 import com.ahu.ahutong.ui.adapter.DiscoveryAdapter
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
@@ -31,22 +32,21 @@ class DiscoveryFragment private constructor() : BaseFragment<FragmentDiscoveryBi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dataBinding.discoveryRec.layoutManager=LinearLayoutManager(context)
-        dataBinding.discoveryRec.adapter= DiscoveryAdapter()
-        mState.getBannerData()?.observe(viewLifecycleOwner, { t ->
-                val adapter:DiscoveryAdapter= dataBinding.discoveryRec.adapter as DiscoveryAdapter;
-                adapter.setBanners(t)
-            })
+        dataBinding.discoveryRec.layoutManager = LinearLayoutManager(context)
+        val bean = DiscoveryAdapter.DiscoveryBean(mState.tools, mState.bannerData, mutableListOf())
+        dataBinding.discoveryRec.adapter = DiscoveryAdapter(bean)
+    }
 
-        val banners = ArrayList<Banner>()
-        banners.add(Banner())
-        banners.add(Banner())
-        mState.getBannerData()!!.value = banners
-        val ad= dataBinding.discoveryRec.adapter as DiscoveryAdapter
-        ad.addGridItem(mState.gridItems)
+     class ClickProxy {
+
+        fun gotoTool(view: View, tool: Tool) {
+
+
+        }
     }
 
     companion object {
         val INSTANCE = DiscoveryFragment()
     }
+
 }

@@ -58,5 +58,6 @@
     <string name="add_schedule">添加到课表</string>
     <string name="schedule_setting">课程表设置</string>
     <string name="schedule_not_this_week">[非本周] %s</string>
+    <string name="tool">Tool</string>
 
 </resources>

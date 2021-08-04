@@ -2,6 +2,7 @@ package com.ahu.ahutong.ext
 
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import coil.load
@@ -24,6 +25,13 @@ fun loadImg(view: ShapeableImageView, url: String?) {
     view.isVisible = !url.isNullOrEmpty()
     if (!url.isNullOrEmpty())
         view.load(url)
+}
+@BindingAdapter("loadImg")
+fun loadImg(view: ImageView, id: Int){
+    if (id != 0){
+        view.load(id)
+    }
+
 }
 
 @BindingAdapter("onSelectItem")
