@@ -3,7 +3,7 @@ package com.ahu.ahutong.data.model
 import com.ahu.ahutong.R
 
 
-data class Tool(val title: String, val resID: Int, val des: Int){
+data class Tool(val title: String,val resID: Int,val layoutID: Int, ){
     companion object{
         val defaultTools = listOf(
             Tool("宣讲会", R.mipmap.preach, R.id.developer_fragment),

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="sector"
+            type="com.ahu.ahutong.data.model.Sector" />
+
+        <variable
+            name="proxy"
+            type="com.ahu.ahutong.ui.page.DiscoveryFragment.SectorClickProxy" />
+    </data>
+
+
+
+        <TextView
+            android:padding="6dp"
+            android:onClick="@{(thisView) -> proxy.onClick(thisView, sector)}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{sector.title}" />
+
+</layout>

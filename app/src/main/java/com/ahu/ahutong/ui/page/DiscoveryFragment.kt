@@ -2,17 +2,19 @@ package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Banner
+import com.ahu.ahutong.data.model.News
+import com.ahu.ahutong.data.model.Sector
 import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.databinding.FragmentDiscoveryBinding
 import com.ahu.ahutong.ui.adapter.DiscoveryAdapter
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
-import java.util.*
 
 
 /**
@@ -21,6 +23,7 @@ import java.util.*
  * @Email 468766131@qq.com
  */
 class DiscoveryFragment private constructor() : BaseFragment<FragmentDiscoveryBinding>() {
+
     private lateinit var mState: DiscoveryViewModel
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(DiscoveryViewModel::class.java)
@@ -30,17 +33,37 @@ class DiscoveryFragment private constructor() : BaseFragment<FragmentDiscoveryBi
         return DataBindingConfig(R.layout.fragment_discovery, BR.state, mState)
     }
 
+    override fun observeData() {
+        mState.bannerData.observe(this, {
+            val adapter= dataBinding.discoveryRec.adapter as DiscoveryAdapter
+            adapter.setBanners(it)
+        })
+        mState.newData.observe(this, Observer<MutableList<News>> {
+            val adapter= dataBinding.discoveryRec.adapter as DiscoveryAdapter
+            adapter.setNews(it)
+        })
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.discoveryRec.layoutManager = LinearLayoutManager(context)
-        val bean = DiscoveryAdapter.DiscoveryBean(mState.tools, mState.bannerData, mutableListOf())
+        val bean = DiscoveryAdapter.DiscoveryBean(mutableListOf(),mState.tools,mState.sectors,mutableListOf(
+            News(), News(), News()
+        ))
         dataBinding.discoveryRec.adapter = DiscoveryAdapter(bean)
     }
 
-     class ClickProxy {
+    class ToolClickProxy {
+        fun onClick(view: View, tool: Tool) {
 
-        fun gotoTool(view: View, tool: Tool) {
+        }
+    }
+    class SectorClickProxy{
+        fun onClick(view: View,sector: Sector){
 
+        }
+    }
+    class NewsClickProxy{
+        fun onClick(view: View,news: News){
 
         }
     }
