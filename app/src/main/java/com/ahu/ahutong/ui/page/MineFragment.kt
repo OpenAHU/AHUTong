@@ -15,7 +15,7 @@ import com.ahu.ahutong.ui.page.state.MineViewModel
  * @Date 2021/7/27-15:48
  * @Email 468766131@qq.com
  */
-class MineFragment private constructor(): BaseFragment<FragmentMineBinding>() {
+class MineFragment: BaseFragment<FragmentMineBinding>() {
 
     private lateinit var mState: MineViewModel
 

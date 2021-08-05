@@ -18,7 +18,7 @@ import java.util.*
  * @Date 2021/7/27-19:14
  * @Email 468766131@qq.com
  */
-class ScheduleFragment private constructor(): BaseFragment<FragmentScheduleBinding>() {
+class ScheduleFragment: BaseFragment<FragmentScheduleBinding>() {
     private lateinit var mState: ScheduleViewModel
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(ScheduleViewModel::class.java)

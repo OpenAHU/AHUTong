@@ -25,6 +25,7 @@ import java.lang.Exception
  */
 class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>(){
     private lateinit var mState: DeveloperViewModel
+
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(DeveloperViewModel::class.java)
     }

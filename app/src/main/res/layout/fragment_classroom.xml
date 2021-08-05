@@ -1,22 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
-
+        <variable
+            name="state"
+            type="com.ahu.ahutong.ui.page.state.ClassRoomViewModel" />
+        <variable
+            name="proxy"
+            type="com.ahu.ahutong.ui.page.ClassRoomFragment.ClickProxy" />
     </data>
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:background="#FFB8DFFF"
-    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".ui.fragment.empty.EmptyRoomFragment">
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            android:id="@+id/appbar">
+            <com.google.android.material.appbar.MaterialToolbar
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                app:navigationIcon="@drawable/icon_back"
+                onIconClick="@{proxy.back}"
+                app:title="@string/emptyRoom"
+                tools:title="@string/emptyRoom"/>
+        </com.google.android.material.appbar.AppBarLayout>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="180dp"
+            android:src="@mipmap/emptyroom"
+            android:contentDescription="@string/img" />
 
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@mipmap/emptyroom"
-        tools:layout_editor_absoluteY="109dp" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_selector_info"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginHorizontal="10dp"
+            app:cardBackgroundColor="#f3f3f3"
+            app:cardCornerRadius="6dp"
+            app:cardUseCompatPadding="false"
+            app:cardElevation="0dp">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/tv_campus"
+                    android:gravity="center"
+                    android:textColor="#232323"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="@{`校区：`+ state.campus}"
+                    tools:text="校区：龙河校区"/>
+                <TextView
+                    android:id="@+id/tv_time"
+                    android:gravity="center"
+                    android:textColor="#232323"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="@{`时间：` + state.time}"
+                    tools:text="时间：1，2节"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+        <Button
+            android:id="@+id/bt_require"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="50dp"
+            android:layout_marginVertical="10dp"
+            android:text="@string/require"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="10dp"
+            android:layout_weight="1"
+            app:cardBackgroundColor="#f3f3f3"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp"
+            app:cardUseCompatPadding="false">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycle_rooms"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
 </layout>

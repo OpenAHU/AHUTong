@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ahu.ahutong.data.model.Banner
 import com.ahu.ahutong.data.model.News
-import com.ahu.ahutong.data.model.Sector
 import com.ahu.ahutong.data.model.Tool
 
 
@@ -23,8 +22,5 @@ class DiscoveryViewModel: ViewModel() {
 
     val tools by lazy {
         Tool.defaultTools
-    }
-    val sectors by lazy {
-        Sector.defaultSectors
     }
 }

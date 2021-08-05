@@ -6,41 +6,35 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.model.Banner
-import com.ahu.ahutong.data.model.News
-import com.ahu.ahutong.data.model.Sector
-import com.ahu.ahutong.data.model.Tool
+import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.databinding.*
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.adapter.base.BaseViewHolder
 import com.ahu.ahutong.ui.page.DiscoveryFragment
 import com.ahu.ahutong.ui.widget.banner.BannerView.BannerAdapter
-import com.ahu.ahutong.ui.page.DiscoveryFragment.ToolClickProxy as ToolClickProxy
 
 
 class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var banners: List<Banner>
     private val tools: List<Tool>
-    private val sectors:List<Sector>
     private var news: MutableList<News>
 
     //Tip: 类似Java, kotlin的构造函数体，尽量写在第一个方法的位置
     init {
         banners = bean.banners
         tools = bean.tools
-        sectors=bean.sectors
         news = bean.news
     }
 
     fun setBanners(data: List<Banner>) {
         banners = data
     }
-    fun setNews(data: MutableList<News>){
-        news=data
+
+    fun setNews(data: MutableList<News>) {
+        news = data
     }
 
     //Tip: 为了让每个方法的代码更加清晰，建议使用多个ViewHolder，不同的ItemView使用不同的ViewHolder
@@ -77,7 +71,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
                     false
                 )
                 val sectorItemHolder = SectorItemHolder(binding)
-                sectorItemHolder.bind(sectors)
+                sectorItemHolder.bind(Unit)
                 sectorItemHolder
             }
             else -> {
@@ -118,7 +112,6 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
     data class DiscoveryBean(
         val banners: List<Banner>,
         val tools: List<Tool>,
-        val sectors: List<Sector>,
         val news: MutableList<News>
     )
 
@@ -160,27 +153,28 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
     }
 
     inner class SectorItemHolder(val binding: ItemDiscoverySectorBinding) :
-        BaseViewHolder<ItemDiscoverySectorBinding, List<Sector>>(binding) {
-        override fun bind(data: List<Sector>) {
-            binding.itemDiscoverySector.layoutManager = LinearLayoutManager(binding.root.context, RecyclerView.HORIZONTAL,false)
-            binding.itemDiscoverySector.adapter = object : BaseAdapter<Sector, ItemSectorBinding>(data) {
-                override fun layout(): Int {
-                    return R.layout.item_sector
+        BaseViewHolder<ItemDiscoverySectorBinding, Unit>(binding) {
+        override fun bind(data: Unit) {
+            binding.btRadios.setOnCheckedChangeListener { _, checkedId ->
+                val type = when (checkedId) {
+                    R.id.rd_college -> NewsType.College
+                    R.id.rd_association -> NewsType.Association
+                    R.id.rd_edu -> NewsType.Edu
+                    R.id.rd_recruit -> NewsType.Recruit
+                    else -> NewsType.College
                 }
-
-                override fun bindingData(binding: ItemSectorBinding, data: Sector) {
-                    binding.sector = data
-                    binding.proxy = DiscoveryFragment.SectorClickProxy()
-                }
+                //fragment处理事件
+                DiscoveryFragment.INSTANCE.SectorClickProxy().onClick(type)
             }
         }
 
     }
+
     inner class NewsItemHolder(val binding: ItemDiscoveryNewsBinding) :
         BaseViewHolder<ItemDiscoveryNewsBinding, News>(binding) {
         override fun bind(data: News) {
-            binding.news=data
-            binding.proxy=DiscoveryFragment.NewsClickProxy()
+            binding.news = data
+            binding.proxy = DiscoveryFragment.INSTANCE.NewsClickProxy()
         }
 
     }
