@@ -40,7 +40,7 @@ abstract class BaseAdapter<T, VD: ViewDataBinding>(data: List<T> = emptyList()):
     }
 
     override fun getItemCount(): Int {
-       return data.size
+        return data.size
     }
 
     @SuppressLint("NotifyDataSetChanged")

@@ -1,84 +1,31 @@
-package com.ahu.ahutong.data.model;
+package com.ahu.ahutong.data.model
 
-import com.google.gson.annotations.SerializedName;
-
-import java.util.List;
+import com.google.gson.annotations.SerializedName
 
 /**
  * @Author: SinkDev
  * @Date: 2021/8/2-下午12:36
  * @Email: 468766131@qq.com
  */
-public class News {
-
+class News {
     @SerializedName("department")
-    private String department;
+    var department: String? = null
+
     @SerializedName("author")
-    private String author;
+    var author: String? = null
+
     @SerializedName("title")
-    private String title;
+    var title: String? = null
+
     @SerializedName("abstract")
-    private String abstractX;
+    var abstractX: String? = null
+
     @SerializedName("releaseTime")
-    private String releaseTime;
+    var releaseTime: String? = null
+
     @SerializedName("detailUrl")
-    private String detailUrl;
+    var detailUrl: String? = null
+
     @SerializedName("imageUrlList")
-    private List<String> imageUrlList;
-
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getAbstractX() {
-        return abstractX;
-    }
-
-    public void setAbstractX(String abstractX) {
-        this.abstractX = abstractX;
-    }
-
-    public String getReleaseTime() {
-        return releaseTime;
-    }
-
-    public void setReleaseTime(String releaseTime) {
-        this.releaseTime = releaseTime;
-    }
-
-    public String getDetailUrl() {
-        return detailUrl;
-    }
-
-    public void setDetailUrl(String detailUrl) {
-        this.detailUrl = detailUrl;
-    }
-
-    public List<String> getImageUrlList() {
-        return imageUrlList;
-    }
-
-    public void setImageUrlList(List<String> imageUrlList) {
-        this.imageUrlList = imageUrlList;
-    }
+    var imageUrlList: List<String>? = null
 }

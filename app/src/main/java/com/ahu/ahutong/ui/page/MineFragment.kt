@@ -9,7 +9,6 @@ import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentMineBinding
 import com.ahu.ahutong.ui.page.state.MineViewModel
-import com.google.android.material.appbar.AppBarLayout
 
 /**
  * @Author SinkDev

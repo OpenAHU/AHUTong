@@ -12,9 +12,21 @@
             android:id="@+id/action_home_fragment_to_developer_fragment"
             app:destination="@id/developer_fragment" />
     </fragment>
+    <fragment
+        tools:layout="@layout/fragment_discovery"
+        android:id="@+id/discovery_fragment"
+        android:name="com.ahu.ahutong.ui.page.DiscoveryFragment">
+        <action
+            android:id="@+id/action_discovery_fragment_to_classroom_fragment"
+            app:destination="@+id/classroom_fragment"/>
+    </fragment>
 
     <fragment
         tools:layout="@layout/fragment_developer"
         android:id="@+id/developer_fragment"
         android:name="com.ahu.ahutong.ui.page.DeveloperFragment"/>
+    <fragment
+        tools:layout="@layout/fragment_classroom"
+        android:id="@+id/classroom_fragment"
+        android:name="com.ahu.ahutong.ui.page.ClassRoomFragment"/>
 </navigation>

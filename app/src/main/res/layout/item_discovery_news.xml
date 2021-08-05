@@ -1,20 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="news"
+            type="com.ahu.ahutong.data.model.News" />
 
+        <variable
+            name="proxy"
+            type="com.ahu.ahutong.ui.page.DiscoveryFragment.NewsClickProxy" />
     </data>
 
-
-    <LinearLayout
-        android:id="@+id/item_discovery_news"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:padding="10dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-<TextView
-    android:id="@+id/item_discovery_text"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:onClick="@{(thisView) -> proxy.onClick(thisView, news)}">
+
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageView"
+            loadImg="@{news.detailUrl}"
+            android:layout_width="35dp"
+            android:layout_height="30dp"
+            android:layout_margin="10dp"
+            tools:ignore="ContentDescription,MissingConstraints"
+            tools:layout_editor_absoluteX="10dp"
+            tools:layout_editor_absoluteY="10dp" />
+
+        <TextView
+            android:text="@{news.author}"
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            app:layout_constraintStart_toEndOf="@+id/imageView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:text="@{news.releaseTime}"
+            android:id="@+id/textView3"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/textView2"
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+        <TextView
+            android:text="@{news.abstractX}"
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView3" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

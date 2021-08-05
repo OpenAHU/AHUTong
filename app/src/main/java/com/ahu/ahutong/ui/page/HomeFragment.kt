@@ -1,7 +1,6 @@
 package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
-import android.util.Base64
 import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.Fragment

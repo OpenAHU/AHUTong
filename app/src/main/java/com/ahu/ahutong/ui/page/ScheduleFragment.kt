@@ -6,7 +6,6 @@ import android.widget.Toast
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
-import com.ahu.ahutong.MainActivity
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentScheduleBinding
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel

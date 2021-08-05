@@ -19,6 +19,7 @@ import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.adapter.base.BaseViewHolder
 import com.ahu.ahutong.ui.page.DiscoveryFragment
 import com.ahu.ahutong.ui.widget.banner.BannerView.BannerAdapter
+import com.ahu.ahutong.ui.page.DiscoveryFragment.ToolClickProxy as ToolClickProxy
 
 
 class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -151,7 +152,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
 
                 override fun bindingData(binding: ItemToolBinding, data: Tool) {
                     binding.tool = data
-                    binding.proxy = DiscoveryFragment.ToolClickProxy()
+                    binding.proxy = DiscoveryFragment.INSTANCE.ToolClickProxy()
                 }
             }
         }
@@ -178,7 +179,8 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
     inner class NewsItemHolder(val binding: ItemDiscoveryNewsBinding) :
         BaseViewHolder<ItemDiscoveryNewsBinding, News>(binding) {
         override fun bind(data: News) {
-            binding.itemDiscoveryText.text = "Test"
+            binding.news=data
+            binding.proxy=DiscoveryFragment.NewsClickProxy()
         }
 
     }

@@ -42,6 +42,14 @@ class DiscoveryFragment private constructor() : BaseFragment<FragmentDiscoveryBi
             val adapter= dataBinding.discoveryRec.adapter as DiscoveryAdapter
             adapter.setNews(it)
         })
+        val a =News()
+        a.releaseTime="2021.8.5"
+        a.author="Simon"
+        a.abstractX="文章内容，文章内容"
+        a.title="文章标题"
+        a.department="department"
+        a.detailUrl="http://39.106.7.220/img/img.php"
+        mState.newData.value= arrayListOf(a)
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -52,14 +60,14 @@ class DiscoveryFragment private constructor() : BaseFragment<FragmentDiscoveryBi
         dataBinding.discoveryRec.adapter = DiscoveryAdapter(bean)
     }
 
-    class ToolClickProxy {
+   inner class ToolClickProxy {
         fun onClick(view: View, tool: Tool) {
-
+            nav().navigate(tool.action)
         }
     }
     class SectorClickProxy{
         fun onClick(view: View,sector: Sector){
-
+            //判断类型，然后网络请求，再通过livedata进行post操作
         }
     }
     class NewsClickProxy{
