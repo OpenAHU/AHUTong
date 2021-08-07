@@ -8,9 +8,10 @@ import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentClassroomBinding
+import com.ahu.ahutong.ui.dialog.ClassRoomDialog
 import com.ahu.ahutong.ui.page.state.ClassRoomViewModel
 
-class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(){
+class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(),ClassRoomDialog.CallBack{
     private lateinit var mState: ClassRoomViewModel
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(ClassRoomViewModel::class.java)
@@ -25,11 +26,20 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(){
         super.onViewCreated(view, savedInstanceState)
 
     }
-
+    override fun dialogCallBack(campus:String,time:String){
+        mState.campus.value=campus
+        mState.time.value=time
+    }
 
     inner class ClickProxy {
         val back: (() -> Unit) = {
             nav().popBackStack()
+        }
+
+        fun selectTime(view: View){
+            val dialog:ClassRoomDialog= ClassRoomDialog()
+            dialog.show(parentFragmentManager,"")
+            dialog.setCallBack(this@ClassRoomFragment)
         }
     }
 
