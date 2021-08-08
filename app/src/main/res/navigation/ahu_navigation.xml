@@ -15,11 +15,7 @@
     <fragment
         tools:layout="@layout/fragment_discovery"
         android:id="@+id/discovery_fragment"
-        android:name="com.ahu.ahutong.ui.page.DiscoveryFragment">
-        <action
-            android:id="@+id/action_discovery_fragment_to_classroom_fragment"
-            app:destination="@+id/classroom_fragment"/>
-    </fragment>
+        android:name="com.ahu.ahutong.ui.page.DiscoveryFragment"/>
 
     <fragment
         tools:layout="@layout/fragment_developer"
@@ -29,4 +25,12 @@
         tools:layout="@layout/fragment_classroom"
         android:id="@+id/classroom_fragment"
         android:name="com.ahu.ahutong.ui.page.ClassRoomFragment"/>
+    <fragment
+        tools:layout="@layout/fragment_bathroom"
+        android:id="@+id/bathroom_fragment"
+        android:name="com.ahu.ahutong.ui.page.BathRoomFragment"/>
+    <fragment
+        tools:layout="@layout/fragment_teldirectory"
+        android:id="@+id/teldirectory_fragment"
+        android:name="com.ahu.ahutong.ui.page.TelDirectoryFragment"/>
 </navigation>
