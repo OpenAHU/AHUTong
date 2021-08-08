@@ -44,6 +44,7 @@
             app:cardUseCompatPadding="false"
             app:cardElevation="0dp">
             <LinearLayout
+                android:onClick="@{(thisView) -> proxy.selectTime(thisView)}"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
