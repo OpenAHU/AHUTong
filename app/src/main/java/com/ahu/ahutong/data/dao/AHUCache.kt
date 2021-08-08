@@ -1,5 +1,6 @@
 package com.ahu.ahutong.data.dao
 
+import arch.sink.utils.Utils
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.ext.fromJson
 import com.google.gson.Gson
@@ -12,6 +13,11 @@ import com.tencent.mmkv.MMKV
  * @Email 468766131@qq.com
  */
 object AHUCache {
+
+    init {
+        MMKV.initialize(Utils.getApp())
+    }
+
     private val kv: MMKV = MMKV.mmkvWithID("ahu")
 
     /**

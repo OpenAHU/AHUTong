@@ -1,6 +1,8 @@
 package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
+import android.os.Debug
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import arch.sink.ui.page.BaseFragment
@@ -41,6 +43,7 @@ class ScheduleFragment: BaseFragment<FragmentScheduleBinding>() {
             Toast.makeText(requireContext(), "${location.startTime} - ${location.weekDay}", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     companion object{
         val INSTANCE = ScheduleFragment()

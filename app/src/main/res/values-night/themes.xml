@@ -15,7 +15,7 @@
         <!-- Customize your theme here. -->
         <item name="colorAccent">@color/teal_200</item>
         <item name="android:textColorPrimary">@color/black</item>
-
+        <item name="android:windowBackground">@drawable/launcher_background</item>
     </style>
 
 

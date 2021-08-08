@@ -84,6 +84,8 @@ interface AHUService {
     @GET("/api/departmentNews")
     suspend fun getNews(): AHUResponse<List<News>>
 
+    @GET("/api/banner")
+    suspend fun getBanner(): AHUResponse<List<Banner>>
     companion object{
         private const val BASE_URL = ""
         // Cookie 本地存储
