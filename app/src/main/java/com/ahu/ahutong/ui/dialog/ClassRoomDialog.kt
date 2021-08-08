@@ -19,23 +19,25 @@ import java.lang.ref.WeakReference
  * @Date: 2021/8/7-上午12:39
  * @Email: 330771794@qq.com
  */
-class ClassRoomDialog : BottomDialog() {
+class ClassRoomDialog(private val campusIndex: Int, private val timesIndex: Int) : BottomDialog() {
     private lateinit var binding: DialogRoomBinding
     private lateinit var callBack: CallBack
     override fun onInitDialog(dialog: Dialog) {
         binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.dialog_room, null, false)
         dialog.setContentView(binding.root)
-        binding.numberPickerView1.setDividerMarginL(25)
-        binding.numberPickerView2.setDividerMarginR(25)
-        binding.numberPickerView1.setDividerHeight(1f)
-        binding.numberPickerView2.setDividerHeight(1f)
-        binding.numberPickerView1.setDividerColor(Color.GRAY)
-        binding.numberPickerView2.setDividerColor(Color.GRAY)
-        binding.numberPickerView1.setDividerPadding(50f)
-        binding.numberPickerView2.setDividerPadding(50f)
-        binding.numberPickerView1.setDisplayedValues(ClassRoomViewModel.campus.toTypedArray(),false)
-        binding.numberPickerView2.setDisplayedValues(ClassRoomViewModel.times.toTypedArray(),false)
-        binding.proxy=this.ClickProxy()
+        binding.run {
+            numberPickerView1.setDividerMarginL(25)
+            numberPickerView2.setDividerMarginR(25)
+            numberPickerView1.setDividerHeight(1f)
+            numberPickerView2.setDividerHeight(1f)
+            numberPickerView1.setDividerColor(Color.GRAY)
+            numberPickerView2.setDividerColor(Color.GRAY)
+            numberPickerView1.setDividerPadding(50f)
+            numberPickerView2.setDividerPadding(50f)
+            numberPickerView1.setDisplayedValuesAndPickedIndex(ClassRoomViewModel.campus.toTypedArray(),campusIndex,false)
+            numberPickerView2.setDisplayedValuesAndPickedIndex(ClassRoomViewModel.times.toTypedArray(),timesIndex,false)
+            proxy=ClickProxy()
+        }
 
     }
     fun setCallBack(callBack: CallBack){
@@ -46,7 +48,7 @@ class ClassRoomDialog : BottomDialog() {
     }
 
     override fun dismiss() {
-        //这里需要把callback制空（会内存泄漏），本人刚学kt，不会。
+        //这里需要把callback制空（不然会内存泄漏），本人刚学kt，不会制空，等以后再修改
         super.dismiss()
         System.gc()
     }

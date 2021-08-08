@@ -11,7 +11,7 @@ import com.ahu.ahutong.databinding.FragmentClassroomBinding
 import com.ahu.ahutong.ui.dialog.ClassRoomDialog
 import com.ahu.ahutong.ui.page.state.ClassRoomViewModel
 
-class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(),ClassRoomDialog.CallBack{
+class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDialog.CallBack {
     private lateinit var mState: ClassRoomViewModel
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(ClassRoomViewModel::class.java)
@@ -26,9 +26,10 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(),ClassRoomDial
         super.onViewCreated(view, savedInstanceState)
 
     }
-    override fun dialogCallBack(campus:String,time:String){
-        mState.campus.value=campus
-        mState.time.value=time
+
+    override fun dialogCallBack(campus: String, time: String) {
+        mState.campus.value = campus
+        mState.time.value = time
     }
 
     inner class ClickProxy {
@@ -36,14 +37,14 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(),ClassRoomDial
             nav().popBackStack()
         }
 
-        fun selectTime(view: View){
-            val dialog:ClassRoomDialog= ClassRoomDialog()
-            dialog.show(parentFragmentManager,"")
+        fun selectTime(view: View) {
+            val index1 = ClassRoomViewModel.campus.indexOf(mState.campus.value)
+            val index2 = ClassRoomViewModel.times.indexOf(mState.time.value)
+            val dialog: ClassRoomDialog = ClassRoomDialog(index1, index2)
+            dialog.show(parentFragmentManager, "")
             dialog.setCallBack(this@ClassRoomFragment)
         }
     }
-
-
 
 
 }

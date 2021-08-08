@@ -405,15 +405,12 @@ public class NumberPickerView extends View {
         if (newDisplayedValues == null) {
             throw new IllegalArgumentException("newDisplayedValues should not be null.");
         }
-        if (pickedIndex < 0) {
-            throw new IllegalArgumentException("pickedIndex should not be negative, now pickedIndex is " + pickedIndex);
-        }
         updateContent(newDisplayedValues);
         updateMaxWHOfDisplayedValues(true);
         updateNotWrapYLimit();
         updateValue();
-        mPrevPickedIndex = pickedIndex + mMinShowIndex;
-        correctPositionByDefaultValue(pickedIndex);
+        mPrevPickedIndex = Math.max(pickedIndex, 0) + mMinShowIndex;
+        correctPositionByDefaultValue(Math.max(pickedIndex, 0));
         if (needRefresh) {
             mHandlerInNewThread.sendMessageDelayed(getMsg(), 0);
             postInvalidate();
