@@ -18,14 +18,10 @@ import arch.sink.BaseApplication;
  * @Email 468766131@qq.com
  */
 public class AHUApplication extends BaseApplication {
-    @NonNull
-    public static AHUApplication globalContext;
-
 
     @Override
     public void onCreate() {
         super.onCreate();
-        globalContext = this;
         MMKV.initialize(this);
         //SinkLog
         SinkLogManager.init(new SinkLogConfig() {

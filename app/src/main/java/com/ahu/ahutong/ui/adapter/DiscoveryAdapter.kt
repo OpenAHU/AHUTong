@@ -127,7 +127,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
                     val imageView = ImageView(parentView.context)
                     imageView.scaleType = ImageView.ScaleType.FIT_XY
                     val banner = data[position]
-                    imageView.load(banner.imgPath)
+                    imageView.load(banner.imageUrl)
                     return imageView
                 }
             })

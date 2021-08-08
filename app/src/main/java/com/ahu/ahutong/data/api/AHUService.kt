@@ -1,5 +1,6 @@
 package com.ahu.ahutong.data.api
 
+import arch.sink.utils.Utils
 import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.AHUResponse
@@ -87,7 +88,7 @@ interface AHUService {
         private const val BASE_URL = ""
         // Cookie 本地存储
         private val cookieJar by lazy {
-            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(AHUApplication.globalContext))
+            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
         }
         //创建AHUService对象
         val API: AHUService by lazy{
@@ -96,7 +97,7 @@ interface AHUService {
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .connectTimeout(15, TimeUnit.SECONDS)
-                .cache(Cache(File(AHUApplication.globalContext.cacheDir,"app_cache"), Long.MAX_VALUE))
+                .cache(Cache(File(Utils.getApp().cacheDir,"app_cache"), Long.MAX_VALUE))
                 .retryOnConnectionFailure(true)
                 .cookieJar(cookieJar)//设置CookieJar
             //debug

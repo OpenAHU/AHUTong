@@ -1,21 +1,37 @@
 package com.ahu.ahutong.data.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Banner {
-    private String imgPath="http://39.106.7.220/img/img.php";
-    private String targetUrl = "";
-    public String getImgPath() {
-        return imgPath;
+
+    @SerializedName("title")
+    private String title;
+    @SerializedName("detailUrl")
+    private String detailUrl;
+    @SerializedName("imageUrl")
+    private String imageUrl;
+
+    public String getTitle() {
+        return title;
     }
 
-    public void setImgPath(String imgPath) {
-        this.imgPath = imgPath;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getTargetUrl() {
-        return targetUrl;
+    public String getDetailUrl() {
+        return detailUrl;
     }
 
-    public void setTargetUrl(String targetUrl) {
-        this.targetUrl = targetUrl;
+    public void setDetailUrl(String detailUrl) {
+        this.detailUrl = detailUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

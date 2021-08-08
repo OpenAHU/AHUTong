@@ -6,9 +6,13 @@ package com.ahu.ahutong.data.model;
  * @Email: 468766131@qq.com
  */
 public enum NewsType {
+    //
     College("院系风采", "colloge"),
-    Association("社团动态", "association"),
+    //
+    Association("社团动态", "association") ,
+    //
     Edu("教务通知", "edu"),
+    //
     Recruit("校招实习", "recruit");
 
     final String value;
