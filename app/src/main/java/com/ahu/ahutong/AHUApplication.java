@@ -1,21 +1,12 @@
 package com.ahu.ahutong;
 
-import android.os.Debug;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
 import com.google.gson.Gson;
-import com.sink.library.log.SinkLog;
 import com.sink.library.log.SinkLogConfig;
 import com.sink.library.log.SinkLogManager;
 import com.sink.library.log.parser.SinkJsonParser;
 import com.sink.library.log.printer.SinkLogConsolePrinter;
-import com.tencent.mmkv.MMKV;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
 
 import arch.sink.BaseApplication;
 

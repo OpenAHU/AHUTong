@@ -1,9 +1,9 @@
 package com.ahu.ahutong.ui.page.state
 
+import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ahu.ahutong.R
-import com.ahu.ahutong.data.model.Tool
 
 class ClassRoomViewModel : ViewModel() {
     val campus = MutableLiveData<String>("磬苑校区")

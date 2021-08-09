@@ -7,7 +7,6 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentScheduleBinding
 import com.ahu.ahutong.ui.dialog.SettingTimeDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
@@ -32,7 +31,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
     }
 
     override fun observeData() {
-        super.observeData()
+
         //课表数据
         mState.schedule.observe(this) {
             it.onSuccess {

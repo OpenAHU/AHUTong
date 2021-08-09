@@ -2,6 +2,7 @@ package com.ahu.ahutong.ui.dialog
 
 import android.app.Dialog
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.databinding.DataBindingUtil
@@ -52,12 +53,6 @@ class ClassRoomDialog(private val campusIndex: Int, private val timesIndex: Int)
         fun dialogCallBack(campus: String, time: String)
     }
 
-    override fun dismiss() {
-        //这里需要把callback制空（不然会内存泄漏），本人刚学kt，不会制空，等以后再修改
-        super.dismiss()
-        callBack = null
-        binding.unbind()
-    }
 
     inner class ClickProxy {
         fun cancel(view: View?) {
@@ -71,5 +66,11 @@ class ClassRoomDialog(private val campusIndex: Int, private val timesIndex: Int)
             )
             dismiss()
         }
+    }
+
+    override fun onDestroy() {//当点击外部导致关闭时不会走dismiss，故使用onDestroy
+        super.onDestroy()
+        callBack = null
+        binding.unbind()
     }
 }

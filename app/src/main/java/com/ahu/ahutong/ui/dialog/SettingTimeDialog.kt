@@ -66,11 +66,7 @@ class SettingTimeDialog: BottomDialog(), View.OnClickListener {
         fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int)
     }
 
-    override fun dismiss() {
-        super.dismiss()
-        callback = null
-        binding.unbind()
-    }
+
     override fun onClick(v: View?) {
         when(v?.id){
             R.id.bt_ok ->{
@@ -86,6 +82,11 @@ class SettingTimeDialog: BottomDialog(), View.OnClickListener {
             }
 
         }
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        callback = null
+        binding.unbind()
     }
 }
