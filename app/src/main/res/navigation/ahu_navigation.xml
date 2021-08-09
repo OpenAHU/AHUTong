@@ -33,4 +33,8 @@
         tools:layout="@layout/fragment_teldirectory"
         android:id="@+id/teldirectory_fragment"
         android:name="com.ahu.ahutong.ui.page.TelDirectoryFragment"/>
+    <fragment
+        tools:layout="@layout/fragment_more"
+        android:id="@+id/more_fragment"
+        android:name="com.ahu.ahutong.ui.page.MoreFragment"/>
 </navigation>
