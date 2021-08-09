@@ -4,6 +4,7 @@ import com.ahu.ahutong.data.model.User
 import org.junit.Test
 
 import org.junit.Assert.*
+import java.util.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -13,7 +14,9 @@ import org.junit.Assert.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        val ahuTeach = User.UserType.AHU_Teach
-        println(ahuTeach.toString())
+        val instance = Calendar.getInstance(Locale.CHINA)
+        instance.firstDayOfWeek = Calendar.MONDAY
+        instance.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        println(instance.time)
     }
 }

@@ -11,10 +11,10 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ext.dp
 import com.ahu.ahutong.ui.widget.schedule.bean.CourseDate
+import com.ahu.ahutong.ui.widget.schedule.bean.DefaultDataUtils
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleCourse
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
 import com.sink.library.log.SinkLog
-import java.lang.IllegalArgumentException
 import java.util.*
 
 /**
@@ -72,11 +72,10 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     private lateinit var startTime: Date
 
     //主题
-    private lateinit var theme: ScheduleTheme
+    private var theme: ScheduleTheme = DefaultDataUtils.getDefaultTheme()
 
     //是否显示非本周课
     private var isShowAllCourses = false
-    private var isInitTableHeader = false
     private var tableHeaderWidth = 35.dp
     private var tableHeaderHeight = 50.dp
 
@@ -120,9 +119,17 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
             initTableHeader()
             initTableBody()
         }
+
     }
 
     private fun initTableBody() {
+        if (contentLinearLayout.childCount != 0){
+            contentLinearLayout.removeAllViews()
+        }
+
+        if (coursesData.isNullOrEmpty()) {
+            return
+        }
         for (i in 1..7) {
             //创建纵向课程容器
             val linearLayout = LinearLayout(context)
@@ -193,18 +200,17 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     }
 
     private fun initTableHeader() {
-        if (isInitTableHeader) {
-            return
-        }
         initTableTimeHeader()
         initTableWeekdayHeader()
-        isInitTableHeader = true
     }
 
     /**
      * 初始化WeekdayList表头
      */
     private fun initTableWeekdayHeader() {
+        if (weekdayList.childCount != 0){
+            weekdayList.removeAllViews()
+        }
         //周一到周末
         //日期计算
         val calendar = Calendar.getInstance()
@@ -241,6 +247,9 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
      * 初始化Time表头
      */
     private fun initTableTimeHeader() {
+        if (timeList.childCount != 0){
+            timeList.removeAllViews()
+        }
         for (i in 1..11) {
             val headerItem =
                 LayoutInflater.from(context).inflate(R.layout.item_schedule_header, this, false)
@@ -263,7 +272,8 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
      */
     fun date(week: Int, weekday: Int): ScheduleView {
         this.week = week
-        this.weekday = weekday
+        this.weekday =
+            if (weekday == Calendar.SUNDAY) 7 else weekday - 1
         return this
     }
 

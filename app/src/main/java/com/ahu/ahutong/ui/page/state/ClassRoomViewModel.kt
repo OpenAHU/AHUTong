@@ -11,7 +11,7 @@ class ClassRoomViewModel : ViewModel() {
     companion object {
         val campus = listOf(
             "磬苑校区",
-            "龙和校区"
+            "龙河校区"
         )
         val times = listOf(
             "1,2节",

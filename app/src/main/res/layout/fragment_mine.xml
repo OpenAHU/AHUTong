@@ -5,6 +5,9 @@
             name="state"
             type="com.ahu.ahutong.ui.page.state.MineViewModel" />
         <variable
+            name="activityState"
+            type="com.ahu.ahutong.ui.page.state.MainViewModel" />
+        <variable
             name="proxy"
             type="com.ahu.ahutong.ui.page.MineFragment.ClickProxy" />
     </data>
@@ -78,7 +81,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="@{state.login ?  @string/mine_tv_logout : @string/mine_tv_identity}"
+                        android:text="@{activityState.login ?  @string/mine_tv_logout : @string/mine_tv_identity}"
                         tool:text="@string/mine_tv_identity" />
                     <androidx.appcompat.widget.AppCompatImageView
                         android:layout_width="20dp"

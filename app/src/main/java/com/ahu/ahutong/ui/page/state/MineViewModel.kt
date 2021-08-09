@@ -14,9 +14,4 @@ class MineViewModel : ViewModel() {
     val user = MutableLiveData<User>()
 
 
-    fun isLogin() = AHUCache.isLogin()
-
-    fun logout(){
-        AHUCache.clearCurrentUser()
-    }
 }

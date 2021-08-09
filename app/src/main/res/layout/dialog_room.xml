@@ -23,13 +23,13 @@
             android:padding="13dp">
 
             <com.simon.library.view.NumberPickerView
-                android:id="@+id/numberPickerView1"
+                android:id="@+id/picker_campus"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
 
             <com.simon.library.view.NumberPickerView
-                android:id="@+id/numberPickerView2"
+                android:id="@+id/picker_time"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />

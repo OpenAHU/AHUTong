@@ -130,4 +130,66 @@ object AHUCache {
     }
 
 
+    /**
+     * 获取开学时间
+     * @param schoolYear String yyyy-yyyy
+     * @param schoolTerm String 1 or 2
+     * @return String? yyyy-MM-dd
+     */
+    fun getSchoolTermStartTime(schoolYear: String, schoolTerm: String): String? {
+        return kv.decodeString("startTime-${schoolYear}-${schoolTerm}")
+    }
+
+    /**
+     * 保存开学时间
+     * @param schoolYear String yyyy-yyyy
+     * @param schoolTerm String 1 or 2
+     * @param startTime String yyyy-MM-dd
+     */
+    fun saveSchoolTermStartTime(schoolYear: String, schoolTerm: String, startTime: String){
+        kv.encode("startTime-${schoolYear}-${schoolTerm}", startTime)
+    }
+
+    /**
+     * 获取默认的学年
+     * @return String?
+     */
+    fun getSchoolYear(): String? {
+        return kv.decodeString("defaultSchoolYear")
+    }
+
+
+    /**
+     * 保存默认的学年
+     * @param schoolYear String
+     */
+    fun saveSchoolYear(schoolYear: String){
+        kv.encode("defaultSchoolYear", schoolYear)
+    }
+
+    /**
+     * 获取默认学期
+     * @return String?
+     */
+    fun getSchoolTerm(): String?{
+        return kv.decodeString("defaultSchoolTerm")
+    }
+
+    /**
+     * 保存默认的学期
+     * @param schoolTerm String
+     */
+    fun saveSchoolTerm(schoolTerm: String){
+        kv.encode("defaultSchoolTerm", schoolTerm)
+    }
+
+    /**
+     * 是否显示非本周课程
+     * @return Boolean
+     */
+    fun isShowAllCourse(): Boolean {
+        return kv.decodeBool("isShowAllCourse", false)
+    }
+
+
 }
