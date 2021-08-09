@@ -8,6 +8,7 @@ import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentMineBinding
+import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.MineViewModel
 
 /**
@@ -18,14 +19,16 @@ import com.ahu.ahutong.ui.page.state.MineViewModel
 class MineFragment: BaseFragment<FragmentMineBinding>() {
 
     private lateinit var mState: MineViewModel
-
+    private lateinit var activityState: MainViewModel
 
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(MineViewModel::class.java)
+        activityState = getActivityScopeViewModel(MainViewModel::class.java)
     }
 
     override fun getDataBindingConfig(): DataBindingConfig {
         return DataBindingConfig(R.layout.fragment_mine, BR.state, mState)
+            .addBindingParam(BR.activityState, activityState)
             .addBindingParam(BR.proxy, ClickProxy())
     }
 
@@ -41,7 +44,7 @@ class MineFragment: BaseFragment<FragmentMineBinding>() {
         }
         //login or logout
         fun login(view: View){
-            if (mState.isLogin()){
+            if (activityState.isLogin.value == true){
                 //注销 (TODO)
             }else {
                 //登录（TODO）

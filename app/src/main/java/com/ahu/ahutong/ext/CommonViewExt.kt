@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ext
 
+import android.graphics.Color
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
@@ -9,6 +10,7 @@ import coil.load
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.imageview.ShapeableImageView
+import com.simon.library.view.NumberPickerView
 
 /**
  * @Author: SinkDev
@@ -44,4 +46,10 @@ fun onIconClick(view: MaterialToolbar, action: (() -> Unit)?){
     view.setNavigationOnClickListener{
         action?.invoke()
     }
+}
+
+fun NumberPickerView.defaultStyle(){
+    setDividerColor(Color.GRAY)
+    setDividerHeight(1f)
+    setDividerPadding(35f)
 }

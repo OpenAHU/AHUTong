@@ -12,6 +12,7 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentHomeBinding
 import com.ahu.ahutong.ui.page.state.HomeViewModel
 import com.sink.library.log.SinkLog
+import java.lang.RuntimeException
 
 /**
  * @Author SinkDev
@@ -20,6 +21,7 @@ import com.sink.library.log.SinkLog
  */
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private lateinit var mState: HomeViewModel
+
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(HomeViewModel::class.java)
 
@@ -36,15 +38,17 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         dataBinding.homeViewPager2.run {
             isUserInputEnabled = false //禁止滑动
             adapter = object: FragmentStateAdapter(requireActivity()) {
-                //主界面的Fragment
-                val fragmentList = listOf<Fragment>(ScheduleFragment.INSTANCE, DiscoveryFragment.INSTANCE, MineFragment.INSTANCE)
 
                 override fun getItemCount(): Int {
-                    return fragmentList.size
+                    return 3
                 }
-
                 override fun createFragment(position: Int): Fragment {
-                    return fragmentList[position]
+                    return when(position) {
+                        0 -> ScheduleFragment.INSTANCE
+                        1 -> DiscoveryFragment.INSTANCE
+                        2 -> MineFragment.INSTANCE
+                        else -> throw RuntimeException("不存在该position")
+                    }
                 }
 
             }

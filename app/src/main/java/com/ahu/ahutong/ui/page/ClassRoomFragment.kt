@@ -38,10 +38,10 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
         }
 
         fun selectTime(view: View) {
-            val index1 = ClassRoomViewModel.campus.indexOf(mState.campus.value)
-            val index2 = ClassRoomViewModel.times.indexOf(mState.time.value)
-            val dialog: ClassRoomDialog = ClassRoomDialog(index1, index2)
-            dialog.show(parentFragmentManager, "")
+            val indexOfCampus = ClassRoomViewModel.campus.indexOf(mState.campus.value)
+            val indexOfTime = ClassRoomViewModel.times.indexOf(mState.time.value)
+            val dialog: ClassRoomDialog = ClassRoomDialog(indexOfCampus, indexOfTime)
+            dialog.show(parentFragmentManager, "ClassRoomPicker")
             dialog.setCallBack(this@ClassRoomFragment)
         }
     }

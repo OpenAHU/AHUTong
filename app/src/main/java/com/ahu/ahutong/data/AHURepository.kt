@@ -87,6 +87,7 @@ object AHURepository {
             throw IllegalArgumentException("schoolTerm must be 1 or 2")
         }
         SinkLog.i("start get Schedule")
+
         if (isRefresh) {
             return getSchedule(schoolYear, schoolTerm)
         }
