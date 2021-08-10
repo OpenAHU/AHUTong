@@ -3,6 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
+        <variable
+            name="proxy"
+            type="com.ahu.ahutong.ui.page.ExamFragment.ClickProxy" />
 <!--        <variable-->
 <!--            name="state"-->
 <!--            type="com.ahu.tong.ui.fragment.exam.ExamViewModel" />-->
@@ -10,9 +13,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".ui.fragment.exam.ExamFragment">
+        android:orientation="vertical">
         <androidx.appcompat.widget.Toolbar
+
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
             android:id="@+id/toolbar"

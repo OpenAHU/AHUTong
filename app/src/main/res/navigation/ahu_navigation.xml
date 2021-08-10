@@ -37,4 +37,12 @@
         tools:layout="@layout/fragment_more"
         android:id="@+id/more_fragment"
         android:name="com.ahu.ahutong.ui.page.MoreFragment"/>
+    <fragment
+        tools:layout="@layout/fragment_exam"
+        android:id="@+id/exam_fragment"
+        android:name="com.ahu.ahutong.ui.page.ExamFragment"/>
+    <fragment
+        tools:layout="@layout/fragment_gradle"
+        android:id="@+id/gradle_fragment"
+        android:name="com.ahu.ahutong.ui.page.GradleFragment"/>
 </navigation>
