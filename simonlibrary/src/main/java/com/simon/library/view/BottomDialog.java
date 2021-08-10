@@ -3,8 +3,11 @@ package com.simon.library.view;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import androidx.fragment.app.DialogFragment;
+
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.simon.library.DialogUtil;
@@ -50,4 +53,16 @@ public abstract class BottomDialog extends DialogFragment {
     }
 
     protected abstract void onInitDialog(Dialog dialog);
+
+    /**
+     * 禁止返回键关闭
+     */
+    protected void cancelBackKey(Dialog dialog){
+        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                return keyCode == KeyEvent.KEYCODE_BACK;
+            }
+        });
+    }
 }

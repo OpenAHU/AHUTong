@@ -36,6 +36,8 @@ class SettingTimeDialog: BottomDialog(), View.OnClickListener {
         }
     }
     override fun onInitDialog(dialog: Dialog?) {
+        dialog?.setCanceledOnTouchOutside(false)
+        cancelBackKey(dialog)
         binding = DialogTimeBinding.inflate(LayoutInflater.from(context))
         dialog?.setContentView(binding.root)
         binding.btOk.setOnClickListener(this)
