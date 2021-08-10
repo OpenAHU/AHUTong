@@ -21,6 +21,7 @@ class MineFragment: BaseFragment<FragmentMineBinding>() {
     private lateinit var mState: MineViewModel
     private lateinit var activityState: MainViewModel
 
+
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(MineViewModel::class.java)
         activityState = getActivityScopeViewModel(MainViewModel::class.java)

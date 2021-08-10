@@ -32,6 +32,8 @@
         <entry key="app/src/main/res/layout/fragment_classroom.xml" value="0.21875" />
         <entry key="app/src/main/res/layout/fragment_developer.xml" value="0.24538258575197888" />
         <entry key="app/src/main/res/layout/fragment_discovery.xml" value="0.19261213720316622" />
+        <entry key="app/src/main/res/layout/fragment_exam.xml" value="0.3494791666666667" />
+        <entry key="app/src/main/res/layout/fragment_gradle.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1266490765171504" />
         <entry key="app/src/main/res/layout/fragment_mine.xml" value="0.24087591240875914" />
         <entry key="app/src/main/res/layout/fragment_schedule.xml" value="0.25" />
@@ -41,6 +43,8 @@
         <entry key="app/src/main/res/layout/item_discovery_news.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/item_discovery_sector.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_discovery_tools.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/item_exam.xml" value="0.3494791666666667" />
+        <entry key="app/src/main/res/layout/item_grade.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/item_grid.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_schdule_course.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_schedule_header.xml" value="0.35104166666666664" />

@@ -35,7 +35,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //pager2
-        dataBinding.homeViewPager2.run {
+        dataBinding.homeViewPager2.apply {
             isUserInputEnabled = false //禁止滑动
             adapter = object: FragmentStateAdapter(requireActivity()) {
 
