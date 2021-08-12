@@ -42,7 +42,7 @@ interface AHUService {
      */
     @GET("/api/schedule")
     suspend fun getSchedule(@Query("schoolYear") schoolYear: String,
-                            @Query("schoolYear") schoolTerm: String): AHUResponse<List<Course>>
+                            @Query("schoolTerm") schoolTerm: String): AHUResponse<List<Course>>
 
     /**
      * getExamInfo
@@ -52,7 +52,7 @@ interface AHUService {
      */
     @GET("/api/exam_info")
     suspend fun getExamInfo(@Query("schoolYear") schoolYear: String,
-                            @Query("schoolYear") schoolTerm: String): AHUResponse<List<Exam>>
+                            @Query("schoolTerm") schoolTerm: String): AHUResponse<List<Exam>>
 
     /**
      * 获取空教室API

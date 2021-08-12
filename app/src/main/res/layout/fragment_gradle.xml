@@ -58,7 +58,8 @@
                         android:id="@+id/sp_schoolYear"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1" />
+                        android:layout_weight="1"
+                        tools:ignore="SpeakableTextPresentCheck" />
 
                     <TextView
                         android:layout_width="wrap_content"

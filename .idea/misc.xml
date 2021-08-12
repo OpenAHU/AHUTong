@@ -33,7 +33,7 @@
         <entry key="app/src/main/res/layout/fragment_developer.xml" value="0.24538258575197888" />
         <entry key="app/src/main/res/layout/fragment_discovery.xml" value="0.19261213720316622" />
         <entry key="app/src/main/res/layout/fragment_exam.xml" value="0.3494791666666667" />
-        <entry key="app/src/main/res/layout/fragment_gradle.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_gradle.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1266490765171504" />
         <entry key="app/src/main/res/layout/fragment_mine.xml" value="0.24087591240875914" />
         <entry key="app/src/main/res/layout/fragment_schedule.xml" value="0.25" />
