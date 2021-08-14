@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <data>
+
         <variable
             name="proxy"
             type="com.ahu.ahutong.ui.page.ExamFragment.ClickProxy" />
-<!--        <variable-->
-<!--            name="state"-->
-<!--            type="com.ahu.tong.ui.fragment.exam.ExamViewModel" />-->
+
     </data>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <androidx.appcompat.widget.Toolbar
 
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:id="@+id/toolbar"
-            app:title="@string/exam"/>
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                onIconClick="@{proxy.back}"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                app:navigationIcon="@drawable/icon_back"
+                app:title="@string/exam" />
+        </com.google.android.material.appbar.AppBarLayout>
 
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -36,8 +44,8 @@
                 <ImageView
                     android:layout_width="250dp"
                     android:layout_height="120dp"
-                    android:src="@mipmap/exam"
-                    android:contentDescription="@string/exam" />
+                    android:contentDescription="@string/exam"
+                    android:src="@mipmap/exam" />
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/card_tip"
