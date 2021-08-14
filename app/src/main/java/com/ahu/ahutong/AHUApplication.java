@@ -1,5 +1,6 @@
 package com.ahu.ahutong;
 
+import com.ahu.ahutong.data.dao.AHUCache;
 import com.google.gson.Gson;
 import com.sink.library.log.SinkLogConfig;
 import com.sink.library.log.SinkLogManager;
@@ -48,5 +49,6 @@ public class AHUApplication extends BaseApplication {
                 return obj -> new Gson().toJson(obj);
             }
         }, new SinkLogConsolePrinter());
+
     }
 }

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ahu_navigation"
     app:startDestination="@id/home_fragment">
+
     <fragment
         tools:layout="@layout/fragment_home"
         android:id="@+id/home_fragment"
@@ -11,7 +12,12 @@
         <action
             android:id="@+id/action_home_fragment_to_developer_fragment"
             app:destination="@id/developer_fragment" />
+        <action
+            android:id="@+id/action_home_fragment_to_login_fragment"
+            app:destination="@id/login_fragment"
+            app:enterAnim="@anim/nav_default_enter_anim" />
     </fragment>
+
     <fragment
         tools:layout="@layout/fragment_discovery"
         android:id="@+id/discovery_fragment"
@@ -45,4 +51,8 @@
         tools:layout="@layout/fragment_gradle"
         android:id="@+id/gradle_fragment"
         android:name="com.ahu.ahutong.ui.page.GradleFragment"/>
+    <fragment
+        tools:layout="@layout/fragment_login"
+        android:id="@+id/login_fragment"
+        android:name="com.ahu.ahutong.ui.page.LoginFragment"/>
 </navigation>

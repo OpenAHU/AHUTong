@@ -1,5 +1,10 @@
 package com.ahu.ahutong.ui.widget.schedule
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.LayoutTransition
+import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -24,6 +29,7 @@ import java.util.*
  */
 class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) :
     LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
+
 
     private val headerTimeMsg by lazy {
         hashMapOf(
@@ -69,7 +75,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     private var weekday = 1
 
     //开学时间
-    private lateinit var startTime: Date
+    private var startTime: Date? = null
 
     //主题
     private var theme: ScheduleTheme = DefaultDataUtils.getDefaultTheme()
@@ -79,11 +85,12 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     private var tableHeaderWidth = 35.dp
     private var tableHeaderHeight = 50.dp
 
-    //每个格子的宽高
-    private var courseWidth: Float = 0.0f
-    private var courseHeight: Float = 0.0f
+    private val mLayoutTransition: LayoutTransition
 
-    private var mCourseListener: (View, ScheduleCourse, CourseDate) -> Unit
+    //每个格子的宽高
+    private var courseHeight: Float = 50.dp
+
+    private var mCourseListener: (View, ScheduleCourse) -> Unit
     private var mEmptyCourseListener: (View, CourseDate) -> Unit
 
     init {
@@ -95,9 +102,15 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         settingImg = findViewById(R.id.schedule_setting)
         contentLinearLayout = findViewById(R.id.schedule_course_content)
         bottomLayout = findViewById(R.id.schedule_bottom)
-        mCourseListener = { _, _, _ -> }
+        mLayoutTransition = LayoutTransition()
+        mLayoutTransition.setAnimator(LayoutTransition.APPEARING, getAppearingAnimation())
+        mLayoutTransition.setDuration(500)
+        mLayoutTransition.setStartDelay(LayoutTransition.APPEARING, 0);
+        contentLinearLayout.layoutTransition = mLayoutTransition
+        mCourseListener = { _, _ -> }
         mEmptyCourseListener = { _, _ -> }
     }
+
 
     /**
      *  创建一堆构造器重载
@@ -113,40 +126,36 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
 
 
     fun loadSchedule() {
-        post {
-            courseHeight = (height - tableHeaderHeight) / 11
-            courseWidth = (width - tableHeaderWidth) / 7
-            initTableHeader()
-            initTableBody()
-        }
+        initTableHeader()
+        initTableBody()
 
     }
 
     private fun initTableBody() {
-        if (contentLinearLayout.childCount != 0){
+        if (contentLinearLayout.childCount != 0) {
             contentLinearLayout.removeAllViews()
         }
-
         if (coursesData.isNullOrEmpty()) {
             return
         }
         for (i in 1..7) {
             //创建纵向课程容器
             val linearLayout = LinearLayout(context)
+            linearLayout.layoutParams = LayoutParams(0, -1, 1f)
             linearLayout.orientation = VERTICAL
             //填充课程
-            coursesData[i]?.forEach {
+            coursesData[i]?.forEachIndexed { index, it ->
                 val course = it.getCourse(week, isShowAllCourses)
                 if (course == null) {
                     addEmptyCourse(linearLayout, CourseDate(i, it.startTime))
                 } else {
                     addCourseMessage(
-                        course, linearLayout, CourseDate(i, it.startTime),
-                        course.startWeek < week && course.endWeek > week
+                        course, linearLayout, it,
+                        course.startWeek <= week && course.endWeek >= week
                     )
                 }
             }
-            contentLinearLayout.addView(linearLayout, courseWidth.toInt(), -1)
+            contentLinearLayout.addView(linearLayout)
         }
     }
 
@@ -159,7 +168,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
             mEmptyCourseListener(view, date)
         }
         //添加进父布局
-        val lparams = LayoutParams(courseWidth.toInt(), courseHeight.toInt())
+        val lparams = LayoutParams(-1, courseHeight.toInt())
         linearLayout.addView(view, lparams)
     }
 
@@ -169,7 +178,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     private fun addCourseMessage(
         course: Course,
         linearLayout: LinearLayout,
-        date: CourseDate,
+        scheduleCourse: ScheduleCourse,
         isThisWeek: Boolean
     ) {
         //解析课程item
@@ -187,13 +196,11 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         theme.theme.setItem(courseView, isThisWeek)
         //设置点击事件
         courseView.setOnClickListener { view ->
-            coursesData[date.weekDay]?.get(date.startTime)?.let {
-                mCourseListener(view, it, date)
-            }
+            mCourseListener(view, scheduleCourse)
         }
         //添加进父布局
         val lparams =
-            LayoutParams(courseWidth.toInt() - 4, courseHeight.toInt() * course.length - 8)
+            LayoutParams(-1, courseHeight.toInt() * course.length - 8)
         lparams.setMargins(2, 4, 2, 4)
         linearLayout.addView(courseView, lparams)
 
@@ -208,19 +215,21 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
      * 初始化WeekdayList表头
      */
     private fun initTableWeekdayHeader() {
-        if (weekdayList.childCount != 0){
+        if (weekdayList.childCount != 0) {
             weekdayList.removeAllViews()
         }
         //周一到周末
         //日期计算
         val calendar = Calendar.getInstance()
-        calendar.time = startTime // 设置时间为开学时间
+        calendar.time =
+            startTime ?: throw IllegalStateException("startTime can't be null")// 设置时间为开学时间
         calendar.add(Calendar.DATE, 7 * (week - 1)) //以开学时间为基准，计算要显示的周的时间
         //为周几，日期添加数据
         for (i in 1..7) {
             //获取item对象
             val headerItem =
                 LayoutInflater.from(context).inflate(R.layout.item_schedule_header, this, false)
+            headerItem.layoutParams = LayoutParams(0, -1, 1f)
             //初始化控件
             val tvTop = headerItem.findViewById<TextView>(R.id.tv_top)
             val tvBottom = headerItem.findViewById<TextView>(R.id.tv_bottom)
@@ -237,7 +246,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
             //日期加1
             calendar.add(Calendar.DATE, 1)
             //添加view
-            weekdayList.addView(headerItem, courseWidth.toInt(), -1)
+            weekdayList.addView(headerItem)
         }
         //设置主题
         theme.theme.setWeekdayListHeader(weekdayList)
@@ -247,7 +256,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
      * 初始化Time表头
      */
     private fun initTableTimeHeader() {
-        if (timeList.childCount != 0){
+        if (timeList.childCount != 0) {
             timeList.removeAllViews()
         }
         for (i in 1..11) {
@@ -299,7 +308,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
                 }
                 list.add(scheduleCourse)
                 //修改步长
-                j += scheduleCourse.length
+                j += scheduleCourse.getLength(week, isShowAllCourses)
             }
             coursesData[i] = list
         }
@@ -356,10 +365,22 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
 
     /**
      * 设置有课监听器
-     * @param listener Function3<[@kotlin.ParameterName] View, [@kotlin.ParameterName] ScheduleCourse, [@kotlin.ParameterName] CourseDate, Unit>
+     * @param listener Function2<[@kotlin.ParameterName] View, [@kotlin.ParameterName] ScheduleCourse, Unit>
      */
-    fun setCourseListener(listener: (view: View, scheduleCourse: ScheduleCourse, location: CourseDate) -> Unit) {
+    fun setCourseListener(listener: (view: View, scheduleCourse: ScheduleCourse) -> Unit) {
         this.mCourseListener = listener
     }
 
+
+    @SuppressLint("ObjectAnimatorBinding")
+    private fun getAppearingAnimation(): Animator {
+        val mSet = AnimatorSet();
+        mSet.playTogether(
+            ObjectAnimator.ofFloat(null, "Alpha", 0.0f, 1.0f),
+            ObjectAnimator.ofFloat(null, "ScaleX", 2.0f, 1.0f),
+            ObjectAnimator.ofFloat(null, "ScaleY", 2.0f, 1.0f),
+            ObjectAnimator.ofFloat(null, "translationX", 400f, 0f)
+        )
+        return mSet;
+    }
 }

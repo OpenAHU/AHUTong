@@ -18,11 +18,14 @@ public class User {
         this.name = name;
     }
 
+
     public enum UserType {
         //使用教务系统登录的
         AHU_Teach("1"),
         //使用智慧安大登录的
-        AHU_Wisdom("2");
+        AHU_Wisdom("2"),
+        // 爬虫
+        AHU_LOCAL("0");
 
         private final String type;
 

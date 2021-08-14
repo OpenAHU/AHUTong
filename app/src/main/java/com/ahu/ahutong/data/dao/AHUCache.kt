@@ -54,6 +54,21 @@ object AHUCache {
     }
 
     /**
+     * 保存密码
+     * @param password String
+     */
+    fun saveCurrentPassword(password: String){
+        kv.encode("password", password)
+    }
+
+    /**
+     * 获取密码
+     * @return String?
+     */
+    fun getCurrentUserPassword(): String?{
+        return kv.decodeString("password")
+    }
+    /**
      * 保存课程表
      * @param schoolYear String
      * @param schoolTerm String
@@ -61,7 +76,7 @@ object AHUCache {
      */
     fun saveSchedule(schoolYear: String, schoolTerm: String, schdule: List<Course>) {
         val data = Gson().toJson(schdule)
-        kv.encode("${schoolYear}-${schoolTerm}.schedule", data)
+        kv.putString("${schoolYear}-${schoolTerm}.schedule", data)
     }
 
     /**
@@ -71,7 +86,7 @@ object AHUCache {
      * @return List<Course>
      */
     fun getSchedule(schoolYear: String, schoolTerm: String): List<Course>? {
-        val data = kv.decodeString("${schoolYear}-${schoolTerm}.schedule") ?: ""
+        val data = kv.getString("${schoolYear}-${schoolTerm}.schedule", "") ?: ""
         return data.fromJson(object : TypeToken<List<Course>>() {}.type)
     }
 
@@ -172,7 +187,7 @@ object AHUCache {
      * @return String?
      */
     fun getSchoolTerm(): String?{
-        return kv.decodeString("defaultSchoolTerm")
+        return kv.getString("defaultSchoolTerm", null)
     }
 
     /**
@@ -180,7 +195,7 @@ object AHUCache {
      * @param schoolTerm String
      */
     fun saveSchoolTerm(schoolTerm: String){
-        kv.encode("defaultSchoolTerm", schoolTerm)
+        kv.putString("defaultSchoolTerm", schoolTerm)
     }
 
     /**
@@ -188,8 +203,27 @@ object AHUCache {
      * @return Boolean
      */
     fun isShowAllCourse(): Boolean {
-        return kv.decodeBool("isShowAllCourse", false)
+        return kv.getBoolean("isShowAllCourse", false)
     }
 
+    /**
+     * 获取登录类型
+     * @return User.UserType
+     */
+    fun getLoginType(): User.UserType{
+        val type = kv.getString("usertype", "0")
+        return when(type){
+            "1" -> User.UserType.AHU_Wisdom
+            "2" -> User.UserType.AHU_Teach
+            else -> User.UserType.AHU_LOCAL
+        }
+    }
 
+    /**
+     * 保存登录类型
+     * @param type UserType
+     */
+    fun saveLoginType(type: User.UserType){
+        kv.putString("usertype", type.toString())
+    }
 }

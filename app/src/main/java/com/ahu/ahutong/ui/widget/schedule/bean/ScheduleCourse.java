@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.ahu.ahutong.data.model.Course;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public class ScheduleCourse {
     @NonNull
-    private final List<Course> courses = Collections.emptyList();
+    private final List<Course> courses = new ArrayList<>();
     private Integer startTime;
 
     public ScheduleCourse(Integer startTime) {
@@ -38,17 +39,18 @@ public class ScheduleCourse {
         this.startTime = startTime;
     }
 
-    public Integer getLength() {
+    public Integer getLength(int week, boolean showAll) {
         int length = 1;
-        for (Course course : courses) {
-            length = Math.max(length, course.getLength());
+        Course course = getCourse(week, showAll);
+        if (course != null){
+            length = course.getLength();
         }
         return length;
     }
 
     public Course getCourse(int week, boolean isShowAll){
         for (Course course : courses) {
-           if (course.getStartWeek() < week && course.getEndWeek() > week){
+           if (course.getStartWeek() <= week && course.getEndWeek() >= week){
                return course;
            }
         }

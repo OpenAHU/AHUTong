@@ -59,5 +59,8 @@
     <string name="schedule_setting">课程表设置</string>
     <string name="schedule_not_this_week">[非本周] %s</string>
     <string name="tool">Tool</string>
+    <string name="login_local_wisdom">智慧安大(本地)</string>
+    <string name="login_wisdom_ahu">智慧安大</string>
+    <string name="login_teach_system">教务系统</string>
 
 </resources>

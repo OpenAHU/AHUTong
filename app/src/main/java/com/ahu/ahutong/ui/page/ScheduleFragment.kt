@@ -11,6 +11,7 @@ import com.ahu.ahutong.databinding.FragmentScheduleBinding
 import com.ahu.ahutong.ui.dialog.SettingTimeDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
+import com.sink.library.log.SinkLog
 import java.util.*
 
 /**
@@ -31,17 +32,24 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
     }
 
     override fun observeData() {
-
+        activityState.isLogin.observe(this){
+            if (it){
+                mState.refreshSchedule()
+                dataBinding.refreshLayout.isRefreshing = true
+            }
+        }
         //课表数据
         mState.schedule.observe(this) {
             it.onSuccess {
                 dataBinding.scheduleView
+                    .showAllCourse(true)
                     .data(it)
                     .loadSchedule()
             }
             it.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }
+            dataBinding.refreshLayout.isRefreshing = false
         }
         //第几周
         mState.week.observe(this){
@@ -71,6 +79,13 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             settingTimeDialog.setCallBack(this)
             settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
         }
+        //加载数据
+        dataBinding.scheduleView
+            .showAllCourse(mState.isShowAllCourse.value ?: false)
+            .startTime(mState.startTime.value ?: Date())
+            .date(mState.week.value ?: 1, Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK])
+            .loadSchedule()
+
         //设置点击空课的事件
         dataBinding.scheduleView.setEmptyCourseListener { _, location ->
             Toast.makeText(
@@ -80,22 +95,20 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             ).show()
         }
         //设置点击课程的事件
-        dataBinding.scheduleView.setCourseListener { _, scheduleCourse, location ->
+        dataBinding.scheduleView.setCourseListener { _, scheduleCourse ->
+            Toast.makeText(requireContext(), scheduleCourse.courses[0].name, Toast.LENGTH_SHORT).show()
+        }
 
-        }
-        //如果已经登录
-        if (activityState.isLogin.value == true){
-            mState.loadSchedule()
-        }
 
     }
 
     override fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int) {
-        //如果已经登录
-        if (activityState.isLogin.value == true){
-            mState.loadSchedule()
-        }
         mState.saveTime(schoolYear, schoolTerm, week)
+        //刷新
+        if (activityState.isLogin.value == true){
+            mState.refreshSchedule(schoolYear, schoolTerm)
+            dataBinding.refreshLayout.isRefreshing = true
+        }
     }
 
     companion object {

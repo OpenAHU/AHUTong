@@ -48,8 +48,7 @@ class MineFragment: BaseFragment<FragmentMineBinding>() {
             if (activityState.isLogin.value == true){
                 //注销 (TODO)
             }else {
-                //登录（TODO）
-                Toast.makeText(requireContext(), "登录", Toast.LENGTH_SHORT).show()
+                nav().navigate(R.id.action_home_fragment_to_login_fragment)
             }
         }
         //jump to developer fragment

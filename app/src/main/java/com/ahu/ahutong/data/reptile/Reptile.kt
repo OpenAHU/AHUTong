@@ -7,6 +7,7 @@ import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.data.reptile.utils.DES
 import com.ahu.ahutong.data.reptile.utils.weekdayMap
 import com.google.gson.JsonParser
+import com.sink.library.log.SinkLog
 import kotlinx.coroutines.*
 import org.jsoup.Connection
 import org.jsoup.Jsoup
@@ -19,10 +20,10 @@ import java.util.regex.Pattern
 object Reptile {
     /**
      * 登录
-     * @param user User
+     * @param reptileUser User
      * @return Result<Boolean>
      */
-    private suspend fun login(user: User): Result<Boolean> = withContext(Dispatchers.IO) {
+    suspend fun login(reptileUser: ReptileUser): Result<Boolean> = withContext(Dispatchers.IO) {
         try {
             var response = Jsoup.newSession()
                 .url(Constants.URL_LOGIN_BASE.format(Constants.URL_LOGIN_HOME))
@@ -36,11 +37,11 @@ object Reptile {
             val lt = body.select("#lt").attr("value")
             val execution = body.select("input[name=execution]").attr("value")
             val _eventId = body.select("input[name=_eventId]").attr("value")
-            val rsa = DES().strEnc(user.username + user.password + lt, "1", "2", "3")
+            val rsa = DES().strEnc(reptileUser.username + reptileUser.password + lt, "1", "2", "3")
             val loginData = mapOf(
                 "lt" to lt,
-                "ul" to user.username.length.toString(),
-                "pl" to user.password.length.toString(),
+                "ul" to reptileUser.username.length.toString(),
+                "pl" to reptileUser.password.length.toString(),
                 "rsa" to rsa,
                 "execution" to execution,
                 "_eventId" to _eventId
@@ -70,7 +71,7 @@ object Reptile {
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
             Result.success(true)
         } catch (e: Exception) {
-            e.printStackTrace()
+            SinkLog.e(e.toString())
             Result.failure(e)
         }
     }
@@ -86,17 +87,13 @@ object Reptile {
             return@withContext Result.failure(it)
         }
         try {
-            var response = Jsoup.newSession()
+            val response = Jsoup.newSession()
                 .timeout(ReptileManager.getInstance().timeout)
                 .url("https://jwxt0.ahu.edu.cn/login_cas.aspx")
-                .cookie(
-                    Constants.COOKIE_LOGIN_TICKET,
-                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_LOGIN_TICKET)
-                )
-                .cookie(
-                    Constants.COOKIE_AHU_JESESSIONID,
-                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_AHU_JESESSIONID)
-                )
+                .cookie(Constants.COOKIE_LOGIN_TICKET,
+                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_LOGIN_TICKET))
+                .cookie(Constants.COOKIE_AHU_JESESSIONID,
+                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_AHU_JESESSIONID))
                 .followRedirects(false)
                 .execute()
             val loginUrl = response.header("Location") ?: throw IllegalStateException("Login Failure, Location is null")
@@ -115,7 +112,7 @@ object Reptile {
                 .execute()
             return@withContext Result.success(true)
         } catch (e: Exception) {
-            e.printStackTrace()
+            SinkLog.e(e.toString())
             return@withContext Result.failure(e)
         }
     }
@@ -155,7 +152,7 @@ object Reptile {
             ahuResponse.msg = "OK"
             return@withContext ahuResponse
         } catch (e: Exception) {
-            e.printStackTrace()
+            SinkLog.e(e.toString())
             ahuResponse.data = ""
             ahuResponse.code = 1
             ahuResponse.msg = "获取余额失败"
@@ -242,6 +239,15 @@ object Reptile {
                         }
                         course.setWeekday(weekdayMap.get(matcher.group(1) ?: ""))
                         val times = matcher.group(2)?.split(",") ?: throw IllegalStateException("时间获取失败")
+                        //三节课的最后一节
+                        if (times.size == 1){
+                            val course1 = courses[courses.lastIndex]
+                            if (course1.courseId == course.courseId){
+                                course1.setLength((course1.length + 1).toString())
+                                courses[courses.lastIndex] = course1
+                                continue
+                            }
+                        }
                         course.setStartTime(times[0])
                         course.setLength(times.size.toString())
                         course.setStartWeek(matcher.group(3))
@@ -256,7 +262,7 @@ object Reptile {
                 ahuResponse.code = 0
                 return@withContext ahuResponse
             } catch (e: Exception) {
-                e.printStackTrace()
+                SinkLog.e(e.toString())
                 ahuResponse.data = null
                 ahuResponse.code = 1
                 ahuResponse.msg = "获取课表失败"
@@ -336,7 +342,7 @@ object Reptile {
             ahuResponse.data = exams
             return@withContext ahuResponse
         } catch (e: Exception) {
-            e.printStackTrace()
+            SinkLog.e(e.toString())
             ahuResponse.data = null
             ahuResponse.code = 1
             ahuResponse.msg = "获取考试信息失败"
@@ -460,7 +466,7 @@ object Reptile {
             ahuResponse.code = 0
             return@withContext ahuResponse
         } catch (e: Exception) {
-            e.printStackTrace()
+            SinkLog.e(e.toString())
             ahuResponse.data = null
             ahuResponse.code = 1
             ahuResponse.msg = "获取成绩失败"
@@ -501,6 +507,5 @@ object Reptile {
         //添加数据
         grade.termGradeList.add(termGradeListBean)
     }
-
 
 }
