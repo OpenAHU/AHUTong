@@ -30,9 +30,7 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.recyclerPhone.layoutManager=
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        dataBinding.recyclerPhone.adapter= object : BaseAdapter<Tel,ItemTelBinding>(listOf(Tel(),
-            Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel(),Tel()
-        )) {
+        dataBinding.recyclerPhone.adapter= object : BaseAdapter<Tel,ItemTelBinding>() {
             override fun layout(): Int {
                 return R.layout.item_tel
             }
