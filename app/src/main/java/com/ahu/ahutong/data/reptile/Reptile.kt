@@ -4,14 +4,16 @@ import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.Grade
+import com.ahu.ahutong.data.model.Room
+import com.ahu.ahutong.data.reptile.store.DefaultCookieStore
 import com.ahu.ahutong.data.reptile.utils.DES
+import com.ahu.ahutong.data.reptile.utils.timeMap
 import com.ahu.ahutong.data.reptile.utils.weekdayMap
 import com.google.gson.JsonParser
 import com.sink.library.log.SinkLog
 import kotlinx.coroutines.*
 import org.jsoup.Connection
 import org.jsoup.Jsoup
-import java.lang.IllegalStateException
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.regex.Pattern
@@ -57,7 +59,8 @@ object Reptile {
                 .execute()
             //保存登录的Cookie 『CASTGC』『Language』、『CASPRIVACY』= ""
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
-            val url = response.header("Location") ?: throw IllegalStateException("Login Failure, Location is null")
+            val url = response.header("Location")
+                ?: throw IllegalStateException("Login Failure, Location is null")
             //获取tp_up
             response = Jsoup.newSession()
                 .url(url)
@@ -66,7 +69,8 @@ object Reptile {
                 .followRedirects(false)
                 .execute()
             //检查登录是否成功
-            response.header("Location") ?: throw IllegalStateException("Login Failure, Location is null")
+            response.header("Location")
+                ?: throw IllegalStateException("Login Failure, Location is null")
             //保存『tp_up』
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
             Result.success(true)
@@ -90,25 +94,36 @@ object Reptile {
             val response = Jsoup.newSession()
                 .timeout(ReptileManager.getInstance().timeout)
                 .url("https://jwxt0.ahu.edu.cn/login_cas.aspx")
-                .cookie(Constants.COOKIE_LOGIN_TICKET,
-                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_LOGIN_TICKET))
-                .cookie(Constants.COOKIE_AHU_JESESSIONID,
-                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_AHU_JESESSIONID))
+                .cookie(
+                    Constants.COOKIE_LOGIN_TICKET,
+                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_LOGIN_TICKET)
+                )
+                .cookie(
+                    Constants.COOKIE_AHU_JESESSIONID,
+                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_AHU_JESESSIONID)
+                )
                 .followRedirects(false)
                 .execute()
-            val loginUrl = response.header("Location") ?: throw IllegalStateException("Login Failure, Location is null")
+            val loginUrl = response.header("Location")
+                ?: throw IllegalStateException("Login Failure, Location is null")
             //保存『ASP.NET_SessionId』
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
             Jsoup.newSession()
                 .timeout(ReptileManager.getInstance().timeout)
                 .url(loginUrl)
                 .method(Connection.Method.GET)
-                .cookie(Constants.COOKIE_LOGIN_TICKET,
-                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_LOGIN_TICKET))
-                .cookie(Constants.COOKIE_AHU_JESESSIONID,
-                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_AHU_JESESSIONID))
-                .cookie(Constants.COOKIE_TEACH_SESSION,
-                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_TEACH_SESSION))
+                .cookie(
+                    Constants.COOKIE_LOGIN_TICKET,
+                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_LOGIN_TICKET)
+                )
+                .cookie(
+                    Constants.COOKIE_AHU_JESESSIONID,
+                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_AHU_JESESSIONID)
+                )
+                .cookie(
+                    Constants.COOKIE_TEACH_SESSION,
+                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_TEACH_SESSION)
+                )
                 .execute()
             return@withContext Result.success(true)
         } catch (e: Exception) {
@@ -147,7 +162,8 @@ object Reptile {
             if (response.statusCode() != 200) {
                 throw IllegalStateException(response.statusMessage())
             }
-            ahuResponse.data = JsonParser.parseString(response.body()).asJsonObject.get("KHYE").asString
+            ahuResponse.data =
+                JsonParser.parseString(response.body()).asJsonObject.get("KHYE").asString
             ahuResponse.code = 0
             ahuResponse.msg = "OK"
             return@withContext ahuResponse
@@ -221,7 +237,8 @@ object Reptile {
                     }
                     val tds = tr.select("td")
                     //解析上课时间、weekday、startTime、endTime
-                    for ((courseMsg, location) in tds[8].text().split(";").zip(tds[9].text().split(";"))) {
+                    for ((courseMsg, location) in tds[8].text().split(";")
+                        .zip(tds[9].text().split(";"))) {
                         //创建课程
                         val course = Course()
                         course.courseId = tds[1].text()
@@ -238,11 +255,12 @@ object Reptile {
                             continue
                         }
                         course.setWeekday(weekdayMap.get(matcher.group(1) ?: ""))
-                        val times = matcher.group(2)?.split(",") ?: throw IllegalStateException("时间获取失败")
+                        val times =
+                            matcher.group(2)?.split(",") ?: throw IllegalStateException("时间获取失败")
                         //三节课的最后一节
-                        if (times.size == 1){
+                        if (times.size == 1) {
                             val course1 = courses[courses.lastIndex]
-                            if (course1.courseId == course.courseId){
+                            if (course1.courseId == course.courseId) {
                                 course1.setLength((course1.length + 1).toString())
                                 courses[courses.lastIndex] = course1
                                 continue
@@ -276,79 +294,168 @@ object Reptile {
      * @param schoolTerm String
      * @return AHUResponse<List<Exam>>
      */
-    suspend fun getExam(schoolYear: String, schoolTerm: String): AHUResponse<List<Exam>> = withContext(Dispatchers.IO) {
-        val ahuResponse = AHUResponse<List<Exam>>()
-        async {
-            loginTeachSystem()
-        }.await().onFailure {
-            ahuResponse.data = null
-            ahuResponse.code = 1
-            ahuResponse.msg = "教务登录失败"
-            return@withContext ahuResponse
+    suspend fun getExam(schoolYear: String, schoolTerm: String): AHUResponse<List<Exam>> =
+        withContext(Dispatchers.IO) {
+            val ahuResponse = AHUResponse<List<Exam>>()
+            async {
+                loginTeachSystem()
+            }.await().onFailure {
+                ahuResponse.data = null
+                ahuResponse.code = 1
+                ahuResponse.msg = "教务登录失败"
+                return@withContext ahuResponse
+            }
+            try {
+                var body = Jsoup.newSession()
+                    .url(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
+                    .timeout(ReptileManager.getInstance().timeout)
+                    .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
+                    .cookie(
+                        Constants.COOKIE_TEACH_SESSION,
+                        ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_TEACH_SESSION)
+                    )
+                    .get().body()
+                val year = body.select("#xnd>option[selected=selected]").attr("value")
+                val term = body.select("#xqd>option[selected=selected]").attr("value")
+                //切换学期
+                if (!year.equals(schoolYear) || !term.equals(schoolTerm)) {
+                    val __VIEWSTATE = body.select("#__VIEWSTATE").attr("value")
+                    val __VIEWSTATEGENERATOR = body.select("#__VIEWSTATEGENERATOR").attr("value")
+                    val data = mapOf(
+                        "__EVENTTARGET" to "",
+                        "__EVENTARGUMENT" to "",
+                        "__LASTFOCUS" to "",
+                        "__VIEWSTATE" to __VIEWSTATE,
+                        "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
+                        "xnd" to schoolYear,
+                        "xqd" to schoolTerm
+                    )
+                    body = Jsoup.newSession()
+                        .url(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
+                        .timeout(ReptileManager.getInstance().timeout)
+                        .referrer(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
+                        .cookie(
+                            Constants.COOKIE_TEACH_SESSION,
+                            ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_TEACH_SESSION)
+                        )
+                        .data(data)
+                        .post().body()
+                }
+                //解析html
+                val table = body.select("#DataGrid1").select("tr")
+                val exams = mutableListOf<Exam>()
+                for (tr in table) {
+                    if (tr.hasClass("datelisthead")) {
+                        continue
+                    }
+                    val exam = Exam()
+                    val tds = tr.select("td")
+                    exam.course = tds[1].text()
+                    exam.time = tds[3].text()
+                    exam.location = tds[4].text()
+                    exam.seatNum = tds[6].text()
+                    exams.add(exam)
+                }
+                ahuResponse.msg = "OK"
+                ahuResponse.code = 0
+                ahuResponse.data = exams
+                return@withContext ahuResponse
+            } catch (e: Exception) {
+                SinkLog.e(e.toString())
+                ahuResponse.data = null
+                ahuResponse.code = 1
+                ahuResponse.msg = "获取考试信息失败"
+                return@withContext ahuResponse
+            }
         }
-        try {
-            var body = Jsoup.newSession()
-                .url(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
-                .timeout(ReptileManager.getInstance().timeout)
-                .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
-                .cookie(
-                    Constants.COOKIE_TEACH_SESSION,
-                    ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_TEACH_SESSION)
-                )
-                .get().body()
-            val year = body.select("#xnd>option[selected=selected]").attr("value")
-            val term = body.select("#xqd>option[selected=selected]").attr("value")
-            //切换学期
-            if (!year.equals(schoolYear) || !term.equals(schoolTerm)) {
+
+
+    /**
+     * 获取空教室
+     * @param campus String
+     * @param weekday String
+     * @param weekNum String
+     * @param time String
+     * @return AHUResponse<List<Room>>
+     */
+    suspend fun getEmptyRoom(campus: String, weekday: String, weekNum: String, time: String): AHUResponse<List<Room>> =
+        withContext(Dispatchers.IO) {
+            val ahuResponse = AHUResponse<List<Room>>()
+            async {
+                loginTeachSystem()
+            }.await().onFailure {
+                ahuResponse.data = null
+                ahuResponse.code = 1
+                ahuResponse.msg = "教务登录失败"
+                return@withContext ahuResponse
+            }
+            try {
+                var body = Jsoup.newSession()
+                    .url(Constants.URL_TEACH_ROOM.format(ReptileManager.getInstance().currentUser.username))
+                    .timeout(ReptileManager.getInstance().timeout)
+                    .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
+                    .cookie(
+                        Constants.COOKIE_TEACH_SESSION,
+                        ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_TEACH_SESSION)
+                    )
+                    .get().body()
+                val kssj = weekday + weekNum
+                val sjd = timeMap[time] ?: "'10'|'1','3','5','7','9','0','0','0','0'"
+
                 val __VIEWSTATE = body.select("#__VIEWSTATE").attr("value")
                 val __VIEWSTATEGENERATOR = body.select("#__VIEWSTATEGENERATOR").attr("value")
                 val data = mapOf(
-                    "__EVENTTARGET" to "",
-                    "__EVENTARGUMENT" to "",
-                    "__LASTFOCUS" to "",
                     "__VIEWSTATE" to __VIEWSTATE,
                     "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
-                    "xnd" to schoolYear,
-                    "xqd" to schoolTerm
+                    "xiaoq" to campus,
+                    "jslb" to "",
+                    "min_zws" to "0",
+                    "max_zws" to "",
+                    "kssj" to kssj,
+                    "jssj" to kssj,
+                    "xqj" to weekday,
+                    "ddlDsz" to "单",
+                    "sjd" to sjd,
+                    "Button2" to "空教室查询"
                 )
                 body = Jsoup.newSession()
-                    .url(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
+                    .url(Constants.URL_TEACH_ROOM.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
-                    .referrer(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
+                    .referrer(Constants.URL_TEACH_ROOM.format(ReptileManager.getInstance().currentUser.username))
                     .cookie(
                         Constants.COOKIE_TEACH_SESSION,
                         ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_TEACH_SESSION)
                     )
                     .data(data)
                     .post().body()
-            }
-            //解析html
-            val table = body.select("#DataGrid1").select("tr")
-            val exams = mutableListOf<Exam>()
-            for (tr in table) {
-                if (tr.hasClass("datelisthead")) {
-                    continue
+
+                //解析html
+                val table = body.select("#DataGrid1").select("tr")
+                val rooms = mutableListOf<Room>()
+                for (tr in table) {
+                    if (tr.hasClass("datelisthead")) {
+                        continue
+                    }
+                    val room = Room()
+                    val tds = tr.select("td")
+                    room.pos = tds[1].text()
+                    room.seating = tds[4].text()
+                    rooms.add(room)
                 }
-                val exam = Exam()
-                val tds = tr.select("td")
-                exam.course = tds[1].text()
-                exam.time = tds[3].text()
-                exam.location = tds[4].text()
-                exam.seatNum = tds[6].text()
-                exams.add(exam)
+                ahuResponse.msg = "OK"
+                ahuResponse.code = 0
+                ahuResponse.data = rooms
+                return@withContext ahuResponse
+            } catch (e: Exception) {
+                e.printStackTrace()
+//                SinkLog.e(e.toString())
+                ahuResponse.data = null
+                ahuResponse.code = 1
+                ahuResponse.msg = "获取空教室信息失败"
+                return@withContext ahuResponse
             }
-            ahuResponse.msg = "OK"
-            ahuResponse.code = 0
-            ahuResponse.data = exams
-            return@withContext ahuResponse
-        } catch (e: Exception) {
-            SinkLog.e(e.toString())
-            ahuResponse.data = null
-            ahuResponse.code = 1
-            ahuResponse.msg = "获取考试信息失败"
-            return@withContext ahuResponse
+
         }
-    }
 
     /**
      * 获取成绩
@@ -427,7 +534,8 @@ object Reptile {
                             schoolYear,
                             schoolTerm,
                             gradeList,
-                            grade)
+                            grade
+                        )
                         //0
                         termTotalCredit = 0.0
                         termTotalGradePoint = 0.0

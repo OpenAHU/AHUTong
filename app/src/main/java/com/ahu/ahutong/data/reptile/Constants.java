@@ -12,6 +12,7 @@ public class Constants {
     public final static String URL_TEACH_EXAM = URL_TEACH_SYSTEM + "/xskscx.aspx?xh=%s&gnmkdm=N121604";
     public final static String URL_TEACH_MAIN = URL_TEACH_SYSTEM + "/xs_main.aspx?xh=%s&type=1";
     public final static String URL_TEACH_GRADE = URL_TEACH_SYSTEM + "/xscj_gc2.aspx?xh=%s&gnmkdm=N121605";
+    public final static String URL_TEACH_ROOM = URL_TEACH_SYSTEM + "/xxjsjy.aspx?xh=%s&gnmkdm=N121611";
 
     public final static String COOKIE_NAME_AHU = "tp_up";
     public final static String COOKIE_LOGIN_TICKET = "CASTGC";

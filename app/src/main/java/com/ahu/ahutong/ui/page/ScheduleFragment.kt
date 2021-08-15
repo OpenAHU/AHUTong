@@ -26,10 +26,10 @@ import java.util.*
  */
 class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDialog.CallBack {
     private lateinit var mState: ScheduleViewModel
-    private lateinit var activityState: MainViewModel
+    private lateinit var gState: MainViewModel
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(ScheduleViewModel::class.java)
-        activityState = getActivityScopeViewModel(MainViewModel::class.java)
+        gState = getActivityScopeViewModel(MainViewModel::class.java)
     }
 
     override fun getDataBindingConfig(): DataBindingConfig {
@@ -37,7 +37,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
     }
 
     override fun observeData() {
-        activityState.isLogin.observe(this) {
+        gState.isLogin.observe(this) {
             if (it) {
                 mState.refreshSchedule()
                 dataBinding.refreshLayout.isRefreshing = true
@@ -147,7 +147,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
     override fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int) {
         mState.saveTime(schoolYear, schoolTerm, week)
         //刷新
-        if (activityState.isLogin.value == true) {
+        if (gState.isLogin.value == true) {
             mState.refreshSchedule(schoolYear, schoolTerm)
             dataBinding.refreshLayout.isRefreshing = true
         }
