@@ -7,9 +7,7 @@
         <variable
             name="proxy"
             type="com.ahu.ahutong.ui.page.GradleFragment.ClickProxy" />
-<!--        <variable-->
-<!--            name="state"-->
-<!--            type="com.ahu.tong.ui.fragment.grade.GradeViewModel" />-->
+
     </data>
 
     <LinearLayout
