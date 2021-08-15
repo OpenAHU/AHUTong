@@ -48,6 +48,7 @@
         <entry key="app/src/main/res/layout/item_exam.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/item_grade.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/item_grid.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/item_pop_course.xml" value="0.67" />
         <entry key="app/src/main/res/layout/item_schdule_course.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_schedule_header.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_sector.xml" value="0.35104166666666664" />

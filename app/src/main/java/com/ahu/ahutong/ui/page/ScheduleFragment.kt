@@ -2,16 +2,21 @@ package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.Toast
+import androidx.core.widget.NestedScrollView
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentScheduleBinding
+import com.ahu.ahutong.databinding.ItemPopCourseBinding
 import com.ahu.ahutong.ui.dialog.SettingTimeDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
-import com.sink.library.log.SinkLog
+import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleCourse
 import java.util.*
 
 /**
@@ -32,8 +37,8 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
     }
 
     override fun observeData() {
-        activityState.isLogin.observe(this){
-            if (it){
+        activityState.isLogin.observe(this) {
+            if (it) {
                 mState.refreshSchedule()
                 dataBinding.refreshLayout.isRefreshing = true
             }
@@ -52,19 +57,19 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             dataBinding.refreshLayout.isRefreshing = false
         }
         //第几周
-        mState.week.observe(this){
+        mState.week.observe(this) {
             dataBinding.scheduleView
                 .date(it, Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK])
                 .loadSchedule()
         }
         //开学时间
-        mState.startTime.observe(this){
+        mState.startTime.observe(this) {
             dataBinding.scheduleView
                 .startTime(it)
                 .loadSchedule()
         }
         //是否显示非本周
-        mState.isShowAllCourse.observe(this){
+        mState.isShowAllCourse.observe(this) {
             dataBinding.scheduleView
                 .showAllCourse(it)
                 .loadSchedule()
@@ -95,17 +100,54 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             ).show()
         }
         //设置点击课程的事件
-        dataBinding.scheduleView.setCourseListener { _, scheduleCourse ->
-            Toast.makeText(requireContext(), scheduleCourse.courses[0].name, Toast.LENGTH_SHORT).show()
+
+        dataBinding.scheduleView.setCourseListener { v, scheduleCourse ->
+            val popupWindow = PopupWindow(v, ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, true)
+            popupWindow.animationStyle = R.style.pop_anim_style
+            popupWindow.contentView = getPopupView(scheduleCourse)
+            popupWindow.isTouchable = true
+            popupWindow.isOutsideTouchable = true
+            popupWindow.showAsDropDown(v)
+
         }
 
 
     }
 
+    /**
+     * 创建课程详情界面
+     * @param scheduleCourse ScheduleCourse
+     * @return NestedScrollView
+     */
+    private fun getPopupView(scheduleCourse: ScheduleCourse): NestedScrollView {
+                //创建课程视图的父容器
+        val li = LinearLayout(context)
+        li.orientation = LinearLayout.VERTICAL
+        li.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        //填入课程视图
+        for (course in scheduleCourse.courses) {
+            val binding = ItemPopCourseBinding.inflate(layoutInflater)
+            binding.course = course
+            val layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            layoutParams.bottomMargin = 10
+            binding.root.layoutParams = layoutParams
+            li.addView(binding.root)
+        }
+        val nestedScrollView = NestedScrollView(requireContext())
+        nestedScrollView.addView(li)
+        return nestedScrollView
+    }
+
     override fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int) {
         mState.saveTime(schoolYear, schoolTerm, week)
         //刷新
-        if (activityState.isLogin.value == true){
+        if (activityState.isLogin.value == true) {
             mState.refreshSchedule(schoolYear, schoolTerm)
             dataBinding.refreshLayout.isRefreshing = true
         }
