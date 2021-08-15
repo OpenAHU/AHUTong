@@ -11,6 +11,9 @@ import com.ahu.ahutong.databinding.FragmentGradleBinding
 import com.ahu.ahutong.ui.page.state.ExamViewModel
 import com.ahu.ahutong.ui.page.state.GradleViewModel
 
+/**
+ * 成绩单
+ */
 class GradleFragment: BaseFragment<FragmentGradleBinding>() {
     private lateinit var mState: GradleViewModel
     override fun initViewModel() {
