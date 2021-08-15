@@ -55,4 +55,7 @@
         tools:layout="@layout/fragment_login"
         android:id="@+id/login_fragment"
         android:name="com.ahu.ahutong.ui.page.LoginFragment"/>
+    <fragment
+        android:id="@+id/setting_fragment"
+        android:name="com.ahu.ahutong.ui.page.SettingFragment"/>
 </navigation>

@@ -7,6 +7,7 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.databinding.FragmentLoginBinding
 import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
@@ -50,6 +51,14 @@ class LoginFragment: BaseFragment<FragmentLoginBinding>() {
                 dataBinding.emoji.close()
             }else {
                 dataBinding.emoji.open()
+            }
+        }
+        arguments?.let {
+            val type = it.getString("type")
+            mState.loginType = when(type){
+                "1" -> User.UserType.AHU_Teach
+                "2" -> User.UserType.AHU_Wisdom
+                else -> User.UserType.AHU_LOCAL
             }
         }
 

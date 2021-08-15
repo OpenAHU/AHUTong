@@ -21,6 +21,13 @@ object AHUCache {
     private val kv: MMKV = MMKV.mmkvWithID("ahu")
 
     /**
+     * 清除全部数据
+     */
+    fun clearAll(){
+        kv.clearAll()
+    }
+
+    /**
      * 保存本地User对象
      * @param user User
      */
@@ -204,6 +211,14 @@ object AHUCache {
      */
     fun isShowAllCourse(): Boolean {
         return kv.getBoolean("isShowAllCourse", false)
+    }
+
+    /**
+     * 保存是否显示非本周课程
+     * @param isCourse Boolean
+     */
+    fun saveIsShowAllCourse(isCourse: Boolean){
+        kv.putBoolean("isShowAllCourse", isCourse)
     }
 
     /**

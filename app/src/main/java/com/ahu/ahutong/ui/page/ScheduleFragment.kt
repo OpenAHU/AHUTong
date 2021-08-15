@@ -38,7 +38,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
 
     override fun observeData() {
         gState.isLogin.observe(this) {
-            if (it) {
+            if (it && !(mState.schoolTerm.isEmpty() || mState.schoolYear.isEmpty())) {
                 mState.refreshSchedule()
                 dataBinding.refreshLayout.isRefreshing = true
             }
@@ -76,14 +76,18 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onResume() {
+        super.onResume()
         if (mState.schoolTerm.isEmpty() || mState.schoolYear.isEmpty()) {
             //如果没有设定学年学期，开启设置
             val settingTimeDialog = SettingTimeDialog()
             settingTimeDialog.setCallBack(this)
             settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
         }
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         //加载数据
         dataBinding.scheduleView
             .showAllCourse(mState.isShowAllCourse.value ?: false)

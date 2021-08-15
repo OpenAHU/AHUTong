@@ -59,6 +59,7 @@
         <entry key="app/src/main/res/layout/layout_schedule.xml" value="0.25" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.36666666666666664" />
         <entry key="app/src/main/res/xml/network_config.xml" value="0.1" />
+        <entry key="app/src/main/res/xml/prefernce_setting.xml" value="0.33" />
       </map>
     </option>
   </component>

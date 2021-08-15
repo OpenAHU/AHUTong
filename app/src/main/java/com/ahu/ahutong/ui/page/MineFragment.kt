@@ -57,7 +57,7 @@ class MineFragment: BaseFragment<FragmentMineBinding>() {
         }
         //jump to setting fragment
         fun setting(view: View){
-
+            nav().navigate(R.id.setting_fragment)
         }
 
 

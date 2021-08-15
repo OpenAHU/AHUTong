@@ -447,8 +447,7 @@ object Reptile {
                 ahuResponse.data = rooms
                 return@withContext ahuResponse
             } catch (e: Exception) {
-                e.printStackTrace()
-//                SinkLog.e(e.toString())
+                SinkLog.e(e.toString())
                 ahuResponse.data = null
                 ahuResponse.code = 1
                 ahuResponse.msg = "获取空教室信息失败"

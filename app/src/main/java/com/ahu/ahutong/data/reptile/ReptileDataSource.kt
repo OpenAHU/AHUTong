@@ -43,11 +43,7 @@ class ReptileDataSource(user: ReptileUser): BaseDataSource {
         weekNum: String,
         time: String
     ): AHUResponse<List<Room>> {
-        //TODO
-        withContext(Dispatchers.Main){
-            Toast.makeText(Utils.getApp(), "本地爬虫暂不支持此项功能！", Toast.LENGTH_SHORT).show()
-        }
-       return AHUResponse()
+       return Reptile.getEmptyRoom(campus, weekday, weekNum, time)
     }
 
     override suspend fun getGrade(): AHUResponse<Grade> {

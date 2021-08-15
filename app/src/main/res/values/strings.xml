@@ -24,7 +24,6 @@
     <string name="setting_diy_theme">自定义主题</string>
     <string name="setting_show_all">显示非本周课程</string>
     <string name="setting_clear">清除缓存</string>
-    <string name="setting_show_other">显示讲座信息</string>
     <string name="license">开源协议</string>
     <string name="login">认证</string>
     <string name="hint_userid">请输入您的学号</string>
