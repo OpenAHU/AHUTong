@@ -24,6 +24,7 @@ public class ClassWidget extends AppWidgetProvider {
      * @return 布局
      */
     public static RemoteViews Update(Context context) {
+        Tuke.init(context);
         // 获取AppWidget对应的视图
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.layout_widget);
 
@@ -38,7 +39,7 @@ public class ClassWidget extends AppWidgetProvider {
 
         PendingIntent rootIntent = PendingIntent.getActivity(context, 0, intent, FLAG_ONE_SHOT);
         remoteViews.setOnClickPendingIntent(R.id.widget_root, rootIntent);
-        int num = Tuke.get("num");
+        int num = Tuke.get("num",0);
         remoteViews.setTextViewText(R.id.widget_class, num + "节课");
         remoteViews.setTextViewText(R.id.widget_date, getWeekOfDate());
         if (WidgetListService.service!=null)
