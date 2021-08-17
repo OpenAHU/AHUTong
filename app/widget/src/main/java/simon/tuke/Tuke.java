@@ -18,12 +18,12 @@ public class Tuke
 	private static OnException error=new OnException() {
 		@Override
 		public void onIOError(IOException e) {
-			Log.e("tuke1",e.toString());
+			Log.e("Tuke:IOException:",e.toString());
 		}
 
 		@Override
 		public void onClassNFError(ClassNotFoundException e) {
-			Log.e("tuke2",e.toString());
+			Log.e("Tuke:ClassNotFoundException:",e.toString());
 		}
 	};
 	
@@ -34,6 +34,7 @@ public class Tuke
 
     public static void init(String name, String path)
 	{
+		if (disk!=null)return;
 		disk = new DiskCache(name, path);
 	}
 	public static void setException(OnException in)
