@@ -1,6 +1,7 @@
 package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
@@ -27,6 +28,8 @@ class GradleFragment: BaseFragment<FragmentGradleBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+      Log.e("test",dataBinding.spSchoolYear.javaClass.name);
+    //虽然布局里不是appcompat，但实际上继承appcompatactivity的活动会使用代理工厂，让他变成appcompat的spinner
     }
 
 

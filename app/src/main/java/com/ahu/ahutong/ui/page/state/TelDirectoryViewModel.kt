@@ -6,7 +6,6 @@ import com.ahu.ahutong.data.model.Developer
 import com.ahu.ahutong.data.model.Tel
 
 class TelDirectoryViewModel : ViewModel() {
-    val type =  MutableLiveData("常用")
     companion object{
         val TelBook by lazy {
             mapOf(
