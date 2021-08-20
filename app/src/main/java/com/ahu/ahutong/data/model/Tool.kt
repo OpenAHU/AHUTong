@@ -15,7 +15,7 @@ data class Tool(val title: String,val resID: Int,val action: Int, ){
             Tool("浴室开放", R.mipmap.bathroom, R.id.bathroom_fragment),
             //Tool("挂科率", R.mipmap.guakelv, R.id.fragment_pass),
             Tool("电话簿", R.mipmap.telephone_directory, R.id.teldirectory_fragment),
-            Tool("垃圾分类", R.mipmap.rubbish, R.id.developer_fragment),
+            Tool("垃圾分类", R.mipmap.rubbish, R.id.garbage_fragment),
           //  Tool("更多", R.mipmap.more, R.id.more_fragment),
         )
 
