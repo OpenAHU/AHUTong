@@ -1,19 +1,21 @@
 package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.BaseAdapter
+import arch.sink.ui.page.BaseFragment
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.model.Developer
+import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.data.model.Rubbish
 import com.ahu.ahutong.databinding.FragmentGarbageBinding
-import com.ahu.ahutong.databinding.ItemDeveloperBinding
+import com.ahu.ahutong.databinding.ItemRubbishBinding
 import com.ahu.ahutong.ui.page.state.GarbageViewModel
+import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 
 /**
  * API: https://api.tianapi.com/txapi/lajifenlei/?key=367f6d1bd8e7cacbb14485af77f1ed6b&word=
@@ -33,6 +35,19 @@ class GarbageFragment : BaseFragment<FragmentGarbageBinding>() {
         super.onViewCreated(view, savedInstanceState)
         ClickProxy().refresh()
         dataBinding.rvResult.layoutManager=LinearLayoutManager(context,RecyclerView.VERTICAL,false)
+        /**
+         * 不懂如何使用T_T，这个页面等你写吧
+         */
+//        dataBinding.rvResult.adapter= object : BaseAdapter<Rubbish,ItemRubbishBinding> (mState.liveData.value?.getOrNull()!!) {
+//
+//            override fun layout(): Int {
+//               return R.layout.item_rubbish
+//            }
+//
+//            override fun bindingData(binding: ItemRubbishBinding, data: Rubbish) {
+//                binding.bean=data
+//            }
+//        }
     }
 
 

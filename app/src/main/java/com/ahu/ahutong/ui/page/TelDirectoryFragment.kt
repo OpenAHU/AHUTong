@@ -1,13 +1,11 @@
 package com.ahu.ahutong.ui.page
 
-import android.R.attr.phoneNumber
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.RadioButton
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
