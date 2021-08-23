@@ -32,6 +32,7 @@ class DiscoveryFragment: BaseFragment<FragmentDiscoveryBinding>() {
         return DataBindingConfig(R.layout.fragment_discovery, BR.state, mState)
     }
 
+
     override fun observeData() {
         mState.bannerData.observe(this, {
             val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
@@ -41,6 +42,7 @@ class DiscoveryFragment: BaseFragment<FragmentDiscoveryBinding>() {
             val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
             adapter.setNews(it)
         })
+
         val a = News()
         a.releaseTime = "2021.8.5"
         a.author = "Simon"

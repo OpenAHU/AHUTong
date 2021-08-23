@@ -5,8 +5,11 @@
 
     <data>
         <variable
+            name="state"
+            type="com.ahu.ahutong.ui.page.state.GradeViewModel" />
+        <variable
             name="proxy"
-            type="com.ahu.ahutong.ui.page.GradleFragment.ClickProxy" />
+            type="com.ahu.ahutong.ui.page.GradeFragment.ClickProxy" />
 
     </data>
 
@@ -58,11 +61,11 @@
                         android:layout_marginStart="20dp"
                         android:text="@string/schoolYear" />
 
-                    <Spinner
+                    <androidx.appcompat.widget.AppCompatSpinner
                         android:id="@+id/sp_schoolYear"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         tools:ignore="SpeakableTextPresentCheck" />
 
                     <TextView
@@ -71,7 +74,7 @@
                         android:layout_marginStart="20dp"
                         android:text="@string/term" />
 
-                    <Spinner
+                    <androidx.appcompat.widget.AppCompatSpinner
                         android:id="@+id/sp_term"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -105,6 +108,7 @@
                         app:layout_constraintEnd_toEndOf="@+id/tv_term"
                         app:layout_constraintStart_toStartOf="@+id/tv_term"
                         app:layout_constraintTop_toBottomOf="@+id/tv_term"
+                        android:text="@{state.termGradePointAverage}"
                         tools:text="4.0" />
 
                     <View
@@ -126,13 +130,15 @@
                         app:layout_constraintHorizontal_bias="0.3"
                         app:layout_constraintStart_toEndOf="@id/barrier"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:text="全程绩点：" />
+                        tools:text="全程绩点："
+                        android:text="@{`全程绩点：` + state.totalGradePointAverage}"/>
 
                     <TextView
                         android:id="@+id/schoolYear_grade"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        tools:text="学期绩点： "
+                        tools:text="学年绩点： "
+                        android:text="@{`学年绩点：` + state.yearGradePointAverage}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="@+id/total_grade"
                         app:layout_constraintTop_toBottomOf="@+id/total_grade" />

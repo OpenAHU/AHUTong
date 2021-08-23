@@ -56,9 +56,9 @@
         android:id="@+id/exam_fragment"
         android:name="com.ahu.ahutong.ui.page.ExamFragment"/>
     <fragment
-        tools:layout="@layout/fragment_gradle"
+        tools:layout="@layout/fragment_grade"
         android:id="@+id/gradle_fragment"
-        android:name="com.ahu.ahutong.ui.page.GradleFragment"/>
+        android:name="com.ahu.ahutong.ui.page.GradeFragment"/>
     <fragment
         tools:layout="@layout/fragment_garbage"
         android:id="@+id/garbage_fragment"

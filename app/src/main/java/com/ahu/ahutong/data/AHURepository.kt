@@ -232,7 +232,7 @@ object AHURepository {
             if (!isRefresh) {
                 val localData = AHUCache.getExamInfo().orEmpty()
                 if (localData.isNotEmpty()) {
-                    return@withContext localData
+                    return@withContext Result.success(localData)
                 }
             }
             //从网络上获取数据
@@ -262,7 +262,8 @@ object AHURepository {
      * @param time String
      */
     private fun checkRoomArgs(campus: String, weekday: String, time: String) {
-        SinkLog.i("check argument start")
+
+        SinkLog.i("check argument start $time")
         if (!campus.isCampus()) {
             throw IllegalArgumentException("campus must be 1 or 2")
         }

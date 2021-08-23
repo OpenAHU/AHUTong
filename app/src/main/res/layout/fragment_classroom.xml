@@ -75,6 +75,7 @@
             android:layout_height="wrap_content"
             android:paddingHorizontal="50dp"
             android:layout_marginVertical="10dp"
+            android:onClick="@{(thisView) -> proxy.search()}"
             android:text="@string/require"/>
 
         <androidx.cardview.widget.CardView

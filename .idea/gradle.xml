@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/arch" />
             <option value="$PROJECT_DIR$/library" />
             <option value="$PROJECT_DIR$/simonlibrary" />
+            <option value="$PROJECT_DIR$/widget" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

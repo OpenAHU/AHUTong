@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <TextView
-                android:text='@{"科目" + grade.course}'
+                android:text='@{"科目：" + grade.course}'
                 tools:text="科目：高等数学"
                 android:textSize="15sp"
                 android:textStyle="bold"

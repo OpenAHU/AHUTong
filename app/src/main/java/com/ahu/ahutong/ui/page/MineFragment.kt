@@ -46,7 +46,7 @@ class MineFragment: BaseFragment<FragmentMineBinding>() {
         //login or logout
         fun login(view: View){
             if (activityState.isLogin.value == true){
-                //注销 (TODO)
+                activityState.logout()
             }else {
                 nav().navigate(R.id.action_home_fragment_to_login_fragment)
             }

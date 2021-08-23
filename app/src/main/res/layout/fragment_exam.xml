@@ -3,11 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <variable
+            name="state"
+            type="com.ahu.ahutong.ui.page.state.ExamViewModel" />
 
         <variable
             name="proxy"
             type="com.ahu.ahutong.ui.page.ExamFragment.ClickProxy" />
-
+        <import type="android.view.View"
+            alias="view"/>
     </data>
 
     <LinearLayout
@@ -48,6 +52,7 @@
                     android:src="@mipmap/exam" />
 
                 <androidx.cardview.widget.CardView
+                    android:visibility="@{state.size > 0 ? view.GONE : view.VISIBLE}"
                     android:id="@+id/card_tip"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"

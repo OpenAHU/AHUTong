@@ -5,6 +5,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.RadioButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
@@ -14,6 +16,7 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Tel
 import com.ahu.ahutong.databinding.FragmentTeldirectoryBinding
 import com.ahu.ahutong.databinding.ItemTelBinding
+import com.ahu.ahutong.ext.dp
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.page.state.TelDirectoryViewModel
 
@@ -32,11 +35,17 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         for ((index, types) in TelDirectoryViewModel.TelBook.keys.withIndex()) {
-            val Btnview =
+            val radioButton =
                 LayoutInflater.from(context).inflate(R.layout.item_type, null, false) as RadioButton
-            Btnview.text = types;
-            Btnview.id = index;
-            dataBinding.recyclerType.addView(Btnview)
+            val layoutParams = LinearLayout.LayoutParams(-1, -2)
+            layoutParams.marginStart = 10.dp.toInt()
+            layoutParams.marginEnd = 10.dp.toInt()
+            layoutParams.topMargin = 5.dp.toInt()
+            layoutParams.bottomMargin = 5.dp.toInt()
+            radioButton.layoutParams = layoutParams
+            radioButton.text = types;
+            radioButton.id = index;
+            dataBinding.recyclerType.addView(radioButton)
         }
         dataBinding.recyclerTel.layoutManager =
             LinearLayoutManager(context)

@@ -20,7 +20,7 @@ public class WidgetListService extends RemoteViewsService {
 
     @Override
     public void onCreate() {
-        service=this;
+        service = this;
         super.onCreate();
     }
 
@@ -34,7 +34,7 @@ public class WidgetListService extends RemoteViewsService {
         private Context context;
 
         public ListRemoteViewsFactory(Context context) {
-            Tuke.init(this.context=context);
+            Tuke.init(this.context = context);
         }
 
         @Override
@@ -45,24 +45,29 @@ public class WidgetListService extends RemoteViewsService {
             ArrayList<WidgetBean> am = Tuke.get("am", new ArrayList<WidgetBean>());
             mData.addAll(am);
 
-            if (am.size() == 0)
+            if (am.size() == 0) {
                 mData.add(new WidgetBean("空闲", "无课表", R.layout.item_widget_content, false));
+            }
+
 
             WidgetBean widgetBean1 = new WidgetBean("下午", null, R.layout.item_widget_head, false);
             mData.add(widgetBean1);
             ArrayList<WidgetBean> pm = Tuke.get("pm", new ArrayList<WidgetBean>());
             mData.addAll(pm);
 
-            if (am.size() == 0)
+            if (am.size() == 0) {
                 mData.add(new WidgetBean("空闲", "无课表", R.layout.item_widget_content, false));
+            }
+
 
             WidgetBean widgetBean2 = new WidgetBean("晚上", null, R.layout.item_widget_head, false);
             mData.add(widgetBean2);
             ArrayList<WidgetBean> ppm = Tuke.get("ppm", new ArrayList<WidgetBean>());
             mData.addAll(ppm);
 
-            if (am.size() == 0)
+            if (am.size() == 0) {
                 mData.add(new WidgetBean("空闲", "无课表", R.layout.item_widget_content, false));
+            }
 
         }
 

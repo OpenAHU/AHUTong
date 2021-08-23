@@ -4,8 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ahu.ahutong.data.model.Rubbish
 
-class GarbageViewModel :ViewModel() {
-    val liveData=MutableLiveData<Result<List<Rubbish>>>()
+class GarbageViewModel : ViewModel() {
+    val liveData = MutableLiveData<Result<List<Rubbish>>>()
     val random = listOf(
         "纸巾",
         "垃圾袋",

@@ -1,8 +1,6 @@
 package com.ahu.ahutong.ui.dialog
 
 import android.app.Dialog
-import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.databinding.DataBindingUtil
@@ -31,7 +29,7 @@ class ClassRoomDialog(private val campusIndex: Int, private val timesIndex: Int)
             pickerCampus.defaultStyle()
             pickerTime.defaultStyle()
             pickerCampus.setDisplayedValuesAndPickedIndex(
-                ClassRoomViewModel.campus.toTypedArray(),
+                ClassRoomViewModel.campuses.toTypedArray(),
                 campusIndex,
                 false
             )
