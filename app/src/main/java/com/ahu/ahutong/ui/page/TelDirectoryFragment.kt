@@ -38,10 +38,10 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
             val radioButton =
                 LayoutInflater.from(context).inflate(R.layout.item_type, null, false) as RadioButton
             val layoutParams = LinearLayout.LayoutParams(-1, -2)
-            layoutParams.marginStart = 10.dp.toInt()
-            layoutParams.marginEnd = 10.dp.toInt()
-            layoutParams.topMargin = 5.dp.toInt()
-            layoutParams.bottomMargin = 5.dp.toInt()
+            layoutParams.marginStart = 20.dp.toInt()
+            layoutParams.marginEnd = 20.dp.toInt()
+            layoutParams.topMargin = 10.dp.toInt()
+            layoutParams.bottomMargin = 10.dp.toInt()
             radioButton.layoutParams = layoutParams
             radioButton.text = types;
             radioButton.id = index;
