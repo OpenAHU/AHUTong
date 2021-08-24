@@ -1,11 +1,10 @@
 package com.ahu.ahutong.widget;
 
+import static java.util.Comparator.comparing;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
@@ -21,12 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import static java.util.Comparator.comparing;
+import java.util.Locale;
 
 
 public class WidgetListService extends RemoteViewsService {
@@ -67,7 +62,7 @@ public class WidgetListService extends RemoteViewsService {
             List<Course> am = new ArrayList<>(2);
             List<Course> pm = new ArrayList<>(2);
             List<Course> ppm = new ArrayList<>(1);
-            if (courses != null)
+            if (courses != null) {
                 for (Course course : courses) {
                     if (course.getWeekday() == thisWeek) {
                         int startTime = course.getStartTime();
@@ -81,6 +76,7 @@ public class WidgetListService extends RemoteViewsService {
                         }
                     }
                 }
+            }
             addToData(am, pm, ppm);
         }
 
@@ -91,14 +87,19 @@ public class WidgetListService extends RemoteViewsService {
                 List<Course> list = lists[i];
                 mData.add(times[i]);
                 list.sort(comparing(Course::getStartTime));
-                if (list.size() == 0)
+                if (list.size() == 0) {
                     mData.add(true);
-                else mData.addAll(list);
+                } else {
+                    mData.addAll(list);
+                }
             }
         }
 
         @Override
         public void onDataSetChanged() {
+            mData.clear();
+            onCreate();
+
         }
 
         @Override
@@ -119,7 +120,6 @@ public class WidgetListService extends RemoteViewsService {
         如果遇到数据错乱，千万不要手写缓存机制，因为这样没有任何的作用
         正确解决方法是：处理使用相同布局但功能不同的RemoteViews时，要保证setXXX方法在各种类型处理中都写一次
          */
-        @SuppressLint("SimpleDateFormat")
         @Override
         public RemoteViews getViewAt(int position) {
             RemoteViews back = null;
@@ -145,18 +145,18 @@ public class WidgetListService extends RemoteViewsService {
                     times += "-" + endTime + "节";
                 }
                 back.setTextViewText(R.id.widget_time, times);
-                SimpleDateFormat formatter = new SimpleDateFormat("HHmm");
+                SimpleDateFormat formatter = new SimpleDateFormat("HHmm", Locale.CHINA);
                 String strTime = formatter.format(new Date());
-                int numTime=getTime(strTime);
-                Log.e("time",numTime+"当前节数");
-                if (course.getStartTime()<=numTime){
-                    String StrColor="#FFCBCBCB";
-                    int color = Color.parseColor(StrColor);
-                    back.setImageViewBitmap(R.id.widget_tag, BitmapUtils.createColorBitmap(StrColor));
+                int numTime = getTime(strTime);
+                Log.e("time", numTime + "当前节数");
+                if (course.getStartTime() <= numTime) {
+                    String strColor = "#FFCBCBCB";
+                    int color = Color.parseColor(strColor);
+                    back.setImageViewBitmap(R.id.widget_tag, BitmapUtils.createColorBitmap(strColor));
                     back.setViewVisibility(R.id.widget_state, View.VISIBLE);
                     back.setTextColor(R.id.widget_name, color);
                     back.setTextColor(R.id.widget_time, color);
-                }else {
+                } else {
                     back.setImageViewBitmap(R.id.widget_tag, BitmapUtils.createColorBitmap("#FFFE9900"));
                     back.setViewVisibility(R.id.widget_state, View.GONE);
                     back.setTextColor(R.id.widget_name, Color.BLACK);

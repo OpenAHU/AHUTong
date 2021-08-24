@@ -6,21 +6,25 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <queries>
-        <!--        指定tim包名-->
+
+        <!-- 指定tim包名 -->
         <package android:name="com.tencent.tim" />
-        <!--        指定qq包名-->
+        <!-- 指定qq包名 -->
         <package android:name="com.tencent.mobileqq" />
     </queries>
+
     <application
-        android:networkSecurityConfig="@xml/network_config"
         android:name=".AHUApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AHUTong">
-        <activity android:name=".MainActivity"
+
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,16 +32,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".widget.ClassWidget"
+
+        <receiver
+            android:name=".widget.ClassWidget"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
+
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_provider" />
         </receiver>
+
         <service
             android:name=".widget.WidgetListService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />

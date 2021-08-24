@@ -11,6 +11,7 @@ import com.ahu.ahutong.ui.page.state.BathRoomViewModel
 
 class BathRoomFragment : BaseFragment<FragmentBathroomBinding>() {
     private lateinit var mState: BathRoomViewModel
+
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(BathRoomViewModel::class.java)
     }

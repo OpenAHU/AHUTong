@@ -58,6 +58,7 @@
         <entry key="app/src/main/res/layout/item_more.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_pop_course.xml" value="0.22" />
         <entry key="app/src/main/res/layout/item_rubbish.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/item_rubbish_type.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_schdule_course.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_schedule_header.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_sector.xml" value="0.35104166666666664" />
@@ -68,6 +69,8 @@
         <entry key="app/src/main/res/layout/layoput.xml" value="0.2140625" />
         <entry key="app/src/main/res/layout/layout_banner.xml" value="0.2140625" />
         <entry key="app/src/main/res/layout/layout_schedule.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/layout_widget.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/menu/search_menu.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.36666666666666664" />
         <entry key="app/src/main/res/xml/network_config.xml" value="0.1" />
         <entry key="app/src/main/res/xml/prefernce_setting.xml" value="0.33" />

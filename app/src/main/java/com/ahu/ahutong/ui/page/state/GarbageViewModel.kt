@@ -1,26 +1,24 @@
 package com.ahu.ahutong.ui.page.state
 
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.model.Rubbish
 
 class GarbageViewModel : ViewModel() {
-    val liveData = MutableLiveData<Result<List<Rubbish>>>()
-    val random = listOf(
-        "纸巾",
-        "垃圾袋",
-        "瓜子",
-        "方便面",
-        "苹果",
-        "包装纸",
-        "小龙虾",
-        "电池",
-        "橡皮泥",
-        "猫砂",
-        "西瓜",
-        "卫生纸",
-        "灰土",
-        "男朋友",//对此疑惑
-        "电灯泡"
-    )
+    val keyword = MutableLiveData<String>()
+
+    //switchMap会观察keyword变化
+    val result = Transformations.switchMap(keyword) { keyword ->
+       AHURepository.searchRubbish(keyword)
+    }
+
+    /**
+     * 搜索
+     * @param word String
+     */
+    fun search(word: String) {
+        keyword.value = word
+    }
 }
