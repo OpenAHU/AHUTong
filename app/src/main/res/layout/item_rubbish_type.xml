@@ -19,8 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <TextView
-                android:text='@{rubbish.name}'
-                tools:text="西瓜"
+                android:text='@{rubbish.typeStr}'
+                tools:text="厨余垃圾"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:layout_marginTop="15dp"
@@ -28,20 +28,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <TextView
-                android:text='@{"【分类】" + rubbish.typeStr}'
+                android:text='@{"【小知识】" + rubbish.explain}'
                 android:textSize="12sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="【分类】厨余垃圾"
-                android:layout_marginTop="10dp"/>
+                tools:text="【小知识】厨余垃圾是指居民日常生活及食品加工、饮食服务、单位供餐等活动中产生的垃圾。"
+                android:layout_marginTop="10dp" />
+            <TextView
+                android:text='@{"【常见物】：" + rubbish.contain}'
+                android:textSize="12sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="【常见物】常见包括菜叶、剩菜、剩饭、果皮、蛋壳、茶渣、骨头等"
+                android:layout_marginTop="5dp" />
             <TextView
                 android:text='@{"【小贴士】" + rubbish.tip}'
                 android:textSize="12sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:text="【小贴士】纯流质的食物垃圾、如牛奶等，应直接倒进下水口。有包装物的湿垃圾应将包装物去除后分类投放、包装物请投放到对应的可回收物或干垃圾容器"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"/>
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </layout>

@@ -1,5 +1,7 @@
 package com.ahu.ahutong.ui.page
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +19,8 @@ import com.ahu.ahutong.ui.dialog.SettingTimeDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleCourse
+import com.ahu.ahutong.widget.ClassWidget
+import com.sink.library.log.SinkLog
 import java.util.*
 
 /**
@@ -50,6 +54,10 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
                     .showAllCourse(true)
                     .data(it)
                     .loadSchedule()
+                val manager = AppWidgetManager.getInstance(requireContext())
+                val componentName = ComponentName(requireActivity(), ClassWidget::class.java)
+                val appWidgetIds = manager.getAppWidgetIds(componentName)
+                manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
             }
             it.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
@@ -87,7 +95,6 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         //加载数据
         dataBinding.scheduleView
             .showAllCourse(mState.isShowAllCourse.value ?: false)
@@ -102,6 +109,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
                 "${location.startTime} - ${location.weekDay}",
                 Toast.LENGTH_SHORT
             ).show()
+
         }
         //设置点击课程的事件
 
@@ -114,6 +122,9 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             popupWindow.isOutsideTouchable = true
             popupWindow.showAsDropDown(v)
 
+        }
+        dataBinding.refreshLayout.setOnRefreshListener {
+            mState.refreshSchedule(mState.schoolYear, mState.schoolTerm, true)
         }
 
 
