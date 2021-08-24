@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="16.669983dp">
+    <RelativeLayout
+        android:id="@+id/widget_root"
+        android:layout_width="match_parent"
+        android:layout_height="53.329987dp"
+        android:paddingEnd="16.669983dp">
+        <ImageView
+            android:id="@+id/course_widget_head_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@color/teal_200"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp" />
+        <TextView
+            android:id="@+id/widget_class"
+            android:text="0节课"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/course_widget_head_icon"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:singleLine="true"
+            android:maxEms="8" />
+        <TextView
+            android:id="@+id/widget_date"
+            android:text="周日 08/15"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:textSize="11.329987sp"
+            android:textColor="#9a000000"
+            android:singleLine="true" />
+        <TextView
+            android:background="#1a000000"
+            android:layout_width="match_parent"
+            android:layout_height="0.33000004dp"
+            android:layout_alignParentBottom="true" />
+    </RelativeLayout>
+    <ListView
+        android:id="@+id/widget_listview"
+        android:paddingBottom="14.669983dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@null" />
+</LinearLayout>
