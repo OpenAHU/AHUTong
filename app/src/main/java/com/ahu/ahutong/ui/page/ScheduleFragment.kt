@@ -51,7 +51,6 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
         mState.schedule.observe(this) {
             it.onSuccess {
                 dataBinding.scheduleView
-                    .showAllCourse(true)
                     .data(it)
                     .loadSchedule()
                 val manager = AppWidgetManager.getInstance(requireContext())
