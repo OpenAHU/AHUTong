@@ -74,6 +74,7 @@
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.36666666666666664" />
         <entry key="app/src/main/res/xml/network_config.xml" value="0.1" />
         <entry key="app/src/main/res/xml/prefernce_setting.xml" value="0.33" />
+        <entry key="app/src/main/res/xml/provider_paths.xml" value="0.1" />
         <entry key="widget/src/main/res/drawable/ic_launcher_background.xml" value="0.36102564102564105" />
         <entry key="widget/src/main/res/drawable/widget_background.xml" value="0.36102564102564105" />
         <entry key="widget/src/main/res/layout/layout_widget.xml" value="0.35104166666666664" />

@@ -1,11 +1,14 @@
 package com.ahu.ahutong;
 
-import com.ahu.ahutong.data.dao.AHUCache;
+import android.content.pm.PackageManager;
+
 import com.google.gson.Gson;
 import com.sink.library.log.SinkLogConfig;
 import com.sink.library.log.SinkLogManager;
 import com.sink.library.log.parser.SinkJsonParser;
 import com.sink.library.log.printer.SinkLogConsolePrinter;
+import com.sink.library.update.CookApkUpdate;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +52,17 @@ public class AHUApplication extends BaseApplication {
                 return obj -> new Gson().toJson(obj);
             }
         }, new SinkLogConsolePrinter());
+
+        //禁止获取手机ID信息
+        CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(this);
+        strategy.setDeviceID("fake-id");
+        CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG, strategy);
+        //初始化更新
+        try {
+            CookApkUpdate.init(this);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
     }
 }
