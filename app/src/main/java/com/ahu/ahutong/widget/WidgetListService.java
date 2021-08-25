@@ -2,9 +2,9 @@ package com.ahu.ahutong.widget;
 
 import static java.util.Comparator.comparing;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
@@ -23,15 +23,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-
+/*
+记录踩坑：
+安卓对RemoteViews的支持就是一坨屎
+如果遇到数据错乱，千万不要手写缓存机制，因为这样没有任何的作用
+正确解决方法是：处理使用相同布局但功能不同的RemoteViews时，要保证setXXX方法在各种类型处理中都写一次
+ */
 public class WidgetListService extends RemoteViewsService {
-
-    public static WidgetListService service;
 
     @Override
     public void onCreate() {
-        service = this;
-        Log.e("WidgetListService", "onCreate");
         super.onCreate();
     }
 
@@ -43,6 +44,15 @@ public class WidgetListService extends RemoteViewsService {
     static class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
         private ArrayList<Object> mData;
         private Context context;
+        private static int numTime;
+        private static final String gray = "#FFCBCBCB";
+        private static final String orange = "#FFFE9900";
+        private static final Bitmap grayBitmap = BitmapUtils.createColorBitmap(gray);
+        private static final Bitmap orangeBitmap = BitmapUtils.createColorBitmap(orange);
+        private static final int grayColor = Color.parseColor(gray);
+        private static final int paleColor = Color.parseColor("#9a000000");
+        private static final int blackColor = Color.BLACK;
+        private static final String[] num2text = {"一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一"};
 
         public ListRemoteViewsFactory(Context context) {
             mData = new ArrayList<>();
@@ -51,7 +61,7 @@ public class WidgetListService extends RemoteViewsService {
 
         @Override
         public void onCreate() {
-            Log.e("ListRemoteViewsFactory", "刷新");
+            Log.e("ListRemoteViewsFactory", "数据刷新");
             //1-4上午
             //5-8中文
             //9-10晚上
@@ -78,6 +88,9 @@ public class WidgetListService extends RemoteViewsService {
                 }
             }
             addToData(am, pm, ppm);
+            SimpleDateFormat formatter = new SimpleDateFormat("HHmm", Locale.CHINA);
+            String strTime = formatter.format(new Date());
+            numTime = getTime(strTime);
         }
 
         @SafeVarargs
@@ -99,7 +112,6 @@ public class WidgetListService extends RemoteViewsService {
         public void onDataSetChanged() {
             mData.clear();
             onCreate();
-
         }
 
         @Override
@@ -114,30 +126,24 @@ public class WidgetListService extends RemoteViewsService {
             return mData == null ? 0 : mData.size();
         }
 
-        /*
-        记录踩坑：
-        安卓对RemoteViews的支持就是一坨屎
-        如果遇到数据错乱，千万不要手写缓存机制，因为这样没有任何的作用
-        正确解决方法是：处理使用相同布局但功能不同的RemoteViews时，要保证setXXX方法在各种类型处理中都写一次
-         */
+
         @Override
         public RemoteViews getViewAt(int position) {
             RemoteViews back = null;
             Object bean = mData.get(position);
-            if (bean instanceof String) {
+            if (bean instanceof String) {//如果是头，即 上午 下午 晚上
                 back = new RemoteViews(context.getPackageName(), R.layout.item_widget_head);
                 back.setTextViewText(R.id.widget_head, (String) bean);
-            } else if (bean instanceof Boolean) {
+            } else if (bean instanceof Boolean) {//如果是空闲状态
                 back = new RemoteViews(context.getPackageName(), R.layout.item_widget_content);
                 back.setTextViewText(R.id.widget_name, "空闲");
                 back.setTextViewText(R.id.widget_time, "无课程");
                 back.setViewVisibility(R.id.widget_state, View.GONE);
-                back.setImageViewBitmap(R.id.widget_tag, BitmapUtils.createColorBitmap("#FFCBCBCB"));
-            } else if (bean instanceof Course) {
+                back.setImageViewBitmap(R.id.widget_tag, grayBitmap);
+            } else if (bean instanceof Course) {//如果是课程
                 Course course = (Course) bean;
                 back = new RemoteViews(context.getPackageName(), R.layout.item_widget_content);
                 back.setTextViewText(R.id.widget_name, course.getName());
-                String[] num2text = {"一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一"};
                 String startTime = num2text[course.getStartTime() - 1];
                 String endTime = num2text[course.getLength() - 1 + course.getStartTime() - 1];
                 String times = "第" + startTime + "节";
@@ -145,22 +151,19 @@ public class WidgetListService extends RemoteViewsService {
                     times += "-" + endTime + "节";
                 }
                 back.setTextViewText(R.id.widget_time, times);
-                SimpleDateFormat formatter = new SimpleDateFormat("HHmm", Locale.CHINA);
-                String strTime = formatter.format(new Date());
-                int numTime = getTime(strTime);
-                Log.e("time", numTime + "当前节数");
+
                 if (course.getStartTime() <= numTime) {
-                    String strColor = "#FFCBCBCB";
-                    int color = Color.parseColor(strColor);
-                    back.setImageViewBitmap(R.id.widget_tag, BitmapUtils.createColorBitmap(strColor));
+                    //如果已结束
+                    back.setImageViewBitmap(R.id.widget_tag, grayBitmap);
                     back.setViewVisibility(R.id.widget_state, View.VISIBLE);
-                    back.setTextColor(R.id.widget_name, color);
-                    back.setTextColor(R.id.widget_time, color);
+                    back.setTextColor(R.id.widget_name, grayColor);
+                    back.setTextColor(R.id.widget_time, grayColor);
                 } else {
-                    back.setImageViewBitmap(R.id.widget_tag, BitmapUtils.createColorBitmap("#FFFE9900"));
+                    //如果没结束
+                    back.setImageViewBitmap(R.id.widget_tag, orangeBitmap);
                     back.setViewVisibility(R.id.widget_state, View.GONE);
-                    back.setTextColor(R.id.widget_name, Color.BLACK);
-                    back.setTextColor(R.id.widget_time, Color.parseColor("#9a000000"));
+                    back.setTextColor(R.id.widget_name, blackColor);
+                    back.setTextColor(R.id.widget_time, paleColor);
                 }
             }
             return back;
@@ -187,6 +190,12 @@ public class WidgetListService extends RemoteViewsService {
         }
     }
 
+    /**
+     * 根据当前时间获取第几节
+     *
+     * @param time 当前时间 例子 1150 即11点50分
+     * @return 返回的第几节 按上述参数，则返回 4
+     */
     private static int getTime(String time) {
         int tim = Integer.parseInt(time);
         if (tim >= 820 && tim <= 915) {

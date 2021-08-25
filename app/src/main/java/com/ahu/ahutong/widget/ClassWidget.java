@@ -1,25 +1,25 @@
 package com.ahu.ahutong.widget;
 
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
-
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
-
 import com.ahu.ahutong.MainActivity;
 import com.ahu.ahutong.R;
 import com.ahu.ahutong.data.dao.AHUCache;
 import com.ahu.ahutong.data.model.Course;
 import com.ahu.ahutong.utils.DateUtils;
-
 import java.util.Calendar;
 import java.util.List;
 
 public class ClassWidget extends AppWidgetProvider {
-
+    /**
+     * 获取当天的课程数
+     * @return 课程数
+     */
     public static int getClassNum() {
         String year = AHUCache.INSTANCE.getSchoolYear();
         String trim = AHUCache.INSTANCE.getSchoolTerm();
@@ -36,9 +36,8 @@ public class ClassWidget extends AppWidgetProvider {
         }
         return back;
     }
-
     /**
-     * 设置widget的头
+     * 设置widget
      *
      * @param context 必传参数
      * @return 布局
@@ -52,12 +51,8 @@ public class ClassWidget extends AppWidgetProvider {
 
         PendingIntent rootIntent = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), FLAG_ONE_SHOT);
         remoteViews.setOnClickPendingIntent(R.id.widget_root, rootIntent);
-        int num = getClassNum();
-        remoteViews.setTextViewText(R.id.widget_class, num + "节课");
+        remoteViews.setTextViewText(R.id.widget_class, getClassNum() + "节课");
         remoteViews.setTextViewText(R.id.widget_date, DateUtils.getWeek());
-        if (WidgetListService.service != null) {
-            WidgetListService.service.onGetViewFactory(null);
-        }
         return remoteViews;
     }
 
@@ -73,25 +68,6 @@ public class ClassWidget extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             appWidgetManager.updateAppWidget(appWidgetId, update(context));
         }
-
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
-
-    @Override
-    public void onEnabled(Context context) {
-        super.onEnabled(context);
-    }
-
-    /**
-     * 相当于ondestroy
-     *
-     * @param context context
-     */
-    @Override
-    public void onDisabled(Context context) {
-        super.onDisabled(context);
-
-    }
-
-
 }
