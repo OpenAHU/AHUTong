@@ -17,7 +17,7 @@ import com.ahu.ahutong.ui.page.state.MainViewModel
  * @Date: 2021/8/14-上午8:56
  * @Email: 468766131@qq.com
  */
-class LoginFragment: BaseFragment<FragmentLoginBinding>() {
+class LoginFragment : BaseFragment<FragmentLoginBinding>() {
     private lateinit var mState: LoginViewModel
     private lateinit var actvivtyState: MainViewModel
     override fun initViewModel() {
@@ -27,7 +27,7 @@ class LoginFragment: BaseFragment<FragmentLoginBinding>() {
 
     override fun observeData() {
         super.observeData()
-        mState.loginResult.observe(this){
+        mState.loginResult.observe(this) {
             it.onSuccess {
                 actvivtyState.isLogin.value = true
                 Toast.makeText(requireContext(), "登录成功，欢迎您：${it.name}", Toast.LENGTH_SHORT).show()
@@ -39,41 +39,45 @@ class LoginFragment: BaseFragment<FragmentLoginBinding>() {
     }
 
     override fun getDataBindingConfig(): DataBindingConfig {
-       return DataBindingConfig(R.layout.fragment_login, BR.state, mState)
-           .addBindingParam(BR.proxy, ClickProxy())
+        return DataBindingConfig(R.layout.fragment_login, BR.state, mState)
+            .addBindingParam(BR.proxy, ClickProxy())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //设置动画
-        dataBinding.edPassword.setOnFocusChangeListener{_, focus ->
-            if (focus){
+        dataBinding.edPassword.setOnFocusChangeListener { _, focus ->
+            if (focus) {
                 dataBinding.emoji.close()
-            }else {
+            } else {
                 dataBinding.emoji.open()
             }
         }
         arguments?.let {
             val type = it.getString("type")
-            mState.loginType = when(type){
+            mState.loginType = when (type) {
                 "1" -> User.UserType.AHU_Teach
                 "2" -> User.UserType.AHU_Wisdom
                 else -> User.UserType.AHU_LOCAL
             }
         }
+        dataBinding.rgLogin.setOnClickListener {
+            Toast.makeText(requireContext(), "后端开发中，暂时无法切换", Toast.LENGTH_SHORT).show()
+
+        }
 
     }
 
 
-    inner class ClickProxy{
+    inner class ClickProxy {
         val back: (() -> Unit) = {
             nav().popBackStack()
         }
 
-        fun login(view: View){
+        fun login(view: View) {
             val username = dataBinding.edUserId.text.toString()
             val password = dataBinding.edPassword.text.toString()
-            if (username.isEmpty() || password.isEmpty()){
+            if (username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(requireContext(), "请不要输入空气哦！", Toast.LENGTH_SHORT).show()
                 return
             }

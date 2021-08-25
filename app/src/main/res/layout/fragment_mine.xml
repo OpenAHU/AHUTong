@@ -121,6 +121,7 @@
                 <LinearLayout
                     android:layout_marginTop="10dp"
                     android:id="@+id/li_recommend"
+                    android:onClick="@{(v)->proxy.recommend()}"
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="@drawable/mine_li_foreground"
@@ -144,6 +145,7 @@
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/li_feedback"
+                    android:onClick="@{(thisView) -> proxy.feedback(thisView)}"
                     android:layout_width="match_parent"
                     android:clickable="true"
                     android:focusable="true"

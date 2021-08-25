@@ -41,6 +41,7 @@ class SettingFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("diy_theme")?.apply {
             setOnPreferenceClickListener {
                 // 跳转到自定义主题
+                Toast.makeText(requireContext(), "功能正在开发,敬请期待.", Toast.LENGTH_SHORT).show()
                 return@setOnPreferenceClickListener true
             }
         }
@@ -51,9 +52,11 @@ class SettingFragment : PreferenceFragmentCompat() {
                 User.UserType.AHU_Wisdom.type, User.UserType.AHU_Teach.type
             )
             key = "data_source"
-            dialogTitle = "请选择数据源"
+            dialogTitle = "智慧安大到教务系统需重新登录, 反之亦然"
             //dialogMessage = "智慧安大到教务系统需重新登录, 反之亦然。"
             negativeButtonText = "关闭"
+            isEnabled = false
+            summary = "后端开发中，暂时无法切换"
             setOnPreferenceChangeListener { _, newValue ->
                 if (newValue !is String) {
                     return@setOnPreferenceChangeListener false
@@ -88,7 +91,7 @@ class SettingFragment : PreferenceFragmentCompat() {
                     }
                     findNavController().navigate(R.id.login_fragment, bundle)
                 }
-                return@setOnPreferenceChangeListener false
+                return@setOnPreferenceChangeListener true
             }
         }
         findPreference<SwitchPreference>("show_all")?.apply {

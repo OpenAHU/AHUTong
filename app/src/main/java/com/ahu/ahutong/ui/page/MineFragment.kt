@@ -1,5 +1,7 @@
 package com.ahu.ahutong.ui.page
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -11,12 +13,13 @@ import com.ahu.ahutong.databinding.FragmentMineBinding
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.MineViewModel
 
+
 /**
  * @Author SinkDev
  * @Date 2021/7/27-15:48
  * @Email 468766131@qq.com
  */
-class MineFragment: BaseFragment<FragmentMineBinding>() {
+class MineFragment : BaseFragment<FragmentMineBinding>() {
 
     private lateinit var mState: MineViewModel
     private lateinit var activityState: MainViewModel
@@ -38,32 +41,51 @@ class MineFragment: BaseFragment<FragmentMineBinding>() {
     }
 
 
-    inner class ClickProxy{
+    inner class ClickProxy {
         //about us
-        fun aboutUs(view: View){
+        fun aboutUs(view: View) {
+            nav().navigate(R.id.about_fragment)
+        }
+
+        fun feedback(view: View) {
+            try {
+                val intent = Intent()
+                intent.data =
+                    Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3DL3WKrBqXGuSoqrpbm4zVqHWN-WyB-Y29")
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "请安装QQ后重试！", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        fun recommend(){
 
         }
+
+
         //login or logout
-        fun login(view: View){
-            if (activityState.isLogin.value == true){
+        fun login(view: View) {
+            if (activityState.isLogin.value == true) {
                 activityState.logout()
-            }else {
+            } else {
                 nav().navigate(R.id.action_home_fragment_to_login_fragment)
             }
         }
+
         //jump to developer fragment
-        fun developer(view: View){
+        fun developer(view: View) {
             nav().navigate(R.id.action_home_fragment_to_developer_fragment)
         }
+
         //jump to setting fragment
-        fun setting(view: View){
+        fun setting(view: View) {
             nav().navigate(R.id.setting_fragment)
         }
 
 
     }
 
-    companion object{
+    companion object {
         val INSTANCE = MineFragment()
 
     }

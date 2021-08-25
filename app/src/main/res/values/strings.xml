@@ -62,5 +62,7 @@
     <string name="login_wisdom_ahu">智慧安大</string>
     <string name="login_teach_system">教务系统</string>
     <string name="search">搜索</string>
+    <string name="check_update">检查更新</string>
+    <string name="update_intro">更新日志</string>
 
 </resources>

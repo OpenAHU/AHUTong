@@ -32,6 +32,8 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/dialog_room.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/dialog_time.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/fragment.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/fragment_bathroom.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/fragment_classroom.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_developer.xml" value="0.24538258575197888" />

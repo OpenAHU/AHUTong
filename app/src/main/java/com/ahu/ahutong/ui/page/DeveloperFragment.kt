@@ -54,6 +54,7 @@ class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>(){
         val back: (() -> Unit) = {
             nav().popBackStack()
         }
+
         fun gotoQQ(view: View, uri: String) {
             try {
                 val i1 = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
