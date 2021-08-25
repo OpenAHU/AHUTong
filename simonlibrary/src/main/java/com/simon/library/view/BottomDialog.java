@@ -2,6 +2,8 @@ package com.simon.library.view;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 import android.content.DialogInterface;
@@ -24,7 +26,8 @@ public abstract class BottomDialog extends DialogFragment {
         }
     }
 
-    @SuppressLint("NewApi")
+
+    @NonNull
     @Override
     public Dialog onCreateDialog( Bundle savedInstanceState) {
         Dialog dialog = new Dialog(getContext(), getTheme());
@@ -38,7 +41,7 @@ public abstract class BottomDialog extends DialogFragment {
     }
 
     @Override
-    public void onSaveInstanceState( Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(KEY_KEEP_ON_RESTARTED, keepOnRestarted());
     }

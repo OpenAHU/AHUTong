@@ -185,10 +185,16 @@
                         android:src="@mipmap/about_us" />
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:text="@string/mine_tv_about_us" />
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="5dp"
+                        android:src="@mipmap/arrow"/>
                 </LinearLayout>
                 <LinearLayout
                     android:foreground="@drawable/mine_li_foreground"

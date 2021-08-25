@@ -15,12 +15,12 @@ import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentScheduleBinding
 import com.ahu.ahutong.databinding.ItemPopCourseBinding
+import com.ahu.ahutong.ui.dialog.SettingScheduleDialog
 import com.ahu.ahutong.ui.dialog.SettingTimeDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleCourse
 import com.ahu.ahutong.widget.ClassWidget
-import com.sink.library.log.SinkLog
 import java.util.*
 
 /**
@@ -28,9 +28,11 @@ import java.util.*
  * @Date 2021/7/27-19:14
  * @Email 468766131@qq.com
  */
-class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDialog.CallBack {
+class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDialog.CallBack,
+    SettingScheduleDialog.SettingCallback {
     private lateinit var mState: ScheduleViewModel
     private lateinit var gState: MainViewModel
+
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(ScheduleViewModel::class.java)
         gState = getActivityScopeViewModel(MainViewModel::class.java)
@@ -92,6 +94,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
         }
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //加载数据
@@ -103,18 +106,15 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
 
         //设置点击空课的事件
         dataBinding.scheduleView.setEmptyCourseListener { _, location ->
-            Toast.makeText(
-                requireContext(),
-                "${location.startTime} - ${location.weekDay}",
-                Toast.LENGTH_SHORT
-            ).show()
 
         }
-        //设置点击课程的事件
 
+        //设置点击课程的事件
         dataBinding.scheduleView.setCourseListener { v, scheduleCourse ->
-            val popupWindow = PopupWindow(v, ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT, true)
+            val popupWindow = PopupWindow(
+                v, ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, true
+            )
             popupWindow.animationStyle = R.style.pop_anim_style
             popupWindow.contentView = getPopupView(scheduleCourse)
             popupWindow.isTouchable = true
@@ -122,8 +122,15 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             popupWindow.showAsDropDown(v)
 
         }
+
+        dataBinding.scheduleView.setSettingClickListener {
+            val dialog = SettingScheduleDialog()
+            dialog.setCallback(this)
+            dialog.show(parentFragmentManager, "SettingScheduleDialog")
+        }
+
         dataBinding.refreshLayout.setOnRefreshListener {
-            mState.refreshSchedule(mState.schoolYear, mState.schoolTerm, true)
+            mState.refreshSchedule()
         }
 
 
@@ -135,7 +142,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
      * @return NestedScrollView
      */
     private fun getPopupView(scheduleCourse: ScheduleCourse): NestedScrollView {
-                //创建课程视图的父容器
+        //创建课程视图的父容器
         val li = LinearLayout(context)
         li.orientation = LinearLayout.VERTICAL
         li.layoutParams = LinearLayout.LayoutParams(
@@ -170,6 +177,27 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
     companion object {
         val INSTANCE = ScheduleFragment()
     }
+
+    // 以下是兔子Dialog的实现
+    override fun addCourse() {
+
+    }
+
+    override fun setStartTime() {
+        val settingTimeDialog = SettingTimeDialog()
+        settingTimeDialog.setCallBack(this)
+        settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
+    }
+
+    override fun inputSchedule() {
+        mState.refreshSchedule(isRefresh = true)
+        dataBinding.refreshLayout.isRefreshing = true
+    }
+
+    override fun gotoSetting() {
+        nav().navigate(R.id.setting_fragment)
+    }
+    //到这里
 
 
 }

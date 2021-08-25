@@ -43,8 +43,6 @@ public final class DialogUtil {
      * @param width  宽度值
      */
     public static void setWith( Dialog dialog, int width) {
-
-
         Window window = dialog.getWindow();
         if (window == null) {
             Log.e(TAG, "The Window of dialog is null.");

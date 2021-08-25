@@ -6,6 +6,8 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.NonNull;
+
 import com.sink.library.update.bean.App;
 
 import org.jsoup.Connection;
@@ -113,12 +115,12 @@ public class CookApkUpdate {
 
     }
 
-    interface UpdateListener {
-        void onNeedUpdate(App app);
+    public interface UpdateListener {
+        void onNeedUpdate(@NonNull App app);
 
         void onLatestVersion();
 
-        void checkFailure(Throwable throwable);
+        void checkFailure(@NonNull Throwable throwable);
     }
 
 }

@@ -118,15 +118,22 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
     inner class BannerItemHolder(val binding: ItemDiscoveryBannerBinding) :
         BaseViewHolder<ItemDiscoveryBannerBinding, List<Banner>>(binding) {
         override fun bind(data: List<Banner>) {
+            val banners = arrayListOf(R.mipmap.banner0, R.mipmap.banner1, R.mipmap.banner2)
             binding.itemDiscoveryBanner.setAdapter(object : BannerAdapter() {
                 override fun getItemCount(): Int {
-                    return banners.size
+                    return  if(banners.size == 0)  banners.size else banners.size
                 }
 
                 override fun getImageView(parentView: View, position: Int): ImageView {
+                    if (data.isEmpty()){
+                        val imageView = ImageView(parentView.context)
+                        imageView.scaleType = ImageView.ScaleType.FIT_XY
+                        imageView.load(banners[position])
+                        return imageView
+                    }
                     val imageView = ImageView(parentView.context)
                     imageView.scaleType = ImageView.ScaleType.FIT_XY
-                    val banner = data[position]
+                    val banner =  data[position]
                     imageView.load(banner.imageUrl)
                     return imageView
                 }

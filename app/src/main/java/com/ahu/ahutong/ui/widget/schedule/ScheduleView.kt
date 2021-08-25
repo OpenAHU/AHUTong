@@ -93,6 +93,8 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     private var mCourseListener: (View, ScheduleCourse) -> Unit
     private var mEmptyCourseListener: (View, CourseDate) -> Unit
 
+    private var mSettingClickListener: () -> Unit
+
     init {
         //加载布局
         View.inflate(context, R.layout.layout_schedule, this)
@@ -109,6 +111,10 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         contentLinearLayout.layoutTransition = mLayoutTransition
         mCourseListener = { _, _ -> }
         mEmptyCourseListener = { _, _ -> }
+        mSettingClickListener = {}
+        settingImg.setOnClickListener {
+            mSettingClickListener()
+        }
     }
 
 
@@ -372,6 +378,9 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     }
 
 
+    fun setSettingClickListener(listener: ()->Unit){
+        this.mSettingClickListener = listener
+    }
     @SuppressLint("ObjectAnimatorBinding")
     private fun getAppearingAnimation(): Animator {
         val mSet = AnimatorSet();

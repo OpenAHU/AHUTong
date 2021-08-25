@@ -17,6 +17,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE
+import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_SETTLING
 import com.ahu.ahutong.R
 
 
@@ -257,7 +259,7 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
 
     private fun getIndicatorBitmap(isSelected: Boolean): Bitmap {
         if (isSelected) {
-            paint.color = Color.BLUE
+            paint.color = Color.WHITE
         } else {
             paint.color = Color.BLACK
         }
@@ -277,11 +279,11 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
             super.onPageSelected(position)
             //循环播放
             if (position == 0) {
-                viewPager2.setCurrentItem(adapter.getItemCount(), false)
+                viewPager2.setCurrentItem(adapter.getItemCount(), true)
                 return
             }
             if (position == adapter.getItemCount() + 1) {
-                viewPager2.setCurrentItem(1, false)
+                viewPager2.setCurrentItem(1, true)
                 return
             }
             //设置指示器
@@ -292,7 +294,6 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
                     imageView.setImageBitmap(indicatorUnselectedBitmap)
                 }
             }
-
         }
     }
 

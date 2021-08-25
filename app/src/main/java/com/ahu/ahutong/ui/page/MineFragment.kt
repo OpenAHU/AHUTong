@@ -10,6 +10,7 @@ import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentMineBinding
+import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.MineViewModel
 
@@ -58,15 +59,28 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
             }
         }
 
-        fun recommend(){
-
+        fun recommend() {
+            val intent = Intent()
+            intent.action = Intent.ACTION_SEND
+            intent.putExtra(
+                Intent.EXTRA_TEXT,
+                "我正在使用安大通App，快来一起用吧，https://www.coolapk.com/apk/com.ahu.ahutong"
+            )
+            intent.type = "text/plain"
+            startActivity(intent)
         }
-
 
         //login or logout
         fun login(view: View) {
             if (activityState.isLogin.value == true) {
-                activityState.logout()
+                buildDialog("提示",
+                    "是否退出登录，点击确定您的登录状态将被删除！",
+                    "确定", { _, _ ->
+                        activityState.logout()
+                    },
+                "取消"
+                ).show()
+
             } else {
                 nav().navigate(R.id.action_home_fragment_to_login_fragment)
             }

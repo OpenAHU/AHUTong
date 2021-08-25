@@ -5,6 +5,7 @@ import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.ext.fromJson
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.sink.library.log.SinkLog
 import com.tencent.mmkv.MMKV
 
 /**
@@ -23,7 +24,7 @@ object AHUCache {
     /**
      * 清除全部数据
      */
-    fun clearAll(){
+    fun clearAll() {
         kv.clearAll()
     }
 
@@ -64,7 +65,7 @@ object AHUCache {
      * 保存密码
      * @param password String
      */
-    fun saveCurrentPassword(password: String){
+    fun saveCurrentPassword(password: String) {
         kv.encode("password", password)
     }
 
@@ -72,9 +73,10 @@ object AHUCache {
      * 获取密码
      * @return String?
      */
-    fun getCurrentUserPassword(): String?{
+    fun getCurrentUserPassword(): String? {
         return kv.decodeString("password")
     }
+
     /**
      * 保存课程表
      * @param schoolYear String
@@ -168,7 +170,7 @@ object AHUCache {
      * @param schoolTerm String 1 or 2
      * @param startTime String yyyy-MM-dd
      */
-    fun saveSchoolTermStartTime(schoolYear: String, schoolTerm: String, startTime: String){
+    fun saveSchoolTermStartTime(schoolYear: String, schoolTerm: String, startTime: String) {
         kv.encode("startTime-${schoolYear}-${schoolTerm}", startTime)
     }
 
@@ -185,7 +187,7 @@ object AHUCache {
      * 保存默认的学年
      * @param schoolYear String
      */
-    fun saveSchoolYear(schoolYear: String){
+    fun saveSchoolYear(schoolYear: String) {
         kv.encode("defaultSchoolYear", schoolYear)
     }
 
@@ -193,7 +195,7 @@ object AHUCache {
      * 获取默认学期
      * @return String?
      */
-    fun getSchoolTerm(): String?{
+    fun getSchoolTerm(): String? {
         return kv.getString("defaultSchoolTerm", null)
     }
 
@@ -201,7 +203,7 @@ object AHUCache {
      * 保存默认的学期
      * @param schoolTerm String
      */
-    fun saveSchoolTerm(schoolTerm: String){
+    fun saveSchoolTerm(schoolTerm: String) {
         kv.putString("defaultSchoolTerm", schoolTerm)
     }
 
@@ -217,7 +219,7 @@ object AHUCache {
      * 保存是否显示非本周课程
      * @param isCourse Boolean
      */
-    fun saveIsShowAllCourse(isCourse: Boolean){
+    fun saveIsShowAllCourse(isCourse: Boolean) {
         kv.putBoolean("isShowAllCourse", isCourse)
     }
 
@@ -225,9 +227,9 @@ object AHUCache {
      * 获取登录类型
      * @return User.UserType
      */
-    fun getLoginType(): User.UserType{
-        val type = kv.getString("usertype", "0")
-        return when(type){
+    fun getLoginType(): User.UserType {
+        val type = kv.getString("usertype", "0") ?: "0"
+        return when (type) {
             "1" -> User.UserType.AHU_Wisdom
             "2" -> User.UserType.AHU_Teach
             else -> User.UserType.AHU_LOCAL
@@ -238,7 +240,7 @@ object AHUCache {
      * 保存登录类型
      * @param type UserType
      */
-    fun saveLoginType(type: User.UserType){
+    fun saveLoginType(type: User.UserType) {
         kv.putString("usertype", type.toString())
     }
 }

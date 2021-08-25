@@ -17,7 +17,6 @@
     <string name="recruit">校招实习</string>
     <string name="ok">确定</string>
     <string name="close">关闭</string>
-    <string name="title_activity_settings">SettingsActivity</string>
     <string name="import_schedule">导入课表</string>
     <string name="add_course">手动添加课程</string>
     <string name="setting_change_theme">更换主题</string>
@@ -47,7 +46,7 @@
     <string name="schoolYear">学年：</string>
     <string name="term">学期：</string>
     <string name="term_grade">本学期绩点</string>
-    <string name="searchBook">书籍索引</string>
+    <string name="search_book">书籍索引</string>
     <string name="search_hint">请输入你要搜索的内容</string>
     <string name="search_history">搜索历史</string>
     <string name="clear">清空</string>
@@ -64,5 +63,8 @@
     <string name="search">搜索</string>
     <string name="check_update">检查更新</string>
     <string name="update_intro">更新日志</string>
+    <string name="schedule_input">导入课表</string>
+    <string name="schedule_add">手动添加课程</string>
+    <string name="schedule_time">设置当前时间</string>
 
 </resources>

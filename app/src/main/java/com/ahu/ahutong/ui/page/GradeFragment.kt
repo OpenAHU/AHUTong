@@ -46,7 +46,6 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
                     return@observe
                 }
                 upDateData()
-                Toast.makeText(requireContext(), "数据加载成功", Toast.LENGTH_SHORT).show()
             }.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }

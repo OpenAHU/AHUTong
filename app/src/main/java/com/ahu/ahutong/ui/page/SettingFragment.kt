@@ -14,6 +14,7 @@ import androidx.preference.*
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.User
+import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
@@ -100,6 +101,7 @@ class SettingFragment : PreferenceFragmentCompat() {
                     return@setOnPreferenceChangeListener false
                 }
                 AHUCache.saveIsShowAllCourse(newValue)
+                Toast.makeText(requireContext(), "设置成功，重启后生效", Toast.LENGTH_SHORT).show()
                 return@setOnPreferenceChangeListener true
             }
         }
@@ -109,11 +111,19 @@ class SettingFragment : PreferenceFragmentCompat() {
                 return@setOnPreferenceClickListener true
             }
         }
+
         findPreference<Preference>("clear")?.apply {
             setOnPreferenceClickListener {
-                //清除所有数据
-                activityState.logout()
-                AHUCache.clearAll()
+                buildDialog(
+                    "提示", "您是否确定要清除应用数据，其中包含您的登录状态、课表等, 且删除后无法恢复。",
+                    "确定", { _, _ ->
+                        //清除所有数据
+                        activityState.logout()
+                        AHUCache.clearAll()
+                        Toast.makeText(requireContext(), "已清除所有数据", Toast.LENGTH_SHORT).show()
+                    }, "取消"
+                ).show()
+
                 return@setOnPreferenceClickListener true
             }
         }

@@ -37,6 +37,7 @@ class LoginViewModel : ViewModel() {
                 AHUCache.saveCurrentUser(user)
                 AHUCache.saveCurrentPassword(password)
                 //切换数据源
+                AHUCache.saveLoginType(loginType)
                 AHURepository.dataSource = ReptileDataSource(ReptileUser(username, password))
                 Result.success(user)
             } else {
@@ -48,7 +49,9 @@ class LoginViewModel : ViewModel() {
                 val response = AHUService.API.login(username, password, loginType)
                 if (response.isSuccessful) {
                     AHUCache.saveCurrentUser(response.data)
+
                     //切换数据源
+                    AHUCache.saveLoginType(loginType)
                     AHURepository.dataSource = APIDataSource()
                     Result.success(response.data)
                 } else {

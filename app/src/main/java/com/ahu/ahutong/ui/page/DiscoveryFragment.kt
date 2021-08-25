@@ -2,18 +2,21 @@ package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.model.Banner
 import com.ahu.ahutong.data.model.News
 import com.ahu.ahutong.data.model.NewsType
 import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.databinding.FragmentDiscoveryBinding
 import com.ahu.ahutong.ui.adapter.DiscoveryAdapter
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
+import com.ahu.ahutong.ui.page.state.MainViewModel
 
 
 /**
@@ -24,8 +27,10 @@ import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 class DiscoveryFragment: BaseFragment<FragmentDiscoveryBinding>() {
 
     private lateinit var mState: DiscoveryViewModel
+    private lateinit var activityState: MainViewModel
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(DiscoveryViewModel::class.java)
+        activityState = getActivityScopeViewModel(MainViewModel::class.java)
     }
 
     override fun getDataBindingConfig(): DataBindingConfig {
@@ -42,7 +47,6 @@ class DiscoveryFragment: BaseFragment<FragmentDiscoveryBinding>() {
             val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
             adapter.setNews(it)
         })
-
         val a = News()
         a.releaseTime = "2021.8.5"
         a.author = "Simon"
@@ -64,6 +68,10 @@ class DiscoveryFragment: BaseFragment<FragmentDiscoveryBinding>() {
 
     inner class ToolClickProxy {
         fun onClick(view: View, tool: Tool) {
+            if(activityState.isLogin.value == false){
+                Toast.makeText(requireContext(), "登录后才能使用小工具。", Toast.LENGTH_SHORT).show()
+                return
+            }
             nav().navigate(tool.action)
         }
     }
