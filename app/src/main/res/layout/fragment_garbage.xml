@@ -72,6 +72,7 @@
                     android:layout_height="@dimen/collapsed_search_height"
                     android:background="@drawable/search_edit"
                     android:hint="@string/search_hint"
+                    android:imeOptions="actionSearch"
                     android:singleLine="true"
                     android:textSize="12sp" />
             </RelativeLayout>
