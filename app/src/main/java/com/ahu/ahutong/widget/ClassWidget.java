@@ -68,6 +68,7 @@ public class ClassWidget extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             appWidgetManager.updateAppWidget(appWidgetId, update(context));
         }
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds,R.id.widget_listview);
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 }
