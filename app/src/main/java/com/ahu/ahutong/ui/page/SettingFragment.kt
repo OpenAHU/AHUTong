@@ -36,6 +36,7 @@ class SettingFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("change_theme")?.apply {
             setOnPreferenceClickListener {
                 // 跳转到主题更换界面
+                findNavController().navigate(R.id.change_theme_fragment)
                 return@setOnPreferenceClickListener true
             }
         }

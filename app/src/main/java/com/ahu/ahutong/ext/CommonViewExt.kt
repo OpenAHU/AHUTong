@@ -1,6 +1,7 @@
 package com.ahu.ahutong.ext
 
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
@@ -27,6 +28,11 @@ fun loadImg(view: ShapeableImageView, url: String?) {
     view.isVisible = !url.isNullOrEmpty()
     if (!url.isNullOrEmpty())
         view.load(url)
+}
+@BindingAdapter("loadColor")
+fun loadColor(view: ShapeableImageView, color: String?){
+    if (!color.isNullOrEmpty())
+        view.setImageDrawable(ColorDrawable(Color.parseColor(color)))
 }
 @BindingAdapter("loadImg")
 fun loadImg(view: ImageView, id: Int){

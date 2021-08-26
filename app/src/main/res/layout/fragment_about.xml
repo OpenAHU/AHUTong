@@ -77,7 +77,7 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
+                android:padding="15dp"
                 android:text="@string/check_update"
                 android:textAppearance="?textAppearanceListItem" />
         </LinearLayout>
@@ -94,7 +94,7 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
+                android:padding="15dp"
                 android:text="@string/update_intro"
                 android:textAppearance="?textAppearanceListItem" />
         </LinearLayout>

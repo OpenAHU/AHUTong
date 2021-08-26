@@ -55,6 +55,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
                 dataBinding.scheduleView
                     .data(it)
                     .loadSchedule()
+                //更新小部件
                 val manager = AppWidgetManager.getInstance(requireContext())
                 val componentName = ComponentName(requireActivity(), ClassWidget::class.java)
                 val appWidgetIds = manager.getAppWidgetIds(componentName)
@@ -83,6 +84,11 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
                 .showAllCourse(it)
                 .loadSchedule()
         }
+        //主题
+        gState.scheduleTheme.observe(this) {
+            dataBinding.scheduleView.theme(it)
+                .loadSchedule()
+        }
     }
 
     override fun onResume() {
@@ -104,6 +110,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             .date(mState.week.value ?: 1, Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK])
             .loadSchedule()
 
+
         //设置点击空课的事件
         dataBinding.scheduleView.setEmptyCourseListener { _, location ->
 
@@ -123,6 +130,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
 
         }
 
+        //兔子
         dataBinding.scheduleView.setSettingClickListener {
             val dialog = SettingScheduleDialog()
             dialog.setCallback(this)

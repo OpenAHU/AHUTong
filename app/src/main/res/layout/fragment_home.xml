@@ -27,6 +27,7 @@
             android:id="@+id/bottom_nav"
             onSelectItem="@{proxy.selectAction}"
             app:itemIconTint="@color/bottom_nav_selector"
+            app:itemTextColor="@color/bottom_nav_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"/>
