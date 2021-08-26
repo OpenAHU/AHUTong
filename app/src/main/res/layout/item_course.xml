@@ -14,7 +14,10 @@
         android:id="@+id/ground"
         android:layout_width="120dp"
         android:layout_height="90dp"
-        android:layout_margin="15dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="6dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         app:cardElevation="5dp"
         app:cardCornerRadius="15dp"
         android:onClick="@{(thisView) -> proxy.onClick(thisView, bean)}">
