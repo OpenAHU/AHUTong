@@ -2,6 +2,8 @@ package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
 import android.view.*
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
@@ -11,10 +13,9 @@ import com.ahu.ahutong.MainActivity
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Rubbish
 import com.ahu.ahutong.databinding.FragmentGarbageBinding
-import com.ahu.ahutong.databinding.ItemRubbishBinding
 import com.ahu.ahutong.ui.adapter.RubbishAdapter
-import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.page.state.GarbageViewModel
+
 
 /**
  * API: https://api.tianapi.com/txapi/lajifenlei/?key=367f6d1bd8e7cacbb14485af77f1ed6b&word=
@@ -48,7 +49,7 @@ class GarbageFragment : BaseFragment<FragmentGarbageBinding>() {
         setHasOptionsMenu(true)
         dataBinding.recyclerRubbish.layoutManager = LinearLayoutManager(context)
         dataBinding.recyclerRubbish.adapter = RubbishAdapter(Rubbish.types, R.layout.item_rubbish_type)
-
+        dataBinding.edKeyword.setOnEditorActionListener(actionListener)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -77,6 +78,20 @@ class GarbageFragment : BaseFragment<FragmentGarbageBinding>() {
         }
 
     }
+
+    private val actionListener =
+        OnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val keyWord = dataBinding.edKeyword.text.toString()
+                if (keyWord.isNotEmpty()) {
+                    //搜索
+                    mState.search(keyWord)
+                } else {
+                    Toast.makeText(requireContext(), "不能输入空气哦", Toast.LENGTH_SHORT).show()
+                }
+            }
+            false
+        }
 
 
 }

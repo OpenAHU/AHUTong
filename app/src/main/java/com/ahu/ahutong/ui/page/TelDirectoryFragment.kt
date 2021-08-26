@@ -58,6 +58,8 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
                 }
 
                 override fun bindingData(binding: ItemTelBinding, data: Tel) {
+                    mState.theme.theme.setItem(binding.tag,true)
+                   // binding.tag
                     binding.bean = data
                     binding.proxy=ClickProxy()
                 }
