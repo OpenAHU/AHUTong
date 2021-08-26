@@ -30,6 +30,7 @@ import java.util.*
  */
 class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDialog.CallBack,
     SettingScheduleDialog.SettingCallback {
+    private lateinit var popupWindow: PopupWindow
     private lateinit var mState: ScheduleViewModel
     private lateinit var gState: MainViewModel
 
@@ -118,7 +119,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
 
         //设置点击课程的事件
         dataBinding.scheduleView.setCourseListener { v, scheduleCourse ->
-            val popupWindow = PopupWindow(
+            popupWindow = PopupWindow(
                 v, ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT, true
             )
@@ -167,6 +168,15 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             layoutParams.bottomMargin = 10
             binding.root.layoutParams = layoutParams
             li.addView(binding.root)
+            binding.tvMore.setOnClickListener {
+                //点击消失
+                popupWindow.dismiss()
+                val bundle = Bundle().apply {
+                    putBoolean("add", false)
+                    putSerializable("course", course)
+                }
+                nav().navigate(R.id.course_fragment, bundle)
+            }
         }
         val nestedScrollView = NestedScrollView(requireContext())
         nestedScrollView.addView(li)
@@ -188,7 +198,10 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
 
     // 以下是兔子Dialog的实现
     override fun addCourse() {
-
+        val bundle = Bundle().apply {
+            putBoolean("add", true)
+        }
+        nav().navigate(R.id.course_fragment, bundle)
     }
 
     override fun setStartTime() {

@@ -31,6 +31,7 @@
         <entry key="app/src/main/res/drawable/tele_radio_unselect.xml" value="0.3594871794871795" />
         <entry key="app/src/main/res/drawable/telephone_background.xml" value="0.36666666666666664" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/dialog_choose_one.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/dialog_room.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/dialog_setting.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/dialog_time.xml" value="0.33" />
@@ -39,6 +40,7 @@
         <entry key="app/src/main/res/layout/fragment_bathroom.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/fragment_change_theme.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/fragment_classroom.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_course.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/fragment_developer.xml" value="0.24538258575197888" />
         <entry key="app/src/main/res/layout/fragment_discovery.xml" value="0.19261213720316622" />
         <entry key="app/src/main/res/layout/fragment_exam.xml" value="0.3494791666666667" />
@@ -94,5 +96,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.35104166666666664" />
+      </ProjectState>
+    </option>
   </component>
 </project>
