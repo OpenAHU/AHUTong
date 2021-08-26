@@ -1,11 +1,13 @@
 package com.ahu.ahutong.ui.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.ahu.ahutong.R
@@ -13,32 +15,43 @@ import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.databinding.*
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.adapter.base.BaseViewHolder
+import com.ahu.ahutong.ui.page.BathViewContainer
 import com.ahu.ahutong.ui.page.DiscoveryFragment
 import com.ahu.ahutong.ui.widget.banner.BannerView.BannerAdapter
+import com.simon.library.ViewContainer
 
+/*
+最后一个item的布局层如下
+item_discovery_activity
+  item_activity
+   itemXXX
+*/
 
 class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var banners: List<Banner>
     private val tools: List<Tool>
-    private var news: MutableList<News>
+    private var courses: List<Course>
+    private val activitys:List<ViewContainer>
 
     //Tip: 类似Java, kotlin的构造函数体，尽量写在第一个方法的位置
     init {
         banners = bean.banners
         tools = bean.tools
-        news = bean.news
+        courses = bean.courses
+        activitys = listOf(BathViewContainer(0),BathViewContainer(1))//这里设置活动
     }
 
     fun setBanners(data: List<Banner>) {
         banners = data
     }
-
-    fun setNews(data: MutableList<News>) {
-        news = data
+    fun setCourses(data: List<Course>) {
+        courses = data
     }
+
 
     //Tip: 为了让每个方法的代码更加清晰，建议使用多个ViewHolder，不同的ItemView使用不同的ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        Log.e("TAG","??")
         return when (viewType) {
             R.layout.item_discovery_banner -> {
                 val binding: ItemDiscoveryBannerBinding = DataBindingUtil.inflate(
@@ -61,35 +74,38 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
                 val toolsItemHolder = ToolsItemHolder(binding)
                 toolsItemHolder.bind(tools)
                 toolsItemHolder
-
             }
-            R.layout.item_discovery_sector -> {
-                val binding: ItemDiscoverySectorBinding = DataBindingUtil.inflate(
+            R.layout.item_discovery_course -> {
+
+                val binding: ItemDiscoveryCourseBinding = DataBindingUtil.inflate(
                     LayoutInflater.from(parent.context),
-                    R.layout.item_discovery_sector,
+                    R.layout.item_discovery_course,
                     parent,
                     false
                 )
-                val sectorItemHolder = SectorItemHolder(binding)
-                sectorItemHolder.bind(Unit)
-                sectorItemHolder
+                val coursesItemHolder = CourseItemHolder(binding)
+                coursesItemHolder.bind(courses)
+                coursesItemHolder
             }
             else -> {
-                val binding: ItemDiscoveryNewsBinding = DataBindingUtil.inflate(
+                val binding: ItemDiscoveryActivityBinding = DataBindingUtil.inflate(
                     LayoutInflater.from(parent.context),
-                    R.layout.item_discovery_news,
+                    R.layout.item_discovery_activity,
                     parent,
                     false
                 )
-                NewsItemHolder(binding)
+                val activityItemHolder = ActivityItemHolder(binding)
+                activityItemHolder.bind(activitys)
+                activityItemHolder
             }
+
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (getItemViewType(position) == R.layout.item_discovery_news) {
-            (holder as NewsItemHolder).bind(news[position - 3])
-        }
+//        if (getItemViewType(position) == R.layout.item_discovery_news) {
+//            (holder as NewsItemHolder).bind(news[position - 3])
+//        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -97,22 +113,21 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
         return when (position) {
             0 -> R.layout.item_discovery_banner
             1 -> R.layout.item_discovery_tools
-            2 -> R.layout.item_discovery_sector
-            else -> R.layout.item_discovery_news
+            2 -> R.layout.item_discovery_course
+           else -> R.layout.item_discovery_activity
         }
     }
 
     override fun getItemCount(): Int {
-        return news.size + 3
+        return 4
     }
 
-    //Tip: ClickProxy 放在fragment， 不然是没有nav用的
 
 
     data class DiscoveryBean(
         val banners: List<Banner>,
         val tools: List<Tool>,
-        val news: MutableList<News>
+        val courses: List<Course>
     )
 
     inner class BannerItemHolder(val binding: ItemDiscoveryBannerBinding) :
@@ -156,35 +171,38 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
                 }
             }
         }
-
     }
-
-    inner class SectorItemHolder(val binding: ItemDiscoverySectorBinding) :
-        BaseViewHolder<ItemDiscoverySectorBinding, Unit>(binding) {
-        override fun bind(data: Unit) {
-            binding.btRadios.setOnCheckedChangeListener { _, checkedId ->
-                val type = when (checkedId) {
-                    R.id.rd_college -> NewsType.College
-                    R.id.rd_association -> NewsType.Association
-                    R.id.rd_edu -> NewsType.Edu
-                    R.id.rd_recruit -> NewsType.Recruit
-                    else -> NewsType.College
+    inner class CourseItemHolder(val binding: ItemDiscoveryCourseBinding) :
+        BaseViewHolder<ItemDiscoveryCourseBinding, List<Course>>(binding) {
+        override fun bind(data: List<Course>) {
+            binding.rv.layoutManager = LinearLayoutManager(binding.root.context,RecyclerView.HORIZONTAL,false)
+            binding.rv.adapter = object : BaseAdapter<Course, ItemCourseBinding>(data) {
+                override fun layout(): Int {
+                    return R.layout.item_course
                 }
-                //fragment处理事件
-                DiscoveryFragment.INSTANCE.SectorClickProxy().onClick(type)
+
+                override fun bindingData(binding: ItemCourseBinding, data: Course) {
+                    binding.bean = data
+                    binding.proxy = DiscoveryFragment.INSTANCE.CourseClickProxy()
+
+                }
             }
         }
-
     }
+    inner class ActivityItemHolder(val binding: ItemDiscoveryActivityBinding) :
+        BaseViewHolder<ItemDiscoveryActivityBinding, List<ViewContainer>>(binding) {
+        override fun bind(data: List<ViewContainer>) {
+            binding.rv.layoutManager = LinearLayoutManager(binding.root.context,RecyclerView.HORIZONTAL,false)
+            binding.rv.adapter = object : BaseAdapter<ViewContainer, ItemActivityBinding>(data) {
+                override fun layout(): Int {
+                    return R.layout.item_activity
+                }
 
-    inner class NewsItemHolder(val binding: ItemDiscoveryNewsBinding) :
-        BaseViewHolder<ItemDiscoveryNewsBinding, News>(binding) {
-        override fun bind(data: News) {
-            binding.news = data
-            binding.proxy = DiscoveryFragment.INSTANCE.NewsClickProxy()
+                override fun bindingData(binding: ItemActivityBinding, data: ViewContainer) {
+                    data.createView(binding.root,binding.root.context)
+                }
+            }
         }
-
     }
-
 
 }

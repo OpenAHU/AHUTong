@@ -35,7 +35,7 @@ class RubbishAdapter(val rubbishes: List<Rubbish>, val type: Int): RecyclerView.
      * 创建Holder
      * @param parent ViewGroup
      * @param viewType Int
-     * @return RecyclerView.ViewHolder
+     * @return RecyclerView.ViewContainer
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutParams = LinearLayout.LayoutParams(
@@ -56,7 +56,7 @@ class RubbishAdapter(val rubbishes: List<Rubbish>, val type: Int): RecyclerView.
 
     /**
      * 绑定数据
-     * @param holder ViewHolder
+     * @param holder ViewContainer
      * @param position Int
      */
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

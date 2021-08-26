@@ -66,5 +66,6 @@
     <string name="schedule_input">导入课表</string>
     <string name="schedule_add">手动添加课程</string>
     <string name="schedule_time">设置当前时间</string>
-
+    <string name="discovery_course">下一节课：</string>
+    <string name="discovery_activity">校园信息</string>
 </resources>
