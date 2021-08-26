@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="license"
+            type="com.ahu.ahutong.data.model.License" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginBottom="10dp"
+        app:cardCornerRadius="5dp"
+        app:cardElevation="2dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_marginTop="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{license.name + ` - ` + license.author}"
+                android:textAppearance="?textAppearanceListItem"
+                tools:text="AndroidX - Google" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@{license.url}"
+                android:textSize="12sp"
+                tools:ignore="SmallSp"
+                tools:text="https://source.android.com" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@{license.license}"
+                android:textSize="12sp"
+                tools:ignore="SmallSp"
+                tools:text="Apache Software License 2.0" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</layout>

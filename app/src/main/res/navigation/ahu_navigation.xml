@@ -74,5 +74,9 @@
     <fragment
         android:id="@+id/course_fragment"
         android:name="com.ahu.ahutong.ui.page.CourseFragment"
-        tools:layout="@layout/fragment_course"/>
+        tools:layout="@layout/fragment_course" />
+    <fragment
+        android:id="@+id/license_fragment"
+        android:name="com.ahu.ahutong.ui.page.LicenseFragment"
+        tools:layout="@layout/fragment_license" />
 </navigation>

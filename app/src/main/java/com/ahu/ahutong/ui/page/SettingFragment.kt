@@ -109,6 +109,7 @@ class SettingFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("license")?.apply {
             setOnPreferenceClickListener {
                 //跳转到开源协议
+                findNavController().navigate(R.id.license_fragment)
                 return@setOnPreferenceClickListener true
             }
         }

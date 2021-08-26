@@ -40,7 +40,7 @@ dependencies {
     api "androidx.core:core-ktx:$androidxCore"
     api "androidx.appcompat:appcompat:$googleMaterial"
     implementation "com.google.android.material:material:$googleMaterial"
-    implementation "org.jsoup:jsoup:1.14.1"
+    implementation "org.jsoup:jsoup:1.14.2"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

@@ -48,6 +48,7 @@
         <entry key="app/src/main/res/layout/fragment_grade.xml" value="0.3314814814814815" />
         <entry key="app/src/main/res/layout/fragment_gradle.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1266490765171504" />
+        <entry key="app/src/main/res/layout/fragment_license.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/fragment_login.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/fragment_mine.xml" value="0.24087591240875914" />
         <entry key="app/src/main/res/layout/fragment_schedule.xml" value="0.25" />
@@ -62,6 +63,7 @@
         <entry key="app/src/main/res/layout/item_exam.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/item_grade.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/item_grid.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/item_license.xml" value="0.33" />
         <entry key="app/src/main/res/layout/item_more.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_pop_course.xml" value="0.22" />
         <entry key="app/src/main/res/layout/item_rubbish.xml" value="0.35104166666666664" />

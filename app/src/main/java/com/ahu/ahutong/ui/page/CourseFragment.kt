@@ -80,6 +80,7 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>() {
                     courseId = System.currentTimeMillis().toString()
                 }
             }
+            //显示dialog
             buildDialog("提示", "是否确认添加该课程?",
                 "确定", { _, _ ->
                     mState.addCourse(course)
