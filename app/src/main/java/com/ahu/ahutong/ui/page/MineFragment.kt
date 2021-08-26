@@ -39,6 +39,7 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        dataBinding.refreshLayout.setOnRefreshListener  { dataBinding.refreshLayout.isRefreshing = false; }
     }
 
 
