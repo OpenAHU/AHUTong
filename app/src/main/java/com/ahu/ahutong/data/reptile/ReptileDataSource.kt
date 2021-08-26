@@ -57,4 +57,8 @@ class ReptileDataSource(user: ReptileUser): BaseDataSource {
         }
         return AHUResponse()
     }
+
+    override suspend fun getCardMoney(): AHUResponse<String> {
+       return Reptile.getCardMoney()
+    }
 }

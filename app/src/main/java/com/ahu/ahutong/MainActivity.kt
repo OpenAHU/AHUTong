@@ -2,10 +2,13 @@ package com.ahu.ahutong
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import arch.sink.ui.page.BaseActivity
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.databinding.ActivityMainBinding
+import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.widget.ClassWidget
 import com.sink.library.update.CookApkUpdate
@@ -29,19 +32,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         val componentName = ComponentName(this, ClassWidget::class.java)
         val appWidgetIds = manager.getAppWidgetIds(componentName)
         manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
-        //检查更新
-        CookApkUpdate.checkUpdate(object : CookApkUpdate.UpdateListener {
-            override fun onNeedUpdate(app: App) {
 
-            }
-
-            override fun onLatestVersion() {
-
-            }
-
-            override fun checkFailure(throwable: Throwable) {
-
-            }
-        })
     }
 }

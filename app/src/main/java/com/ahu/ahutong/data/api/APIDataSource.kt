@@ -45,4 +45,8 @@ class APIDataSource: BaseDataSource {
     override suspend fun getNews(): AHUResponse<List<News>> {
         return AHUService.API.getNews()
     }
+
+    override suspend fun getCardMoney(): AHUResponse<String> {
+        return AHUResponse()
+    }
 }

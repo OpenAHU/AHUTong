@@ -254,6 +254,22 @@ object AHURepository {
             }
         }
 
+    /**
+     *  获取余额
+     * @return Result<(kotlin.String..kotlin.String?)>
+     */
+    suspend fun getCardMoney() = withContext(Dispatchers.IO) {
+        try {
+            val response = dataSource.getCardMoney()
+            if (response.isSuccessful) {
+                Result.success(response.data)
+            } else {
+                Result.failure(Throwable(response.msg))
+            }
+        }catch (e: Exception){
+            Result.failure(e)
+        }
+    }
 
     /**
      * 检查Room参数
@@ -274,4 +290,6 @@ object AHURepository {
             throw IllegalArgumentException("time must be 1-10")
         }
     }
+
+
 }

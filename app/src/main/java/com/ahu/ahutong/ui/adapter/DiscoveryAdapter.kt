@@ -1,7 +1,5 @@
 package com.ahu.ahutong.ui.adapter
 
-import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,42 +10,47 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.model.*
+import com.ahu.ahutong.data.model.Banner
+import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.databinding.*
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.adapter.base.BaseViewHolder
-import com.ahu.ahutong.ui.page.BalanceContainer
-import com.ahu.ahutong.ui.page.BathViewContainer
 import com.ahu.ahutong.ui.page.DiscoveryFragment
 import com.ahu.ahutong.ui.widget.banner.BannerView.BannerAdapter
-import com.simon.library.ViewContainer
 
 
 class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private var activityBean: DiscoveryAdapter.ActivityBean
     private var banners: List<Banner>
     private val tools: List<Tool>
     private var courses: List<Course>
-    private val activitys:List<ViewContainer>
 
     //Tip: 类似Java, kotlin的构造函数体，尽量写在第一个方法的位置
     init {
         banners = bean.banners
         tools = bean.tools
         courses = bean.courses
-        activitys = listOf(BathViewContainer(),BalanceContainer())//这里设置活动
+        activityBean = bean.activityBean
     }
 
     fun setBanners(data: List<Banner>) {
         banners = data
     }
+
     fun setCourses(data: List<Course>) {
         courses = data
     }
 
 
+    fun setActivityBean(activityBean: ActivityBean) {
+        this.activityBean = activityBean
+        notifyItemChanged(3)
+    }
+
+
     //Tip: 为了让每个方法的代码更加清晰，建议使用多个ViewHolder，不同的ItemView使用不同的ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        Log.e("TAG","??")
         return when (viewType) {
             R.layout.item_discovery_banner -> {
                 val binding: ItemDiscoveryBannerBinding = DataBindingUtil.inflate(
@@ -91,7 +94,6 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
                     false
                 )
                 val activityItemHolder = ActivityItemHolder(binding)
-                activityItemHolder.bind(activitys)
                 activityItemHolder
             }
 
@@ -99,9 +101,9 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-//        if (getItemViewType(position) == R.layout.item_discovery_news) {
-//            (holder as NewsItemHolder).bind(news[position - 3])
-//        }
+        if (holder is ActivityItemHolder) {
+            holder.bind(activityBean)
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -110,7 +112,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
             0 -> R.layout.item_discovery_banner
             1 -> R.layout.item_discovery_tools
             2 -> R.layout.item_discovery_course
-           else -> R.layout.item_discovery_activity
+            else -> R.layout.item_discovery_activity
         }
     }
 
@@ -119,11 +121,11 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
     }
 
 
-
     data class DiscoveryBean(
         val banners: List<Banner>,
         val tools: List<Tool>,
-        val courses: List<Course>
+        val courses: List<Course>,
+        val activityBean: ActivityBean
     )
 
     inner class BannerItemHolder(val binding: ItemDiscoveryBannerBinding) :
@@ -132,11 +134,11 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
             val banners = arrayListOf(R.mipmap.banner0, R.mipmap.banner1, R.mipmap.banner2)
             binding.itemDiscoveryBanner.setAdapter(object : BannerAdapter() {
                 override fun getItemCount(): Int {
-                    return  if(banners.size == 0)  banners.size else banners.size
+                    return if (banners.size == 0) banners.size else banners.size
                 }
 
                 override fun getImageView(parentView: View, position: Int): ImageView {
-                    if (data.isEmpty()){
+                    if (data.isEmpty()) {
                         val imageView = ImageView(parentView.context)
                         imageView.scaleType = ImageView.ScaleType.FIT_XY
                         imageView.load(banners[position])
@@ -144,7 +146,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
                     }
                     val imageView = ImageView(parentView.context)
                     imageView.scaleType = ImageView.ScaleType.FIT_XY
-                    val banner =  data[position]
+                    val banner = data[position]
                     imageView.load(banner.imageUrl)
                     return imageView
                 }
@@ -168,29 +170,34 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
             }
         }
     }
+
     inner class CourseItemHolder(val binding: ItemDiscoveryCourseBinding) :
         BaseViewHolder<ItemDiscoveryCourseBinding, List<Course>>(binding) {
         override fun bind(data: List<Course>) {
-            binding.rv.layoutManager = LinearLayoutManager(binding.root.context,RecyclerView.HORIZONTAL,false)
+            binding.rv.layoutManager =
+                LinearLayoutManager(binding.root.context, RecyclerView.HORIZONTAL, false)
             binding.rv.adapter = object : BaseAdapter<Course, ItemCourseBinding>(data) {
                 override fun layout(): Int {
                     return R.layout.item_course
                 }
+
                 override fun bindingData(binding: ItemCourseBinding, data: Course) {
                     binding.bean = data
                     binding.proxy = DiscoveryFragment.INSTANCE.CourseClickProxy()
-                    binding.ground.cardBackgroundColor=Color.BLACK
                 }
             }
         }
     }
+
     inner class ActivityItemHolder(val binding: ItemDiscoveryActivityBinding) :
-        BaseViewHolder<ItemDiscoveryActivityBinding, List<ViewContainer>>(binding) {
-        override fun bind(data: List<ViewContainer>) {
-            data.forEach {
-                it.createView(binding.holder,binding.root.context)
-            }
+        BaseViewHolder<ItemDiscoveryActivityBinding, ActivityBean>(binding) {
+        override fun bind(data: ActivityBean) {
+            binding.bean = data
         }
+    }
+
+    class ActivityBean(val money: String, val north: String, val south: String) {
+
     }
 
 }

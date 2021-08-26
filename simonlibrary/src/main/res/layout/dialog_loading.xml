@@ -8,8 +8,8 @@
 
     <ProgressBar
         android:id="@+id/progress"
-        android:layout_width="76dp"
-        android:layout_height="76dp" />
+        android:layout_width="66dp"
+        android:layout_height="66dp" />
 
     <TextView
         android:id="@+id/tv"

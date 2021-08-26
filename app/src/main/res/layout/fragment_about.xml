@@ -60,19 +60,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="1.0.0-beta"
+                android:text="@{state.versionName}"
                 android:textAppearance="?textAppearanceBody2"
                 tools:text="1.0.0-beta" />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <LinearLayout
-            android:clickable="true"
-            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
             android:background="@color/white"
-            android:foreground="@drawable/mine_li_foreground">
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="@drawable/mine_li_foreground"
+            android:onClick="@{(v) -> proxy.checkUpdate()}">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="match_parent"
@@ -83,13 +84,14 @@
         </LinearLayout>
 
         <LinearLayout
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="@drawable/mine_li_foreground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
-            android:background="@color/white">
+            android:background="@color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="@drawable/mine_li_foreground"
+            android:onClick="@{(v) -> proxy.updateLog()}">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="match_parent"

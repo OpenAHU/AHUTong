@@ -4,6 +4,7 @@ package com.ahu.ahutong.ui.page
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
@@ -20,6 +21,7 @@ import com.simon.library.view.LoadingDialog
 class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDialog.CallBack {
     private lateinit var mState: ClassRoomViewModel
     private var adapter: BaseAdapter<Room, ItemEmptyRoomBinding>? = null
+    private var progressDialog: LoadingDialog? = null
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(ClassRoomViewModel::class.java)
     }
@@ -42,7 +44,7 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
             }
         }
         dataBinding.recycleRooms.adapter = adapter
-        LoadingDialog(context).setMessage("正在加载中。。。").create()
+
     }
 
     override fun observeData() {
@@ -53,6 +55,7 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
             }.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }
+            progressDialog?.dismiss()
         }
     }
     override fun dialogCallBack(campus: String, time: String) {
@@ -74,6 +77,8 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
         }
 
         fun search(){
+            progressDialog = LoadingDialog(context).setMessage("正在加载中...")
+            progressDialog?.create()
             mState.searchEmptyRoom(mState.campus.value, mState.time.value)
         }
     }

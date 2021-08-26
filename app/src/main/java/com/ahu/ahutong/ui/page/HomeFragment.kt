@@ -1,5 +1,7 @@
 package com.ahu.ahutong.ui.page
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -10,8 +12,11 @@ import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentHomeBinding
+import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.HomeViewModel
 import com.sink.library.log.SinkLog
+import com.sink.library.update.CookApkUpdate
+import com.sink.library.update.bean.App
 import java.lang.RuntimeException
 
 /**
@@ -53,6 +58,23 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
             }
         }
+        //检查更新
+        CookApkUpdate.checkUpdate(object : CookApkUpdate.UpdateListener {
+            override fun onNeedUpdate(app: App) {
+                val message = "版本：${app.versionName} \n" +
+                        "新版特性：\n ${app.intro}"
+                buildDialog("更新", message, "前往下载", { _, _ ->
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(app.cookApkUrl)
+                    startActivity(intent)
+                }, "取消").show()
+            }
+
+            override fun onLatestVersion() {}
+
+            override fun checkFailure(throwable: Throwable) {}
+
+        })
     }
 
 

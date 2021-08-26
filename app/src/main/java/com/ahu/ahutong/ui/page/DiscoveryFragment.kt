@@ -44,13 +44,22 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
             val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
             adapter.setBanners(it)
         })
+        mState.activityBean.observe(this){ result ->
+            val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
+            adapter.setActivityBean(result)
+            dataBinding.refreshLayout.isRefreshing = false
+
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.discoveryRec.layoutManager = LinearLayoutManager(context)
         val bean = DiscoveryAdapter.DiscoveryBean(
-            mutableListOf(), mState.tools, mutableListOf()
+            mutableListOf(),
+            mState.tools,
+            mutableListOf(),
+            DiscoveryAdapter.ActivityBean("0.00", "男生", "女生")
         )
         dataBinding.discoveryRec.adapter = DiscoveryAdapter(bean)
 
@@ -59,9 +68,14 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
         val courses = getSchedule(year ?: "", trim ?: "")
             ?: return
         val thisWeek = Calendar.getInstance()[Calendar.DAY_OF_WEEK] - 1
-        val FilterCourses = courses.filter { t -> t.weekday == thisWeek }//kt这种拓展函数看着着舒服
-        val  adapter= dataBinding.discoveryRec.adapter as DiscoveryAdapter
-        adapter.setCourses(FilterCourses)
+        val filterCourses = courses.filter { t -> t.weekday == thisWeek }//kt这种拓展函数看着着舒服
+        val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
+        adapter.setCourses(filterCourses)
+        mState.loadActivityBean()
+        dataBinding.refreshLayout.isRefreshing = true
+        dataBinding.refreshLayout.setOnRefreshListener {
+            mState.loadActivityBean()
+        }
 
     }
 
