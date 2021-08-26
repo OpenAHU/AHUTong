@@ -15,6 +15,7 @@ import com.ahu.ahutong.databinding.ItemEmptyRoomBinding
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.dialog.ClassRoomDialog
 import com.ahu.ahutong.ui.page.state.ClassRoomViewModel
+import com.simon.library.view.LoadingDialog
 
 class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDialog.CallBack {
     private lateinit var mState: ClassRoomViewModel
@@ -41,6 +42,7 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
             }
         }
         dataBinding.recycleRooms.adapter = adapter
+        LoadingDialog(context).setMessage("正在加载中。。。").create()
     }
 
     override fun observeData() {
