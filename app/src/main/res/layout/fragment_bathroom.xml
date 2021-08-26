@@ -2,10 +2,11 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="250dp"
+    android:layout_height="match_parent"
     android:layout_margin="15dp"
     app:cardCornerRadius="10dp"
     app:cardElevation="7dp"
+    android:layout_weight="1"
     app:contentPadding="15dp">
 
     <LinearLayout
@@ -13,19 +14,13 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/times"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:text="今日 - 周日" />
 
         <TextView
             android:id="@+id/dateTimes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:text="2021-8-8\n10:30-21:00" />
+            android:text="\n10:30-21:00" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,43 +28,43 @@
             android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_margin="5dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="北区"
-                    android:textSize="35sp" />
+                    android:textSize="22sp" />
 
                 <TextView
                     android:id="@+id/north"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="男生"
-                    android:textSize="25sp" />
+                    android:textSize="19sp" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_margin="5dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="南区/蕙园"
-                    android:textSize="35sp" />
+                    android:text="南区"
+                    android:textSize="22sp" />
 
                 <TextView
                     android:id="@+id/south"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="女生"
-                    android:textSize="25sp" />
+                    android:textSize="19sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

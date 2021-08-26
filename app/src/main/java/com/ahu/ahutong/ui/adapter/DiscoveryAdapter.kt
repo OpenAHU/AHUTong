@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.adapter
 
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,17 +16,12 @@ import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.databinding.*
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.adapter.base.BaseViewHolder
+import com.ahu.ahutong.ui.page.BalanceContainer
 import com.ahu.ahutong.ui.page.BathViewContainer
 import com.ahu.ahutong.ui.page.DiscoveryFragment
 import com.ahu.ahutong.ui.widget.banner.BannerView.BannerAdapter
 import com.simon.library.ViewContainer
 
-/*
-最后一个item的布局层如下
-item_discovery_activity
-  item_activity
-   itemXXX
-*/
 
 class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var banners: List<Banner>
@@ -38,7 +34,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
         banners = bean.banners
         tools = bean.tools
         courses = bean.courses
-        activitys = listOf(BathViewContainer(0),BathViewContainer(1))//这里设置活动
+        activitys = listOf(BathViewContainer(),BalanceContainer())//这里设置活动
     }
 
     fun setBanners(data: List<Banner>) {
@@ -180,11 +176,10 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
                 override fun layout(): Int {
                     return R.layout.item_course
                 }
-
                 override fun bindingData(binding: ItemCourseBinding, data: Course) {
                     binding.bean = data
                     binding.proxy = DiscoveryFragment.INSTANCE.CourseClickProxy()
-
+                    binding.ground.cardBackgroundColor=Color.BLACK
                 }
             }
         }
@@ -192,15 +187,8 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
     inner class ActivityItemHolder(val binding: ItemDiscoveryActivityBinding) :
         BaseViewHolder<ItemDiscoveryActivityBinding, List<ViewContainer>>(binding) {
         override fun bind(data: List<ViewContainer>) {
-            binding.rv.layoutManager = LinearLayoutManager(binding.root.context,RecyclerView.HORIZONTAL,false)
-            binding.rv.adapter = object : BaseAdapter<ViewContainer, ItemActivityBinding>(data) {
-                override fun layout(): Int {
-                    return R.layout.item_activity
-                }
-
-                override fun bindingData(binding: ItemActivityBinding, data: ViewContainer) {
-                    data.createView(binding.root,binding.root.context)
-                }
+            data.forEach {
+                it.createView(binding.holder,binding.root.context)
             }
         }
     }

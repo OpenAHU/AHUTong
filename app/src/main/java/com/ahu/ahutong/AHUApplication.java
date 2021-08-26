@@ -1,6 +1,10 @@
 package com.ahu.ahutong;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 import com.google.gson.Gson;
 import com.sink.library.log.SinkLogConfig;
@@ -20,10 +24,13 @@ import arch.sink.BaseApplication;
  * @Email 468766131@qq.com
  */
 public class AHUApplication extends BaseApplication {
+    public static int width, height;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        width = getResources().getDisplayMetrics().widthPixels;
+        height = getResources().getDisplayMetrics().heightPixels;
         //SinkLog
         SinkLogManager.init(new SinkLogConfig() {
             @NotNull
