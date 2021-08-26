@@ -14,27 +14,29 @@ import java.util.*
  * @Date: 2021/8/8-下午12:24
  * @Email: 468766131@qq.com
  */
-class SettingTimeDialog: BottomDialog(), View.OnClickListener {
+class SettingTimeDialog : BottomDialog(), View.OnClickListener {
     private var callback: CallBack? = null
     private lateinit var binding: DialogTimeBinding
-    companion object{
+
+    companion object {
         private val schoolYears by lazy {
             val result = mutableListOf<String>()
             val instance = Calendar.getInstance(Locale.CHINA)
             val year = instance[Calendar.YEAR]
-            for (i in 0..5){
+            for (i in 0..5) {
                 result.add("${year - i}-${year - i + 1}")
             }
             result.toTypedArray()
         }
         private val week by lazy {
             val result = mutableListOf<String>()
-            for (i in 1..20){
+            for (i in 1..20) {
                 result.add("第${i}周")
             }
             result.toTypedArray()
         }
     }
+
     override fun onInitDialog(dialog: Dialog?) {
         dialog?.setCanceledOnTouchOutside(false)
         cancelBackKey(dialog)
@@ -52,7 +54,7 @@ class SettingTimeDialog: BottomDialog(), View.OnClickListener {
                 schoolYears, 0, false
             )
             pickerSchoolTerm.setDisplayedValuesAndPickedIndex(
-                arrayOf("第1学期" ,"第2学期"), 0, false
+                arrayOf("第1学期", "第2学期"), 0, false
             )
             pickerWeek.setDisplayedValuesAndPickedIndex(
                 week, 0, false
@@ -60,18 +62,18 @@ class SettingTimeDialog: BottomDialog(), View.OnClickListener {
         }
     }
 
-    fun setCallBack(callback: CallBack){
+    fun setCallBack(callback: CallBack) {
         this.callback = callback
     }
 
-    interface CallBack{
+    interface CallBack {
         fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int)
     }
 
 
     override fun onClick(v: View?) {
-        when(v?.id){
-            R.id.bt_ok ->{
+        when (v?.id) {
+            R.id.bt_ok -> {
                 callback?.onSelectTime(
                     binding.pickerSchoolYear.contentByCurrValue,
                     (binding.pickerSchoolTerm.value + 1).toString(),
@@ -79,7 +81,7 @@ class SettingTimeDialog: BottomDialog(), View.OnClickListener {
                 )
                 dismiss()
             }
-            R.id.bt_close ->{
+            R.id.bt_close -> {
                 dismiss()
             }
 

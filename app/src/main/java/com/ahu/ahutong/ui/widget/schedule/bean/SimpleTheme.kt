@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.ahu.ahutong.R
+import org.json.JSONObject
 import kotlin.random.Random
 
 /**
@@ -14,7 +15,22 @@ import kotlin.random.Random
  * @Email: 468766131@qq.com
  */
 
-class SimpleTheme(private val colors: List<String>): ScheduleTheme.Theme(){
+class SimpleTheme(config: String) : ScheduleTheme.Theme(config) {
+    val colors: List<String>
+
+    init {
+        val jsonObject = JSONObject(config)
+        val type = jsonObject.optString("type")
+        if (type != SimpleTheme::class.java.name) {
+            throw IllegalArgumentException("主题不是Simple主题")
+        }
+        val color1 = jsonObject.optString("color1")
+        val color2 = jsonObject.optString("color2")
+        val color3 = jsonObject.optString("color3")
+        val color4 = jsonObject.optString("color4")
+        val color5 = jsonObject.optString("color5")
+        colors = listOf<String>(color1, color2, color3, color4, color5)
+    }
 
 
     override fun setWeekdayListHeader(linearLayout: LinearLayout) {
@@ -26,9 +42,9 @@ class SimpleTheme(private val colors: List<String>): ScheduleTheme.Theme(){
     }
 
     override fun setItem(item: View, isThisWeek: Boolean) {
-        if (isThisWeek){
+        if (isThisWeek) {
             item.background = getRandomBackground()
-        }else{
+        } else {
             item.background = getGrayBackground()
         }
     }
@@ -36,9 +52,20 @@ class SimpleTheme(private val colors: List<String>): ScheduleTheme.Theme(){
     override fun setToday(view: TextView) {
         view.setBackgroundResource(R.drawable.schedule_weekday_background)
         val gradientDrawable = view.background as GradientDrawable
-        gradientDrawable.colors = intArrayOf(Color.parseColor(colors[0]), Color.parseColor(colors[0]))
+        gradientDrawable.colors =
+            intArrayOf(Color.parseColor(colors[0]), Color.parseColor(colors[0]))
         view.setTextColor(Color.WHITE)
     }
+
+    override fun toConfig(): JSONObject {
+        val jsonObject = JSONObject()
+        jsonObject.put("type", SimpleTheme::class.java.name)
+        for (i in 1..5) {
+            jsonObject.put("color$i", colors[i - 1])
+        }
+        return jsonObject
+    }
+
 
     private fun getRandomBackground(): GradientDrawable {
         val gradientDrawable = GradientDrawable()
@@ -47,7 +74,8 @@ class SimpleTheme(private val colors: List<String>): ScheduleTheme.Theme(){
         gradientDrawable.cornerRadius = 15f
         //随机颜色
         val index = Random(System.currentTimeMillis()).nextInt(colors.size)
-        gradientDrawable.colors = intArrayOf(Color.parseColor(colors[index]), Color.parseColor(colors[index]))
+        gradientDrawable.colors =
+            intArrayOf(Color.parseColor(colors[index]), Color.parseColor(colors[index]))
         return gradientDrawable
     }
 
@@ -55,7 +83,7 @@ class SimpleTheme(private val colors: List<String>): ScheduleTheme.Theme(){
         val gradientDrawable = GradientDrawable()
         //圆角矩形
         gradientDrawable.shape = GradientDrawable.RECTANGLE
-        gradientDrawable.cornerRadius = 5f
+        gradientDrawable.cornerRadius = 15f
         //灰色颜色
         gradientDrawable.colors = intArrayOf(Color.GRAY, Color.GRAY)
         return gradientDrawable

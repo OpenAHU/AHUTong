@@ -67,4 +67,16 @@
         android:id="@+id/about_fragment"
         android:name="com.ahu.ahutong.ui.page.AboutFragment"
         tools:layout="@layout/fragment_about" />
+    <fragment
+        android:id="@+id/change_theme_fragment"
+        android:name="com.ahu.ahutong.ui.page.ChangeThemeFragment"
+        tools:layout="@layout/fragment_change_theme" />
+    <fragment
+        android:id="@+id/course_fragment"
+        android:name="com.ahu.ahutong.ui.page.CourseFragment"
+        tools:layout="@layout/fragment_course" />
+    <fragment
+        android:id="@+id/license_fragment"
+        android:name="com.ahu.ahutong.ui.page.LicenseFragment"
+        tools:layout="@layout/fragment_license" />
 </navigation>

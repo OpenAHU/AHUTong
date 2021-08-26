@@ -36,6 +36,7 @@ class SettingFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("change_theme")?.apply {
             setOnPreferenceClickListener {
                 // 跳转到主题更换界面
+                findNavController().navigate(R.id.change_theme_fragment)
                 return@setOnPreferenceClickListener true
             }
         }
@@ -108,6 +109,7 @@ class SettingFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("license")?.apply {
             setOnPreferenceClickListener {
                 //跳转到开源协议
+                findNavController().navigate(R.id.license_fragment)
                 return@setOnPreferenceClickListener true
             }
         }

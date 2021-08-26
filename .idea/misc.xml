@@ -31,13 +31,16 @@
         <entry key="app/src/main/res/drawable/tele_radio_unselect.xml" value="0.3594871794871795" />
         <entry key="app/src/main/res/drawable/telephone_background.xml" value="0.36666666666666664" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/dialog_choose_one.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/dialog_room.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/dialog_setting.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/dialog_time.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/fragment_about.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/fragment_bathroom.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/fragment_change_theme.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/fragment_classroom.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_course.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/fragment_developer.xml" value="0.24538258575197888" />
         <entry key="app/src/main/res/layout/fragment_discovery.xml" value="0.19261213720316622" />
         <entry key="app/src/main/res/layout/fragment_exam.xml" value="0.3494791666666667" />
@@ -45,6 +48,7 @@
         <entry key="app/src/main/res/layout/fragment_grade.xml" value="0.3314814814814815" />
         <entry key="app/src/main/res/layout/fragment_gradle.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1266490765171504" />
+        <entry key="app/src/main/res/layout/fragment_license.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/fragment_login.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/fragment_mine.xml" value="0.24087591240875914" />
         <entry key="app/src/main/res/layout/fragment_schedule.xml" value="0.25" />
@@ -59,6 +63,7 @@
         <entry key="app/src/main/res/layout/item_exam.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/item_grade.xml" value="0.3494791666666667" />
         <entry key="app/src/main/res/layout/item_grid.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/item_license.xml" value="0.33" />
         <entry key="app/src/main/res/layout/item_more.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_pop_course.xml" value="0.22" />
         <entry key="app/src/main/res/layout/item_rubbish.xml" value="0.35104166666666664" />
@@ -67,9 +72,12 @@
         <entry key="app/src/main/res/layout/item_schedule_header.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_sector.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_tel.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/item_theme_simple.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_tool.xml" value="0.2171875" />
         <entry key="app/src/main/res/layout/item_type.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/item_weekday.xml" value="0.13697916666666668" />
+        <entry key="app/src/main/res/layout/item_widget_content.xml" value="0.35104166666666664" />
+        <entry key="app/src/main/res/layout/item_widget_head.xml" value="0.35104166666666664" />
         <entry key="app/src/main/res/layout/layoput.xml" value="0.2140625" />
         <entry key="app/src/main/res/layout/layout_banner.xml" value="0.2140625" />
         <entry key="app/src/main/res/layout/layout_schedule.xml" value="0.25" />
@@ -90,5 +98,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.35104166666666664" />
+      </ProjectState>
+    </option>
   </component>
 </project>

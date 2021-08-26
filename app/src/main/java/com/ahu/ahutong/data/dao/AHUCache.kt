@@ -3,6 +3,7 @@ package com.ahu.ahutong.data.dao
 import arch.sink.utils.Utils
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.ext.fromJson
+import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.sink.library.log.SinkLog
@@ -242,5 +243,26 @@ object AHUCache {
      */
     fun saveLoginType(type: User.UserType) {
         kv.putString("usertype", type.toString())
+    }
+
+    /**
+     * 保存ScheduleTheme
+     * @param theme ScheduleTheme
+     */
+    fun saveScheduleTheme(theme: ScheduleTheme){
+        val config = theme.toConfig()
+        kv.putString("schedule_theme", config)
+    }
+
+    /**
+     * 获取ScheduleTheme
+     * @return ScheduleTheme?
+     */
+    fun getScheduleTheme(): ScheduleTheme?{
+        val config = kv.getString("schedule_theme", "")
+        if (!config.isNullOrEmpty()){
+            return ScheduleTheme(config)
+        }
+        return null
     }
 }
