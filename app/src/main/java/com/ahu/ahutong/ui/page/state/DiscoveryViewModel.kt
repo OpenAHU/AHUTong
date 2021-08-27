@@ -36,17 +36,16 @@ class DiscoveryViewModel : ViewModel() {
 
     fun loadActivityBean() {
         viewModelScope.launch {
+            val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
+                .parse("2021-08-26")
+            val timeDistance = TimeUtils.getTimeDistance(Date(), date).toInt() % 2
+            val north = if (timeDistance == 0) "男生" else "女生"
+            val south = if (timeDistance == 1) "男生" else "女生"
             AHURepository.getCardMoney()
                 .onSuccess {
-                    val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
-                        .parse("2021-08-26")
-                    val timeDistance = TimeUtils.getTimeDistance(Date(), date).toInt() % 2
-                    val north = if (timeDistance == 0) "男生" else "女生"
-                    val south = if (timeDistance == 1) "男生" else "女生"
-
                     activityBean.value = DiscoveryAdapter.ActivityBean(it, north, south)
-
                 }.onFailure {
+                    activityBean.value = DiscoveryAdapter.ActivityBean("0.00", north, south)
                     Toast.makeText(Utils.getApp(), it.message, Toast.LENGTH_SHORT).show()
                 }
         }
