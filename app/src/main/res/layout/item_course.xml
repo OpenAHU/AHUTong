@@ -19,10 +19,11 @@
         android:layout_marginRight="6dp"
         android:layout_marginTop="15dp"
         android:layout_marginBottom="15dp"
-        app:cardElevation="5dp"
+        app:cardElevation="3dp"
         app:cardCornerRadius="15dp"
         android:onClick="@{(thisView) -> proxy.onClick(thisView, bean)}">
        <TextView
+           android:textSize="14.4sp"
            android:text="@{bean.name}"
            android:gravity="center"
            android:layout_width="match_parent"

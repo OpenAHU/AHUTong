@@ -1,6 +1,7 @@
 package com.ahu.ahutong.ui.page
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -45,6 +46,10 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
             radioButton.layoutParams = layoutParams
             radioButton.text = types;
             radioButton.id = index;
+            radioButton.setOnCheckedChangeListener { t, isChecked ->
+                if (isChecked)mState.theme.theme.setItem(t,true)
+                else t.setBackgroundColor(Color.TRANSPARENT)
+            }
             dataBinding.recyclerType.addView(radioButton)
         }
         dataBinding.recyclerTel.layoutManager =
@@ -58,6 +63,8 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
                 }
 
                 override fun bindingData(binding: ItemTelBinding, data: Tel) {
+                    mState.theme.theme.setItem(binding.tag,true)
+                   // binding.tag
                     binding.bean = data
                     binding.proxy=ClickProxy()
                 }
