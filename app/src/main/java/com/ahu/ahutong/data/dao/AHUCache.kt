@@ -265,12 +265,12 @@ object AHUCache {
         return null
     }
 
-    fun isFirstOpen(): Boolean {
-        return kv.getBoolean("first", true)
+    fun getVersionHistory(): String {
+        return kv.getString("version", "") ?: ""
     }
 
-    fun hasOpen() {
-        kv.putBoolean("first", false)
+    fun saveVersionHistory(version: String) {
+        kv.putString("version", version)
     }
 
 }

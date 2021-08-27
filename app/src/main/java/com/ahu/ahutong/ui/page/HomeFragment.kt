@@ -19,7 +19,6 @@ import com.ahu.ahutong.ui.page.state.HomeViewModel
 import com.sink.library.log.SinkLog
 import com.sink.library.update.CookApkUpdate
 import com.sink.library.update.bean.App
-import java.lang.RuntimeException
 
 /**
  * @Author SinkDev
@@ -35,8 +34,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     }
 
     override fun getDataBindingConfig(): DataBindingConfig {
-       return DataBindingConfig(R.layout.fragment_home, BR.state, mState)
-           .addBindingParam(BR.proxy, ActionProxy())
+        return DataBindingConfig(R.layout.fragment_home, BR.state, mState)
+            .addBindingParam(BR.proxy, ActionProxy())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -44,13 +43,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         //pager2
         dataBinding.homeViewPager2.apply {
             isUserInputEnabled = false //禁止滑动
-            adapter = object: FragmentStateAdapter(requireActivity()) {
+            adapter = object : FragmentStateAdapter(requireActivity()) {
 
                 override fun getItemCount(): Int {
                     return 3
                 }
+
                 override fun createFragment(position: Int): Fragment {
-                    return when(position) {
+                    return when (position) {
                         0 -> ScheduleFragment.INSTANCE
                         1 -> DiscoveryFragment.INSTANCE
                         2 -> MineFragment.INSTANCE
@@ -73,37 +73,37 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             }
 
             override fun onLatestVersion() {
-                if (AHUCache.isFirstOpen()){
-                    buildDialog("更新日志", Constants.UPDATE_LOG, "我知道了").show()
-                    AHUCache.hasOpen()
-                }
+                checkVersion()
             }
 
             override fun checkFailure(throwable: Throwable) {
-                if (AHUCache.isFirstOpen()){
-                    buildDialog("更新日志", Constants.UPDATE_LOG, "我知道了").show()
-                    AHUCache.hasOpen()
-                }
+                checkVersion()
             }
 
         })
 
     }
 
+    private fun checkVersion() {
+        if (AHUCache.getVersionHistory() != mState.versionName) {
+            buildDialog("更新日志", Constants.UPDATE_LOG, "我知道了").show()
+            AHUCache.saveVersionHistory(mState.versionName)
+        }
+    }
 
-    inner class ActionProxy{
-        var selectAction: (MenuItem)->Boolean = fun(item: MenuItem): Boolean {
-            val pos = when(item.itemId) {
+    inner class ActionProxy {
+        var selectAction: (MenuItem) -> Boolean = fun(item: MenuItem): Boolean {
+            val pos = when (item.itemId) {
                 R.id.schedule_fragment -> 0
                 R.id.discovery_fragment -> 1
                 R.id.mine_fragment -> 2
                 else -> -1
             }
-            if (pos == -1){
+            if (pos == -1) {
                 SinkLog.e("选中的ItemId不存在！")
                 return false
             }
-            if (dataBinding.homeViewPager2.currentItem == pos){
+            if (dataBinding.homeViewPager2.currentItem == pos) {
                 SinkLog.i("已在当前界面！")
                 return false
             }

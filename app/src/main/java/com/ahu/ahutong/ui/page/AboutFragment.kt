@@ -2,6 +2,8 @@ package com.ahu.ahutong.ui.page
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.core.os.persistableBundleOf
 import arch.sink.ui.page.BaseFragment
