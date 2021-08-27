@@ -60,7 +60,7 @@ object Reptile {
             //保存登录的Cookie 『CASTGC』『Language』、『CASPRIVACY』= ""
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
             val url = response.header("Location")
-                ?: throw IllegalStateException("Login Failure, Location is null")
+                ?: throw IllegalStateException("账号或密码错误")
             //获取tp_up
             response = Jsoup.newSession()
                 .url(url)
@@ -70,7 +70,7 @@ object Reptile {
                 .execute()
             //检查登录是否成功
             response.header("Location")
-                ?: throw IllegalStateException("Login Failure, Location is null")
+                ?: throw IllegalStateException("账号或密码错误")
             //保存『tp_up』
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
             Result.success(true)
@@ -105,7 +105,7 @@ object Reptile {
                 .followRedirects(false)
                 .execute()
             val loginUrl = response.header("Location")
-                ?: throw IllegalStateException("Login Failure, Location is null")
+                ?: throw IllegalStateException("账号或密码错误")
             //保存『ASP.NET_SessionId』
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
             Jsoup.newSession()
@@ -160,6 +160,9 @@ object Reptile {
                 .requestBody("{}")
                 .execute()
             if (response.statusCode() != 200) {
+                if (response.statusCode() == 503){
+                    throw IllegalStateException("")
+                }
                 throw IllegalStateException(response.statusMessage())
             }
             ahuResponse.data =

@@ -10,18 +10,22 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
+import android.widget.Toast;
 
 import com.ahu.ahutong.R;
 import com.ahu.ahutong.data.dao.AHUCache;
 import com.ahu.ahutong.data.model.Course;
 import com.ahu.ahutong.utils.BitmapUtils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import arch.sink.utils.TimeUtils;
 
 /*
 记录踩坑：
@@ -66,15 +70,35 @@ public class WidgetListService extends RemoteViewsService {
             //5-8中文
             //9-10晚上
             String year = AHUCache.INSTANCE.getSchoolYear();
-            String trim = AHUCache.INSTANCE.getSchoolTerm();
-            List<Course> courses = AHUCache.INSTANCE.getSchedule(year == null ? "" : year, trim == null ? "" : trim);
+            String term = AHUCache.INSTANCE.getSchoolTerm();
+
+            if (year == null || term == null) {
+                Toast.makeText(context, "请填写当前时间后再试", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String time = AHUCache.INSTANCE.getSchoolTermStartTime(year, term);
+            if (time == null) {
+                Toast.makeText(context, "请填写当前时间后再试", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            List<Course> courses = AHUCache.INSTANCE.getSchedule(year, term);
+            //根据开学时间， 获取当前周数
+            Date date = null;
+            try {
+                date = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
+                        .parse(time);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return;
+            }
+            int week = (int) (TimeUtils.getTimeDistance(new Date(), date) / 7 + 1);
             int thisWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
             List<Course> am = new ArrayList<>(2);
             List<Course> pm = new ArrayList<>(2);
             List<Course> ppm = new ArrayList<>(1);
             if (courses != null) {
                 for (Course course : courses) {
-                    if (course.getWeekday() == thisWeek) {
+                    if (course.getWeekday() == thisWeek && course.getStartWeek() <= week && course.getEndWeek() >= week) {
                         int startTime = course.getStartTime();
                         int endTime = course.getLength() - 1 + course.getStartTime();
                         if (startTime >= 9 && endTime <= 11) {
@@ -151,7 +175,7 @@ public class WidgetListService extends RemoteViewsService {
                     times += "-" + endTime + "节";
                 }
                 String location = course.getLocation();
-                if (location.isEmpty()){
+                if (location.isEmpty()) {
                     location = "暂无上课地点";
                 }
                 times += "\t@" + location;

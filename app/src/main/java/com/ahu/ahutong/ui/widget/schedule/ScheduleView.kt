@@ -101,6 +101,13 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         settingImg = findViewById(R.id.schedule_setting)
         contentLinearLayout = findViewById(R.id.schedule_course_content)
         bottomLayout = findViewById(R.id.schedule_bottom)
+//        mLayoutTransition = LayoutTransition()
+//        mLayoutTransition.setAnimator(LayoutTransition.APPEARING, getAppearingAnimation())
+//        mLayoutTransition.setDuration(500)
+//        mLayoutTransition.setStartDelay(LayoutTransition.APPEARING, 0)
+//        mLayoutTransition.setAnimateParentHierarchy(false)
+//        contentLinearLayout.layoutTransition = mLayoutTransition
+
         mCourseListener = { _, _ -> }
         mEmptyCourseListener = { _, _ -> }
         mSettingClickListener = {}
@@ -129,7 +136,6 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
 
 
     fun loadSchedule() {
-        SinkLog.e("MLGB")
         initTableHeader()
         initTableBody()
 

@@ -41,6 +41,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.viewPager2.apply {
+            offscreenPageLimit = 1
             adapter = object : FragmentStateAdapter(this@ScheduleFragment) {
                 override fun getItemCount(): Int {
                     return 18
@@ -51,7 +52,6 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>() {
                 }
             }
             isSaveEnabled = false
-            offscreenPageLimit = 1
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 var position = 0
                 override fun onPageSelected(position: Int) {

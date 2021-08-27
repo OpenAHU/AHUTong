@@ -33,7 +33,6 @@ class DiscoveryViewModel : ViewModel() {
 
     val activityBean = MutableLiveData<DiscoveryAdapter.ActivityBean>()
 
-
     fun loadActivityBean() {
         viewModelScope.launch {
             val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
@@ -53,11 +52,25 @@ class DiscoveryViewModel : ViewModel() {
 
     fun loadCourse(): List<Course> {
         val year = AHUCache.getSchoolYear()
-        val trim = AHUCache.getSchoolTerm()
-        val courses = AHUCache.getSchedule(year ?: "", trim ?: "") ?: emptyList()
+        val term = AHUCache.getSchoolTerm()
+        if (year == null || term == null) {
+            Toast.makeText(Utils.getApp(), "请填写开学时间后再试", Toast.LENGTH_SHORT).show()
+            return emptyList()
+        }
+        //获取第几周
+        val time = AHUCache.getSchoolTermStartTime(year, term)
+        if (time == null) {
+            Toast.makeText(Utils.getApp(), "请填写开学时间后再试", Toast.LENGTH_SHORT).show()
+            return emptyList()
+        }
+        //根据开学时间， 获取当前周数
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
+            .parse(time)
+        val week = (TimeUtils.getTimeDistance(Date(), date) / 7 + 1).toInt()
+        val courses = AHUCache.getSchedule(year ?: "", term ?: "") ?: emptyList()
         val thisWeek = Calendar.getInstance()[Calendar.DAY_OF_WEEK] - 1
         return courses.filter { t ->
-            t.weekday == thisWeek
+            t.weekday == thisWeek && t.startWeek <=week && t.endWeek >= week
         }.sortedBy {
             it.startTime
         }
