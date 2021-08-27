@@ -94,6 +94,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     private var mEmptyCourseListener: (View, CourseDate) -> Unit
 
     private var mSettingClickListener: () -> Unit
+    private var mChangeWeekListener: () -> Unit
 
     init {
         //加载布局
@@ -107,14 +108,19 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         mLayoutTransition = LayoutTransition()
         mLayoutTransition.setAnimator(LayoutTransition.APPEARING, getAppearingAnimation())
         mLayoutTransition.setDuration(500)
-        mLayoutTransition.setStartDelay(LayoutTransition.APPEARING, 0);
+        mLayoutTransition.setStartDelay(LayoutTransition.APPEARING, 0)
         contentLinearLayout.layoutTransition = mLayoutTransition
         mCourseListener = { _, _ -> }
         mEmptyCourseListener = { _, _ -> }
         mSettingClickListener = {}
+        mChangeWeekListener = {}
         settingImg.setOnClickListener {
             mSettingClickListener()
         }
+        weekdayList.setOnClickListener {
+            mChangeWeekListener()
+        }
+
     }
 
 
@@ -380,6 +386,10 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
 
     fun setSettingClickListener(listener: ()->Unit){
         this.mSettingClickListener = listener
+    }
+
+    fun setChangeWeekListener(listener: ()->Unit){
+        this.mChangeWeekListener = listener
     }
     @SuppressLint("ObjectAnimatorBinding")
     private fun getAppearingAnimation(): Animator {

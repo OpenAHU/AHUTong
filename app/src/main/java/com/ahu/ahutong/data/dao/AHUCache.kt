@@ -6,7 +6,6 @@ import com.ahu.ahutong.ext.fromJson
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.sink.library.log.SinkLog
 import com.tencent.mmkv.MMKV
 
 /**
@@ -249,7 +248,7 @@ object AHUCache {
      * 保存ScheduleTheme
      * @param theme ScheduleTheme
      */
-    fun saveScheduleTheme(theme: ScheduleTheme){
+    fun saveScheduleTheme(theme: ScheduleTheme) {
         val config = theme.toConfig()
         kv.putString("schedule_theme", config)
     }
@@ -258,13 +257,20 @@ object AHUCache {
      * 获取ScheduleTheme
      * @return ScheduleTheme?
      */
-    fun getScheduleTheme(): ScheduleTheme?{
+    fun getScheduleTheme(): ScheduleTheme? {
         val config = kv.getString("schedule_theme", "")
-        if (!config.isNullOrEmpty()){
+        if (!config.isNullOrEmpty()) {
             return ScheduleTheme(config)
         }
         return null
     }
 
+    fun isFirstOpen(): Boolean {
+        return kv.getBoolean("first", true)
+    }
+
+    fun hasOpen() {
+        kv.putBoolean("first", false)
+    }
 
 }

@@ -15,6 +15,7 @@ import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentScheduleBinding
 import com.ahu.ahutong.databinding.ItemPopCourseBinding
+import com.ahu.ahutong.ui.dialog.ChooseOneDialog
 import com.ahu.ahutong.ui.dialog.SettingScheduleDialog
 import com.ahu.ahutong.ui.dialog.SettingTimeDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
@@ -136,6 +137,19 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SettingTimeDia
             val dialog = SettingScheduleDialog()
             dialog.setCallback(this)
             dialog.show(parentFragmentManager, "SettingScheduleDialog")
+        }
+
+        //切换周数
+        dataBinding.scheduleView.setChangeWeekListener {
+            val list = mutableListOf<String>()
+            for (i in 1..25) {
+                list.add("第 $i 周")
+            }
+            val chooseOneDialog = ChooseOneDialog(list)
+            chooseOneDialog.selectListener = { index, _ ->
+                mState.week.value = index + 1
+            }
+            chooseOneDialog.show(parentFragmentManager, "chooseStartWeek")
         }
 
         dataBinding.refreshLayout.setOnRefreshListener {

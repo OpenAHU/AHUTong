@@ -10,7 +10,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
+import com.ahu.ahutong.Constants
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentHomeBinding
 import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.HomeViewModel
@@ -70,11 +72,22 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 }, "取消").show()
             }
 
-            override fun onLatestVersion() {}
+            override fun onLatestVersion() {
+                if (AHUCache.isFirstOpen()){
+                    buildDialog("更新日志", Constants.UPDATE_LOG, "我知道了").show()
+                    AHUCache.hasOpen()
+                }
+            }
 
-            override fun checkFailure(throwable: Throwable) {}
+            override fun checkFailure(throwable: Throwable) {
+                if (AHUCache.isFirstOpen()){
+                    buildDialog("更新日志", Constants.UPDATE_LOG, "我知道了").show()
+                    AHUCache.hasOpen()
+                }
+            }
 
         })
+
     }
 
 
