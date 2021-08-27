@@ -1,10 +1,6 @@
 package com.ahu.ahutong;
 
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.util.DisplayMetrics;
-import android.view.WindowManager;
 
 import com.google.gson.Gson;
 import com.sink.library.log.SinkLogConfig;
@@ -70,6 +66,6 @@ public class AHUApplication extends BaseApplication {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-
     }
+
 }

@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="bean"
             type="com.ahu.ahutong.ui.adapter.DiscoveryAdapter.ActivityBean" />
     </data>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -29,108 +30,152 @@
 
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="120dp"
                 android:layout_margin="15dp"
                 android:layout_weight="1"
                 android:foreground="?android:attr/selectableItemBackground"
                 app:cardCornerRadius="10dp"
-                app:cardElevation="7dp"
-                app:contentPadding="15dp">
+                app:cardElevation="2dp"
+                app:contentPadding="10dp">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/icon_wallet"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_wallet_24" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:text="@string/card_money"
-                        android:textSize="22sp" />
+                        app:layout_constraintBottom_toBottomOf="@id/icon_wallet"
+                        app:layout_constraintLeft_toRightOf="@id/icon_wallet" />
 
-                    <TextView
-                        android:layout_width="match_parent"
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_money"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{bean.money + `元`}"
-                        android:textSize="35sp"
-                        tools:text="100元" />
-                </LinearLayout>
+                        android:layout_marginTop="20dp"
+                        android:text="@{`￥`+ bean.money}"
+                        android:textAppearance="?textAppearanceListItem"
+                        android:textSize="23sp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/icon_wallet"
+                        tools:text="￥100" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/text_pay"
+                        android:text="@string/recharge"
+                        android:textColor="@color/light_blue_600"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/tv_money"
+                        app:layout_constraintHorizontal_bias="0.8"
+                        app:layout_constraintLeft_toRightOf="@id/tv_money"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/tv_money" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#eee"
+                        app:layout_constraintTop_toBottomOf="@id/tv_money" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_state"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        tools:text="未冻结" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/view_flow"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintRight_toLeftOf="@id/img_more" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/img_more"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        app:layout_constraintBottom_toBottomOf="@id/tv_state"
+                        app:layout_constraintRight_toRightOf="parent"
+
+                        app:layout_constraintTop_toTopOf="@id/tv_state"
+                        app:srcCompat="@mipmap/arrow" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="120dp"
                 android:layout_margin="15dp"
                 android:layout_weight="1"
                 android:foreground="?android:attr/selectableItemBackground"
                 app:cardCornerRadius="10dp"
-                app:cardElevation="7dp"
+                app:cardElevation="2dp"
                 app:contentPadding="15dp">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/icon_bath"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_bathtub_24" />
 
-                    <TextView
-                        android:id="@+id/dateTimes"
-                        android:layout_width="match_parent"
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:text="@string/bathroom_time" />
+                        android:layout_marginStart="10dp"
+                        android:text="@string/bathroom"
+                        app:layout_constraintBottom_toBottomOf="@id/icon_bath"
+                        app:layout_constraintLeft_toRightOf="@id/icon_bath" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_north"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:textColor="@color/black"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/icon_bath"
+                        android:text="@{`北区：` + bean.north}"
+                        tools:text="北区：女生" />
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:textColor="@color/black"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_north"
+                        android:text="@{`南区/蕙园：` + bean.south}"
+                        tools:text="南区/蕙园：男生" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@{`北区`}"
-                                android:textSize="22sp"
-                                tools:text="北区" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-                            <TextView
-                                android:id="@+id/north"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@{bean.north}"
-                                android:textSize="19sp"
-                                tools:text="男生" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@{`南区`}"
-                                android:textSize="22sp"
-                                tools:text="南区" />
-
-                            <TextView
-                                android:id="@+id/south"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@{bean.south}"
-                                android:textSize="19sp"
-                                tools:text="女生" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </LinearLayout>
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>

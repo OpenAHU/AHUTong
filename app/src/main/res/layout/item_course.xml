@@ -1,33 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <data>
+
         <variable
             name="bean"
             type="com.ahu.ahutong.data.model.Course" />
+
         <variable
             name="proxy"
             type="com.ahu.ahutong.ui.page.DiscoveryFragment.CourseClickProxy" />
     </data>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/ground"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:foreground="?android:attr/selectableItemBackground"
-        android:layout_width="120dp"
-        android:layout_height="90dp"
-        android:layout_marginLeft="6dp"
-        android:layout_marginRight="6dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        app:cardElevation="3dp"
-        app:cardCornerRadius="15dp"
-        android:onClick="@{(thisView) -> proxy.onClick(thisView, bean)}">
-       <TextView
-           android:textSize="14.4sp"
-           android:text="@{bean.name}"
-           android:gravity="center"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"/>
+        android:onClick="@{(thisView) -> proxy.onClick(thisView, bean)}"
+        app:cardElevation="0dp">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:paddingVertical="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="@{bean.name}"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                tools:text="高等数学" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:maxLines="1"
+                android:text="@{`时间：第` + bean.startTime + ` - ` + (bean.startTime + bean.length) + ` 节\t\t` + `地点：` + bean.location}"
+                android:textSize="11sp"
+                tools:text="时间：第 5 - 6 节 \t 地点：11111" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
     </androidx.cardview.widget.CardView>
 
 </layout>

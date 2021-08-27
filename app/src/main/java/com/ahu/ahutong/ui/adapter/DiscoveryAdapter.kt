@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.adapter
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -175,7 +176,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
         BaseViewHolder<ItemDiscoveryCourseBinding, List<Course>>(binding) {
         override fun bind(data: List<Course>) {
             binding.rv.layoutManager =
-                LinearLayoutManager(binding.root.context, RecyclerView.HORIZONTAL, false)
+                LinearLayoutManager(binding.root.context)
             binding.rv.adapter = object : BaseAdapter<Course, ItemCourseBinding>(data) {
                 override fun layout(): Int {
                     return R.layout.item_course

@@ -1,6 +1,5 @@
 package com.ahu.ahutong.ui.page.state
 
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import arch.sink.utils.TimeUtils
 import arch.sink.utils.Utils
 import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Banner
+import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.ui.adapter.DiscoveryAdapter
 import kotlinx.coroutines.launch
@@ -32,6 +33,7 @@ class DiscoveryViewModel : ViewModel() {
 
     val activityBean = MutableLiveData<DiscoveryAdapter.ActivityBean>()
 
+
     fun loadActivityBean() {
         viewModelScope.launch {
             AHURepository.getCardMoney()
@@ -47,6 +49,18 @@ class DiscoveryViewModel : ViewModel() {
                 }.onFailure {
                     Toast.makeText(Utils.getApp(), it.message, Toast.LENGTH_SHORT).show()
                 }
+        }
+    }
+
+    fun loadCourse(): List<Course> {
+        val year = AHUCache.getSchoolYear()
+        val trim = AHUCache.getSchoolTerm()
+        val courses = AHUCache.getSchedule(year ?: "", trim ?: "") ?: emptyList()
+        val thisWeek = Calendar.getInstance()[Calendar.DAY_OF_WEEK] - 1
+        return courses.filter { t ->
+            t.weekday == thisWeek
+        }.sortedBy {
+            it.startTime
         }
     }
 }

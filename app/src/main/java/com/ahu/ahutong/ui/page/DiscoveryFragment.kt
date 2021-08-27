@@ -8,16 +8,12 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.dao.AHUCache.getSchedule
-import com.ahu.ahutong.data.dao.AHUCache.getSchoolTerm
-import com.ahu.ahutong.data.dao.AHUCache.getSchoolYear
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.databinding.FragmentDiscoveryBinding
 import com.ahu.ahutong.ui.adapter.DiscoveryAdapter
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
-import java.util.*
 
 
 /**
@@ -44,7 +40,7 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
             val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
             adapter.setBanners(it)
         })
-        mState.activityBean.observe(this){ result ->
+        mState.activityBean.observe(this) { result ->
             val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
             adapter.setActivityBean(result)
             dataBinding.refreshLayout.isRefreshing = false
@@ -62,16 +58,9 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
             DiscoveryAdapter.ActivityBean("0.00", "男生", "女生")
         )
         dataBinding.discoveryRec.adapter = DiscoveryAdapter(bean)
-
-        val year = getSchoolYear()
-        val trim = getSchoolTerm()
-        val courses = getSchedule(year ?: "", trim ?: "")
-            ?: return
-        val thisWeek = Calendar.getInstance()[Calendar.DAY_OF_WEEK] - 1
-        val filterCourses = courses.filter { t -> t.weekday == thisWeek }//kt这种拓展函数看着着舒服
-        val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
-        adapter.setCourses(filterCourses)
         mState.loadActivityBean()
+        val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
+        adapter.setCourses(mState.loadCourse())
         dataBinding.refreshLayout.isRefreshing = true
         dataBinding.refreshLayout.setOnRefreshListener {
             mState.loadActivityBean()
@@ -90,8 +79,12 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
     }
 
     inner class CourseClickProxy {
-        fun onClick(view: View, tool: Course) {
-
+        fun onClick(view: View, course: Course) {
+            val bundle = Bundle().apply {
+                putBoolean("add", false)
+                putSerializable("course", course)
+            }
+            nav().navigate(R.id.course_fragment, bundle)
         }
     }
 

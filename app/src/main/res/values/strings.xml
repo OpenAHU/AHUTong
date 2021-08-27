@@ -79,8 +79,10 @@
     <string name="teacher">老师</string>
     <string name="course">课程</string>
     <string name="course_length_hint">输入数字即可,例如 2 = 两节</string>
-    <string name="discovery_course">下一节课：</string>
+    <string name="discovery_course">今日课表</string>
     <string name="discovery_activity">校园信息</string>
     <string name="card_money">校园卡余额</string>
     <string name="bathroom_time">10:30 - 21:00</string>
+    <string name="recharge">充值</string>
+    <string name="view_flow">查看流水</string>
 </resources>
