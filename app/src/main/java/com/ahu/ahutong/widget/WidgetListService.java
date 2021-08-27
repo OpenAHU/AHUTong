@@ -146,10 +146,15 @@ public class WidgetListService extends RemoteViewsService {
                 back.setTextViewText(R.id.widget_name, course.getName());
                 String startTime = num2text[course.getStartTime() - 1];
                 String endTime = num2text[course.getLength() - 1 + course.getStartTime() - 1];
-                String times = "第" + startTime + "节";
+                String times = "第" + startTime;
                 if (!startTime.equals(endTime)) {
                     times += "-" + endTime + "节";
                 }
+                String location = course.getLocation();
+                if (location.isEmpty()){
+                    location = "暂无上课地点";
+                }
+                times += "\t@" + location;
                 back.setTextViewText(R.id.widget_time, times);
 
                 if (course.getStartTime() <= numTime) {
