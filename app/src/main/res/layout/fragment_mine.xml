@@ -1,35 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools">
+
     <data>
+
         <variable
             name="state"
             type="com.ahu.ahutong.ui.page.state.MineViewModel" />
+
         <variable
             name="activityState"
             type="com.ahu.ahutong.ui.page.state.MainViewModel" />
+
         <variable
             name="proxy"
             type="com.ahu.ahutong.ui.page.MineFragment.ClickProxy" />
     </data>
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tool="http://schemas.android.com/tools"
-        android:background="#eee"
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#eee">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <LinearLayout
-                android:fitsSystemWindows="true"
                 android:id="@+id/user_header"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:background="@mipmap/head_background"
+                android:fitsSystemWindows="true"
                 android:gravity="center"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toTopOf="parent">
@@ -41,9 +45,9 @@
                     android:gravity="start"
                     android:paddingHorizontal="20dp"
                     android:singleLine="true"
+                    android:text="@{state.user.name}"
                     android:textColor="@color/black"
                     android:textSize="35sp"
-                    android:text="@{state.user.name}"
                     tool:text="Sink" />
             </LinearLayout>
 
@@ -59,82 +63,86 @@
                 app:layout_constraintVertical_bias="1.0">
 
                 <LinearLayout
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_marginTop="10dp"
-                    android:onClick="@{(thisView) -> proxy.login(thisView)}"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
+                    android:layout_marginTop="10dp"
                     android:background="@color/white"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:foreground="@drawable/mine_li_foreground"
                     android:gravity="center_vertical"
+                    android:onClick="@{(thisView) -> proxy.login(thisView)}"
                     android:orientation="horizontal">
 
                     <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_marginStart="5dp"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginStart="5dp"
                         android:src="@mipmap/identity" />
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
+                        android:layout_weight="1"
                         android:text="@{activityState.login ?  @string/mine_tv_logout : @string/mine_tv_identity}"
                         tool:text="@string/mine_tv_identity" />
+
                     <androidx.appcompat.widget.AppCompatImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginEnd="5dp"
-                        android:src="@mipmap/arrow"/>
+                        android:src="@mipmap/arrow" />
                 </LinearLayout>
+
                 <LinearLayout
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:onClick="@{(thisView) -> proxy.setting(thisView)}"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:background="@color/white"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:foreground="@drawable/mine_li_foreground"
                     android:gravity="center_vertical"
+                    android:onClick="@{(thisView) -> proxy.setting(thisView)}"
                     android:orientation="horizontal">
 
                     <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_marginStart="5dp"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginStart="5dp"
                         android:src="@mipmap/setup" />
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
+                        android:layout_weight="1"
                         android:text="@string/setting" />
+
                     <androidx.appcompat.widget.AppCompatImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginEnd="5dp"
-                        android:src="@mipmap/arrow"/>
+                        android:src="@mipmap/arrow" />
                 </LinearLayout>
+
                 <LinearLayout
-                    android:layout_marginTop="10dp"
                     android:id="@+id/li_recommend"
-                    android:onClick="@{(v)->proxy.recommend()}"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@color/white"
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="@drawable/mine_li_foreground"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:background="@color/white"
                     android:gravity="center_vertical"
+                    android:onClick="@{(v)->proxy.recommend()}"
                     android:orientation="horizontal">
 
                     <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_marginStart="5dp"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginStart="5dp"
                         android:src="@mipmap/recommend" />
 
                     <androidx.appcompat.widget.AppCompatTextView
@@ -143,22 +151,23 @@
                         android:layout_marginStart="10dp"
                         android:text="@string/mine_tv_recommend" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:id="@+id/li_feedback"
-                    android:onClick="@{(thisView) -> proxy.feedback(thisView)}"
                     android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@color/white"
                     android:clickable="true"
                     android:focusable="true"
-                    android:layout_height="50dp"
                     android:foreground="@drawable/mine_li_foreground"
-                    android:background="@color/white"
                     android:gravity="center_vertical"
+                    android:onClick="@{(thisView) -> proxy.feedback(thisView)}"
                     android:orientation="horizontal">
 
                     <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_marginStart="5dp"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginStart="5dp"
                         android:src="@mipmap/feedback" />
 
                     <androidx.appcompat.widget.AppCompatTextView
@@ -167,64 +176,67 @@
                         android:layout_marginStart="10dp"
                         android:text="@string/mine_tv_feedback" />
                 </LinearLayout>
+
                 <LinearLayout
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:onClick="@{(thisView) -> proxy.aboutUs(thisView)}"
                     android:layout_width="match_parent"
-                    android:foreground="@drawable/mine_li_foreground"
                     android:layout_height="50dp"
                     android:background="@color/white"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="@drawable/mine_li_foreground"
                     android:gravity="center_vertical"
+                    android:onClick="@{(thisView) -> proxy.aboutUs(thisView)}"
                     android:orientation="horizontal">
 
                     <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_marginStart="5dp"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginStart="5dp"
                         android:src="@mipmap/about_us" />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
+                        android:layout_weight="1"
                         android:text="@string/mine_tv_about_us" />
+
                     <androidx.appcompat.widget.AppCompatImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginEnd="5dp"
-                        android:src="@mipmap/arrow"/>
+                        android:src="@mipmap/arrow" />
                 </LinearLayout>
+
                 <LinearLayout
-                    android:foreground="@drawable/mine_li_foreground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:onClick="@{(thisView) -> proxy.developer(thisView)}"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:background="@color/white"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="@drawable/mine_li_foreground"
                     android:gravity="center_vertical"
+                    android:onClick="@{(thisView) -> proxy.developer(thisView)}"
                     android:orientation="horizontal">
 
                     <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_marginStart="5dp"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginStart="5dp"
                         android:src="@mipmap/crewlist" />
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
+                        android:layout_weight="1"
                         android:text="@string/mine_tv_developer" />
 
                     <androidx.appcompat.widget.AppCompatImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginEnd="5dp"
-                        android:src="@mipmap/arrow"/>
+                        android:src="@mipmap/arrow" />
                 </LinearLayout>
             </LinearLayout>
 

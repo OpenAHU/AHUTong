@@ -59,7 +59,6 @@ class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>(){
             try {
                 val i1 = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
                 i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                i1.action = Intent.ACTION_VIEW
                 view.context.startActivity(i1)
             }catch (e: Exception){
                 Toast.makeText(requireContext(), "您并没有安装QQ或者Tim", Toast.LENGTH_SHORT).show()

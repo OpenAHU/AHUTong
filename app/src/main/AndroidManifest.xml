@@ -16,6 +16,8 @@
         <package android:name="com.tencent.tim" />
         <!-- 指定qq包名 -->
         <package android:name="com.tencent.mobileqq" />
+        <!-- 指定alipay包名 -->
+        <package android:name="com.eg.android.AlipayGphone" />
     </queries>
 
     <application
