@@ -66,7 +66,6 @@ public class ScheduleTheme {
         public Theme(String config) {
 
         }
-
         public abstract void setWeekdayListHeader(@NonNull LinearLayout linearLayout);
 
         public abstract void setContentBackground(@NonNull LinearLayout linearLayout);

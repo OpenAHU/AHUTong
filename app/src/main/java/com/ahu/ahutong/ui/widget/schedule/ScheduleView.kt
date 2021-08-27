@@ -12,13 +12,11 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.viewpager2.widget.ViewPager2
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ext.dp
-import com.ahu.ahutong.ui.widget.schedule.bean.CourseDate
-import com.ahu.ahutong.ui.widget.schedule.bean.DefaultDataUtils
-import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleCourse
-import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
+import com.ahu.ahutong.ui.widget.schedule.bean.*
 import com.sink.library.log.SinkLog
 import java.util.*
 
@@ -29,7 +27,6 @@ import java.util.*
  */
 class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) :
     LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
-
 
     private val headerTimeMsg by lazy {
         hashMapOf(
@@ -85,7 +82,6 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     private var tableHeaderWidth = 35.dp
     private var tableHeaderHeight = 50.dp
 
-    private val mLayoutTransition: LayoutTransition
 
     //每个格子的宽高
     private var courseHeight: Float = 50.dp
@@ -105,11 +101,6 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         settingImg = findViewById(R.id.schedule_setting)
         contentLinearLayout = findViewById(R.id.schedule_course_content)
         bottomLayout = findViewById(R.id.schedule_bottom)
-        mLayoutTransition = LayoutTransition()
-        mLayoutTransition.setAnimator(LayoutTransition.APPEARING, getAppearingAnimation())
-        mLayoutTransition.setDuration(500)
-        mLayoutTransition.setStartDelay(LayoutTransition.APPEARING, 0)
-        contentLinearLayout.layoutTransition = mLayoutTransition
         mCourseListener = { _, _ -> }
         mEmptyCourseListener = { _, _ -> }
         mSettingClickListener = {}
@@ -138,6 +129,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
 
 
     fun loadSchedule() {
+        SinkLog.e("MLGB")
         initTableHeader()
         initTableBody()
 
@@ -149,6 +141,9 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         }
         if (coursesData.isNullOrEmpty()) {
             return
+        }
+        if (theme.theme is SimpleTheme){
+            (theme.theme as SimpleTheme).num = 0
         }
         for (i in 1..7) {
             //创建纵向课程容器
@@ -193,6 +188,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         scheduleCourse: ScheduleCourse,
         isThisWeek: Boolean
     ) {
+
         //解析课程item
         val courseView = inflate(context, R.layout.item_schdule_course, null)
         val tvName = courseView.findViewById<TextView>(R.id.course_name)

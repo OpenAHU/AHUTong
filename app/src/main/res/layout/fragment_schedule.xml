@@ -31,17 +31,10 @@
                 tools:title="@string/title_schedule" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <com.ahu.ahutong.ui.widget.AHURefreshLayout
-            android:id="@+id/refresh_layout"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager2"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <com.ahu.ahutong.ui.widget.schedule.ScheduleView
-                android:id="@+id/scheduleView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </com.ahu.ahutong.ui.widget.AHURefreshLayout>
+            android:layout_height="match_parent" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 </layout>

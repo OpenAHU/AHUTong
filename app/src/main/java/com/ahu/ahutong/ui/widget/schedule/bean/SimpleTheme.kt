@@ -7,7 +7,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.ahu.ahutong.R
 import org.json.JSONObject
-import kotlin.random.Random
 
 /**
  * @Author: SinkDev
@@ -17,6 +16,7 @@ import kotlin.random.Random
 
 class SimpleTheme(config: String) : ScheduleTheme.Theme(config) {
     val colors: List<String>
+    var num = 0
 
     init {
         val jsonObject = JSONObject(config)
@@ -73,9 +73,10 @@ class SimpleTheme(config: String) : ScheduleTheme.Theme(config) {
         gradientDrawable.shape = GradientDrawable.RECTANGLE
         gradientDrawable.cornerRadius = 15f
         //随机颜色
-        val index = Random(System.currentTimeMillis()).nextInt(colors.size)
+        val index = num % colors.size
         gradientDrawable.colors =
             intArrayOf(Color.parseColor(colors[index]), Color.parseColor(colors[index]))
+        num++
         return gradientDrawable
     }
 
