@@ -1,7 +1,6 @@
 package com.ahu.ahutong.data.reptile.store;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
 public class DefaultCookieStore implements CookieStore {
     Map<String, String> cookieMap = new HashMap<>();

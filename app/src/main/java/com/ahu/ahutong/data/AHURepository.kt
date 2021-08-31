@@ -1,5 +1,6 @@
 package com.ahu.ahutong.data
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.ahu.ahutong.data.api.APIDataSource
 import com.ahu.ahutong.data.base.BaseDataSource
@@ -45,7 +46,7 @@ object AHURepository {
      * @param keyword String
      * @return LiveData<Result<List<Rubbish>>>
      */
-    fun searchRubbish(keyword: String) = liveData(Dispatchers.IO) {
+    fun searchRubbish(keyword: String): LiveData<Result<List<Rubbish>>> = liveData(Dispatchers.IO) {
         val result = try {
             val client = OkHttpClient.Builder()
                 .readTimeout(5, TimeUnit.SECONDS)
