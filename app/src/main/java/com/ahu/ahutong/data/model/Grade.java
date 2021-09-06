@@ -201,6 +201,40 @@ public class Grade implements Serializable {
             public void setCourseNature(String courseNature) {
                 this.courseNature = courseNature;
             }
+
+            @Override
+            public String toString() {
+                return "GradeListBean{" +
+                        "courseNum='" + courseNum + '\'' +
+                        ", course='" + course + '\'' +
+                        ", credit='" + credit + '\'' +
+                        ", gradePoint='" + gradePoint + '\'' +
+                        ", grade='" + grade + '\'' +
+                        ", courseNature='" + courseNature + '\'' +
+                        '}';
+            }
         }
+
+        @Override
+        public String toString() {
+            return "TermGradeListBean{" +
+                    "schoolYear='" + schoolYear + '\'' +
+                    ", term='" + term + '\'' +
+                    ", termGradePoint='" + termGradePoint + '\'' +
+                    ", termTotalCredit='" + termTotalCredit + '\'' +
+                    ", termGradePointAverage='" + termGradePointAverage + '\'' +
+                    ", gradeList=" + gradeList +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Grade{" +
+                "totalGradePoint='" + totalGradePoint + '\'' +
+                ", totalCredit='" + totalCredit + '\'' +
+                ", totalGradePointAverage='" + totalGradePointAverage + '\'' +
+                ", termGradeList=" + termGradeList +
+                '}';
     }
 }

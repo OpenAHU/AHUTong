@@ -3,9 +3,10 @@ buildscript {
     ext{
         kotlin_version = "1.5.21"
         lifecycleVersion = "2.3.1"
-        androidxCore = "1.5.0"
+        androidxCore = "1.6.0"
         googleMaterial = "1.3.0"
-        navVersion = "2.3.3"
+        navVersion = "2.3.5"
+        sdkVersion = 31
     }
 
     repositories {

@@ -1,15 +1,17 @@
 package com.ahu.ahutong;
 
-import androidx.annotation.NonNull;
+import android.content.pm.PackageManager;
 
 import com.google.gson.Gson;
 import com.sink.library.log.SinkLogConfig;
 import com.sink.library.log.SinkLogManager;
 import com.sink.library.log.parser.SinkJsonParser;
 import com.sink.library.log.printer.SinkLogConsolePrinter;
-import com.tencent.mmkv.MMKV;
+import com.sink.library.update.CookApkUpdate;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import org.jetbrains.annotations.NotNull;
+
 import arch.sink.BaseApplication;
 
 /**
@@ -18,15 +20,13 @@ import arch.sink.BaseApplication;
  * @Email 468766131@qq.com
  */
 public class AHUApplication extends BaseApplication {
-    @NonNull
-    public static AHUApplication globalContext;
-
+    public static int width, height;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        globalContext = this;
-        MMKV.initialize(this);
+        width = getResources().getDisplayMetrics().widthPixels;
+        height = getResources().getDisplayMetrics().heightPixels;
         //SinkLog
         SinkLogManager.init(new SinkLogConfig() {
             @NotNull
@@ -55,5 +55,17 @@ public class AHUApplication extends BaseApplication {
                 return obj -> new Gson().toJson(obj);
             }
         }, new SinkLogConsolePrinter());
+
+        //禁止获取手机ID信息
+        CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(this);
+        strategy.setDeviceID("fake-id");
+        CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG, strategy);
+        //初始化更新
+        try {
+            CookApkUpdate.init(this);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
+
 }

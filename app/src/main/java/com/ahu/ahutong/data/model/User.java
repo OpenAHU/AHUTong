@@ -1,13 +1,8 @@
 package com.ahu.ahutong.data.model;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
-import androidx.annotation.StringDef;
 
 import com.google.gson.annotations.SerializedName;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 public class User {
 
@@ -23,8 +18,14 @@ public class User {
         this.name = name;
     }
 
+
     public enum UserType {
-        AHU_Teach("1"), AHU_Wisdom("2");
+        //使用教务系统登录的
+        AHU_Teach("1"),
+        //使用智慧安大登录的
+        AHU_Wisdom("2"),
+        // 爬虫
+        AHU_LOCAL("0");
 
         private final String type;
 
@@ -41,6 +42,7 @@ public class User {
         public String toString() {
             return type;
         }
+
     }
 
 }

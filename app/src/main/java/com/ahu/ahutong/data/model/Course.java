@@ -48,24 +48,24 @@ public class Course implements Serializable {
     @SerializedName("courseId")
     private String courseId;
 
-    public String getWeekday() {
-        return weekday;
+    public Integer getWeekday() {
+        return weekday == null || weekday.isEmpty() ? 0 : Integer.parseInt(weekday);
     }
 
     public void setWeekday(String weekday) {
         this.weekday = weekday;
     }
 
-    public String getStartWeek() {
-        return startWeek;
+    public Integer getStartWeek() {
+        return startWeek == null || startWeek.isEmpty() ? 0 : Integer.parseInt(startWeek);
     }
 
     public void setStartWeek(String startWeek) {
         this.startWeek = startWeek;
     }
 
-    public String getEndWeek() {
-        return endWeek;
+    public Integer getEndWeek() {
+        return endWeek == null || endWeek.isEmpty() ? 0 : Integer.parseInt(endWeek);
     }
 
     public void setEndWeek(String endWeek) {
@@ -104,16 +104,16 @@ public class Course implements Serializable {
         this.teacher = teacher;
     }
 
-    public String getLength() {
-        return length;
+    public Integer getLength() {
+        return length == null || length.isEmpty() ? 0 : Integer.parseInt(length);
     }
 
     public void setLength(String length) {
         this.length = length;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public Integer getStartTime() {
+        return startTime == null || startTime.isEmpty() ? 0 : Integer.parseInt(startTime);
     }
 
     public void setStartTime(String startTime) {
@@ -134,6 +134,49 @@ public class Course implements Serializable {
 
     public void setCourseId(String courseId) {
         this.courseId = courseId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Course course = (Course) o;
+
+        if (weekday != null ? !weekday.equals(course.weekday) : course.weekday != null)
+            return false;
+        if (startWeek != null ? !startWeek.equals(course.startWeek) : course.startWeek != null)
+            return false;
+        if (endWeek != null ? !endWeek.equals(course.endWeek) : course.endWeek != null)
+            return false;
+        if (extra != null ? !extra.equals(course.extra) : course.extra != null) return false;
+        if (location != null ? !location.equals(course.location) : course.location != null)
+            return false;
+        if (name != null ? !name.equals(course.name) : course.name != null) return false;
+        if (teacher != null ? !teacher.equals(course.teacher) : course.teacher != null)
+            return false;
+        if (length != null ? !length.equals(course.length) : course.length != null) return false;
+        if (startTime != null ? !startTime.equals(course.startTime) : course.startTime != null)
+            return false;
+        if (singleDouble != null ? !singleDouble.equals(course.singleDouble) : course.singleDouble != null)
+            return false;
+        return courseId != null ? courseId.equals(course.courseId) : course.courseId == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = weekday != null ? weekday.hashCode() : 0;
+        result = 31 * result + (startWeek != null ? startWeek.hashCode() : 0);
+        result = 31 * result + (endWeek != null ? endWeek.hashCode() : 0);
+        result = 31 * result + (extra != null ? extra.hashCode() : 0);
+        result = 31 * result + (location != null ? location.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (teacher != null ? teacher.hashCode() : 0);
+        result = 31 * result + (length != null ? length.hashCode() : 0);
+        result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
+        result = 31 * result + (singleDouble != null ? singleDouble.hashCode() : 0);
+        result = 31 * result + (courseId != null ? courseId.hashCode() : 0);
+        return result;
     }
 }
 

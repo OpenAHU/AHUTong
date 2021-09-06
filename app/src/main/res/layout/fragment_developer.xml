@@ -6,6 +6,9 @@
         <variable
             name="state"
             type="com.ahu.ahutong.ui.page.state.DeveloperViewModel" />
+        <variable
+            name="proxy"
+            type="com.ahu.ahutong.ui.page.DeveloperFragment.ClickProxy" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -19,18 +22,21 @@
             <com.google.android.material.appbar.MaterialToolbar
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
+                app:navigationIcon="@drawable/icon_back"
+                onIconClick="@{proxy.back}"
                 app:title="@string/mine_tv_developer"
                 tools:title="@string/mine_tv_developer"/>
         </com.google.android.material.appbar.AppBarLayout>
-        
-        
+
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_developer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/appbar"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
+            app:layout_constraintVertical_bias="1.0"
+            tools:layout_editor_absoluteX="80dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

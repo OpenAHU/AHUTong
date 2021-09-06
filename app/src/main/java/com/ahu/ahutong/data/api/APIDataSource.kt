@@ -2,10 +2,7 @@ package com.ahu.ahutong.data.api
 
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
-import com.ahu.ahutong.data.model.Course
-import com.ahu.ahutong.data.model.Exam
-import com.ahu.ahutong.data.model.Grade
-import com.ahu.ahutong.data.model.Room
+import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.ext.isCampus
 import com.ahu.ahutong.ext.isEmptyRoomTime
 import com.ahu.ahutong.ext.isWeekday
@@ -29,10 +26,6 @@ class APIDataSource: BaseDataSource {
         schoolYear: String,
         schoolTerm: String
     ): AHUResponse<List<Exam>> {
-        SinkLog.i("check argument start")
-        if (!schoolTerm.isCampus()){
-            throw IllegalArgumentException("schoolTerm must be 1 or 2")
-        }
         return AHUService.API.getExamInfo(schoolYear, schoolTerm)
     }
 
@@ -47,5 +40,13 @@ class APIDataSource: BaseDataSource {
 
     override suspend fun getGrade(): AHUResponse<Grade> {
         return AHUService.API.getGrade()
+    }
+
+    override suspend fun getNews(): AHUResponse<List<News>> {
+        return AHUService.API.getNews()
+    }
+
+    override suspend fun getCardMoney(): AHUResponse<String> {
+        return AHUResponse()
     }
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="state"
+            type="com.ahu.ahutong.ui.page.state.ScheduleViewModel" />
+    </data>
+
+    <com.ahu.ahutong.ui.widget.AHURefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.ahu.ahutong.ui.widget.schedule.ScheduleView
+            android:id="@+id/scheduleView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.ahu.ahutong.ui.widget.AHURefreshLayout>
+</layout>

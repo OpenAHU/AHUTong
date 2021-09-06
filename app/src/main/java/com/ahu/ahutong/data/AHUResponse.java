@@ -38,4 +38,12 @@ public class AHUResponse<T> {
         return code == 0;
     }
 
+    @Override
+    public String toString() {
+        return "AHUResponse{" +
+                "data=" + data +
+                ", msg='" + msg + '\'' +
+                ", code=" + code +
+                '}';
+    }
 }

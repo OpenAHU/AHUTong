@@ -86,8 +86,9 @@ public abstract class BaseFragment<R extends ViewDataBinding> extends Fragment {
      * @return Application级的ViewModel
      */
     protected <T extends ViewModel> T getApplicationScopeViewModel(Class<T> viewModelClass){
-        if (getActivity() == null)
+        if (getActivity() == null) {
             throw new IllegalStateException("Can't create ViewModelProvider for detached fragment");
+        }
         if (mApplicationVMProvider == null){
             BaseApplication application = (BaseApplication) getActivity().getApplication();
             mApplicationVMProvider = new ViewModelProvider(application,
@@ -102,8 +103,9 @@ public abstract class BaseFragment<R extends ViewDataBinding> extends Fragment {
      * @return Activity级的ViewModel
      */
     protected <T extends ViewModel> T getActivityScopeViewModel(Class<T> viewModelClass){
-        if (getActivity() == null)
+        if (getActivity() == null) {
             throw new IllegalStateException("Can't create ViewModelProvider for detached fragment");
+        }
         if (mActivityVMProvider == null){
             mActivityVMProvider = new ViewModelProvider(getActivity());
         }

@@ -15,10 +15,8 @@
         <!-- Customize your theme here. -->
         <item name="colorAccent">@color/teal_200</item>
         <item name="android:textColorPrimary">@color/black</item>
-    </style>
-    <style name="circleImageViewStyle">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">50%</item>
+        <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert</item>
+        <item name="android:windowBackground">@drawable/launcher_background</item>
     </style>
 
 </resources>

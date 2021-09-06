@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="tool"
+            type="com.ahu.ahutong.data.model.Tool" />
+
+        <variable
+            name="proxy"
+            type="com.ahu.ahutong.ui.page.DiscoveryFragment.ToolClickProxy" />
+    </data>
+
+    <LinearLayout
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:onClick="@{(thisView) -> proxy.onClick(thisView, tool)}"
+        android:orientation="vertical"
+        tools:ignore="UseCompoundDrawables">
+
+        <ImageView
+            loadImg="@{tool.resID}"
+            android:layout_width="35dp"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/tool" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{tool.title}" />
+    </LinearLayout>
+
+</layout>

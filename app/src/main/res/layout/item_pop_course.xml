@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <variable
+            name="course"
+            type="com.ahu.ahutong.data.model.Course" />
+    </data>
+
+    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:cardBackgroundColor="#9966cc99"
+        app:cardCornerRadius="6dp"
+        app:cardElevation="0dp"
+        app:cardUseCompatPadding="false">
+
+        <LinearLayout
+            android:layout_width="250dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingVertical="5dp"
+            android:paddingStart="15dp"
+            android:paddingEnd="5dp">
+
+            <TextView
+                android:id="@+id/tv_more"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:padding="10dp"
+                android:text="@string/more"
+                android:textColor="@color/white"
+                tools:text="更多" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{course.name}"
+                android:textColor="@color/white"
+                tools:text="形势与政策（二）" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@{course.teacher}"
+                android:textColor="@color/white"
+                tools:text="王利" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@{`第`+String.valueOf(course.startTime)+`-`+String.valueOf(course.startTime + course.length - 1)+`节 `+String.valueOf(course.startWeek)+`-`+String.valueOf(course.endWeek)+`周`}"
+                android:textColor="@color/white"
+                tools:text="第9，10，11节 12-13周" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="15dp"
+                android:text="@{`@` + course.location}"
+                android:textColor="@color/white"
+                tools:text="`@生化104`" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</layout>

@@ -1,5 +1,6 @@
 package com.ahu.ahutong.data.api
 
+import arch.sink.utils.Utils
 import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.AHUResponse
@@ -41,7 +42,7 @@ interface AHUService {
      */
     @GET("/api/schedule")
     suspend fun getSchedule(@Query("schoolYear") schoolYear: String,
-                            @Query("schoolYear") schoolTerm: String): AHUResponse<List<Course>>
+                            @Query("schoolTerm") schoolTerm: String): AHUResponse<List<Course>>
 
     /**
      * getExamInfo
@@ -51,7 +52,7 @@ interface AHUService {
      */
     @GET("/api/exam_info")
     suspend fun getExamInfo(@Query("schoolYear") schoolYear: String,
-                            @Query("schoolYear") schoolTerm: String): AHUResponse<List<Exam>>
+                            @Query("schoolTerm") schoolTerm: String): AHUResponse<List<Exam>>
 
     /**
      * 获取空教室API
@@ -76,11 +77,20 @@ interface AHUService {
     @GET("/api/grade")
     suspend fun getGrade(): AHUResponse<Grade>
 
+    /**
+     * 获取院系新闻
+     * @return AHUResponse<News>
+     */
+    @GET("/api/departmentNews")
+    suspend fun getNews(): AHUResponse<List<News>>
+
+    @GET("/api/banner")
+    suspend fun getBanner(): AHUResponse<List<Banner>>
     companion object{
         private const val BASE_URL = ""
         // Cookie 本地存储
         private val cookieJar by lazy {
-            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(AHUApplication.globalContext))
+            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
         }
         //创建AHUService对象
         val API: AHUService by lazy{
@@ -89,7 +99,7 @@ interface AHUService {
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .connectTimeout(15, TimeUnit.SECONDS)
-                .cache(Cache(File(AHUApplication.globalContext.cacheDir,"app_cache"), Long.MAX_VALUE))
+                .cache(Cache(File(Utils.getApp().cacheDir,"app_cache"), Long.MAX_VALUE))
                 .retryOnConnectionFailure(true)
                 .cookieJar(cookieJar)//设置CookieJar
             //debug

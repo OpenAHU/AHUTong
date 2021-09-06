@@ -4,33 +4,79 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ahu_navigation"
     app:startDestination="@id/home_fragment">
+
     <fragment
-        tools:layout="@layout/fragment_home"
         android:id="@+id/home_fragment"
-        android:name="com.ahu.ahutong.ui.page.HomeFragment">
+        android:name="com.ahu.ahutong.ui.page.HomeFragment"
+        tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_home_fragment_to_discovery_fragment2"
-            app:destination="@id/discovery_fragment" />
+            android:id="@+id/action_home_fragment_to_developer_fragment"
+            app:destination="@id/developer_fragment" />
         <action
-            android:id="@+id/action_home_fragment_to_schedule_fragment"
-            app:destination="@id/schedule_fragment" />
-        <action
-            android:id="@+id/action_home_fragment_to_mine_fragment"
-            app:destination="@id/mine_fragment" />
+            android:id="@+id/action_home_fragment_to_login_fragment"
+            app:destination="@id/login_fragment"
+            app:enterAnim="@anim/nav_default_enter_anim" />
     </fragment>
 
     <fragment
-        tools:layout="@layout/fragment_schedule"
-        android:id="@+id/schedule_fragment"
-        android:name="com.ahu.ahutong.ui.page.ScheduleFragment"/>
-
-    <fragment
-        tools:layout="@layout/fragment_discovery"
         android:id="@+id/discovery_fragment"
-        android:name="com.ahu.ahutong.ui.page.DiscoveryFragment"/>
+        android:name="com.ahu.ahutong.ui.page.DiscoveryFragment"
+        tools:layout="@layout/fragment_discovery" />
 
     <fragment
-        tools:layout="@layout/fragment_mine"
-        android:id="@+id/mine_fragment"
-        android:name="com.ahu.ahutong.ui.page.MineFragment"/>
+        android:id="@+id/developer_fragment"
+        android:name="com.ahu.ahutong.ui.page.DeveloperFragment"
+        tools:layout="@layout/fragment_developer" />
+    <fragment
+        android:id="@+id/login_fragment"
+        android:name="com.ahu.ahutong.ui.page.LoginFragment"
+        tools:layout="@layout/fragment_login" />
+    <fragment
+        android:id="@+id/setting_fragment"
+        android:name="com.ahu.ahutong.ui.page.SettingFragment" />
+
+    <fragment
+        android:id="@+id/classroom_fragment"
+        android:name="com.ahu.ahutong.ui.page.ClassRoomFragment"
+        tools:layout="@layout/fragment_classroom" />
+    <fragment
+        android:id="@+id/bathroom_fragment"
+        android:name="com.ahu.ahutong.ui.page.BathRoomFragment"
+        tools:layout="@layout/fragment_bathroom" />
+    <fragment
+        android:id="@+id/teldirectory_fragment"
+        android:name="com.ahu.ahutong.ui.page.TelDirectoryFragment"
+        tools:layout="@layout/fragment_teldirectory" />
+    <fragment
+        android:id="@+id/more_fragment"
+        android:name="com.ahu.ahutong.ui.page.MoreFragment"
+        tools:layout="@layout/fragment_more" />
+    <fragment
+        android:id="@+id/exam_fragment"
+        android:name="com.ahu.ahutong.ui.page.ExamFragment"
+        tools:layout="@layout/fragment_exam" />
+    <fragment
+        android:id="@+id/gradle_fragment"
+        android:name="com.ahu.ahutong.ui.page.GradeFragment"
+        tools:layout="@layout/fragment_grade" />
+    <fragment
+        android:id="@+id/garbage_fragment"
+        android:name="com.ahu.ahutong.ui.page.GarbageFragment"
+        tools:layout="@layout/fragment_garbage" />
+    <fragment
+        android:id="@+id/about_fragment"
+        android:name="com.ahu.ahutong.ui.page.AboutFragment"
+        tools:layout="@layout/fragment_about" />
+    <fragment
+        android:id="@+id/change_theme_fragment"
+        android:name="com.ahu.ahutong.ui.page.ChangeThemeFragment"
+        tools:layout="@layout/fragment_change_theme" />
+    <fragment
+        android:id="@+id/course_fragment"
+        android:name="com.ahu.ahutong.ui.page.CourseFragment"
+        tools:layout="@layout/fragment_course" />
+    <fragment
+        android:id="@+id/license_fragment"
+        android:name="com.ahu.ahutong.ui.page.LicenseFragment"
+        tools:layout="@layout/fragment_license" />
 </navigation>

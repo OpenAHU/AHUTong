@@ -24,4 +24,12 @@ public class Room {
     public void setSeating(String seating) {
         this.seating = seating;
     }
+
+    @Override
+    public String toString() {
+        return "Room{" +
+                "pos='" + pos + '\'' +
+                ", seating='" + seating + '\'' +
+                '}';
+    }
 }
