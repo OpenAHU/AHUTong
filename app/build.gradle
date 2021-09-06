@@ -16,26 +16,38 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        debug {
+            storeFile file("../ahu.jks")
+            storePassword "SinkDev"
+            keyAlias "key0"
+            keyPassword "SinkDev"
+        }
 
-
-
+        release {
+            storeFile file("../ahu.jks")
+            storePassword "SinkDev"
+            keyAlias "key0"
+            keyPassword "SinkDev"
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            ndk{
-                abiFilters  'arm64-v8a', 'armeabi-v7a'
+            ndk {
+                abiFilters 'arm64-v8a', 'armeabi-v7a'
             }
+            signingConfig signingConfigs.release
         }
         debug {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-
+            signingConfig signingConfigs.debug
         }
     }
-
 
 
     compileOptions {
