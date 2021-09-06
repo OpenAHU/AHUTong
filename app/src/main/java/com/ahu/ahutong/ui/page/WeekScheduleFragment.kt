@@ -10,10 +10,10 @@ import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
-import arch.sink.BR
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.R
+import com.ahu.ahutong.BR
 import com.ahu.ahutong.databinding.FragmentScheduleWeekBinding
 import com.ahu.ahutong.databinding.ItemPopCourseBinding
 import com.ahu.ahutong.ui.dialog.ChooseOneDialog
@@ -115,7 +115,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
             settingTimeDialog.setCallBack(this)
             settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
         }
-
+        //懒加载
         dataBinding.scheduleView.loadSchedule()
 
     }

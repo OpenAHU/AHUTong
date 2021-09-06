@@ -101,13 +101,6 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         settingImg = findViewById(R.id.schedule_setting)
         contentLinearLayout = findViewById(R.id.schedule_course_content)
         bottomLayout = findViewById(R.id.schedule_bottom)
-//        mLayoutTransition = LayoutTransition()
-//        mLayoutTransition.setAnimator(LayoutTransition.APPEARING, getAppearingAnimation())
-//        mLayoutTransition.setDuration(500)
-//        mLayoutTransition.setStartDelay(LayoutTransition.APPEARING, 0)
-//        mLayoutTransition.setAnimateParentHierarchy(false)
-//        contentLinearLayout.layoutTransition = mLayoutTransition
-
         mCourseListener = { _, _ -> }
         mEmptyCourseListener = { _, _ -> }
         mSettingClickListener = {}
@@ -393,15 +386,5 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     fun setChangeWeekListener(listener: ()->Unit){
         this.mChangeWeekListener = listener
     }
-    @SuppressLint("ObjectAnimatorBinding")
-    private fun getAppearingAnimation(): Animator {
-        val mSet = AnimatorSet();
-        mSet.playTogether(
-            ObjectAnimator.ofFloat(null, "Alpha", 0.0f, 1.0f),
-            ObjectAnimator.ofFloat(null, "ScaleX", 2.0f, 1.0f),
-            ObjectAnimator.ofFloat(null, "ScaleY", 2.0f, 1.0f),
-            ObjectAnimator.ofFloat(null, "translationX", 400f, 0f)
-        )
-        return mSet;
-    }
+
 }
