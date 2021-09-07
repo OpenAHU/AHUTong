@@ -227,7 +227,9 @@ public class WidgetListService extends RemoteViewsService {
      */
     private static int getTime(String time) {
         int tim = Integer.parseInt(time);
-        if (tim >= 820 && tim <= 915) {
+        if (tim >= 0 && tim <= 820) {
+            return 0;
+        } else if (tim >= 820 && tim <= 915) {
             return 1;
         } else if (tim >= 915 && tim <= 1020) {
             return 2;
