@@ -6,10 +6,10 @@ package com.ahu.ahutong;
  * @Email: 468766131@qq.com
  */
 public class Constants {
-    public static final String UPDATE_LOG = "版本：1.0.0-beta1\n" +
-            "- 测试版本初步实现基本功能\n" +
-            "- 添加校园卡余额查询\n" +
-            "- 添加桌面小部件\n" +
-            "- 移除小程序中无用功能\n" +
+    public static final String UPDATE_LOG = "版本：1.0.0-beta2\n" +
+            "- 修复桌面小部件8.20前显示课程已结束Bug\n" +
+            "- 修复系统中、大字体错位Bug\n" +
+            "- 请求错误返回细分\n" +
+            "- 优化课表细节\n" +
             "- 图书馆、校园一卡通布局中，预计正式版加入";
 }

@@ -6,17 +6,18 @@ import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.data.model.Room
-import com.ahu.ahutong.data.reptile.store.DefaultCookieStore
 import com.ahu.ahutong.data.reptile.utils.DES
 import com.ahu.ahutong.data.reptile.utils.timeMap
 import com.ahu.ahutong.data.reptile.utils.weekdayMap
-import com.ahu.ahutong.ext.require
 import com.google.gson.JsonParser
 import com.sink.library.log.SinkLog
 import kotlinx.coroutines.*
 import org.jsoup.Connection
+import org.jsoup.HttpStatusException
 import org.jsoup.Jsoup
 import java.math.RoundingMode
+import java.net.ConnectException
+import java.net.SocketTimeoutException
 import java.text.DecimalFormat
 import java.util.regex.Pattern
 
@@ -32,7 +33,7 @@ object Reptile {
             var response = Jsoup.newSession()
                 .url(Constants.URL_LOGIN_BASE.format(Constants.URL_LOGIN_HOME))
                 .timeout(ReptileManager.getInstance().timeout)
-                .require()
+                .execute()
             val jsessionID = response.cookie("JSESSIONID")
             //保存Cookie 『JesessionID』『Language』
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
@@ -58,30 +59,30 @@ object Reptile {
                 .method(Connection.Method.POST)
                 .followRedirects(false) // 禁止重定向
                 .data(loginData)
-                .require()
+                .execute()
             //保存登录的Cookie 『CASTGC』『Language』、『CASPRIVACY』= ""
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
 
             val url = response.header("Location")
-                ?: throw IllegalStateException("账号或密码错误或访问过于频繁")
+                ?: throw IllegalStateException("账号或密码错误")
             //获取tp_up
             response = Jsoup.newSession()
                 .url(url)
                 .timeout(ReptileManager.getInstance().timeout)
                 .method(Connection.Method.GET)
                 .followRedirects(false)
-                .require()
-            Log.e("Response", response.statusMessage() + response.statusCode())
+                .execute()
             //检查登录是否成功
             response.header("Location")
-                ?: throw IllegalStateException("账号或密码错误或访问过于频繁")
+                ?: throw IllegalStateException("账号或密码错误")
             //保存『tp_up』
             ReptileManager.getInstance().cookieStore.putAll(response.cookies())
             Result.success(true)
         } catch (e: Exception) {
-            Result.failure(e)
+            return@withContext handleError(e)
         }
     }
+
 
     /**
      * 教务登录
@@ -106,7 +107,7 @@ object Reptile {
                     ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_AHU_JESESSIONID)
                 )
                 .followRedirects(false)
-                .require()
+                .execute()
             val loginUrl = response.header("Location")
                 ?: throw IllegalStateException("账号或密码错误或访问过于频繁")
             //保存『ASP.NET_SessionId』
@@ -127,11 +128,10 @@ object Reptile {
                     Constants.COOKIE_TEACH_SESSION,
                     ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_TEACH_SESSION)
                 )
-                .require()
+                .execute()
             return@withContext Result.success(true)
         } catch (e: Exception) {
-            SinkLog.e(e.toString())
-            return@withContext Result.failure(e)
+            return@withContext handleError(e)
         }
     }
 
@@ -161,7 +161,7 @@ object Reptile {
                     ReptileManager.getInstance().cookieStore.get(Constants.COOKIE_NAME_AHU)
                 )
                 .requestBody("{}")
-                .require()
+                .execute()
             if (response.statusCode() != 200) {
                 if (response.statusCode() == 503) {
                     throw IllegalStateException("服务器异常，访过于频繁。")
@@ -584,7 +584,6 @@ object Reptile {
             ahuResponse.code = 0
             return@withContext ahuResponse
         } catch (e: Exception) {
-            SinkLog.e(e.toString())
             ahuResponse.data = null
             ahuResponse.code = 1
             ahuResponse.msg = "获取成绩失败"
@@ -624,6 +623,29 @@ object Reptile {
         termGradeListBean.gradeList = gradeList
         //添加数据
         grade.termGradeList.add(termGradeListBean)
+    }
+
+    private fun handleError(e: Exception): Result<Boolean> {
+        when (e) {
+            is HttpStatusException -> {
+                val statusCode = e.statusCode
+                if (statusCode >= 500) {
+                    return Result.failure(Throwable("服务器异常，请慢点刷新！"))
+                } else {
+                    return Result.failure(Throwable("请求地址异常，界面找不到！"))
+                }
+            }
+            is SocketTimeoutException -> {
+                if (e.message == "timeout") {
+                    return Result.failure(Throwable("当前网络不稳定，请求失败"))
+                }
+            }
+            is ConnectException -> {
+                return Result.failure(Throwable("当前没有网络连接哦！"))
+            }
+        }
+        e.printStackTrace()
+        return Result.failure(e)
     }
 
 }
