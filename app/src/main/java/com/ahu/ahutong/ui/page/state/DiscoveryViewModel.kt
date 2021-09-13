@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arch.sink.utils.TimeUtils
 import arch.sink.utils.Utils
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Banner
@@ -35,11 +36,8 @@ class DiscoveryViewModel : ViewModel() {
 
     fun loadActivityBean() {
         viewModelScope.launch {
-            val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
-                .parse("2021-08-26")
-            val timeDistance = TimeUtils.getTimeDistance(Date(), date).toInt() % 2
-            val north = if (timeDistance == 0) "男生" else "女生"
-            val south = if (timeDistance == 1) "男生" else "女生"
+            val north = AHUApplication.getBathPlug().north;
+            val south = AHUApplication.getBathPlug().south
             AHURepository.getCardMoney()
                 .onSuccess {
                     activityBean.value = DiscoveryAdapter.ActivityBean(it, north, south)

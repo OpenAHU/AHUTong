@@ -44,7 +44,6 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
             val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
             adapter.setActivityBean(result)
             dataBinding.refreshLayout.isRefreshing = false
-
         }
     }
 

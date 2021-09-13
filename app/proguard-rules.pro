@@ -174,6 +174,8 @@
 -keepclassmembers class kotlin.coroutines.SafeContinuation {
     volatile <fields>;
 }
+#不混淆某个包下的类
+-keep class com.ahu.plugin.** {*;}
 
 # These classes are only required by kotlinx.coroutines.debug.AgentPremain, which is only loaded when
 # kotlinx-coroutines-core is used as a Java agent, so these are not needed in contexts where ProGuard is used.

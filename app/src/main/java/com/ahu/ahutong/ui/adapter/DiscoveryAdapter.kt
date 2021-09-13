@@ -214,8 +214,6 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
         }
     }
 
-    class ActivityBean(val money: String, val north: String, val south: String) {
-
-    }
+    class ActivityBean(val money: String, val north: String, val south: String)
 
 }
