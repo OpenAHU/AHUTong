@@ -23,7 +23,8 @@ public class AppUpdate {
     public static void check(String version,CallBack cb){
         new Thread(()->{
             try {
-                HttpURLConnection connection= (HttpURLConnection) new URL("http://com.ahu/api/android/version").openConnection();
+                HttpURLConnection connection= (HttpURLConnection) new URL("https://ahuer.cn/api/android/version").openConnection();
+                connection.setRequestMethod("GET");
                 connection.connect();
                 int responseCode = connection.getResponseCode();
                 if(responseCode == HttpURLConnection.HTTP_OK){
