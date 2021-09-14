@@ -7,7 +7,7 @@ package com.ahu.ahutong;
  */
 public class Constants {
     public static final String UPDATE_LOG = "版本：1.0.0-beta3\n" +
-            "- 部分功能增加热更新。\n"+
+            "- 更改浴室开放规则。\n"+
             "- 完善检查更新。\n"+
             "- 修复小部件BUG。\n";
 }

@@ -80,15 +80,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 }
 
                 override fun requestError(e: Exception?) {
-                    Looper.prepare()
-                    Toast.makeText(requireContext(), "检查更新出错" + e!!.message, Toast.LENGTH_LONG).show()
-                    Looper.loop()
                 }
 
                 override fun onLatestVersion() {
-                    Looper.prepare()
-                    Toast.makeText(requireContext(), "已是最新版本啦", Toast.LENGTH_SHORT).show()
-                    Looper.loop()
                 }
 
             })
