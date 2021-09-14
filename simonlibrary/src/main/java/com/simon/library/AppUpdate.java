@@ -1,5 +1,7 @@
 package com.simon.library;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
@@ -30,17 +32,32 @@ public class AppUpdate {
                 if(responseCode == HttpURLConnection.HTTP_OK){
                     InputStream inputStream = connection.getInputStream();
                     String result=streamToString(inputStream);
-                    JSONObject jsonObject=new JSONObject(result);
-                   if (200==jsonObject.optInt("code",0)){
-                       jsonObject=jsonObject.getJSONObject("data");
-                       if (!jsonObject.optString("version").equals(version)){
-                           String msg=jsonObject.optString("msg");
-                           String url=jsonObject.optString("url");
-                           cb.appUpdate(url,msg);
-                       }else{
-                           cb.onLatestVersion();
-                       }
-                   }
+                    Log.e("update","result:"+result);
+                    JSONObject jsonObject=new JSONObject(result);//code为0代表请求成功，-1是业务异常，-2是系统异常
+                    int code=jsonObject.optInt("code",-1);
+                    String msg= jsonObject.optString("msg");
+                    switch (code){
+                        case 0:
+                            jsonObject=jsonObject.getJSONObject("data");
+                            if (!jsonObject.optString("version").equals(version)){
+                                msg=jsonObject.optString("msg");
+                                String url=jsonObject.optString("url");
+                                Log.e("update","appUpdate,url"+url+",msg+"+msg);
+                                cb.appUpdate(url,msg);
+                            }else{
+                                Log.e("update","onLatestVersion");
+                                cb.onLatestVersion();
+                            }
+                            break;
+                        case -1:
+                            cb.requestError(new IOException("检查更新出错，业务异常"+msg));
+                            break;
+                        case -2:
+                            cb.requestError(new IOException("检查更新出错，系统异常"+msg));
+                            break;
+                    }
+                }else {
+                    cb.requestError(new IOException("检查更新出现未知错误,请求"));
                 }
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
