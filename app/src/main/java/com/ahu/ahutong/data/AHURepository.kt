@@ -207,11 +207,10 @@ object AHURepository {
                 AHUCache.saveGrade(response.data)
                 Result.success(response.data)
             } else {
-                SinkLog.e(response)
                 Result.failure(Throwable(response.msg))
             }
         } catch (e: Exception) {
-            SinkLog.e(e)
+            e.printStackTrace()
             Result.failure(e)
         }
     }

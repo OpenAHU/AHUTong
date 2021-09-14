@@ -3,6 +3,7 @@ package com.ahu.ahutong.ui.page
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -16,6 +17,7 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.databinding.FragmentScheduleWeekBinding
 import com.ahu.ahutong.databinding.ItemPopCourseBinding
+import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.dialog.ChooseOneDialog
 import com.ahu.ahutong.ui.dialog.SettingScheduleDialog
 import com.ahu.ahutong.ui.dialog.SettingTimeDialog
@@ -64,17 +66,27 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
             it.onSuccess {
                 dataBinding.scheduleView
                     .data(it)
-
-                if (isResumed) {
-                    dataBinding.scheduleView.loadSchedule()
+                if (!isResumed) {
+                    return@onSuccess
                 }
+                if (it.isEmpty()) {
+                    buildDialog(
+                        "提示",
+                        "当前学期课表数据为空，请查看是否选择了正确的学年学期", "确定"
+                    ).show()
+                }
+                dataBinding.scheduleView.loadSchedule()
                 //更新小部件
                 val manager = AppWidgetManager.getInstance(requireContext())
                 val componentName = ComponentName(requireActivity(), ClassWidget::class.java)
                 val appWidgetIds = manager.getAppWidgetIds(componentName)
                 manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
+
             }
             it.onFailure {
+                if (!isResumed) {
+                    return@onFailure
+                }
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }
             //停止加载

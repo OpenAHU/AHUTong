@@ -13,5 +13,4 @@ import com.ahu.ahutong.data.model.User
 class MineViewModel : ViewModel() {
     val user = MutableLiveData<User>()
 
-
 }
