@@ -28,7 +28,7 @@ public class AppUpdate {
     public static void check(String version,String plugVersion,String plugPath,CallBack cb){
         new Thread(()->{
             try {
-                HttpURLConnection connection= (HttpURLConnection) new URL("").openConnection();
+                HttpURLConnection connection= (HttpURLConnection) new URL("http://39.106.7.220/h.json").openConnection();
                 connection.connect();
                 int responseCode = connection.getResponseCode();
                 if(responseCode == HttpURLConnection.HTTP_OK){

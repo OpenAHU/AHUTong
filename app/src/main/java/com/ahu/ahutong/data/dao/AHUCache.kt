@@ -265,12 +265,12 @@ object AHUCache {
         return null
     }
 
-    fun getVersionHistory(): String {
-        return kv.getString("version", "") ?: ""
-    }
-
-    fun saveVersionHistory(version: String) {
-        kv.putString("version", version)
-    }
+//    fun getVersionHistory(): String {
+//        return kv.getString("version", "") ?: ""
+//    }
+//
+//    fun saveVersionHistory(version: String) {
+//        kv.putString("version", version)
+//    }
 
 }
