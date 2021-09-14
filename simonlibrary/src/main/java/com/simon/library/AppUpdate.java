@@ -1,19 +1,15 @@
 package com.simon.library;
 
-import com.ahu.plugin.PlugLoader;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class AppUpdate {
-    public static abstract interface CallBack{
-        void plugUpdate(Object plug);
+    public interface CallBack{
         void appUpdate(String url,String msg);
         void requestError(Exception e);
         void onLatestVersion();
@@ -22,13 +18,12 @@ public class AppUpdate {
     /**
      * 检查版本更新
      * @param version 当前app版本
-     * @param plugVersion 当前插件版本
      * @param cb 数据回调
      */
-    public static void check(String version,String plugVersion,String plugPath,CallBack cb){
+    public static void check(String version,CallBack cb){
         new Thread(()->{
             try {
-                HttpURLConnection connection= (HttpURLConnection) new URL("http://39.106.7.220/h.json").openConnection();
+                HttpURLConnection connection= (HttpURLConnection) new URL("http://com.ahu/api/android/version").openConnection();
                 connection.connect();
                 int responseCode = connection.getResponseCode();
                 if(responseCode == HttpURLConnection.HTTP_OK){
@@ -41,38 +36,19 @@ public class AppUpdate {
                            String msg=jsonObject.optString("msg");
                            String url=jsonObject.optString("url");
                            cb.appUpdate(url,msg);
-                       }else
+                       }else{
                            cb.onLatestVersion();
-                       if (!jsonObject.optString("plugVersion").equals(plugVersion)){
-                           String url=jsonObject.optString("plugUrl");
-                           Object plug=downLoadPlug(url,new File(plugPath));
-                           cb.plugUpdate(plug);
                        }
                    }
                 }
-            } catch (IOException | JSONException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
                 cb.requestError(e);
             }
         }).start();
     }
 
-    /**
-     * 下载插件对象
-     * @param url 下载链接
-     * @return 对象
-     */
-    private static Object downLoadPlug(String url,File plug) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-            InputStream in = new URL(url).openConnection().getInputStream();
-            FileOutputStream fo = new FileOutputStream(plug);
-            byte[] buffer = new byte[1024 * 1024];
-            int len;
-            while( (len = in.read(buffer)) > 0)
-                fo.write(buffer, 0, len);
-            in.close();
-            fo.close();
-       return PlugLoader.load(plug.getAbsolutePath());
-    }
+
     /**
      * 将输入流转换成字符串
      *

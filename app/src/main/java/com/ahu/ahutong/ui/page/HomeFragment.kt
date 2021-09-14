@@ -3,22 +3,23 @@ package com.ahu.ahutong.ui.page
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.BR
-import com.ahu.ahutong.Constants
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentHomeBinding
 import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.HomeViewModel
+import com.simon.library.AppUpdate
 import com.sink.library.log.SinkLog
-import com.sink.library.update.CookApkUpdate
-import com.sink.library.update.bean.App
+import java.lang.Exception
 
 /**
  * @Author SinkDev
@@ -61,6 +62,36 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             }
         }
         //检查更新
+        AppUpdate.check(
+            AHUApplication.version,
+            object : AppUpdate.CallBack {
+
+
+                override fun appUpdate(url: String?, msg: String?) {
+                    val message = "发现新版本！\n" +
+                            "新版特性：\n $msg"
+                    Looper.prepare()
+                    buildDialog("更新", message, "前往下载", { _, _ ->
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse(url)
+                        startActivity(intent)
+                    }, "取消").show()
+                    Looper.loop()
+                }
+
+                override fun requestError(e: Exception?) {
+                    Looper.prepare()
+                    Toast.makeText(requireContext(), "检查更新出错" + e!!.message, Toast.LENGTH_LONG).show()
+                    Looper.loop()
+                }
+
+                override fun onLatestVersion() {
+                    Looper.prepare()
+                    Toast.makeText(requireContext(), "已是最新版本啦", Toast.LENGTH_SHORT).show()
+                    Looper.loop()
+                }
+
+            })
 //        CookApkUpdate.checkUpdate(object : CookApkUpdate.UpdateListener {
 //            override fun onNeedUpdate(app: App) {
 //                val message = "版本：${app.versionName} \n" +

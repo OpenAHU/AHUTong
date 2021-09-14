@@ -36,8 +36,8 @@ class DiscoveryViewModel : ViewModel() {
 
     fun loadActivityBean() {
         viewModelScope.launch {
-            val north = AHUApplication.getBathPlug().north;
-            val south = AHUApplication.getBathPlug().south
+            val north = AHUApplication.getBath().north;
+            val south = AHUApplication.getBath().south
             AHURepository.getCardMoney()
                 .onSuccess {
                     activityBean.value = DiscoveryAdapter.ActivityBean(it, north, south)

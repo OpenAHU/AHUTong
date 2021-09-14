@@ -2,11 +2,8 @@ package com.ahu.ahutong.ui.page
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.os.Looper
-import android.view.View
 import android.widget.Toast
-import androidx.core.os.persistableBundleOf
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.AHUApplication
@@ -16,11 +13,8 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentAboutBinding
 import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.AboutViewModel
-import com.ahu.plugin.BathPlug
 import com.simon.library.AppUpdate
 import com.simon.library.view.LoadingDialog
-import com.sink.library.update.CookApkUpdate
-import com.sink.library.update.bean.App
 import java.lang.Exception
 
 /**
@@ -49,22 +43,20 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>() {
             val progressDialog = LoadingDialog(context).setMessage("正在加载中...")
             progressDialog.create()
             AppUpdate.check(AHUApplication.version,
-                AHUApplication.getBathPlug().version,
-                AHUApplication.plugPath, object : AppUpdate.CallBack {
-                    override fun plugUpdate(plug: Any?) {
-                        AHUApplication.setBathPlug(plug as BathPlug?)
-                    }
+                 object : AppUpdate.CallBack {
+
 
                     override fun appUpdate(url: String?, msg: String?) {
                         progressDialog.dismiss()
                         val message = "发现新版本！\n" +
                                 "新版特性：\n $msg"
+                        Looper.prepare()
                         buildDialog("更新", message, "前往下载", { _, _ ->
                             val intent = Intent(Intent.ACTION_VIEW)
                             intent.data = Uri.parse(url)
                             startActivity(intent)
                         }, "取消").show()
-
+                        Looper.loop()
                     }
 
                     override fun requestError(e: Exception?) {
@@ -109,7 +101,7 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>() {
         }
 
         fun updateLog() {
-            buildDialog("更新日志", Constants.UPDATE_LOG, "我知道了").show()
+            buildDialog("当前版本更新日志", Constants.UPDATE_LOG, "我知道了").show()
         }
     }
 }
