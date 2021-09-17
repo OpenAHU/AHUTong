@@ -36,8 +36,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         AppUpdate.check(
             AHUApplication.version,
             object : AppUpdate.CallBack {
-
-
                 override fun appUpdate(url: String?, msg: String?) {
                     val message = "发现新版本！\n" +
                             "新版特性：\n $msg"

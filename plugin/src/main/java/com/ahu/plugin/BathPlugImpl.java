@@ -1,11 +1,22 @@
 package com.ahu.plugin;
 
-import java.util.Calendar;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
-public class BathPlugImpl implements BathPlug{
-    private int getWeek(){
-        int week= Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
-        return week<0?7:week;
+import arch.sink.utils.TimeUtils;
+
+public class BathPlugImpl implements BathPlug {
+    private int getDay() {
+        //20号 南 男         北 女
+        Date date;
+        try {
+            date = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).parse("2021-09-20");
+        } catch (ParseException e) {
+            throw new RuntimeException("尼玛，离谱的错误");
+        }
+        return (int) (TimeUtils.getTimeDistance(new Date(), date) % 2);
     }
 
     @Override
@@ -14,28 +25,26 @@ public class BathPlugImpl implements BathPlug{
     }
 
     @Override
-    public String getNorth() {//1357女，246男
-        switch (getWeek()){
+    public String getNorth() {
+        switch (getDay()) {
             case 1:
-            case 3:
-            case 5:
-            case 7:
+                return "男生";
+            case 0:
                 return "女生";
             default:
-                return "男生";
+                return "异常";
         }
     }
 
     @Override
-    public String getSouth() {//1357男，246女
-        switch (getWeek()){
+    public String getSouth() {
+        switch (getDay()) {
             case 1:
-            case 3:
-            case 5:
-            case 7:
+                return "女生";
+            case 0:
                 return "男生";
             default:
-                return "女生";
+                return "异常";
         }
     }
 }
