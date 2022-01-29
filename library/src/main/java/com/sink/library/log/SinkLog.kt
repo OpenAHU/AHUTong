@@ -11,7 +11,9 @@ import com.sink.library.log.util.removeSelfLog
  */
 
 object SinkLog {
-    private val PACKAGE_NAME = SinkLog.javaClass.name.substring(0, SinkLog.javaClass.name.lastIndexOf('.') + 1)
+    private val PACKAGE_NAME =
+        SinkLog.javaClass.name.substring(0, SinkLog.javaClass.name.lastIndexOf('.') + 1)
+
     /**
      * VERBOSE Log
      * @param contents Array<out Any>
@@ -162,11 +164,16 @@ object SinkLog {
         //是否打印调用栈
         if (config.stackTraceDepth() > 0) {
             //去除自身调用栈
-            val element = removeSelfLog(Throwable().stackTrace, config.stackTraceDepth(), PACKAGE_NAME)
+            val element =
+                removeSelfLog(Throwable().stackTrace, config.stackTraceDepth(), PACKAGE_NAME)
             sb.append(SinkLogConfig.stackTraceFormatter.format(element))
                 .append("\n")
         }
-        SinkLogManager.getInstance().printers.forEach{
+        if (SinkLogManager.getInstance().globalConfig.enableTest()) {
+            println(sb.toString())
+            return
+        }
+        SinkLogManager.getInstance().printers.forEach {
             LogCache.getInstance().addLog(Log(level, tag, sb.toString()))
             it.print(config, level, tag, sb.toString())
         }

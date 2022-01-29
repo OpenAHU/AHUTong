@@ -30,6 +30,11 @@ abstract class SinkLogConfig {
     open fun enable() = true
 
     /**
+     * 测试开关
+     * @return Boolean
+     */
+    open fun enableTest() = false
+    /**
      * 栈打印深度
      * @return Int
      */

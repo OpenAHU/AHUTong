@@ -62,7 +62,7 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>() {
                     Toast.makeText(requireContext(), "请输入正确的课程长度", Toast.LENGTH_SHORT).show()
                     return
                 }
-                if (course.length + course.startTime > 11) {
+                if (course.length + course.startTime > 12) {
                     Toast.makeText(requireContext(), "一天最多有11节课", Toast.LENGTH_SHORT).show()
                     return
                 }

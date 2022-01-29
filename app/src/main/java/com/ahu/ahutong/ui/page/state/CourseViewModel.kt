@@ -24,7 +24,8 @@ class CourseViewModel : ViewModel() {
         }
         val newSchedule = mutableListOf<Course>()
         AHUCache.getSchedule(schoolYear, schoolTerm)?.forEach {
-            if (!it.equals(course)) {
+            // courseId 作为课程的标识
+            if (!it.courseId.equals(course.courseId)) {
                 newSchedule.add(it)
             }
         }
