@@ -2,9 +2,9 @@ package com.ahu.ahutong.data.reptile;
 
 
 public class Constants {
-    public final static String URL_LOGIN_BASE = "http://101.76.160.28:8001/cas/login?service=%s";
+     public final static String URL_LOGIN_BASE = "http://one.ahu.edu.cn/cas/login?service=%s";
     public final static String URL_LOGIN_HOME = "http%3A%2F%2Fone.ahu.edu.cn%2Ftp_up%2F";
-    public final static String URL_LOGIN_1 = "http://101.76.160.28:8001/cas/login;jsessionid=%s?service=%s";
+    public final static String URL_LOGIN_1 = "http://one.ahu.edu.cn/cas/login;jsessionid=%s?service=%s";
     public final static String URL_CARD_MONEY = "http://one.ahu.edu.cn/tp_up/up/subgroup/getCardMoney";
     public final static String URL_TEACH_SYSTEM = "https://jwxt0.ahu.edu.cn";
     public final static String URL_LOGIN_TEACH = URL_TEACH_SYSTEM + "/login_cas.aspx";

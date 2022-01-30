@@ -5,6 +5,7 @@ import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.model.*
+import com.ahu.ahutong.utils.SinkCookieJar
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
@@ -26,13 +27,11 @@ interface AHUService {
     @POST("/api/login")
     @FormUrlEncoded
     suspend fun login(@Field("userId") userId: String,
-                      @Field("userId") password: String,
-                      @Field("userId") type: User.UserType): AHUResponse<User>
+                      @Field("password") password: String,
+                      @Field("type") type: User.UserType): AHUResponse<User>
 
-    @POST
-    @FormUrlEncoded
-    suspend fun logout(@Field("userId") userId: String,
-                       @Field("type") type: User.UserType): AHUResponse<Unit>
+    @GET("/api/logout")
+    suspend fun logout(@Query("type") type: User.UserType): AHUResponse<Unit>
 
     /**
      * getSchedule
@@ -50,7 +49,7 @@ interface AHUService {
      * @param schoolTerm String 1,2
      * @return AHUResponse<List<Exam>>
      */
-    @GET("/api/exam_info")
+    @GET("/api/examInfo")
     suspend fun getExamInfo(@Query("schoolYear") schoolYear: String,
                             @Query("schoolTerm") schoolTerm: String): AHUResponse<List<Exam>>
 
@@ -62,7 +61,7 @@ interface AHUService {
      * @param time 1为1，2节；2为3，4节；3为5，6节；4为7，8节；5为9，10，11节；6为上午；7为下午；8为晚上；9为白天；10为整天
      * @return AHUResponse<List<Room>>
      */
-    @GET("/api/empty_rooms")
+    @GET("/api/emptyRoom")
     suspend fun getEmptyRoom(
         @Query("campus") campus: String,
         @Query("weekday") weekday: String,
@@ -84,14 +83,18 @@ interface AHUService {
     @GET("/api/departmentNews")
     suspend fun getNews(): AHUResponse<List<News>>
 
-    @GET("/api/banner")
+    @GET("/api/banner/all")
     suspend fun getBanner(): AHUResponse<List<Banner>>
+
+    @GET("/api/campusCardBalance")
+    suspend fun getCardMoney(): AHUResponse<Card>
+
     companion object{
-        private const val BASE_URL = ""
+        private const val BASE_URL = "https://ahuer.cn"
         // Cookie 本地存储
-        private val cookieJar by lazy {
-            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
-        }
+        private val cookieJar =
+            SinkCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
+
         //创建AHUService对象
         val API: AHUService by lazy{
             val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
@@ -111,7 +114,7 @@ interface AHUService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .baseUrl(BASE_URL)
                 .client(client.build())
-                .build().create(API::class.java)
+                .build().create(AHUService::class.java)
         }
 
         /**

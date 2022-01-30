@@ -61,9 +61,12 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
                 else -> User.UserType.AHU_LOCAL
             }
         }
-        dataBinding.rgLogin.setOnClickListener {
-            Toast.makeText(requireContext(), "后端开发中，暂时无法切换", Toast.LENGTH_SHORT).show()
-
+        dataBinding.rgLogin.setOnCheckedChangeListener { _, id ->
+            mState.loginType = when (id) {
+                R.id.rd_wisdom -> User.UserType.AHU_Wisdom
+                R.id.rd_teach -> User.UserType.AHU_Teach
+                else -> User.UserType.AHU_LOCAL
+            }
         }
 
     }

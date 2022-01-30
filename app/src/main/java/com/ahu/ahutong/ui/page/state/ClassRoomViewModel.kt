@@ -43,8 +43,11 @@ class ClassRoomViewModel : ViewModel() {
         instance.firstDayOfWeek = Calendar.MONDAY
         //获取空教室信息
         rooms.value = AHURepository.getEmptyRoom(
-            (campuses.indexOf(currentCampus) + 1).toString(), instance[Calendar.DAY_OF_WEEK].toString(),
-            week.toString(), (times.indexOf(time) + 1).toString());
+            (campuses.indexOf(currentCampus) + 1).toString(),
+            instance[Calendar.DAY_OF_WEEK].toString(),
+            week.toString(),
+            (times.indexOf(time) + 1).toString()
+        )
     }
 
     companion object {

@@ -5,6 +5,7 @@ import androidx.lifecycle.liveData
 import com.ahu.ahutong.data.api.APIDataSource
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.fake.FakeDataSource
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.data.reptile.ReptileDataSource
 import com.ahu.ahutong.data.reptile.ReptileUser
@@ -31,7 +32,9 @@ object AHURepository {
     var dataSource: BaseDataSource
 
     init {
-        dataSource = if (AHUCache.isLogin() && AHUCache.getLoginType() == User.UserType.AHU_LOCAL) {
+        dataSource = if (!AHUCache.isLogin()) {
+            FakeDataSource()
+        } else if (AHUCache.getLoginType() == User.UserType.AHU_LOCAL) {
             val user = AHUCache.getCurrentUser()!! // 加!!因为可以保证，已经登录
             val password = AHUCache.getCurrentUserPassword()!!
             ReptileDataSource(ReptileUser(user.name, password))
@@ -155,36 +158,6 @@ object AHURepository {
     }
 
 
-    /**
-     * 获取新闻 本地优先
-     * @param isRefresh Boolean 是否直接获取服务器上的
-     * @return Result<List<News>>
-     */
-    suspend fun getNews(isRefresh: Boolean = false): Result<List<News>> =
-        withContext(Dispatchers.IO) {
-            //本地优先
-            if (!isRefresh) {
-                val localData = AHUCache.getNews().orEmpty()
-                if (localData.isNotEmpty()) {
-                    return@withContext Result.success(localData)
-                }
-            }
-            //获取网络上的数据
-            try {
-                val response = dataSource.getNews()
-                if (response.isSuccessful) {
-                    AHUCache.saveNews(response.data)
-                    Result.success(response.data)
-                } else {
-                    SinkLog.e(response)
-                    Result.failure(Throwable(response.msg))
-                }
-            } catch (e: Exception) {
-                SinkLog.e(e)
-                Result.failure(e)
-            }
-        }
-
 
     /**
      * 查询成绩 本地优先
@@ -266,7 +239,7 @@ object AHURepository {
             } else {
                 Result.failure(Throwable(response.msg))
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

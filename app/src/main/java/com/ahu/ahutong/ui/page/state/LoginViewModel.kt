@@ -14,8 +14,10 @@ import com.ahu.ahutong.data.reptile.ReptileDataSource
 import com.ahu.ahutong.data.reptile.ReptileManager
 import com.ahu.ahutong.data.reptile.ReptileUser
 import com.ahu.ahutong.data.reptile.store.DefaultCookieStore
+import com.ahu.ahutong.utils.RSA
 import kotlinx.coroutines.launch
 import java.lang.Exception
+import java.nio.charset.Charset
 
 /**
  * @Author: SinkDev
@@ -46,10 +48,15 @@ class LoginViewModel : ViewModel() {
         } else {
             try {
                 //普通登录
-                val response = AHUService.API.login(username, password, loginType)
+                val response = AHUService.API.login(
+                    username, RSA.encryptByPublicKey(
+                        password.toByteArray(
+                            Charsets.UTF_8
+                        )
+                    ), loginType
+                )
                 if (response.isSuccessful) {
                     AHUCache.saveCurrentUser(response.data)
-
                     //切换数据源
                     AHUCache.saveLoginType(loginType)
                     AHURepository.dataSource = APIDataSource()
@@ -57,7 +64,7 @@ class LoginViewModel : ViewModel() {
                 } else {
                     Result.failure(Throwable(response.msg))
                 }
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 Result.failure(Throwable("登录失败，系统异常。"))
             }
 

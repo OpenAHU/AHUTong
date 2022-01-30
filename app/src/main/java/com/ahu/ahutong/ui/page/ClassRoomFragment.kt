@@ -34,7 +34,7 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.recycleRooms.layoutManager = LinearLayoutManager(requireContext())
-        adapter = object : BaseAdapter<Room, ItemEmptyRoomBinding>(){
+        adapter = object : BaseAdapter<Room, ItemEmptyRoomBinding>() {
             override fun layout(): Int {
                 return R.layout.item_empty_room
             }
@@ -49,8 +49,11 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
 
     override fun observeData() {
         super.observeData()
-        mState.rooms.observe(this){
+        mState.rooms.observe(this) {
             it.onSuccess {
+                if (it.isEmpty()) {
+                    Toast.makeText(activity, "暂时没有空教室信息哦！", Toast.LENGTH_SHORT).show()
+                }
                 adapter?.submitList(it)
             }.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
@@ -58,6 +61,7 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
             progressDialog?.dismiss()
         }
     }
+
     override fun dialogCallBack(campus: String, time: String) {
         mState.campus.value = campus
         mState.time.value = time
@@ -76,7 +80,7 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
             dialog.setCallBack(this@ClassRoomFragment)
         }
 
-        fun search(){
+        fun search() {
             progressDialog = LoadingDialog(context).setMessage("正在加载中...")
             progressDialog?.create()
             mState.searchEmptyRoom(mState.campus.value, mState.time.value)

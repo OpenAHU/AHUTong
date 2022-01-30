@@ -99,23 +99,6 @@ object AHUCache {
         return data.fromJson(object : TypeToken<List<Course>>() {}.type)
     }
 
-    /**
-     * 保存新闻
-     * @param news List<News>
-     */
-    fun saveNews(news: List<News>) {
-        val data = Gson().toJson(news)
-        kv.encode("news", data)
-    }
-
-    /**
-     * 获取新闻
-     * @return List<News>
-     */
-    fun getNews(): List<News>? {
-        val data = kv.decodeString("news") ?: ""
-        return data.fromJson(object : TypeToken<List<Course>>() {}.type)
-    }
 
     /**
      * 保存成绩

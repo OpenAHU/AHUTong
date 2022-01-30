@@ -1,5 +1,7 @@
 package com.ahu.ahutong.data;
 
+import androidx.annotation.Nullable;
+
 /**
  * @Author: Sink
  * @Date: 2021/7/31-下午8:40

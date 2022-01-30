@@ -1,6 +1,7 @@
 package com.ahu.ahutong.data.base
 
 import com.ahu.ahutong.data.AHUResponse
+import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.model.*
 
 /**
@@ -41,7 +42,9 @@ interface BaseDataSource {
 
     suspend fun getGrade(): AHUResponse<Grade>
 
-    suspend fun getNews(): AHUResponse<List<News>>
+    suspend fun getBanner(): AHUResponse<List<Banner>> {
+        return AHUService.API.getBanner()
+    }
 
-    suspend fun getCardMoney(): AHUResponse<String>
+    suspend fun getCardMoney(): AHUResponse<Card>
 }

@@ -51,14 +51,14 @@ class SettingFragment : PreferenceFragmentCompat() {
             entries = arrayOf("智慧安大（本地爬虫版）", "智慧安大（后端版）", "教务系统")
             entryValues = arrayOf(
                 User.UserType.AHU_LOCAL.type,
-                User.UserType.AHU_Wisdom.type, User.UserType.AHU_Teach.type
+                User.UserType.AHU_Wisdom.type,
+                User.UserType.AHU_Teach.type
             )
             key = "data_source"
             dialogTitle = "智慧安大到教务系统需重新登录, 反之亦然"
             //dialogMessage = "智慧安大到教务系统需重新登录, 反之亦然。"
             negativeButtonText = "关闭"
-            isEnabled = false
-            summary = "后端开发中，暂时无法切换"
+            positiveButtonText = "切换"
             setOnPreferenceChangeListener { _, newValue ->
                 if (newValue !is String) {
                     return@setOnPreferenceChangeListener false

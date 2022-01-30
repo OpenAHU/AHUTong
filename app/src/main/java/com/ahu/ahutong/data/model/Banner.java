@@ -10,6 +10,27 @@ public class Banner {
     private String detailUrl;
     @SerializedName("imageUrl")
     private String imageUrl;
+    @SerializedName("orderWeight")
+    private Double orderWeight;
+    @SerializedName("id")
+    private Integer id;
+
+    public Double getOrderWeight() {
+        return orderWeight;
+    }
+
+    public void setOrderWeight(Double orderWeight) {
+        this.orderWeight = orderWeight;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
 
     public String getTitle() {
         return title;

@@ -73,7 +73,7 @@ public class Grade implements Serializable {
 
         @SerializedName("schoolYear")
         private String schoolYear;
-        @SerializedName("term")
+        @SerializedName("schoolTerm")
         private String term;
         @SerializedName("termGradePoint")
         private String termGradePoint;
@@ -81,7 +81,7 @@ public class Grade implements Serializable {
         private String termTotalCredit;
         @SerializedName("termGradePointAverage")
         private String termGradePointAverage;
-        @SerializedName("gradeList")
+        @SerializedName("termGradeList")
         private List<GradeListBean> gradeList;
 
         public String getSchoolYear() {
@@ -139,7 +139,7 @@ public class Grade implements Serializable {
              * credit : 学分
              * gradePoint : 绩点
              * grade : 成绩
-             * course_nature : 课程类型
+             * courseType : 课程类型
              */
             @SerializedName("courseNum")
             private String courseNum;
@@ -151,7 +151,7 @@ public class Grade implements Serializable {
             private String gradePoint;
             @SerializedName("grade")
             private String grade;
-            @SerializedName("courseNature")
+            @SerializedName("courseType")
             private String courseNature;
 
             public String getCourseNum() {

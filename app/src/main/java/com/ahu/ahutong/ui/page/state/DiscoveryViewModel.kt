@@ -40,7 +40,7 @@ class DiscoveryViewModel : ViewModel() {
             val south = AHUApplication.getBath().south
             AHURepository.getCardMoney()
                 .onSuccess {
-                    activityBean.value = DiscoveryAdapter.ActivityBean(it, north, south)
+                    activityBean.value = DiscoveryAdapter.ActivityBean(it.balance.toString(), north, south)
                 }.onFailure {
                     activityBean.value = DiscoveryAdapter.ActivityBean("0.00", north, south)
                     Toast.makeText(Utils.getApp(), it.message, Toast.LENGTH_SHORT).show()

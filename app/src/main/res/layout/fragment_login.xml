@@ -80,7 +80,6 @@
                 android:text="@string/login_local_wisdom"
                 android:checked="true"/>
             <RadioButton
-                android:clickable="false"
                 android:id="@+id/rd_wisdom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -88,7 +87,6 @@
                 android:text="@string/login_wisdom_ahu"
                 android:checked="false"/>
             <RadioButton
-                android:clickable="false"
                 android:id="@+id/rd_teach"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

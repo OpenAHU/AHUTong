@@ -2,10 +2,7 @@ package com.ahu.ahutong.data.reptile
 
 import android.util.Log
 import com.ahu.ahutong.data.AHUResponse
-import com.ahu.ahutong.data.model.Course
-import com.ahu.ahutong.data.model.Exam
-import com.ahu.ahutong.data.model.Grade
-import com.ahu.ahutong.data.model.Room
+import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.data.reptile.utils.DES
 import com.ahu.ahutong.data.reptile.utils.timeMap
 import com.ahu.ahutong.data.reptile.utils.weekdayMap
@@ -137,14 +134,14 @@ object Reptile {
 
     /**
      * 获取校园卡余额
-     * @return AHUResponse<String>
+     * @return AHUResponse<Card>
      */
-    suspend fun getCardMoney(): AHUResponse<String> = withContext(Dispatchers.IO) {
-        val ahuResponse = AHUResponse<String>()
+    suspend fun getCardMoney(): AHUResponse<Card> = withContext(Dispatchers.IO) {
+        val ahuResponse = AHUResponse<Card>()
         async {
             login(ReptileManager.getInstance().currentUser)
         }.await().onFailure {
-            ahuResponse.data = ""
+            ahuResponse.data = null
             ahuResponse.code = 1
             ahuResponse.msg = it.message
             return@withContext ahuResponse
@@ -168,14 +165,18 @@ object Reptile {
                 }
                 throw IllegalStateException(response.statusMessage())
             }
-            ahuResponse.data =
+            val balance =
                 JsonParser.parseString(response.body()).asJsonObject.get("KHYE").asString
+            val card = Card()
+            card.balance = balance.toDouble()
+            card.transitionBalance = 0;
+            ahuResponse.data = card
             ahuResponse.code = 0
             ahuResponse.msg = "OK"
             return@withContext ahuResponse
         } catch (e: Exception) {
             SinkLog.e(e.toString())
-            ahuResponse.data = ""
+            ahuResponse.data = null
             ahuResponse.code = 1
             ahuResponse.msg = "获取余额失败"
             return@withContext ahuResponse

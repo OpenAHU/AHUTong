@@ -12,8 +12,12 @@ public class DefaultCookieStore implements CookieStore {
 
     @Override
     public void putAll(Map<String, String> cookies) {
-        System.out.println("cookies = " + cookies);
+
         cookieMap.putAll(cookies);
+        if (cookieMap.containsKey("refresh")){
+            cookieMap.put("refresh", "0");
+        }
+        System.out.println("cookies = " + cookieMap);
     }
 
     @Override
@@ -33,6 +37,7 @@ public class DefaultCookieStore implements CookieStore {
 
     @Override
     public Map<String, String> getCookies() {
+
         return this.cookieMap;
     }
 

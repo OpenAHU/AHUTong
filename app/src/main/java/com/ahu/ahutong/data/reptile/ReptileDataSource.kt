@@ -50,15 +50,8 @@ class ReptileDataSource(user: ReptileUser): BaseDataSource {
        return Reptile.getGrade()
     }
 
-    override suspend fun getNews(): AHUResponse<List<News>> {
-        //TODO
-        withContext(Dispatchers.Main){
-            Toast.makeText(Utils.getApp(), "本地爬虫暂不支持此项功能！", Toast.LENGTH_SHORT).show()
-        }
-        return AHUResponse()
-    }
 
-    override suspend fun getCardMoney(): AHUResponse<String> {
+    override suspend fun getCardMoney(): AHUResponse<Card> {
        return Reptile.getCardMoney()
     }
 }
