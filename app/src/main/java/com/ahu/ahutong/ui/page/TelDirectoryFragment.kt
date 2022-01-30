@@ -47,7 +47,7 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
             radioButton.text = types;
             radioButton.id = index;
             radioButton.setOnCheckedChangeListener { t, isChecked ->
-                if (isChecked)mState.theme.theme.setItem(t,true)
+                if (isChecked) mState.theme.theme.setItem(t, true)
                 else t.setBackgroundColor(Color.TRANSPARENT)
             }
             dataBinding.recyclerType.addView(radioButton)
@@ -63,10 +63,10 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
                 }
 
                 override fun bindingData(binding: ItemTelBinding, data: Tel) {
-                    mState.theme.theme.setItem(binding.tag,true)
-                   // binding.tag
+                    mState.theme.theme.setItem(binding.tag, true)
+                    // binding.tag
                     binding.bean = data
-                    binding.proxy=ClickProxy()
+                    binding.proxy = ClickProxy()
                 }
             }
         }
@@ -78,6 +78,7 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
         val back: (() -> Unit) = {
             nav().popBackStack()
         }
+
         fun gotoTel(view: View, tel: String) {
             val dialIntent =
                 Intent(Intent.ACTION_DIAL, Uri.parse("tel:$tel")) //跳转到拨号界面，同时传递电话号码

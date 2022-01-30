@@ -9,6 +9,7 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.lifecycle.ViewModel;
@@ -18,6 +19,7 @@ import arch.sink.BaseApplication;
 import arch.sink.data.manager.NetworkStateManager;
 import arch.sink.ui.BarConfig;
 import arch.sink.ui.SinkBar;
+import arch.sink.utils.NightUtils;
 
 /**
  * @Author SinkDev

@@ -6,8 +6,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
+import arch.sink.ui.BarConfig
 import arch.sink.ui.page.BaseActivity
 import arch.sink.ui.page.DataBindingConfig
+import arch.sink.utils.NightUtils
 import com.ahu.ahutong.databinding.ActivityMainBinding
 import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
@@ -24,6 +26,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun getDataBindingConfig(): DataBindingConfig {
         return DataBindingConfig(R.layout.activity_main, BR.state, mState)
+    }
+
+    override fun getBarConfig(): BarConfig {
+        val barConfig = BarConfig()
+        if (NightUtils.isNightMode(this)) {
+
+            barConfig.dark()
+        } else {
+            barConfig.light()
+        }
+        return barConfig
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -37,7 +37,7 @@
             android:maxEms="8"
             android:singleLine="true"
             android:text="空闲"
-            android:textColor="@color/black"
+            android:textColor="?colorOnPrimary"
             android:textSize="14sp"
             android:textStyle="bold" />
 

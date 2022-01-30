@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:text="@{bean.name}"
-                android:textColor="@color/black"
+                android:textColor="?colorOnPrimary"
                 android:textSize="12sp"
                 tools:text="高等数学" />
 
