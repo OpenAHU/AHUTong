@@ -4,13 +4,22 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../../../layout/custom_preview.xml" value="0.33" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/drawable/bottom_nav_schedule.xml" value="0.1" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/drawable/ic_today_24.xml" value="0.1" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/drawable/ic_wallet_24.xml" value="0.1" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/drawable/icon_back.xml" value="0.1" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/drawable/mine_sheet.xml" value="0.1" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/drawable/search_edit.xml" value="0.1" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/drawable/tele_radio_background.xml" value="0.1705" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/drawable/tele_radio_select.xml" value="0.1705" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/drawable/tele_radio_unselect.xml" value="0.1705" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/dialog_choose_one.xml" value="0.1" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/dialog_room.xml" value="0.1" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/dialog_setting.xml" value="0.1" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/fragment_about.xml" value="0.1" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/fragment_change_theme.xml" value="0.1" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/fragment_classroom.xml" value="0.1" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/fragment_course.xml" value="0.1" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/fragment_exam.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/fragment_garbage.xml" value="0.1" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/fragment_home.xml" value="0.25364583333333335" />
@@ -38,6 +47,7 @@
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/item_widget_content.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/item_widget_head.xml" value="0.1" />
         <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/app/src/main/res/layout/layout_schedule.xml" value="0.1" />
+        <entry key="..\:/Users/Sink/AndroidStudioProjects/AHUTong/simonlibrary/src/main/res/drawable/bg_bottom_dialog.xml" value="0.1" />
         <entry key="..\:/Users/SinkDev/StudioProjects/AHUTong/app/src/main/res/layout/fragment_schedule_week.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/SinkDev/StudioProjects/AHUTong/app/src/main/res/layout/item_pop_course.xml" value="0.25364583333333335" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.36666666666666664" />

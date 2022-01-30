@@ -23,7 +23,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#eee">
+        android:background="?colorSecondary">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,7 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@color/white">
+                android:background="?colorPrimary">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="100dp"
@@ -76,7 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:background="@color/white">
+                android:background="?colorPrimary">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="100dp"
@@ -101,7 +101,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@color/white">
+                android:background="?colorPrimary">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="100dp"
@@ -126,7 +126,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:background="@color/white">
+                android:background="?colorPrimary">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="100dp"
@@ -151,7 +151,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:background="@color/white">
+                android:background="?colorPrimary">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="100dp"
@@ -176,7 +176,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:background="@color/white">
+                android:background="?colorPrimary">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="100dp"
@@ -201,7 +201,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:background="@color/white">
+                android:background="?colorPrimary">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="100dp"
@@ -230,7 +230,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@color/white">
+                android:background="?colorPrimary">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="100dp"
