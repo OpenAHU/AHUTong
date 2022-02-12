@@ -52,15 +52,8 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.discoveryRec.layoutManager = LinearLayoutManager(context)
         // 设置默认数据
-        val bean = DiscoveryAdapter.DiscoveryBean(
-            mutableListOf(),
-            mState.tools,
-            mutableListOf(),
-            DiscoveryAdapter.ActivityBean("0.00", "男生", "女生")
-        )
-        dataBinding.discoveryRec.adapter = DiscoveryAdapter(bean)
-        mState.loadActivityBean()
-        mState.loadBanner()
+        dataBinding.discoveryRec.adapter = DiscoveryAdapter()
+
         val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
         adapter.setCourses(mState.loadCourse())
         adapter.toolItemSelectAction = ToolClickProxy()::onClick
@@ -68,10 +61,14 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
         // 创建View
         dataBinding.refreshLayout.isRefreshing = true
         dataBinding.refreshLayout.setOnRefreshListener {
-            mState.loadActivityBean()
-            mState.loadBanner()
+            refresh()
         }
+        refresh()
+    }
 
+    private fun refresh() {
+        mState.loadActivityBean()
+        mState.loadBanner()
     }
 
     inner class ToolClickProxy {

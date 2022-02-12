@@ -29,10 +29,6 @@ class DiscoveryViewModel : ViewModel() {
         MutableLiveData<List<Banner>>()
     }
 
-    val tools by lazy {
-        Tool.defaultTools
-    }
-
     val activityBean = MutableLiveData<DiscoveryAdapter.ActivityBean>()
 
     fun loadActivityBean() {

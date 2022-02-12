@@ -1,31 +1,22 @@
 package com.ahu.ahutong.ui.adapter
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
+
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Banner
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.databinding.*
-import com.ahu.ahutong.ui.adapter.base.BaseAdapter
-import com.ahu.ahutong.ui.adapter.base.BaseViewHolder
+import com.ahu.ahutong.ui.adapter.holder.ActivityItemHolder
+import com.ahu.ahutong.ui.adapter.holder.BannerItemHolder
 import com.ahu.ahutong.ui.adapter.holder.CourseItemHolder
 import com.ahu.ahutong.ui.adapter.holder.ToolsItemHolder
-import com.ahu.ahutong.ui.widget.banner.BannerView.BannerAdapter
-import com.sink.library.log.SinkLog
 
 
-class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class DiscoveryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var activityBean: ActivityBean
     private var banners: List<Banner>
     private val tools: List<Tool>
@@ -35,26 +26,10 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
 
     //Tip: 类似Java, kotlin的构造函数体，尽量写在第一个方法的位置
     init {
-        banners = bean.banners
-        tools = bean.tools
-        courses = bean.courses
-        activityBean = bean.activityBean
-    }
-
-    fun setBanners(data: List<Banner>) {
-        banners = data
-        notifyItemChanged(0)
-    }
-
-    fun setCourses(data: List<Course>) {
-        courses = data
-        notifyItemChanged(2)
-    }
-
-
-    fun setActivityBean(activityBean: ActivityBean) {
-        this.activityBean = activityBean
-        notifyItemChanged(3)
+        banners = mutableListOf()
+        tools = Tool.defaultTools
+        courses = mutableListOf()
+        activityBean = ActivityBean("0.00", "男生", "女生")
     }
 
 
@@ -130,69 +105,22 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
     }
 
 
-    data class DiscoveryBean(
-        val banners: List<Banner>,
-        val tools: List<Tool>,
-        val courses: List<Course>,
-        val activityBean: ActivityBean
-    )
+    data class ActivityBean(val money: String, val north: String, val south: String)
 
-    inner class BannerItemHolder(val binding: ItemDiscoveryBannerBinding) :
-        BaseViewHolder<ItemDiscoveryBannerBinding, List<Banner>>(binding) {
-        override fun bind(data: List<Banner>) {
 
-            binding.itemDiscoveryBanner.setAdapter(object : BannerAdapter() {
-                override fun getItemCount(): Int {
-                    return if (data.isEmpty()) 0 else data.size
-                }
+    fun setBanners(data: List<Banner>) {
+        banners = data
+        notifyItemChanged(0)
+    }
 
-                override fun getImageView(parentView: View, position: Int): ImageView {
-                    val imageView = ImageView(parentView.context)
-                    imageView.scaleType = ImageView.ScaleType.FIT_XY
-                    val banner = data[position]
-                    imageView.load(banner.imageUrl)
-                    imageView.setOnClickListener {
-                        try {
-                            val i1 = Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(banner.detailUrl)
-                            )
-                            i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            it.context.startActivity(i1)
-                        } catch (e: Exception) {
-                            SinkLog.e(e)
-                        }
-                    }
-                    return imageView
-                }
-            })
-        }
+    fun setCourses(data: List<Course>) {
+        courses = data
+        notifyItemChanged(2)
     }
 
 
-
-    inner class ActivityItemHolder(val binding: ItemDiscoveryActivityBinding) :
-        BaseViewHolder<ItemDiscoveryActivityBinding, ActivityBean>(binding) {
-        override fun bind(data: ActivityBean) {
-            binding.bean = data
-            binding.tvPay.setOnClickListener {
-                try {
-                    val i1 = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("alipays://platformapi/startapp?appId=2019090967125695&page=pages%2Findex%2Findex&enbsv=0.3.2106171038.6&chInfo=ch_share__chsub_CopyLink")
-                    )
-                    i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    it.context.startActivity(i1)
-                } catch (e: Exception) {
-                    Toast.makeText(it.context, "手机未安装支付宝App", Toast.LENGTH_SHORT).show()
-                }
-            }
-            binding.tvFlow.setOnClickListener {
-                Toast.makeText(it.context, "开发中，敬请期待.", Toast.LENGTH_SHORT).show()
-            }
-        }
+    fun setActivityBean(activityBean: ActivityBean) {
+        this.activityBean = activityBean
+        notifyItemChanged(3)
     }
-
-    class ActivityBean(val money: String, val north: String, val south: String)
-
 }
