@@ -8,12 +8,14 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLines="3"
         android:layout_weight="1"
         android:gravity="center"
         android:padding="2dp"
         android:id="@+id/course_name"
         android:textColor="@color/white"
         android:textSize="10sp"
+        android:ellipsize="end"
         tools:text="高等数学"
         tools:ignore="SmallSp" />
 

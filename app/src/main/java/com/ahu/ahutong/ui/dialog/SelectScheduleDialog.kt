@@ -14,7 +14,7 @@ import com.simon.library.view.BottomDialog
  * @Date: 2021/8/25-下午6:38
  * @Email: 468766131@qq.com
  */
-class SettingScheduleDialog : BottomDialog() {
+class SelectScheduleDialog : BottomDialog() {
     private var callback: SettingCallback? = null
 
     override fun onInitDialog(dialog: Dialog?) {

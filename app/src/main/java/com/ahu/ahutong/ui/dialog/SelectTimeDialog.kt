@@ -4,9 +4,13 @@ import android.app.Dialog
 import android.view.LayoutInflater
 import android.view.View
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.databinding.DialogTimeBinding
 import com.ahu.ahutong.ext.defaultStyle
+import com.ahu.ahutong.ext.getSchoolYears
 import com.simon.library.view.BottomDialog
+import java.lang.IllegalStateException
 import java.util.*
 
 /**
@@ -14,19 +18,17 @@ import java.util.*
  * @Date: 2021/8/8-下午12:24
  * @Email: 468766131@qq.com
  */
-class SettingTimeDialog : BottomDialog(), View.OnClickListener {
+class SelectTimeDialog : BottomDialog(), View.OnClickListener {
     private var callback: CallBack? = null
     private lateinit var binding: DialogTimeBinding
 
     companion object {
         private val schoolYears by lazy {
-            val result = mutableListOf<String>()
-            val instance = Calendar.getInstance(Locale.CHINA)
-            val year = instance[Calendar.YEAR]
-            for (i in 0..5) {
-                result.add("${year - i}-${year - i + 1}")
-            }
-            result.toTypedArray()
+            val defaultUser = User()
+            defaultUser.name = "Y01717"
+            // 求出用户的入学时间
+            (AHUCache.getCurrentUser()
+                ?: defaultUser).getSchoolYears()
         }
         private val week by lazy {
             val result = mutableListOf<String>()

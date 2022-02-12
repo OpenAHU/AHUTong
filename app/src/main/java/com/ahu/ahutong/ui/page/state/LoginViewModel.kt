@@ -29,13 +29,13 @@ class LoginViewModel : ViewModel() {
     val loginResult = MutableLiveData<Result<User>>()
 
     fun login(username: String, password: String) = viewModelScope.launch {
+        val user = User()
+        user.name = username
         val result: Result<User> = if (loginType == User.UserType.AHU_LOCAL) {
             //爬虫登录
             ReptileManager.getInstance().cookieStore = DefaultCookieStore()
             val result = Reptile.login(ReptileUser(username, password))
             if (result.isSuccess) {
-                val user = User()
-                user.name = username
                 AHUCache.saveCurrentUser(user)
                 AHUCache.saveCurrentPassword(password)
                 //切换数据源
@@ -56,7 +56,7 @@ class LoginViewModel : ViewModel() {
                     ), loginType
                 )
                 if (response.isSuccessful) {
-                    AHUCache.saveCurrentUser(response.data)
+                    AHUCache.saveCurrentUser(user)
                     //切换数据源
                     AHUCache.saveLoginType(loginType)
                     AHURepository.dataSource = APIDataSource()

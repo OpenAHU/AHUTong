@@ -3,7 +3,6 @@ package com.ahu.ahutong.ui.page
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -19,8 +18,8 @@ import com.ahu.ahutong.databinding.FragmentScheduleWeekBinding
 import com.ahu.ahutong.databinding.ItemPopCourseBinding
 import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.dialog.ChooseOneDialog
-import com.ahu.ahutong.ui.dialog.SettingScheduleDialog
-import com.ahu.ahutong.ui.dialog.SettingTimeDialog
+import com.ahu.ahutong.ui.dialog.SelectScheduleDialog
+import com.ahu.ahutong.ui.dialog.SelectTimeDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleCourse
@@ -33,8 +32,8 @@ import java.util.*
  * @Email: 468766131@qq.com
  */
 class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBinding>(),
-    SettingTimeDialog.CallBack,
-    SettingScheduleDialog.SettingCallback {
+    SelectTimeDialog.CallBack,
+    SelectScheduleDialog.SettingCallback {
     constructor() : this(1)
 
     private lateinit var popupWindow: PopupWindow
@@ -123,7 +122,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
         super.onResume()
         if (pState.schoolTerm.isEmpty() || pState.schoolYear.isEmpty()) {
             //如果没有设定学年学期，开启设置
-            val settingTimeDialog = SettingTimeDialog()
+            val settingTimeDialog = SelectTimeDialog()
             settingTimeDialog.setCallBack(this)
             settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
         }
@@ -156,7 +155,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
 
         //兔子
         dataBinding.scheduleView.setSettingClickListener {
-            val dialog = SettingScheduleDialog()
+            val dialog = SelectScheduleDialog()
             dialog.setCallback(this)
             dialog.show(parentFragmentManager, "SettingScheduleDialog")
         }
@@ -239,7 +238,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
     }
 
     override fun setStartTime() {
-        val settingTimeDialog = SettingTimeDialog()
+        val settingTimeDialog = SelectTimeDialog()
         settingTimeDialog.setCallBack(this)
         settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
     }

@@ -4,8 +4,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Grade
+import com.ahu.ahutong.ext.getSchoolYears
 import kotlinx.coroutines.launch
+import java.lang.IllegalStateException
 import java.util.*
 
 class GradeViewModel : ViewModel() {
@@ -13,8 +16,8 @@ class GradeViewModel : ViewModel() {
     val termGradePointAverage = MutableLiveData<String>()
     val yearGradePointAverage = MutableLiveData<String>()
     val result = MutableLiveData<Result<Grade>>()
-    var schoolYear = MutableLiveData<String>(schoolYears[0])
-    var schoolTerm = MutableLiveData<String>(terms.keys.toTypedArray()[0])
+    var schoolYear = MutableLiveData(schoolYears[0])
+    var schoolTerm = MutableLiveData(terms.keys.toTypedArray()[0])
     var grade: Grade? = null
 
     fun getGarde(isRefresh: Boolean = false) = viewModelScope.launch {
@@ -23,12 +26,9 @@ class GradeViewModel : ViewModel() {
 
     companion object {
         val schoolYears by lazy {
-            val result = mutableListOf<String>()
-            val year = Calendar.getInstance().get(Calendar.YEAR)
-            for (i in 0..6) {
-                result.add("${year - i}-${year - i + 1}")
-            }
-            result.toTypedArray()
+            (AHUCache.getCurrentUser()
+                ?: throw IllegalStateException("未登录，无法打开成绩界面！"))
+                .getSchoolYears()
         }
         val terms by lazy {
             val result = mutableMapOf("1" to "0", "2" to "1")
