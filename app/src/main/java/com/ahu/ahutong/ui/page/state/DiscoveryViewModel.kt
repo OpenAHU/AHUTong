@@ -75,7 +75,7 @@ class DiscoveryViewModel : ViewModel() {
         val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
             .parse(time)
         val week = (TimeUtils.getTimeDistance(Date(), date) / 7 + 1).toInt()
-        val courses = AHUCache.getSchedule(year ?: "", term ?: "") ?: emptyList()
+        val courses = AHUCache.getSchedule(year, term) ?: emptyList()
         val thisWeek = Calendar.getInstance()[Calendar.DAY_OF_WEEK] - 1
         return courses.filter { t ->
             t.weekday == thisWeek && t.startWeek <= week && t.endWeek >= week

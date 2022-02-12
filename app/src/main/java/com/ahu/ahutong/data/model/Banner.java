@@ -63,8 +63,7 @@ public class Banner {
         try {
             String protocol = new URL(detailUrl).getProtocol();
             String protocol1 = new URL(imageUrl).getProtocol();
-            SinkLog.i(protocol1);
-            return protocol.matches("https?") && protocol1.matches("https?");
+            return protocol1.matches("https?") && imageUrl.startsWith(protocol1);
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return false;
