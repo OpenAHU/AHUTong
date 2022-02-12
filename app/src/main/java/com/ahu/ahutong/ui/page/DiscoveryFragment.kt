@@ -51,6 +51,7 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.discoveryRec.layoutManager = LinearLayoutManager(context)
+        // 设置默认数据
         val bean = DiscoveryAdapter.DiscoveryBean(
             mutableListOf(),
             mState.tools,
@@ -62,6 +63,9 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
         mState.loadBanner()
         val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
         adapter.setCourses(mState.loadCourse())
+        adapter.toolItemSelectAction = ToolClickProxy()::onClick
+        adapter.courseClickAction = CourseClickProxy()::onClick
+        // 创建View
         dataBinding.refreshLayout.isRefreshing = true
         dataBinding.refreshLayout.setOnRefreshListener {
             mState.loadActivityBean()
@@ -71,7 +75,7 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
     }
 
     inner class ToolClickProxy {
-        fun onClick(view: View, tool: Tool) {
+        fun onClick(tool: Tool) {
             if (activityState.isLogin.value == false) {
                 Toast.makeText(requireContext(), "登录后才能使用小工具。", Toast.LENGTH_SHORT).show()
                 return
@@ -81,7 +85,7 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
     }
 
     inner class CourseClickProxy {
-        fun onClick(view: View, course: Course) {
+        fun onClick(course: Course) {
             val bundle = Bundle().apply {
                 putBoolean("add", false)
                 putSerializable("course", course)
@@ -90,9 +94,5 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
         }
     }
 
-
-    companion object {
-        val INSTANCE = DiscoveryFragment()
-    }
 
 }

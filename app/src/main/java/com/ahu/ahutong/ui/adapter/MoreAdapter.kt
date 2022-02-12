@@ -23,18 +23,18 @@ class MoreAdapter(val bean: MoreBean) : RecyclerView.Adapter<RecyclerView.ViewHo
             false
         )
 
-       return ItemHolder(binding)
+        return ItemHolder(binding)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val itemHolder = holder as ItemHolder
-        when(position) {
-            0-> {
-                itemHolder.binding.sector.text="学习"
+        when (position) {
+            0 -> {
+                itemHolder.binding.sector.text = "学习"
                 itemHolder.bind(bean.study)
             }
-            1-> {
-                itemHolder.binding.sector.text="生活"
+            1 -> {
+                itemHolder.binding.sector.text = "生活"
                 itemHolder.bind(bean.life)
             }
         }
@@ -43,22 +43,27 @@ class MoreAdapter(val bean: MoreBean) : RecyclerView.Adapter<RecyclerView.ViewHo
     override fun getItemCount(): Int {
         return 2
     }
-    inner class ItemHolder(val binding: ItemMoreBinding) : BaseViewHolder<ItemMoreBinding, List<Tool>>(binding) {
+
+    inner class ItemHolder(val binding: ItemMoreBinding) :
+        BaseViewHolder<ItemMoreBinding, List<Tool>>(binding) {
         override fun bind(data: List<Tool>) {
-            binding.recycler.layoutManager=GridLayoutManager(binding.root.context, 3)
-            binding.recycler.adapter=object : BaseAdapter<Tool, ItemToolBinding>(data) {
+            binding.recycler.layoutManager = GridLayoutManager(binding.root.context, 3)
+            binding.recycler.adapter = object : BaseAdapter<Tool, ItemToolBinding>(data) {
                 override fun layout(): Int {
                     return R.layout.item_tool
                 }
+
                 override fun bindingData(binding: ItemToolBinding, data: Tool) {
                     binding.tool = data
-                    binding.proxy = DiscoveryFragment.INSTANCE.ToolClickProxy()
+                    TODO()
+//                    binding.proxy = DiscoveryFragment.INSTANCE.ToolClickProxy()
                 }
             }
         }
-        }
     }
-    data class MoreBean(
-        val study: List<Tool>,
-        val life: List<Tool>
-    )
+}
+
+data class MoreBean(
+    val study: List<Tool>,
+    val life: List<Tool>
+)

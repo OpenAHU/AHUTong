@@ -42,7 +42,6 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
         dataBinding.refreshLayout.setOnRefreshListener  { dataBinding.refreshLayout.isRefreshing = false; }
     }
 
-
     inner class ClickProxy {
         //about us
         fun aboutUs(view: View) {
@@ -100,8 +99,4 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
 
     }
 
-    companion object {
-        val INSTANCE = MineFragment()
-
-    }
 }

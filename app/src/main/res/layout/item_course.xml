@@ -11,7 +11,7 @@
 
         <variable
             name="proxy"
-            type="com.ahu.ahutong.ui.page.DiscoveryFragment.CourseClickProxy" />
+            type="com.ahu.ahutong.ui.adapter.holder.CourseItemHolder.CourseClickProxy" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:foreground="?android:attr/selectableItemBackground"
-        android:onClick="@{(thisView) -> proxy.onClick(thisView, bean)}"
+        android:onClick="@{(thisView) -> proxy.onClick(bean)}"
         app:cardElevation="0dp">
 
         <androidx.appcompat.widget.LinearLayoutCompat

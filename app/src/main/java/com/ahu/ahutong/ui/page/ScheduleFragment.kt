@@ -70,9 +70,6 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>() {
 
     }
 
-    companion object {
-        val INSTANCE = ScheduleFragment()
-    }
 
 
 }

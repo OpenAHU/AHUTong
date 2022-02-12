@@ -2,13 +2,13 @@ package com.ahu.ahutong.ui.adapter
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
@@ -19,16 +19,19 @@ import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.databinding.*
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.adapter.base.BaseViewHolder
-import com.ahu.ahutong.ui.page.DiscoveryFragment
+import com.ahu.ahutong.ui.adapter.holder.CourseItemHolder
+import com.ahu.ahutong.ui.adapter.holder.ToolsItemHolder
 import com.ahu.ahutong.ui.widget.banner.BannerView.BannerAdapter
 import com.sink.library.log.SinkLog
 
 
 class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var activityBean: DiscoveryAdapter.ActivityBean
+    private var activityBean: ActivityBean
     private var banners: List<Banner>
     private val tools: List<Tool>
     private var courses: List<Course>
+    var toolItemSelectAction: ((Tool) -> Unit) = {}
+    var courseClickAction: (Course) -> Unit = {}
 
     //Tip: 类似Java, kotlin的构造函数体，尽量写在第一个方法的位置
     init {
@@ -45,6 +48,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
 
     fun setCourses(data: List<Course>) {
         courses = data
+        notifyItemChanged(2)
     }
 
 
@@ -75,7 +79,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
                     parent,
                     false
                 )
-                val toolsItemHolder = ToolsItemHolder(binding)
+                val toolsItemHolder = ToolsItemHolder(binding, toolItemSelectAction)
                 toolsItemHolder.bind(tools)
                 toolsItemHolder
             }
@@ -87,7 +91,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
                     parent,
                     false
                 )
-                val coursesItemHolder = CourseItemHolder(binding)
+                val coursesItemHolder = CourseItemHolder(binding, courseClickAction)
                 coursesItemHolder.bind(courses)
                 coursesItemHolder
             }
@@ -165,40 +169,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
         }
     }
 
-    inner class ToolsItemHolder(val binding: ItemDiscoveryToolsBinding) :
-        BaseViewHolder<ItemDiscoveryToolsBinding, List<Tool>>(binding) {
-        override fun bind(data: List<Tool>) {
-            binding.itemDiscoveryTools.layoutManager = GridLayoutManager(binding.root.context, 5)
-            binding.itemDiscoveryTools.adapter = object : BaseAdapter<Tool, ItemToolBinding>(data) {
-                override fun layout(): Int {
-                    return R.layout.item_tool
-                }
 
-                override fun bindingData(binding: ItemToolBinding, data: Tool) {
-                    binding.tool = data
-                    binding.proxy = DiscoveryFragment.INSTANCE.ToolClickProxy()
-                }
-            }
-        }
-    }
-
-    inner class CourseItemHolder(val binding: ItemDiscoveryCourseBinding) :
-        BaseViewHolder<ItemDiscoveryCourseBinding, List<Course>>(binding) {
-        override fun bind(data: List<Course>) {
-            binding.rv.layoutManager =
-                LinearLayoutManager(binding.root.context)
-            binding.rv.adapter = object : BaseAdapter<Course, ItemCourseBinding>(data) {
-                override fun layout(): Int {
-                    return R.layout.item_course
-                }
-
-                override fun bindingData(binding: ItemCourseBinding, data: Course) {
-                    binding.bean = data
-                    binding.proxy = DiscoveryFragment.INSTANCE.CourseClickProxy()
-                }
-            }
-        }
-    }
 
     inner class ActivityItemHolder(val binding: ItemDiscoveryActivityBinding) :
         BaseViewHolder<ItemDiscoveryActivityBinding, ActivityBean>(binding) {

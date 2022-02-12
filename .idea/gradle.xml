@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/library" />
             <option value="$PROJECT_DIR$/plugin" />
             <option value="$PROJECT_DIR$/simonlibrary" />
+            <option value="$PROJECT_DIR$/webview_reptile" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

@@ -20,6 +20,9 @@ import com.sink.library.log.SinkLog
  */
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private lateinit var mState: HomeViewModel
+    private val scheduleFragment = ScheduleFragment()
+    private val discoveryFragment = DiscoveryFragment()
+    private val mineFragment = MineFragment()
 
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(HomeViewModel::class.java)
@@ -44,45 +47,17 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
                 override fun createFragment(position: Int): Fragment {
                     return when (position) {
-                        0 -> ScheduleFragment.INSTANCE
-                        1 -> DiscoveryFragment.INSTANCE
-                        2 -> MineFragment.INSTANCE
+                        0 -> scheduleFragment
+                        1 -> discoveryFragment
+                        2 -> mineFragment
                         else -> throw RuntimeException("不存在该position")
                     }
                 }
-
             }
         }
-        //检查更新
-//        CookApkUpdate.checkUpdate(object : CookApkUpdate.UpdateListener {
-//            override fun onNeedUpdate(app: App) {
-//                val message = "版本：${app.versionName} \n" +
-//                        "新版特性：\n ${app.intro}"
-//                buildDialog("更新", message, "前往下载", { _, _ ->
-//                    val intent = Intent(Intent.ACTION_VIEW)
-//                    intent.data = Uri.parse(app.cookApkUrl)
-//                    startActivity(intent)
-//                }, "取消").show()
-//            }
-//
-//            override fun onLatestVersion() {
-//                checkVersion()
-//            }
-//
-//            override fun checkFailure(throwable: Throwable) {
-//                checkVersion()
-//            }
-//
-//        })
+
 
     }
-
-//    private fun checkVersion() {
-//        if (AHUCache.getVersionHistory() != mState.versionName) {
-//            buildDialog("更新日志", Constants.UPDATE_LOG, "我知道了").show()
-//            AHUCache.saveVersionHistory(mState.versionName)
-//        }
-//    }
 
     inner class ActionProxy {
         var selectAction: (MenuItem) -> Boolean = fun(item: MenuItem): Boolean {

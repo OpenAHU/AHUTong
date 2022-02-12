@@ -10,14 +10,14 @@
 
         <variable
             name="proxy"
-            type="com.ahu.ahutong.ui.page.DiscoveryFragment.ToolClickProxy" />
+            type="com.ahu.ahutong.ui.adapter.holder.ToolsItemHolder.ToolClickProxy" />
     </data>
 
     <LinearLayout
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:onClick="@{(thisView) -> proxy.onClick(thisView, tool)}"
+        android:onClick="@{(thisView) -> proxy.onClick(tool)}"
         android:orientation="vertical"
         tools:ignore="UseCompoundDrawables">
 
