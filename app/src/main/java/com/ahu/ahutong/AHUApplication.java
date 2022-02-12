@@ -20,7 +20,6 @@ import arch.sink.BaseApplication;
  */
 public class AHUApplication extends BaseApplication {
     public static int width, height;
-    public static String version;
 
 
     @Override
@@ -61,18 +60,6 @@ public class AHUApplication extends BaseApplication {
         CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(this);
         strategy.setDeviceID("fake-id");
         CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG, strategy);
-        try {
-            version = getPackageManager().getPackageInfo(getPackageName(),0).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException("这错误够离谱的");
-        }
-
-        //初始化更新
-//        try {
-//            CookApkUpdate.init(this);
-//        } catch (PackageManager.NameNotFoundException e) {
-//            e.printStackTrace();
-//        }
 
     }
     private static final BathPlugImpl bath=new BathPlugImpl();

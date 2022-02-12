@@ -158,7 +158,6 @@ object AHURepository {
     }
 
 
-
     /**
      * 查询成绩 本地优先
      * @param isRefresh Boolean 是否直接获取服务器上的
@@ -240,6 +239,19 @@ object AHURepository {
                 Result.failure(Throwable(response.msg))
             }
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getBanner() = withContext(Dispatchers.IO) {
+        try {
+            val response = dataSource.getBanner()
+            if (response.isSuccessful) {
+                Result.success(response.data.filter { it.isLegal })
+            } else {
+                Result.failure(Throwable(response.msg))
+            }
+        } catch (e: java.lang.Exception) {
             Result.failure(e)
         }
     }

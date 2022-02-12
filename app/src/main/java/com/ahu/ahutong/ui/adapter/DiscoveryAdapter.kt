@@ -21,6 +21,7 @@ import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.adapter.base.BaseViewHolder
 import com.ahu.ahutong.ui.page.DiscoveryFragment
 import com.ahu.ahutong.ui.widget.banner.BannerView.BannerAdapter
+import com.sink.library.log.SinkLog
 
 
 class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -39,6 +40,7 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
 
     fun setBanners(data: List<Banner>) {
         banners = data
+        notifyItemChanged(0)
     }
 
     fun setCourses(data: List<Course>) {
@@ -134,23 +136,29 @@ class DiscoveryAdapter(bean: DiscoveryBean) : RecyclerView.Adapter<RecyclerView.
     inner class BannerItemHolder(val binding: ItemDiscoveryBannerBinding) :
         BaseViewHolder<ItemDiscoveryBannerBinding, List<Banner>>(binding) {
         override fun bind(data: List<Banner>) {
-            val banners = arrayListOf(R.mipmap.banner0, R.mipmap.banner1, R.mipmap.banner2)
+
             binding.itemDiscoveryBanner.setAdapter(object : BannerAdapter() {
                 override fun getItemCount(): Int {
-                    return if (banners.size == 0) banners.size else banners.size
+                    return if (data.isEmpty()) 0 else data.size
                 }
 
                 override fun getImageView(parentView: View, position: Int): ImageView {
-                    if (data.isEmpty()) {
-                        val imageView = ImageView(parentView.context)
-                        imageView.scaleType = ImageView.ScaleType.FIT_XY
-                        imageView.load(banners[position])
-                        return imageView
-                    }
                     val imageView = ImageView(parentView.context)
                     imageView.scaleType = ImageView.ScaleType.FIT_XY
                     val banner = data[position]
                     imageView.load(banner.imageUrl)
+                    imageView.setOnClickListener {
+                        try {
+                            val i1 = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(banner.detailUrl)
+                            )
+                            i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            it.context.startActivity(i1)
+                        } catch (e: Exception) {
+                            SinkLog.e(e)
+                        }
+                    }
                     return imageView
                 }
             })

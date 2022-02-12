@@ -89,6 +89,10 @@ interface AHUService {
     @GET("/api/campusCardBalance")
     suspend fun getCardMoney(): AHUResponse<Card>
 
+
+    @GET("/api/android/version")
+    suspend fun getLatestVersion(): AHUResponse<AppVersion>
+
     companion object{
         private const val BASE_URL = "https://ahuer.cn"
         // Cookie 本地存储

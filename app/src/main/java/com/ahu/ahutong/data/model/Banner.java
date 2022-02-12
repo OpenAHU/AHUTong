@@ -1,6 +1,10 @@
 package com.ahu.ahutong.data.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.sink.library.log.SinkLog;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class Banner {
 
@@ -8,7 +12,7 @@ public class Banner {
     private String title;
     @SerializedName("detailUrl")
     private String detailUrl;
-    @SerializedName("imageUrl")
+    @SerializedName("imgUrl")
     private String imageUrl;
     @SerializedName("orderWeight")
     private Double orderWeight;
@@ -30,7 +34,6 @@ public class Banner {
     public void setId(Integer id) {
         this.id = id;
     }
-
 
     public String getTitle() {
         return title;
@@ -55,4 +58,17 @@ public class Banner {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+    public boolean isLegal() {
+        try {
+            String protocol = new URL(detailUrl).getProtocol();
+            String protocol1 = new URL(imageUrl).getProtocol();
+            SinkLog.i(protocol1);
+            return protocol.matches("https?") && protocol1.matches("https?");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
+

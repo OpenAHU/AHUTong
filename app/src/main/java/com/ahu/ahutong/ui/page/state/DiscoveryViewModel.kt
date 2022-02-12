@@ -13,6 +13,7 @@ import com.ahu.ahutong.data.model.Banner
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.ui.adapter.DiscoveryAdapter
+import com.sink.library.log.SinkLog
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -40,10 +41,23 @@ class DiscoveryViewModel : ViewModel() {
             val south = AHUApplication.getBath().south
             AHURepository.getCardMoney()
                 .onSuccess {
-                    activityBean.value = DiscoveryAdapter.ActivityBean(it.balance.toString(), north, south)
+                    activityBean.value =
+                        DiscoveryAdapter.ActivityBean(it.balance.toString(), north, south)
                 }.onFailure {
                     activityBean.value = DiscoveryAdapter.ActivityBean("0.00", north, south)
                     Toast.makeText(Utils.getApp(), it.message, Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    fun loadBanner() {
+        viewModelScope.launch {
+            AHURepository.getBanner()
+                .onSuccess {
+                    SinkLog.it("BannerLog", it)
+                    bannerData.value = it
+                }.onFailure {
+                    SinkLog.et("BannerLog", it)
                 }
         }
     }
@@ -68,7 +82,7 @@ class DiscoveryViewModel : ViewModel() {
         val courses = AHUCache.getSchedule(year ?: "", term ?: "") ?: emptyList()
         val thisWeek = Calendar.getInstance()[Calendar.DAY_OF_WEEK] - 1
         return courses.filter { t ->
-            t.weekday == thisWeek && t.startWeek <=week && t.endWeek >= week
+            t.weekday == thisWeek && t.startWeek <= week && t.endWeek >= week
         }.sortedBy {
             it.startTime
         }

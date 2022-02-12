@@ -36,10 +36,11 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
 
 
     override fun observeData() {
-        mState.bannerData.observe(this, {
+        mState.bannerData.observe(this) {
             val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
             adapter.setBanners(it)
-        })
+            dataBinding.refreshLayout.isRefreshing = false
+        }
         mState.activityBean.observe(this) { result ->
             val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
             adapter.setActivityBean(result)
@@ -58,11 +59,13 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
         )
         dataBinding.discoveryRec.adapter = DiscoveryAdapter(bean)
         mState.loadActivityBean()
+        mState.loadBanner()
         val adapter = dataBinding.discoveryRec.adapter as DiscoveryAdapter
         adapter.setCourses(mState.loadCourse())
         dataBinding.refreshLayout.isRefreshing = true
         dataBinding.refreshLayout.setOnRefreshListener {
             mState.loadActivityBean()
+            mState.loadBanner()
         }
 
     }

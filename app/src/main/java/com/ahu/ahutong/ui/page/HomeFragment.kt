@@ -1,25 +1,17 @@
 package com.ahu.ahutong.ui.page
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.os.Looper
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
-import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentHomeBinding
-import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.HomeViewModel
-import com.simon.library.AppUpdate
 import com.sink.library.log.SinkLog
-import java.lang.Exception
 
 /**
  * @Author SinkDev
