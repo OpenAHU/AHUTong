@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -247,23 +248,19 @@ object AHURepository {
         try {
             val response = dataSource.getBanner()
             if (response.isSuccessful) {
-               val data= response.data.filter { it.isLegal }
+                val data = response.data.filter { it.isLegal }
                 AHUCache.saveBanner(data)
                 Result.success(data)
             } else {
-                val cache=AHUCache.getBanner()
-                if (cache!=null){
-                    Result.success(cache)
-                }else {
-                    Result.failure(Throwable(response.msg))
-                }
+                throw IllegalStateException(response.msg)
             }
-        } catch (e: java.lang.Exception) {
-            val cache=AHUCache.getBanner()
-            if (cache!=null)
+        } catch (e: Exception) {
+            val cache = AHUCache.getBanner()
+            if (cache != null) {
                 Result.success(cache)
-            else
-            Result.failure(e)
+            } else {
+                Result.failure(Throwable(e.message))
+            }
         }
     }
 

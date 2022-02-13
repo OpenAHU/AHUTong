@@ -14,7 +14,7 @@ public class BathPlugImpl implements BathPlug {
         try {
             date = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).parse("2021-09-20");
         } catch (ParseException e) {
-            throw new RuntimeException("尼玛，离谱的错误");
+            throw new RuntimeException("尼玛，换个手机吧，换个能获取日期的！");
         }
         return (int) (TimeUtils.getTimeDistance(new Date(), date) % 2);
     }

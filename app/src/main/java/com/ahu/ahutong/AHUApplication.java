@@ -10,7 +10,9 @@ import com.sink.library.log.SinkLogManager;
 import com.sink.library.log.parser.SinkJsonParser;
 import com.sink.library.log.printer.SinkLogConsolePrinter;
 import com.tencent.bugly.crashreport.CrashReport;
+
 import org.jetbrains.annotations.NotNull;
+
 import arch.sink.BaseApplication;
 
 /**
@@ -19,14 +21,9 @@ import arch.sink.BaseApplication;
  * @Email 468766131@qq.com
  */
 public class AHUApplication extends BaseApplication {
-    public static int width, height;
-
-
     @Override
     public void onCreate() {
         super.onCreate();
-        width = getResources().getDisplayMetrics().widthPixels;
-        height = getResources().getDisplayMetrics().heightPixels;
         //SinkLog
         SinkLogManager.init(new SinkLogConfig() {
             @NotNull
@@ -62,10 +59,12 @@ public class AHUApplication extends BaseApplication {
         CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG, strategy);
 
     }
-    private static final BathPlugImpl bath=new BathPlugImpl();
+
+    private static final BathPlugImpl bath = new BathPlugImpl();
 
     /**
      * 返回浴室开放计算类
+     *
      * @return 类
      */
     public static BathPlug getBath() {

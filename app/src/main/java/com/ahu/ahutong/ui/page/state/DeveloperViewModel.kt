@@ -13,8 +13,8 @@ class DeveloperViewModel: ViewModel() {
     val developers by lazy {
         listOf(
 //            Developer("吴振龙", "爬虫&后端开发者", "1298749337"),
-            Developer("高玉灿", "Android 客户端 & 爬虫 开发者", "468766131"),
-            Developer("谭哲昊", "Android 客户端 & 摸鱼 开发者","330771794")
+            Developer("高玉灿", "Android 客户端 & 划水 开发者", "468766131"),
+            Developer("谭哲昊 (在线求偶)", "Android 客户端 & 摸鱼 开发者","330771794")
         )
     }
 }
