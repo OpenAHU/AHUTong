@@ -1,6 +1,7 @@
 package com.ahu.ahutong.ui.adapter
 
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -85,8 +86,13 @@ class DiscoveryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is ActivityItemHolder) {
-            holder.bind(activityBean)
+        when(holder){
+            is BannerItemHolder->{
+                holder.bind(banners)
+            }
+            is ActivityItemHolder->{
+                holder.bind(activityBean)
+            }
         }
     }
 
