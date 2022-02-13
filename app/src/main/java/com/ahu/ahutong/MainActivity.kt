@@ -46,13 +46,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         val componentName = ComponentName(this, ClassWidget::class.java)
         val appWidgetIds = manager.getAppWidgetIds(componentName)
         manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
-        
+
+        // 检查更新
         mState.getAppLatestVersion()
+        // 日活统计接口
+        mState.addAppAccess()
     }
 
-    fun observeData() {
+    private fun observeData() {
+        // 检查更新
         val localVersion = packageManager.getPackageInfo(packageName, 0).versionName
-        mState.laestVserion.observe(this) {
+        mState.latestVersions.observe(this) {
             it.onSuccess {
                 if (!it.isSuccessful) {
                     Toast.makeText(this, "检查更新失败：${it.msg}", Toast.LENGTH_SHORT).show()
