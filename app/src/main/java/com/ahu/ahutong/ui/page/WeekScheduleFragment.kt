@@ -141,12 +141,14 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
 
         //设置点击课程的事件
         dataBinding.scheduleView.setCourseListener { v, scheduleCourse ->
+            val popupView = getPopupView(scheduleCourse)
+            popupView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             popupWindow = PopupWindow(
-                v, ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT, true
+                v, popupView.measuredWidth,
+                    popupView.measuredHeight, true
             )
             popupWindow.animationStyle = R.style.pop_anim_style
-            popupWindow.contentView = getPopupView(scheduleCourse)
+            popupWindow.contentView = popupView
             popupWindow.isTouchable = true
             popupWindow.isOutsideTouchable = true
             popupWindow.showAsDropDown(v)
