@@ -247,11 +247,22 @@ object AHURepository {
         try {
             val response = dataSource.getBanner()
             if (response.isSuccessful) {
-                Result.success(response.data.filter { it.isLegal })
+               val data= response.data.filter { it.isLegal }
+                AHUCache.saveBanner(data)
+                Result.success(data)
             } else {
-                Result.failure(Throwable(response.msg))
+                val cache=AHUCache.getBanner()
+                if (cache!=null){
+                    Result.success(cache)
+                }else {
+                    Result.failure(Throwable(response.msg))
+                }
             }
         } catch (e: java.lang.Exception) {
+            val cache=AHUCache.getBanner()
+            if (cache!=null)
+                Result.success(cache)
+            else
             Result.failure(e)
         }
     }

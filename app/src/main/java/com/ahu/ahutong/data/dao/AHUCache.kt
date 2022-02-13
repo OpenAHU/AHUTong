@@ -7,6 +7,10 @@ import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
+
 
 /**
  * @Author SinkDev
@@ -244,6 +248,25 @@ object AHUCache {
         val config = kv.getString("schedule_theme", "")
         if (!config.isNullOrEmpty()) {
             return ScheduleTheme(config)
+        }
+        return null
+    }
+    /**
+     * 保存List<Banner>
+     * @param theme ScheduleTheme
+     */
+    fun saveBanner(banners: List<Banner>) {
+        val json=Gson().toJson(banners)
+        kv.putString("list_banner", json)
+    }
+    /**
+     * 获取List<Banner>
+     * @return List<Banner>?
+     */
+    fun getBanner(): List<Banner>? {
+        val config = kv.getString("list_banner", "")
+        if (!config.isNullOrEmpty()) {
+            return Gson().fromJson(config, object : TypeToken<List<Banner>>() {}.type)
         }
         return null
     }
