@@ -1,23 +1,27 @@
 package com.ahu.ahutong.widget;
 
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
+
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
+
 import com.ahu.ahutong.MainActivity;
 import com.ahu.ahutong.R;
 import com.ahu.ahutong.data.dao.AHUCache;
 import com.ahu.ahutong.data.model.Course;
 import com.ahu.ahutong.utils.DateUtils;
+
 import java.util.Calendar;
 import java.util.List;
 
 public class ClassWidget extends AppWidgetProvider {
     /**
      * 获取当天的课程数
+     *
      * @return 课程数
      */
     public static int getClassNum() {
@@ -36,6 +40,7 @@ public class ClassWidget extends AppWidgetProvider {
         }
         return back;
     }
+
     /**
      * 设置widget
      *
@@ -55,7 +60,6 @@ public class ClassWidget extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.widget_date, DateUtils.getWeek());
         return remoteViews;
     }
-
     /**
      * 刷新时调用，添加时不会调用
      *
@@ -68,7 +72,7 @@ public class ClassWidget extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             appWidgetManager.updateAppWidget(appWidgetId, update(context));
         }
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds,R.id.widget_listview);
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 }

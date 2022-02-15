@@ -15,6 +15,7 @@ import com.ahu.ahutong.data.reptile.ReptileManager
 import com.ahu.ahutong.data.reptile.ReptileUser
 import com.ahu.ahutong.data.reptile.store.DefaultCookieStore
 import com.ahu.ahutong.utils.RSA
+import com.sink.library.log.SinkLog
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.nio.charset.Charset
@@ -32,6 +33,7 @@ class LoginViewModel : ViewModel() {
         val user = User()
         user.name = username
         val result: Result<User> = if (loginType == User.UserType.AHU_LOCAL) {
+            SinkLog.i("爬虫登录")
             //爬虫登录
             ReptileManager.getInstance().cookieStore = DefaultCookieStore()
             val result = Reptile.login(ReptileUser(username, password))

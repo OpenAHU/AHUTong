@@ -35,5 +35,11 @@ public class AHURefreshLayout extends SwipeRefreshLayout {
             e.printStackTrace();
         }
     }
-    
+
+    @Override
+    public void requestLayout() {
+        super.requestLayout();
+        Log.d("AHURefreshLayout", "requestLayout() called");
+        new Throwable().printStackTrace();
+    }
 }
