@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class User {
 
-
     @SerializedName("name")
     private String name;
 
@@ -18,6 +17,13 @@ public class User {
         this.name = name;
     }
 
+    public User() {
+
+    }
+
+    public User(String name) {
+        this.name = name;
+    }
 
     public enum UserType {
         //使用教务系统登录的

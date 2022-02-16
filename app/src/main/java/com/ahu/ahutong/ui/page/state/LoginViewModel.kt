@@ -9,16 +9,9 @@ import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.api.APIDataSource
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.User
-import com.ahu.ahutong.data.reptile.Reptile
-import com.ahu.ahutong.data.reptile.ReptileDataSource
-import com.ahu.ahutong.data.reptile.ReptileManager
-import com.ahu.ahutong.data.reptile.ReptileUser
-import com.ahu.ahutong.data.reptile.store.DefaultCookieStore
 import com.ahu.ahutong.utils.RSA
-import com.sink.library.log.SinkLog
 import kotlinx.coroutines.launch
 import java.lang.Exception
-import java.nio.charset.Charset
 
 /**
  * @Author: SinkDev
@@ -27,51 +20,33 @@ import java.nio.charset.Charset
  */
 class LoginViewModel : ViewModel() {
     var loginType = AHUCache.getLoginType()
-    val loginResult = MutableLiveData<Result<User>>()
+    val serverLoginResult = MutableLiveData<Result<User>>()
 
-    fun login(username: String, password: String) = viewModelScope.launch {
+    fun loginWithServer(username: String, password: String) = viewModelScope.launch {
         val user = User()
         user.name = username
-        val result: Result<User> = if (loginType == User.UserType.AHU_LOCAL) {
-            SinkLog.i("爬虫登录")
-            //爬虫登录
-            ReptileManager.getInstance().cookieStore = DefaultCookieStore()
-            val result = Reptile.login(ReptileUser(username, password))
-            if (result.isSuccess) {
+        val result: Result<User> = try {
+            //普通登录
+            val response = AHUService.API.login(
+                username,
+                RSA.encryptByPublicKey(
+                    password.toByteArray(Charsets.UTF_8)
+                ),
+                loginType
+            )
+            if (response.isSuccessful) {
                 AHUCache.saveCurrentUser(user)
-                AHUCache.saveCurrentPassword(password)
                 //切换数据源
                 AHUCache.saveLoginType(loginType)
-                AHURepository.dataSource = ReptileDataSource(ReptileUser(username, password))
-                Result.success(user)
+                AHURepository.dataSource = APIDataSource()
+                Result.success(response.data)
             } else {
-                Result.failure(result.exceptionOrNull() ?: Throwable("登录失败，请检查账号密码后重试！"))
+                Result.failure(Throwable(response.msg))
             }
-        } else {
-            try {
-                //普通登录
-                val response = AHUService.API.login(
-                    username, RSA.encryptByPublicKey(
-                        password.toByteArray(
-                            Charsets.UTF_8
-                        )
-                    ), loginType
-                )
-                if (response.isSuccessful) {
-                    AHUCache.saveCurrentUser(user)
-                    //切换数据源
-                    AHUCache.saveLoginType(loginType)
-                    AHURepository.dataSource = APIDataSource()
-                    Result.success(response.data)
-                } else {
-                    Result.failure(Throwable(response.msg))
-                }
-            } catch (e: Exception) {
-                Result.failure(Throwable("登录失败，系统异常。"))
-            }
-
+        } catch (e: Exception) {
+            Result.failure(Throwable("登录失败，系统异常。"))
         }
-        loginResult.value = result
+        serverLoginResult.value = result
     }
 
     companion object {

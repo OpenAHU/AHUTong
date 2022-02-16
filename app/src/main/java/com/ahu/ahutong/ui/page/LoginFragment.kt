@@ -7,7 +7,12 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.User
+import com.ahu.ahutong.data.reptile.ReptileDataSource
+import com.ahu.ahutong.data.reptile.ReptileUser
+import com.ahu.ahutong.data.reptile.login.SinkWebViewClient
 import com.ahu.ahutong.databinding.FragmentLoginBinding
 import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
@@ -27,13 +32,21 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
 
     override fun observeData() {
         super.observeData()
-        mState.loginResult.observe(this) {
+        mState.serverLoginResult.observe(this) {
             it.onSuccess {
                 actvivtyState.isLogin.value = true
                 Toast.makeText(requireContext(), "登录成功，欢迎您：${it.name}", Toast.LENGTH_SHORT).show()
                 nav().popBackStack()
             }.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+        actvivtyState.localReptileLoginStatus.observe(this) {
+            when (it) {
+                SinkWebViewClient.STATUS_LOGIN_SUCCESS -> {
+                    Toast.makeText(requireContext(), "登录成功，欢迎您：${AHUCache.getCurrentUser()?.name}", Toast.LENGTH_SHORT).show()
+                    nav().popBackStack()
+                }
             }
         }
     }
@@ -86,7 +99,18 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
             }
             LoginViewModel.type[dataBinding.rgLogin.checkedRadioButtonId]?.let {
                 mState.loginType = it
-                mState.login(username, password)
+                if (it != User.UserType.AHU_LOCAL) {
+                    mState.loginWithServer(username, password)
+                } else {
+
+                    AHUCache.saveCurrentUser(User(username))
+                    AHUCache.saveCurrentPassword(password)
+                    //切换数据源
+                    AHUCache.saveLoginType(it)
+                    AHURepository.dataSource = ReptileDataSource(ReptileUser(username, password))
+                    // 触发登录逻辑
+                    actvivtyState.isLogin.value = true
+                }
             }
 
         }

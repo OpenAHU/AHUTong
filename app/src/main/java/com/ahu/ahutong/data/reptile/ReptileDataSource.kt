@@ -7,6 +7,7 @@ import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.data.reptile.store.DefaultCookieStore
+import com.ahu.ahutong.ext.createFailureResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -15,26 +16,26 @@ import kotlinx.coroutines.withContext
  * @Date: 2021/8/13-下午2:45
  * @Email: 468766131@qq.com
  */
-class ReptileDataSource(user: ReptileUser): BaseDataSource {
+class ReptileDataSource(user: ReptileUser) : BaseDataSource {
     init {
         //初始化
         ReptileManager.getInstance()
             .setCookieStore(DefaultCookieStore())
             .setCurrentUser(user.username, user.password)
-
     }
+
     override suspend fun getSchedule(
         schoolYear: String,
         schoolTerm: String
     ): AHUResponse<List<Course>> {
-       return Reptile.getSchedule(schoolYear, schoolTerm)
+        return checkLoginStatus() ?: WebViewReptile.getSchedule(schoolYear, schoolTerm)
     }
 
     override suspend fun getExamInfo(
         schoolYear: String,
         schoolTerm: String
     ): AHUResponse<List<Exam>> {
-        return Reptile.getExam(schoolYear, schoolTerm)
+        return checkLoginStatus() ?: WebViewReptile.getExam(schoolYear, schoolTerm)
     }
 
     override suspend fun getEmptyRoom(
@@ -43,15 +44,22 @@ class ReptileDataSource(user: ReptileUser): BaseDataSource {
         weekNum: String,
         time: String
     ): AHUResponse<List<Room>> {
-       return Reptile.getEmptyRoom(campus, weekday, weekNum, time)
+        return checkLoginStatus() ?: WebViewReptile.getEmptyRoom(campus, weekday, weekNum, time)
     }
 
     override suspend fun getGrade(): AHUResponse<Grade> {
-       return Reptile.getGrade()
+        return checkLoginStatus() ?: WebViewReptile.getGrade()
     }
 
 
     override suspend fun getCardMoney(): AHUResponse<Card> {
-       return Reptile.getCardMoney()
+        return checkLoginStatus() ?: WebViewReptile.getCardMoney()
+    }
+
+    private fun <T> checkLoginStatus(): AHUResponse<T>? {
+        if (!ReptileManager.getInstance().isLoginStatus) {
+            return createFailureResponse("本地爬虫未登录，请先登录")
+        }
+        return null
     }
 }

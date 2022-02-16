@@ -11,8 +11,10 @@ public class ReptileManager {
     private CookieStore store;
     private ReptileUser currentReptileUser;
     private int timeout = 5000;
+    private boolean loginStatus = false;
 
-    private ReptileManager(){}
+    private ReptileManager() {
+    }
 
     public static ReptileManager getInstance() {
         return INSTANCE;
@@ -23,11 +25,11 @@ public class ReptileManager {
         return this;
     }
 
-    public CookieStore getCookieStore(){
+    public CookieStore getCookieStore() {
         return store;
     }
 
-    public ReptileManager setCurrentUser(String username, String password){
+    public ReptileManager setCurrentUser(String username, String password) {
         this.currentReptileUser = new ReptileUser(username, password);
         return this;
     }
@@ -43,6 +45,15 @@ public class ReptileManager {
 
     public ReptileManager setTimeout(int timeout) {
         this.timeout = timeout;
+        return this;
+    }
+
+    public boolean isLoginStatus() {
+        return loginStatus;
+    }
+
+    public ReptileManager setLoginStatus(boolean status) {
+        loginStatus = status;
         return this;
     }
 }
