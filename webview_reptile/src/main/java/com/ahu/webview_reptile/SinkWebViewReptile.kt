@@ -11,10 +11,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import okhttp3.internal.wait
-import java.lang.Exception
-import kotlin.concurrent.thread
 
 @SuppressLint("SetJavaScriptEnabled")
 class SinkWebViewReptile(val webView: WebView) {
@@ -30,8 +26,7 @@ class SinkWebViewReptile(val webView: WebView) {
 
     private fun login(loginCallback: (String, Throwable?) -> Unit) {
         client.loginCallback = loginCallback
-        //webView.loadUrl("https://wvpn.ahu.edu.cn/")
-        webView.loadUrl("https://wvpn.ahu.edu.cn/https/77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/login_cas.aspx")
+        webView.loadUrl("https://wvpn.ahu.edu.cn/")
     }
 
 
@@ -43,10 +38,15 @@ class SinkWebViewReptile(val webView: WebView) {
 
     suspend fun getCardMoney() {
         val response = withContext(Dispatchers.IO) {
+            val isWvpn = client.getIsWvpn()
+            val cookieSite=if (isWvpn) "https://wvpn.ahu.edu.cn/" else "http://one.ahu.edu.cn"
+            val url =
+                if (isWvpn) "https://wvpn.ahu.edu.cn/http/77726476706e69737468656265737421fff944d226387d1e7b0c9ce29b5b/tp_up/up/subgroup/getCardMoney"
+                    else "http://one.ahu.edu.cn/tp_up/up/subgroup/getCardMoney"
             val request = Request.Builder()
                 .header("Accept", "application/json")
-                .header("Cookie", CookieManager.getInstance().getCookie("https://wvpn.ahu.edu.cn/"))
-                .url("https://wvpn.ahu.edu.cn/http/77726476706e69737468656265737421fff944d226387d1e7b0c9ce29b5b/tp_up/up/subgroup/getCardMoney")
+                .header("Cookie", CookieManager.getInstance().getCookie(cookieSite))
+                .url(url)
                 .post("{}".toRequestBody("application/json".toMediaType()))
                 .build()
             return@withContext OkHttpClient.Builder()
@@ -58,17 +58,22 @@ class SinkWebViewReptile(val webView: WebView) {
         }
         if (response.isSuccessful) {
             val json = response.body?.string() ?: return
-            Log.e("SINK","json = ${json}")
+            Log.e("SINK", "success json = ${json}")
         } else {
-            Log.e("SINK","json = ${response.message}")
+            Log.e("SINK", "error json = ${response.message}")
         }
     }
 
     suspend fun getSchedule() {
         val response = withContext(Dispatchers.IO) {
+            val isWvpn = client.getIsWvpn()
+            val cookieSite=if (isWvpn) "https://wvpn.ahu.edu.cn/" else "http://one.ahu.edu.cn"
             val request = Request.Builder()
-                .header("Referer", "https://wvpn.ahu.edu.cn/https/77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/xsxkqk.aspx")
-                .header("Cookie", CookieManager.getInstance().getCookie("https://wvpn.ahu.edu.cn/"))
+                .header(
+                    "Referer",
+                    "https://wvpn.ahu.edu.cn/https/77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/xsxkqk.aspx"
+                )
+                .header("Cookie", CookieManager.getInstance().getCookie(cookieSite))
                 .url("https://wvpn.ahu.edu.cn/https/77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/xsxkqk.aspx?xh=Y02014373&gnmkdm=N121615")
                 .post("ddlXN=2021-2022&ddlXQ=2".toRequestBody("application/x-www-form-urlencoded".toMediaType()))
                 .build()
@@ -81,9 +86,9 @@ class SinkWebViewReptile(val webView: WebView) {
         }
         if (response.isSuccessful) {
             val html = response.body?.string() ?: return
-            Log.e("SINK",html)
+            Log.e("SINK", "success $html")
         } else {
-            Log.e("SINK","error = ${response.message}")
+            Log.e("SINK", "error = ${response.message}")
         }
     }
 
