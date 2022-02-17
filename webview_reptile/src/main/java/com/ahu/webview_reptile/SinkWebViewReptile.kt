@@ -29,7 +29,8 @@ class SinkWebViewReptile(val webView: WebView) {
 
     private fun login(loginCallback: (String, Throwable?) -> Unit) {
         client.loginCallback = loginCallback
-        webView.loadUrl("https://wvpn.ahu.edu.cn/")
+        //webView.loadUrl("https://wvpn.ahu.edu.cn/")
+        webView.loadUrl("https://wvpn.ahu.edu.cn/https/77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/login_cas.aspx")
     }
 
 

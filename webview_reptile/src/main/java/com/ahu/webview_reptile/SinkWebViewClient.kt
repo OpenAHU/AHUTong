@@ -18,31 +18,58 @@ class SinkWebViewClient : WebViewClient() {
 
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
+        if (url != null) {
+            Log.e("simon", url)
+        }
         if (url == null) {
             return
         }
-        when {
-            url.contains(KEY_LOGIN) -> {
-                if (loginStatus != 0) {
-                    loginStatus = 3
-                    loginCallback("登录失败", Throwable("登录失败, 账号或者密码错误！"))
-                    loginStatus = 0
-                    return
+        if (url.contains("one.ahu.edu.cn"))
+            when {
+                url.contains(KEY_LOGIN_ONE) -> {
+                    if (loginStatus != 0) {
+                        loginStatus = 3
+                        loginCallback("登录失败", Throwable("登录失败, 账号或者密码错误！"))
+                        loginStatus = 0
+                        return
+                    }
+                    // 登录函数
+                    view?.loadUrl(CMD_LOGIN)
+                    loginCallback("登录中", null)
+                    loginStatus = 1
                 }
-                // 登录函数
-                view?.loadUrl(CMD_LOGIN)
-                loginCallback("登录中", null)
-                loginStatus = 1
+                url.contains("m=up#act=portal/viewhome") -> {
+                    loginStatus = 1
+                    view?.loadUrl("javascript:window.location='https://jwxt0.ahu.edu.cn/login_cas.aspx'")
+                }
+                url.contains("xs_main.aspx") -> {
+                    loginStatus = 2
+                    loginCallback("登录成功", null)
+                }
             }
-            url.contains("m=up#act=portal/viewhome") -> {
-                loginStatus = 1
-                view?.loadUrl("javascript:window.location='https://wvpn.ahu.edu.cn/https/77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/login_cas.aspx'")
+        else
+            when {
+                url.contains(KEY_LOGIN) -> {
+                    if (loginStatus != 0) {
+                        loginStatus = 3
+                        loginCallback("登录失败", Throwable("登录失败, 账号或者密码错误！"))
+                        loginStatus = 0
+                        return
+                    }
+                    // 登录函数
+                    view?.loadUrl(CMD_LOGIN)
+                    loginCallback("登录中", null)
+                    loginStatus = 1
+                }
+                url.contains("m=up#act=portal/viewhome") -> {
+                    loginStatus = 1
+                    view?.loadUrl("javascript:window.location='https://wvpn.ahu.edu.cn/https/77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/login_cas.aspx'")
+                }
+                url.contains("77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/xs_main.aspx") -> {
+                    loginStatus = 2
+                    loginCallback("登录成功", null)
+                }
             }
-            url.contains("77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/xs_main.aspx") -> {
-                loginStatus = 2
-                loginCallback("登录成功", null)
-            }
-        }
     }
 
 }
