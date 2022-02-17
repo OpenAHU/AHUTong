@@ -145,7 +145,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
             popupView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             popupWindow = PopupWindow(
                 v, popupView.measuredWidth,
-                    popupView.measuredHeight, true
+                popupView.measuredHeight, true
             )
             popupWindow.animationStyle = R.style.pop_anim_style
             popupWindow.contentView = popupView
@@ -246,6 +246,10 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
     }
 
     override fun inputSchedule() {
+        if (gState.isLogin.value != true) {
+            Toast.makeText(requireContext(), "登录后才可以刷新课表哦！", Toast.LENGTH_SHORT).show()
+            return
+        }
         pState.refreshSchedule(isRefresh = true)
         dataBinding.refreshLayout.isRefreshing = true
     }

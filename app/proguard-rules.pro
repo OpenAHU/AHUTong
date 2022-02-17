@@ -12,7 +12,8 @@
      private void readObject(java.io.ObjectInputStream);
      java.lang.Object writeReplace();
      java.lang.Object readResolve();
- }-keepclasseswithmembernames class * {
+ }
+ -keepclasseswithmembernames class * {
       native <methods>;
   }
 # Bugly
@@ -58,7 +59,9 @@
 -dontwarn sun.misc.SignalHandler
 -dontwarn java.lang.instrument.Instrumentation
 -dontwarn sun.misc.Signal
-
+-keep class com.ahu.ahutong.data.AHUResponse{
+    private *;
+}
 -keep class com.ahu.ahutong.ui.widget.schedule.bean.**{*;}
 -keep class androidx.swiperefreshlayout.widget.SwipeRefreshLayout{*;}
 -keepclassmembers class com.ahu.ahutong.data.model.* {
@@ -66,9 +69,10 @@
 }
 -renamesourcefileattribute AHUTong
 #开启深度重载
--overloadaggressively
+# -overloadaggressively
 # 把重命名之后的类名放到根目录
 -repackageclasses
+
 -printmapping map.txt
 
 -assumenosideeffects class com.sink.library.log.SinkLog {
@@ -85,16 +89,15 @@
     public *** log(...);
 }
  #使用GSON、fastjson等框架时，所写的JSON对象类不混淆，否则无法将JSON解析成对应的对象
-    -keepclassmembers class * {
-        public <init>(org.json.JSONObject);
-    }
+-keepclassmembers class * {
+    public <init>(org.json.JSONObject);
+}
 -assumenosideeffects class com.sink.library.log.SinkLogManager{
     public *** init(...);
     public *** addLogPrinter(...);
     public *** addFloatLogPrinter(...);
 
 }
-
 -assumenosideeffects class java.io.PrintStream {
       public *** println(...);
       public *** print(...);

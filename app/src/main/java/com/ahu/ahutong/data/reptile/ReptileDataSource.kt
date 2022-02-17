@@ -58,7 +58,7 @@ class ReptileDataSource(user: ReptileUser) : BaseDataSource {
 
     private fun <T> checkLoginStatus(): AHUResponse<T>? {
         if (!ReptileManager.getInstance().isLoginStatus) {
-            return createFailureResponse("本地爬虫未登录，请先登录")
+            return createFailureResponse("本地爬虫正在登录中,或当前登录密码错误！")
         }
         return null
     }

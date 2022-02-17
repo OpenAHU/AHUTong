@@ -24,28 +24,37 @@ import com.ahu.ahutong.ui.page.state.MainViewModel
  */
 class LoginFragment : BaseFragment<FragmentLoginBinding>() {
     private lateinit var mState: LoginViewModel
-    private lateinit var actvivtyState: MainViewModel
+    private lateinit var activityState: MainViewModel
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(LoginViewModel::class.java)
-        actvivtyState = getActivityScopeViewModel(MainViewModel::class.java)
+        activityState = getActivityScopeViewModel(MainViewModel::class.java)
     }
 
     override fun observeData() {
         super.observeData()
         mState.serverLoginResult.observe(this) {
+            dataBinding.btLogin.isClickable = true  // 恢复按钮
             it.onSuccess {
-                actvivtyState.isLogin.value = true
+                activityState.isLogin.value = true
                 Toast.makeText(requireContext(), "登录成功，欢迎您：${it.name}", Toast.LENGTH_SHORT).show()
                 nav().popBackStack()
             }.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }
         }
-        actvivtyState.localReptileLoginStatus.observe(this) {
+        activityState.localReptileLoginStatus.observe(this) {
             when (it) {
                 SinkWebViewClient.STATUS_LOGIN_SUCCESS -> {
-                    Toast.makeText(requireContext(), "登录成功，欢迎您：${AHUCache.getCurrentUser()?.name}", Toast.LENGTH_SHORT).show()
+                    dataBinding.btLogin.isClickable = true  // 恢复按钮
+                    Toast.makeText(
+                        requireContext(),
+                        "登录成功，欢迎您：${AHUCache.getCurrentUser()?.name ?: return@observe}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     nav().popBackStack()
+                }
+                SinkWebViewClient.STATUS_LOGIN_FAILURE -> {
+                    dataBinding.btLogin.isClickable = true  // 恢复按钮
                 }
             }
         }
@@ -97,19 +106,21 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
                 Toast.makeText(requireContext(), "请不要输入空气哦！", Toast.LENGTH_SHORT).show()
                 return
             }
+
             LoginViewModel.type[dataBinding.rgLogin.checkedRadioButtonId]?.let {
+                dataBinding.btLogin.isClickable = false // 禁用按钮防止重复操作
                 mState.loginType = it
                 if (it != User.UserType.AHU_LOCAL) {
                     mState.loginWithServer(username, password)
                 } else {
-
+                    Toast.makeText(requireContext(), "本地爬虫登录较为缓慢，请耐心等待！", Toast.LENGTH_SHORT).show()
                     AHUCache.saveCurrentUser(User(username))
                     AHUCache.saveCurrentPassword(password)
                     //切换数据源
                     AHUCache.saveLoginType(it)
                     AHURepository.dataSource = ReptileDataSource(ReptileUser(username, password))
                     // 触发登录逻辑
-                    actvivtyState.isLogin.value = true
+                    activityState.isLogin.value = true
                 }
             }
 

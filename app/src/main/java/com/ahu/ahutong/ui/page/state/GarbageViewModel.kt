@@ -8,7 +8,6 @@ import java.lang.IllegalArgumentException
 
 class GarbageViewModel : ViewModel() {
     val keyword = MutableLiveData<String>()
-
     //switchMap会观察keyword变化
     val result = Transformations.switchMap(keyword) { keyword ->
        AHURepository.searchRubbish(keyword)

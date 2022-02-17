@@ -9,6 +9,7 @@ import com.ahu.ahutong.data.reptile.utils.timeMap
 import com.ahu.ahutong.data.reptile.utils.weekdayMap
 import com.ahu.ahutong.ext.createFailureResponse
 import com.ahu.ahutong.ext.createSuccessResponse
+import com.google.gson.JsonParseException
 import com.google.gson.JsonParser
 import com.sink.library.log.SinkLog
 import kotlinx.coroutines.CancellationException
@@ -48,6 +49,7 @@ object WebViewReptile {
                 }
                 throw IllegalStateException()
             }
+
             val balance =
                 JsonParser.parseString(response.body()).asJsonObject.get("KHYE").asString
             val card = Card()
@@ -57,6 +59,9 @@ object WebViewReptile {
         } catch (e: Exception) {
             if (e is CancellationException) {
                 throw e
+            }
+            if (e is JsonParseException) {
+                return@withContext createFailureResponse(e.message ?: "本地爬虫正在登录中,或当前登录密码错误！")
             }
             e.printStackTrace()
             return@withContext createFailureResponse(e.message ?: "未知异常，请尝试重新登录或联系开发者（高玉灿）！")
