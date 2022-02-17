@@ -4,7 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.ahu.ahutong.data.AHURepository
-import com.ahu.ahutong.data.model.Rubbish
+import java.lang.IllegalArgumentException
 
 class GarbageViewModel : ViewModel() {
     val keyword = MutableLiveData<String>()
@@ -19,6 +19,8 @@ class GarbageViewModel : ViewModel() {
      * @param word String
      */
     fun search(word: String) {
+        if("倩倩" == word)
+            throw IllegalArgumentException("你在狗叫什么？")
         keyword.value = word
     }
 }
