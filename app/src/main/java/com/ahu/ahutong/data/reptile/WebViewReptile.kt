@@ -2,9 +2,9 @@
 
 package com.ahu.ahutong.data.reptile
 
-import android.webkit.CookieManager
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.model.*
+import com.ahu.ahutong.data.reptile.utils.JsoupProxy
 import com.ahu.ahutong.data.reptile.utils.timeMap
 import com.ahu.ahutong.data.reptile.utils.weekdayMap
 import com.ahu.ahutong.ext.createFailureResponse
@@ -34,13 +34,13 @@ object WebViewReptile {
     suspend fun getCardMoney(): AHUResponse<Card> = withContext(Dispatchers.IO)
     {
         try {
-            val response = Jsoup.newSession()
+            val response = JsoupProxy.newSession()
                 .url(Constants.URL_CARD_MONEY)
                 .timeout(ReptileManager.getInstance().timeout)
                 .method(Connection.Method.POST)
                 .ignoreContentType(true)
                 .header("Content-Type", "application/json;charset=utf-8")
-                .header("Cookie", CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE))
+                .header("Cookie", ReptileManager.getInstance().getCookie(Constants.URL_ONE_BASE))
                 .requestBody("{}")
                 .execute()
             if (response.statusCode() != 200) {
@@ -49,7 +49,6 @@ object WebViewReptile {
                 }
                 throw IllegalStateException()
             }
-
             val balance =
                 JsonParser.parseString(response.body()).asJsonObject.get("KHYE").asString
             val card = Card()
@@ -77,15 +76,15 @@ object WebViewReptile {
     suspend fun getSchedule(schoolYear: String, schoolTerm: String): AHUResponse<List<Course>> =
         withContext(Dispatchers.IO) {
             try {
-                var body = Jsoup.newSession()
+                var body = JsoupProxy.newSession()
                     .url(Constants.URL_TEACH_SCHEDULE.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
                     .referrer(Constants.URL_TEACH_MAIN)
                     .header(
                         "Cookie",
-                        CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
+                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                     )
-                    .get()
+                    .get().body()
                 val year = body.select("#ddlXN>option[selected=selected]").attr("value")
                 val term = body.select("#ddlXQ>option[selected=selected]").attr("value")
                 if (!year.equals(schoolYear) || !term.equals(schoolTerm)) {
@@ -100,16 +99,16 @@ object WebViewReptile {
                         "ddlXN" to schoolYear,
                         "ddlXQ" to schoolTerm
                     )
-                    body = Jsoup.newSession()
+                    body = JsoupProxy.newSession()
                         .url(Constants.URL_TEACH_SCHEDULE.format(ReptileManager.getInstance().currentUser.username))
                         .timeout(ReptileManager.getInstance().timeout)
                         .referrer(Constants.URL_TEACH_MAIN)
                         .header(
                             "Cookie",
-                            CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
+                            ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                         )
                         .data(data)
-                        .post()
+                        .post().body()
                 }
                 val table = body.select("#DBGrid").select("tr")
                 val courses = mutableListOf<Course>()
@@ -175,15 +174,15 @@ object WebViewReptile {
     suspend fun getExam(schoolYear: String, schoolTerm: String): AHUResponse<List<Exam>> =
         withContext(Dispatchers.IO) {
             try {
-                var body = Jsoup.newSession()
+                val body = JsoupProxy.newSession()
                     .url(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
                     .referrer(Constants.URL_TEACH_MAIN)
                     .header(
                         "Cookie",
-                        CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
+                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                     )
-                    .get()
+                    .get().body()
 //                val year = body.select("#xnd>option[selected=selected]").attr("value")
 //                val term = body.select("#xqd>option[selected=selected]").attr("value")
 //                //切换学期
@@ -199,13 +198,13 @@ object WebViewReptile {
 //                        "xnd" to schoolYear,
 //                        "xqd" to schoolTerm
 //                    )
-//                    body = Jsoup.newSession()
+//                    body = JsoupProxy.newSession()
 //                        .url(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
 //                        .timeout(ReptileManager.getInstance().timeout)
 //                        .referrer(Constants.URL_TEACH_MAIN)
 //                        .header(
 //                            "Cookie",
-//                            CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
+//                            ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
 //                        )
 //                        .data(data)
 //                        .post()
@@ -251,15 +250,15 @@ object WebViewReptile {
     ): AHUResponse<List<Room>> =
         withContext(Dispatchers.IO) {
             try {
-                var body = Jsoup.newSession()
+                var body = JsoupProxy.newSession()
                     .url(Constants.URL_TEACH_ROOM.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
                     .referrer(Constants.URL_TEACH_MAIN)
                     .header(
                         "Cookie",
-                        CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
+                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                     )
-                    .get()
+                    .get().body()
                 val kssj = weekday + weekNum
                 val sjd = timeMap[time] ?: "'10'|'1','3','5','7','9','0','0','0','0'"
 
@@ -279,16 +278,16 @@ object WebViewReptile {
                     "sjd" to sjd,
                     "Button2" to "空教室查询"
                 )
-                body = Jsoup.newSession()
+                body = JsoupProxy.newSession()
                     .url(Constants.URL_TEACH_ROOM.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
                     .referrer(Constants.URL_TEACH_MAIN)
                     .header(
                         "Cookie",
-                        CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
+                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                     )
                     .data(data)
-                    .post()
+                    .post().body()
                 //解析html
                 val table = body.select("#DataGrid1").select("tr")
                 val rooms = mutableListOf<Room>()
@@ -319,13 +318,13 @@ object WebViewReptile {
      */
     suspend fun getGrade(): AHUResponse<Grade> = withContext(Dispatchers.IO) {
         try {
-            var body = Jsoup.newSession()
+            var body = JsoupProxy.newSession()
                 .url(Constants.URL_TEACH_GRADE.format(ReptileManager.getInstance().currentUser.username))
                 .timeout(ReptileManager.getInstance().timeout)
                 .referrer(Constants.URL_TEACH_MAIN)
                 .header(
                     "Cookie",
-                    CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
+                    ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                 )
                 .get().body()
             //拼接请求体
@@ -339,13 +338,13 @@ object WebViewReptile {
                 "Button2" to "在校学习成绩查询"
             )
             //请求全部成绩
-            body = Jsoup.newSession()
+            body = JsoupProxy.newSession()
                 .url(Constants.URL_TEACH_GRADE.format(ReptileManager.getInstance().currentUser.username))
                 .timeout(ReptileManager.getInstance().timeout)
                 .referrer(Constants.URL_TEACH_MAIN)
                 .header(
                     "Cookie",
-                    CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
+                    ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                 )
                 .data(data)
                 .post().body()

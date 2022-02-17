@@ -62,6 +62,7 @@
 -keep class com.ahu.ahutong.data.AHUResponse{
     private *;
 }
+-keep class org.jsoup.Connection{*;}
 -keep class com.ahu.ahutong.ui.widget.schedule.bean.**{*;}
 -keep class androidx.swiperefreshlayout.widget.SwipeRefreshLayout{*;}
 -keepclassmembers class com.ahu.ahutong.data.model.* {

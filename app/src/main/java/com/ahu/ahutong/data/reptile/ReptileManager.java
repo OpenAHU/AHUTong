@@ -1,6 +1,8 @@
 package com.ahu.ahutong.data.reptile;
 
 
+import android.webkit.CookieManager;
+
 import com.ahu.ahutong.data.reptile.store.CookieStore;
 
 /**
@@ -12,6 +14,7 @@ public class ReptileManager {
     private ReptileUser currentReptileUser;
     private int timeout = 5000;
     private boolean loginStatus = false;
+    private boolean isWVPN = true;
 
     private ReptileManager() {
     }
@@ -55,5 +58,23 @@ public class ReptileManager {
     public ReptileManager setLoginStatus(boolean status) {
         loginStatus = status;
         return this;
+    }
+
+    public boolean isWVPN() {
+        return isWVPN;
+    }
+
+    public ReptileManager setWVPN(boolean WVPN) {
+        isWVPN = WVPN;
+        return this;
+    }
+
+    public String getCookie(String url) {
+        CookieManager instance = CookieManager.getInstance();
+        if (isWVPN) {
+            return instance.getCookie(Constants.URL_LOGIN_BASE);
+        } else {
+            return instance.getCookie(url);
+        }
     }
 }

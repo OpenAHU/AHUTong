@@ -1,6 +1,5 @@
 package com.ahu.ahutong.data.reptile.utils;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -17,13 +16,21 @@ public class VpnURL {
         return String.format(URL_WPN_AHU_BASE, url.getProtocol(), encrypt(url.getAuthority()) + url.getPath());
     }
 
+    public static String getPlaintUrl(String proxyUrl) throws Exception {
+        URL url = new URL(proxyUrl);
+        String path = url.getPath().substring(1);
+        String[] split = path.split("/", 3);
+        String decryptedHost = decrypt(split[1].substring(32));
+        return String.format("%s://%s/%s?%s", split[0], decryptedHost, split[2], url.getQuery());
+    }
+
     private static String encrypt(String plainText) throws Exception {
         IvParameterSpec iv = new IvParameterSpec(IV_KEY.getBytes(StandardCharsets.UTF_8));
         SecretKeySpec keySpec = new SecretKeySpec(IV_KEY.getBytes(StandardCharsets.UTF_8), "AES");
         Cipher instance = Cipher.getInstance("AES/CFB/NoPadding");
         instance.init(Cipher.ENCRYPT_MODE, keySpec, iv);
         byte[] bytes = instance.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
-        return byteToHex(bytes);
+        return byteToHex(IV_KEY.getBytes(StandardCharsets.UTF_8)) + byteToHex(bytes);
     }
 
     private static String decrypt(String srcText) throws Exception {
