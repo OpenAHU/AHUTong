@@ -184,32 +184,32 @@ object WebViewReptile {
                         CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
                     )
                     .get()
-                val year = body.select("#xnd>option[selected=selected]").attr("value")
-                val term = body.select("#xqd>option[selected=selected]").attr("value")
-                //切换学期
-                if (!year.equals(schoolYear) || !term.equals(schoolTerm)) {
-                    val __VIEWSTATE = body.select("#__VIEWSTATE").attr("value")
-                    val __VIEWSTATEGENERATOR = body.select("#__VIEWSTATEGENERATOR").attr("value")
-                    val data = mapOf(
-                        "__EVENTTARGET" to "",
-                        "__EVENTARGUMENT" to "",
-                        "__LASTFOCUS" to "",
-                        "__VIEWSTATE" to __VIEWSTATE,
-                        "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
-                        "xnd" to schoolYear,
-                        "xqd" to schoolTerm
-                    )
-                    body = Jsoup.newSession()
-                        .url(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
-                        .timeout(ReptileManager.getInstance().timeout)
-                        .referrer(Constants.URL_TEACH_MAIN)
-                        .header(
-                            "Cookie",
-                            CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
-                        )
-                        .data(data)
-                        .post()
-                }
+//                val year = body.select("#xnd>option[selected=selected]").attr("value")
+//                val term = body.select("#xqd>option[selected=selected]").attr("value")
+//                //切换学期
+//                if (!year.equals(schoolYear) || !term.equals(schoolTerm)) {
+//                    val __VIEWSTATE = body.select("#__VIEWSTATE").attr("value")
+//                    val __VIEWSTATEGENERATOR = body.select("#__VIEWSTATEGENERATOR").attr("value")
+//                    val data = mapOf(
+//                        "__EVENTTARGET" to "",
+//                        "__EVENTARGUMENT" to "",
+//                        "__LASTFOCUS" to "",
+//                        "__VIEWSTATE" to __VIEWSTATE,
+//                        "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
+//                        "xnd" to schoolYear,
+//                        "xqd" to schoolTerm
+//                    )
+//                    body = Jsoup.newSession()
+//                        .url(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
+//                        .timeout(ReptileManager.getInstance().timeout)
+//                        .referrer(Constants.URL_TEACH_MAIN)
+//                        .header(
+//                            "Cookie",
+//                            CookieManager.getInstance().getCookie(Constants.URL_LOGIN_BASE)
+//                        )
+//                        .data(data)
+//                        .post()
+//                }
                 //解析html
                 val table = body.select("#DataGrid1").select("tr")
                 val exams = mutableListOf<Exam>()

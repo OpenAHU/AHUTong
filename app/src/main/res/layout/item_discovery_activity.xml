@@ -55,6 +55,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
+                        android:scrollbars="none"
                         android:text="@string/card_money"
                         app:layout_constraintBottom_toBottomOf="@id/icon_wallet"
                         app:layout_constraintLeft_toRightOf="@id/icon_wallet" />
@@ -151,6 +152,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
+                        android:scrollbars="none"
                         android:text="@string/bathroom"
                         app:layout_constraintBottom_toBottomOf="@id/icon_bath"
                         app:layout_constraintLeft_toRightOf="@id/icon_bath" />

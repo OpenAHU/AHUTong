@@ -33,9 +33,7 @@ class WebviewActivity : AppCompatActivity() {
         sinkWebViewReptile.loginTeach()
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
-            GlobalScope.launch {
-            }
-
+            sinkWebViewReptile.loginTeach()
         }
     }
 

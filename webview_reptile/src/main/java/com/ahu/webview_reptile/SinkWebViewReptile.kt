@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebView
+import android.widget.Toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -36,7 +37,7 @@ class SinkWebViewReptile(val webView: WebView) {
 
     fun loginTeach() {
         login { str, e ->
-            Log.e("SINK", str)
+            Toast.makeText(webView.context, str, Toast.LENGTH_SHORT).show()
         }
     }
 

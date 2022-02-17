@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.page.state
 
+import android.webkit.CookieManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,6 +29,8 @@ class MainViewModel : ViewModel() {
         isLogin.value = false
         AHUCache.clearCurrentUser()
         AHUCache.saveCurrentPassword("")
+        CookieManager.getInstance().removeAllCookies(null)
+        CookieManager.getInstance().flush()
     }
 
     val scheduleTheme by lazy {
