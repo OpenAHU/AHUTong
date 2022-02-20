@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.webkit.CookieManager
 import android.webkit.WebView
 import android.widget.Toast
 import arch.sink.ui.BarConfig
@@ -98,9 +99,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             val username = AHUCache.getCurrentUser()?.name ?: return@observe
             val password = AHUCache.getCurrentUserPassword() ?: return@observe
             loginer.login(ReptileUser(username, password)) { status, e ->
+
                 mState.localReptileLoginStatus.value = status
                 if (status == SinkWebViewClient.STATUS_LOGIN_SUCCESS) {
                     ReptileManager.getInstance().isLoginStatus = true
+                    val cookie = CookieManager.getInstance()
+                        .getCookie("https://jwxt0.ahu.edu.cn")
+                    Log.e("SINK", cookie)
                 }
                 if (SinkWebViewClient.STATUS_LOGIN_FAILURE == status) {
                     Toast.makeText(this, e?.message, Toast.LENGTH_SHORT).show()

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -27,9 +28,10 @@ class WebviewActivity : AppCompatActivity() {
         sinkWebViewReptile.loginTeach()
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
-            sinkWebViewReptile.loginTeach()
             GlobalScope.launch{
-                sinkWebViewReptile.getSchedule()
+                val cookie = CookieManager.getInstance()
+                    .getCookie("https://jwxt0.ahu.edu.cn")
+                Log.e("SINK", cookie)
             }
         }
     }

@@ -2,6 +2,7 @@
 
 package com.ahu.ahutong.data.reptile
 
+import android.util.Log
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.data.reptile.utils.JsoupProxy
@@ -11,6 +12,8 @@ import com.ahu.ahutong.ext.createFailureResponse
 import com.ahu.ahutong.ext.createSuccessResponse
 import com.google.gson.JsonParseException
 import com.google.gson.JsonParser
+import com.google.gson.JsonSyntaxException
+import com.google.gson.stream.MalformedJsonException
 import com.sink.library.log.SinkLog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -59,8 +62,8 @@ object WebViewReptile {
             if (e is CancellationException) {
                 throw e
             }
-            if (e is JsonParseException) {
-                return@withContext createFailureResponse(e.message ?: "本地爬虫正在登录中,或当前登录密码错误！")
+            if (e is MalformedJsonException || e is JsonSyntaxException) {
+                return@withContext createFailureResponse("登录中或刷新过于频繁，如果使用的校园网请切换其他网络！")
             }
             e.printStackTrace()
             return@withContext createFailureResponse(e.message ?: "未知异常，请尝试重新登录或联系开发者（高玉灿）！")
@@ -79,7 +82,7 @@ object WebViewReptile {
                 var body = JsoupProxy.newSession()
                     .url(Constants.URL_TEACH_SCHEDULE.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
-                    .referrer(Constants.URL_TEACH_MAIN)
+                    .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                     .header(
                         "Cookie",
                         ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
@@ -102,7 +105,7 @@ object WebViewReptile {
                     body = JsoupProxy.newSession()
                         .url(Constants.URL_TEACH_SCHEDULE.format(ReptileManager.getInstance().currentUser.username))
                         .timeout(ReptileManager.getInstance().timeout)
-                        .referrer(Constants.URL_TEACH_MAIN)
+                        .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                         .header(
                             "Cookie",
                             ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
@@ -177,7 +180,7 @@ object WebViewReptile {
                 val body = JsoupProxy.newSession()
                     .url(Constants.URL_TEACH_EXAM.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
-                    .referrer(Constants.URL_TEACH_MAIN)
+                    .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                     .header(
                         "Cookie",
                         ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
@@ -253,7 +256,7 @@ object WebViewReptile {
                 var body = JsoupProxy.newSession()
                     .url(Constants.URL_TEACH_ROOM.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
-                    .referrer(Constants.URL_TEACH_MAIN)
+                    .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                     .header(
                         "Cookie",
                         ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
@@ -281,7 +284,7 @@ object WebViewReptile {
                 body = JsoupProxy.newSession()
                     .url(Constants.URL_TEACH_ROOM.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
-                    .referrer(Constants.URL_TEACH_MAIN)
+                    .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                     .header(
                         "Cookie",
                         ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
@@ -321,7 +324,7 @@ object WebViewReptile {
             var body = JsoupProxy.newSession()
                 .url(Constants.URL_TEACH_GRADE.format(ReptileManager.getInstance().currentUser.username))
                 .timeout(ReptileManager.getInstance().timeout)
-                .referrer(Constants.URL_TEACH_MAIN)
+                .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                 .header(
                     "Cookie",
                     ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
@@ -341,7 +344,7 @@ object WebViewReptile {
             body = JsoupProxy.newSession()
                 .url(Constants.URL_TEACH_GRADE.format(ReptileManager.getInstance().currentUser.username))
                 .timeout(ReptileManager.getInstance().timeout)
-                .referrer(Constants.URL_TEACH_MAIN)
+                .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                 .header(
                     "Cookie",
                     ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
