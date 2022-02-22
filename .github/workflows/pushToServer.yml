@@ -1,0 +1,19 @@
+name: Auto deploy to server
+on: 
+  release:
+    types: [published]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download latest version
+        run: |
+          curl https://api.github.com/repos/OpenAHU/AHUTong/releases | jq '.[0].assets[0].browser_download_url' | xargs curl -L -o ahu.apk
+      - name: Copy file to remote
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: ahu.apk
+          remote: adt_important/public/ahu.apk
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}
