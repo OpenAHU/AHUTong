@@ -27,7 +27,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:title="@{`第 `+ state.week + `  周`}"
+                app:title="@{`第 `+ state.scheduleConfig.week + `  周`}"
                 tools:title="@string/title_schedule" />
         </com.google.android.material.appbar.AppBarLayout>
 

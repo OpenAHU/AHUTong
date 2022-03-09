@@ -8,13 +8,13 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Exam
 import kotlinx.coroutines.launch
 
-class ExamViewModel:ViewModel() {
-    val data  = MutableLiveData<Result<List<Exam>>>()
+class ExamViewModel : ViewModel() {
+    val data = MutableLiveData<Result<List<Exam>>>()
     val size = MutableLiveData(0)
-    fun loadExam(isRefresh: Boolean = false) = viewModelScope.launch{
+    fun loadExam(isRefresh: Boolean = false) = viewModelScope.launch {
         val schoolTerm = AHUCache.getSchoolTerm()
         val schoolYear = AHUCache.getSchoolYear()
-        if (schoolYear == null || schoolTerm == null){
+        if (schoolYear == null || schoolTerm == null) {
             data.value = Result.failure(Throwable("未填写当前学年，学期。"))
             return@launch
         }

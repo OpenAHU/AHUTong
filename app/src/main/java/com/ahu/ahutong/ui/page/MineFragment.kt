@@ -9,6 +9,7 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentMineBinding
 import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
@@ -33,7 +34,6 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
 
     override fun getDataBindingConfig(): DataBindingConfig {
         return DataBindingConfig(R.layout.fragment_mine, BR.state, mState)
-            .addBindingParam(BR.activityState, activityState)
             .addBindingParam(BR.proxy, ClickProxy())
     }
 
@@ -72,7 +72,7 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
 
         //login or logout
         fun login(view: View) {
-            if (activityState.isLogin.value == true) {
+            if (AHUCache.isLogin()) {
                 buildDialog("提示",
                     "是否退出登录，点击确定您的登录状态将被删除！",
                     "确定", { _, _ ->

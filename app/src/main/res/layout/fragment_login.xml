@@ -61,38 +61,27 @@
             <androidx.appcompat.widget.AppCompatEditText
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="@string/hint_password"
-                android:id="@+id/ed_password"
+                android:hint="@string/hint_wisdom_password"
+                android:id="@+id/ed_wisdom_password"
                 android:inputType="textPassword"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <RadioGroup
-            android:id="@+id/rg_login"
-            android:layout_marginTop="10dp"
-            android:layout_width="wrap_content"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/MyOutlinedBox.Dense"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <RadioButton
-                android:id="@+id/rd_wisdom_local"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:text="@string/login_local_wisdom"
-                android:checked="true"/>
-            <RadioButton
-                android:id="@+id/rd_wisdom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:text="@string/login_wisdom_ahu"
-                android:checked="false"/>
-            <RadioButton
-                android:id="@+id/rd_teach"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:text="@string/login_teach_system"/>
-        </RadioGroup>
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="10dp"
+            app:passwordToggleEnabled="true">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/ed_teach_password"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/hint_teach_password"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         <Button
             android:id="@+id/bt_login"

@@ -10,8 +10,6 @@ import com.tencent.mmkv.MMKV
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 
 
-
-
 /**
  * @Author SinkDev
  * @Date 2021/7/27-16:49
@@ -66,20 +64,21 @@ object AHUCache {
     }
 
     /**
-     * 保存密码
+     * 保存智慧安大密码
      * @param password String
      */
-    fun saveCurrentPassword(password: String) {
-        kv.encode("password", password)
+    fun saveWisdomPassword(password: String) {
+        kv.encode("password_wisdom", password)
     }
 
     /**
-     * 获取密码
+     * 获取智慧安大密码
      * @return String?
      */
-    fun getCurrentUserPassword(): String? {
-        return kv.decodeString("password")
+    fun getWisdomPassword(): String? {
+        return kv.decodeString("password_wisdom")
     }
+
 
     /**
      * 保存课程表
@@ -210,26 +209,6 @@ object AHUCache {
         kv.putBoolean("isShowAllCourse", isCourse)
     }
 
-    /**
-     * 获取登录类型
-     * @return User.UserType
-     */
-    fun getLoginType(): User.UserType {
-        val type = kv.getString("usertype", "0") ?: "0"
-        return when (type) {
-            "1" -> User.UserType.AHU_Wisdom
-            "2" -> User.UserType.AHU_Teach
-            else -> User.UserType.AHU_LOCAL
-        }
-    }
-
-    /**
-     * 保存登录类型
-     * @param type UserType
-     */
-    fun saveLoginType(type: User.UserType) {
-        kv.putString("usertype", type.toString())
-    }
 
     /**
      * 保存ScheduleTheme
@@ -251,14 +230,16 @@ object AHUCache {
         }
         return null
     }
+
     /**
      * 保存List<Banner>
      * @param theme ScheduleTheme
      */
     fun saveBanner(banners: List<Banner>) {
-        val json=Gson().toJson(banners)
+        val json = Gson().toJson(banners)
         kv.putString("list_banner", json)
     }
+
     /**
      * 获取List<Banner>
      * @return List<Banner>?
@@ -271,12 +252,5 @@ object AHUCache {
         return null
     }
 
-//    fun getVersionHistory(): String {
-//        return kv.getString("version", "") ?: ""
-//    }
-//
-//    fun saveVersionHistory(version: String) {
-//        kv.putString("version", version)
-//    }
 
 }

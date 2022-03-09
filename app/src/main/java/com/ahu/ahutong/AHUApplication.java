@@ -2,6 +2,8 @@ package com.ahu.ahutong;
 
 import android.content.pm.PackageManager;
 
+import com.ahu.ahutong.common.ObservableData;
+import com.ahu.ahutong.data.model.User;
 import com.ahu.plugin.BathPlug;
 import com.ahu.plugin.BathPlugImpl;
 import com.google.gson.Gson;
@@ -21,6 +23,9 @@ import arch.sink.BaseApplication;
  * @Email 468766131@qq.com
  */
 public class AHUApplication extends BaseApplication {
+    // 初始默认值为 AHU_Wisdom
+    public static ObservableData<User.UserType> loginType = new ObservableData<>(User.UserType.AHU_Wisdom);
+
     @Override
     public void onCreate() {
         super.onCreate();

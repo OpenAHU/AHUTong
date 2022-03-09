@@ -2,6 +2,7 @@ package com.ahu.ahutong.data
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.api.APIDataSource
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.dao.AHUCache
@@ -30,17 +31,23 @@ import java.util.concurrent.TimeUnit
  * @Email: 468766131@qq.com
  */
 object AHURepository {
-    var dataSource: BaseDataSource
+    var dataSource: BaseDataSource = FakeDataSource()
 
     init {
-        dataSource = if (!AHUCache.isLogin()) {
-            FakeDataSource()
-        } else if (AHUCache.getLoginType() == User.UserType.AHU_LOCAL) {
-            val user = AHUCache.getCurrentUser()!! // 加!!因为可以保证，已经登录
-            val password = AHUCache.getCurrentUserPassword()!!
-            ReptileDataSource(ReptileUser(user.name, password))
-        } else {
-            APIDataSource()
+        // 数据源选择
+        AHUApplication.loginType.addObserver {
+            if (!AHUCache.isLogin()) {
+                dataSource = FakeDataSource()
+                return@addObserver
+            }
+
+            if (it == User.UserType.AHU_LOCAL) {
+                val user = AHUCache.getCurrentUser()!! // 加!!因为可以保证，已经登录
+                val password = AHUCache.getWisdomPassword()!!
+                dataSource = ReptileDataSource(ReptileUser(user.name, password))
+            } else {
+                dataSource = APIDataSource()
+            }
         }
     }
 
@@ -118,7 +125,7 @@ object AHURepository {
                     AHUCache.saveSchedule(schoolYear, schoolTerm, response.data)
                     Result.success(response.data)
                 } else {
-                    Result.failure<List<Course>>(Throwable(response.msg))
+                    Result.failure(Throwable(response.msg))
                 }
             } catch (e: Exception) {
                 Result.failure(e)

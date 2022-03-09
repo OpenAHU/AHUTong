@@ -1,8 +1,10 @@
 package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import arch.sink.ui.page.BaseFragment
@@ -29,8 +31,9 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>() {
 
     override fun observeData() {
         super.observeData()
-        mState.week.observe(this) {
-            dataBinding.viewPager2.setCurrentItem(it - 1, false)
+        // 周数
+        mState.scheduleConfig.observe(this) {
+            dataBinding.viewPager2.setCurrentItem(it.week - 1, false)
         }
     }
 
@@ -62,14 +65,20 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>() {
                 override fun onPageScrollStateChanged(state: Int) {
                     super.onPageScrollStateChanged(state)
                     if (state == ViewPager2.SCROLL_STATE_IDLE) {
-                        mState.week.value = position + 1
+                        mState.changeWeek(position + 1)
                     }
                 }
             })
         }
-
+        mState.refreshSchedule()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (::mState.isInitialized) {
+            mState.loadConfig()
+        }
 
+    }
 
 }

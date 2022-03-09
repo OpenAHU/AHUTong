@@ -26,7 +26,8 @@
     <string name="license">开源协议</string>
     <string name="login">认证</string>
     <string name="hint_userid">请输入您的学号</string>
-    <string name="hint_password">请输入您的密码</string>
+    <string name="hint_wisdom_password">请输入您的智慧安大密码</string>
+    <string name="hint_teach_password">请输入您的教务系统密码</string>
     <string name="more">更多</string>
     <string name="library">图书馆</string>
     <string name="emptyRoom">空教室</string>

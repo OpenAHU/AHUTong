@@ -47,62 +47,13 @@ class SettingFragment : PreferenceFragmentCompat() {
                 return@setOnPreferenceClickListener true
             }
         }
-        findPreference<ListPreference>("data_source")?.apply {
-            entries = arrayOf("智慧安大（本地爬虫版）", "智慧安大（后端版）", "教务系统")
-            entryValues = arrayOf(
-                User.UserType.AHU_LOCAL.type,
-                User.UserType.AHU_Wisdom.type,
-                User.UserType.AHU_Teach.type
-            )
-            key = "data_source"
-            dialogTitle = "智慧安大到教务系统需重新登录, 反之亦然"
-            //dialogMessage = "智慧安大到教务系统需重新登录, 反之亦然。"
-            negativeButtonText = "关闭"
-            positiveButtonText = "切换"
-            setOnPreferenceChangeListener { _, newValue ->
-                if (newValue !is String) {
-                    return@setOnPreferenceChangeListener false
-                }
-                //没进行登录
-                if (activityState.isLogin.value != true) {
-                    val bundle = Bundle().apply {
-                        putString("type", newValue.toString())
-                    }
-                    findNavController().navigate(R.id.login_fragment, bundle)
-                    Toast.makeText(requireContext(), "请先进行登录!", Toast.LENGTH_SHORT).show()
-                    return@setOnPreferenceChangeListener false
-                }
-                val oldValue = AHUCache.getLoginType().type
-                if (oldValue == newValue) {
-                    return@setOnPreferenceChangeListener false
-                }
-                if (oldValue == User.UserType.AHU_Wisdom.type &&
-                    newValue == User.UserType.AHU_LOCAL.type
-                ) {
-                    AHUCache.saveLoginType(User.UserType.AHU_LOCAL)
-                } else if (oldValue == User.UserType.AHU_LOCAL.type &&
-                    newValue == User.UserType.AHU_Wisdom.type
-                ) {
-                    AHUCache.saveLoginType(User.UserType.AHU_Wisdom)
-                } else {
-                    //退出登录
-                    activityState.logout()
-                    //进入登录界面
-                    val bundle = Bundle().apply {
-                        putString("type", newValue.toString())
-                    }
-                    findNavController().navigate(R.id.login_fragment, bundle)
-                }
-                return@setOnPreferenceChangeListener true
-            }
-        }
         findPreference<SwitchPreference>("show_all")?.apply {
             setOnPreferenceChangeListener { preference, newValue ->
                 if (newValue !is Boolean) {
                     return@setOnPreferenceChangeListener false
                 }
                 AHUCache.saveIsShowAllCourse(newValue)
-                Toast.makeText(requireContext(), "设置成功，重启后生效", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "设置成功！", Toast.LENGTH_SHORT).show()
                 return@setOnPreferenceChangeListener true
             }
         }

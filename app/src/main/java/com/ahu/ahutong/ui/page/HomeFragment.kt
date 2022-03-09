@@ -1,9 +1,11 @@
 package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
@@ -23,6 +25,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private val scheduleFragment = ScheduleFragment()
     private val discoveryFragment = DiscoveryFragment()
     private val mineFragment = MineFragment()
+    private var currentFragment: Fragment = scheduleFragment
 
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(HomeViewModel::class.java)
@@ -46,17 +49,22 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 }
 
                 override fun createFragment(position: Int): Fragment {
-                    return when (position) {
+                   currentFragment =  when (position) {
                         0 -> scheduleFragment
                         1 -> discoveryFragment
                         2 -> mineFragment
                         else -> throw RuntimeException("不存在该position")
                     }
+                    return currentFragment
                 }
             }
         }
 
+    }
 
+    override fun onResume() {
+        super.onResume()
+        currentFragment.onResume()
     }
 
     inner class ActionProxy {

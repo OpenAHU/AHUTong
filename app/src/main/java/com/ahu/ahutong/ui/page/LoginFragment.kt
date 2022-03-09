@@ -35,27 +35,10 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
         mState.serverLoginResult.observe(this) {
             dataBinding.btLogin.isClickable = true  // 恢复按钮
             it.onSuccess {
-                activityState.isLogin.value = true
                 Toast.makeText(requireContext(), "登录成功，欢迎您：${it.name}", Toast.LENGTH_SHORT).show()
                 nav().popBackStack()
             }.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
-            }
-        }
-        activityState.localReptileLoginStatus.observe(this) {
-            when (it) {
-                SinkWebViewClient.STATUS_LOGIN_SUCCESS -> {
-                    dataBinding.btLogin.isClickable = true  // 恢复按钮
-                    Toast.makeText(
-                        requireContext(),
-                        "登录成功，欢迎您：${AHUCache.getCurrentUser()?.name ?: return@observe}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    nav().popBackStack()
-                }
-                SinkWebViewClient.STATUS_LOGIN_FAILURE -> {
-                    dataBinding.btLogin.isClickable = true  // 恢复按钮
-                }
             }
         }
     }
@@ -68,26 +51,19 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //设置动画
-        dataBinding.edPassword.setOnFocusChangeListener { _, focus ->
+        dataBinding.edWisdomPassword.setOnFocusChangeListener { _, focus ->
             if (focus) {
                 dataBinding.emoji.close()
             } else {
                 dataBinding.emoji.open()
             }
         }
-        arguments?.let {
-            val type = it.getString("type")
-            mState.loginType = when (type) {
-                "1" -> User.UserType.AHU_Teach
-                "2" -> User.UserType.AHU_Wisdom
-                else -> User.UserType.AHU_LOCAL
-            }
-        }
-        dataBinding.rgLogin.setOnCheckedChangeListener { _, id ->
-            mState.loginType = when (id) {
-                R.id.rd_wisdom -> User.UserType.AHU_Wisdom
-                R.id.rd_teach -> User.UserType.AHU_Teach
-                else -> User.UserType.AHU_LOCAL
+
+        dataBinding.edTeachPassword.setOnFocusChangeListener { _, focus ->
+            if (focus) {
+                dataBinding.emoji.close()
+            } else {
+                dataBinding.emoji.open()
             }
         }
 
@@ -101,28 +77,13 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
 
         fun login(view: View) {
             val username = dataBinding.edUserId.text.toString()
-            val password = dataBinding.edPassword.text.toString()
-            if (username.isEmpty() || password.isEmpty()) {
+            val teachPassword = dataBinding.edTeachPassword.text.toString()
+            val wisdomPassword = dataBinding.edWisdomPassword.text.toString()
+            if (username.isEmpty() || teachPassword.isEmpty() || wisdomPassword.isEmpty()) {
                 Toast.makeText(requireContext(), "请不要输入空气哦！", Toast.LENGTH_SHORT).show()
                 return
             }
-
-            LoginViewModel.type[dataBinding.rgLogin.checkedRadioButtonId]?.let {
-                dataBinding.btLogin.isClickable = false // 禁用按钮防止重复操作
-                mState.loginType = it
-                if (it != User.UserType.AHU_LOCAL) {
-                    mState.loginWithServer(username, password)
-                } else {
-                    Toast.makeText(requireContext(), "本地爬虫登录较为缓慢，请耐心等待！", Toast.LENGTH_SHORT).show()
-                    AHUCache.saveCurrentUser(User(username))
-                    AHUCache.saveCurrentPassword(password)
-                    //切换数据源
-                    AHUCache.saveLoginType(it)
-                    AHURepository.dataSource = ReptileDataSource(ReptileUser(username, password))
-                    // 触发登录逻辑
-                    activityState.isLogin.value = true
-                }
-            }
+            mState.loginWithServer(username, teachPassword, wisdomPassword)
 
         }
     }

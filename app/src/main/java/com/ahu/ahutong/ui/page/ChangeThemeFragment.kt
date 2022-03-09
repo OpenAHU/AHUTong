@@ -52,8 +52,6 @@ class ChangeThemeFragment : BaseFragment<FragmentChangeThemeBinding>() {
                     binding.theme = data.theme as SimpleTheme
                     binding.root.setOnClickListener {
                         AHUCache.saveScheduleTheme(data)
-                        //更新主题
-                        gState.scheduleTheme.value = data
                         Toast.makeText(requireContext(), "主题切换成功.", Toast.LENGTH_SHORT).show()
                     }
                 }

@@ -279,11 +279,11 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
             super.onPageSelected(position)
             //循环播放
             if (position == 0) {
-                viewPager2.setCurrentItem(adapter.getItemCount(), true)
+                viewPager2.setCurrentItem(adapter.getItemCount(), false)
                 return
             }
             if (position == adapter.getItemCount() + 1) {
-                viewPager2.setCurrentItem(1, true)
+                viewPager2.setCurrentItem(1, false)
                 return
             }
             //设置指示器

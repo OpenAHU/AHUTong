@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.Toast
@@ -14,6 +13,7 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.R
 import com.ahu.ahutong.BR
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentScheduleWeekBinding
 import com.ahu.ahutong.databinding.ItemPopCourseBinding
 import com.ahu.ahutong.ext.buildDialog
@@ -44,7 +44,6 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
         parentFragment?.let {
             pState = ViewModelProvider(it).get(ScheduleViewModel::class.java)
         }
-
         gState = getActivityScopeViewModel(MainViewModel::class.java)
     }
 
@@ -54,91 +53,47 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
 
 
     override fun observeData() {
-        gState.isLogin.observe(this) {
-            if (it && !(pState.schoolTerm.isEmpty() || pState.schoolYear.isEmpty())) {
-                pState.refreshSchedule()
-                dataBinding.refreshLayout.isRefreshing = true
-            }
+        // 不可以在数据观察后
+        pState.scheduleConfig.observe(this) {
+            dataBinding.scheduleView
+                .date(it.week, it.weekDay)
+                .theme(it.theme)
+                .startTime(it.startTime)
+                .showAllCourse(it.isShowAll)
+                .loadSchedule()
         }
+
         //课表数据
         pState.schedule.observe(this) {
             it.onSuccess {
-                dataBinding.scheduleView
-                    .data(it)
-                if (!isResumed) {
-                    return@onSuccess
-                }
                 if (it.isEmpty()) {
                     buildDialog(
                         "提示",
                         "当前学期课表数据为空，请查看是否选择了正确的学年学期", "确定"
                     ).show()
                 }
-                dataBinding.scheduleView.loadSchedule()
+                // 课表数据刷新
+                dataBinding.scheduleView
+                    .data(it)
+                    .loadSchedule()
                 //更新小部件
                 val manager = AppWidgetManager.getInstance(requireContext())
                 val componentName = ComponentName(requireActivity(), ClassWidget::class.java)
                 val appWidgetIds = manager.getAppWidgetIds(componentName)
                 manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
-
-            }
-            it.onFailure {
-                if (!isResumed) {
-                    return@onFailure
-                }
+            }.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }
             //停止加载
             dataBinding.refreshLayout.isRefreshing = false
         }
 
-        //开学时间
-        pState.startTime.observe(this) {
-            dataBinding.scheduleView
-                .startTime(it)
-            if (isResumed) {
-                dataBinding.scheduleView.loadSchedule()
-            }
-        }
-
-        //是否显示非本周
-        pState.isShowAllCourse.observe(this) {
-            dataBinding.scheduleView
-                .showAllCourse(it)
-            if (isResumed) {
-                dataBinding.scheduleView.loadSchedule()
-            }
-        }
-
-        //主题
-        gState.scheduleTheme.observe(this) {
-            dataBinding.scheduleView.theme(it)
-                .loadSchedule()
-        }
-    }
-
-
-    override fun onResume() {
-        super.onResume()
-        if (pState.schoolTerm.isEmpty() || pState.schoolYear.isEmpty()) {
-            //如果没有设定学年学期，开启设置
-            val settingTimeDialog = SelectTimeDialog()
-            settingTimeDialog.setCallBack(this)
-            settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
-        }
-        //懒加载
-        dataBinding.scheduleView.loadSchedule()
 
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //加载数据
-        dataBinding.scheduleView
-            .showAllCourse(pState.isShowAllCourse.value ?: false)
-            .startTime(pState.startTime.value ?: Date())
-            .date(week, Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK])
-
         //设置点击课程的事件
         dataBinding.scheduleView.setCourseListener { v, scheduleCourse ->
             val popupView = getPopupView(scheduleCourse)
@@ -170,7 +125,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
             }
             val chooseOneDialog = ChooseOneDialog(list)
             chooseOneDialog.selectListener = { index, _ ->
-                pState.week.value = index + 1
+                pState.changeWeek(index + 1)
             }
             chooseOneDialog.show(parentFragmentManager, "chooseStartWeek")
         }
@@ -224,7 +179,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
     override fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int) {
         pState.saveTime(schoolYear, schoolTerm, week)
         //刷新
-        if (gState.isLogin.value == true) {
+        if (AHUCache.isLogin()) {
             pState.refreshSchedule(schoolYear, schoolTerm)
             dataBinding.refreshLayout.isRefreshing = true
         }
@@ -246,7 +201,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
     }
 
     override fun inputSchedule() {
-        if (gState.isLogin.value != true) {
+        if (!AHUCache.isLogin()) {
             Toast.makeText(requireContext(), "登录后才可以刷新课表哦！", Toast.LENGTH_SHORT).show()
             return
         }

@@ -136,7 +136,7 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
         if (coursesData.isNullOrEmpty()) {
             return
         }
-        if (theme.theme is SimpleTheme){
+        if (theme.theme is SimpleTheme) {
             (theme.theme as SimpleTheme).num = 0
         }
         for (i in 1..7) {
@@ -209,8 +209,12 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     }
 
     private fun initTableHeader() {
-        initTableTimeHeader()
-        initTableWeekdayHeader()
+        try {
+            initTableTimeHeader()
+            initTableWeekdayHeader()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -374,11 +378,11 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
     }
 
 
-    fun setSettingClickListener(listener: ()->Unit){
+    fun setSettingClickListener(listener: () -> Unit) {
         this.mSettingClickListener = listener
     }
 
-    fun setChangeWeekListener(listener: ()->Unit){
+    fun setChangeWeekListener(listener: () -> Unit) {
         this.mChangeWeekListener = listener
     }
 

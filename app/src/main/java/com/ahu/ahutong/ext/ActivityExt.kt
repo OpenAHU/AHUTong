@@ -3,6 +3,7 @@ package com.ahu.ahutong.ext
 import android.app.Activity
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
+import com.simon.library.view.LoadingDialog
 
 fun Activity.buildDialog(
     title: String, message: String, positiveText: String,
@@ -18,4 +19,12 @@ fun Activity.buildDialog(
         dialog.setNegativeButton(negativeText, negativeListener)
     }
     return dialog
+}
+
+fun Activity.buildProgressDialog(
+    message: String
+): LoadingDialog {
+    val loadingDialog = LoadingDialog(this)
+    loadingDialog.setMessage(message)
+    return loadingDialog
 }

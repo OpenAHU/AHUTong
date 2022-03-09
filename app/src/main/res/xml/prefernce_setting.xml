@@ -14,15 +14,6 @@
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-        app:iconSpaceReserved="false"
-        app:title="数据源">
-        <ListPreference
-            app:iconSpaceReserved="false"
-            app:title="数据来源"
-            app:summary="选择你的数据来源！"
-            app:key="data_source"/>
-    </PreferenceCategory>
 
     <PreferenceCategory
         app:iconSpaceReserved="false"

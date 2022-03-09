@@ -21,21 +21,14 @@ import java.lang.Exception
  * @Email: 468766131@qq.com
  */
 class MainViewModel : ViewModel() {
-    val isLogin by lazy {
-        MutableLiveData(AHUCache.isLogin())
-    }
 
     fun logout() {
-        isLogin.value = false
         AHUCache.clearCurrentUser()
-        AHUCache.saveCurrentPassword("")
+        AHUCache.saveWisdomPassword("")
         CookieManager.getInstance().removeAllCookies(null)
         CookieManager.getInstance().flush()
     }
 
-    val scheduleTheme by lazy {
-        MutableLiveData(AHUCache.getScheduleTheme() ?: DefaultDataUtils.getDefaultTheme())
-    }
 
     val latestVersions: MutableLiveData<Result<AHUResponse<AppVersion>>> = MutableLiveData()
 

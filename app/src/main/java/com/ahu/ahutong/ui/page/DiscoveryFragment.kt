@@ -8,6 +8,7 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.databinding.FragmentDiscoveryBinding
@@ -73,7 +74,7 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
 
     inner class ToolClickProxy {
         fun onClick(tool: Tool) {
-            if (activityState.isLogin.value == false) {
+            if (!AHUCache.isLogin()) {
                 Toast.makeText(requireContext(), "登录后才能使用小工具。", Toast.LENGTH_SHORT).show()
                 return
             }
