@@ -81,14 +81,16 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
                 val componentName = ComponentName(requireActivity(), ClassWidget::class.java)
                 val appWidgetIds = manager.getAppWidgetIds(componentName)
                 manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
-            }.onFailure {
-                Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }
             //停止加载
             dataBinding.refreshLayout.isRefreshing = false
         }
 
-
+        pState.showSelectTimeDialog.observe(this) {
+            val settingTimeDialog = SelectTimeDialog()
+            settingTimeDialog.setCallBack(this)
+            settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
+        }
     }
 
 

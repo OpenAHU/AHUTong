@@ -3,6 +3,7 @@ package com.ahu.ahutong.ui.page
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -34,6 +35,12 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>() {
         // 周数
         mState.scheduleConfig.observe(this) {
             dataBinding.viewPager2.setCurrentItem(it.week - 1, false)
+        }
+        // 因为会存在多个 WeekScheduleFragment 对象，失败会弹出三个toast，所以在这里处理异常
+        mState.schedule.observe(this) {
+            it.onFailure {
+                Toast.makeText(requireContext(), "获取课表失败，${it.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

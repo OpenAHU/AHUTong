@@ -2,10 +2,14 @@ package com.ahu.ahutong.ui.page.state
 
 import androidx.lifecycle.*
 import arch.sink.utils.TimeUtils
+import com.ahu.ahutong.common.SingleLiveEvent
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.ui.widget.schedule.bean.DefaultDataUtils
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleConfigBean
+import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
+import com.ahu.ahutong.ui.widget.schedule.bean.SimpleTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -21,14 +25,12 @@ class ScheduleViewModel : ViewModel() {
 
     val schedule = MutableLiveData<Result<List<Course>>>()
 
+    val showSelectTimeDialog = SingleLiveEvent<Boolean>()
 
-    val schoolYear by lazy {
-        AHUCache.getSchoolYear() ?: ""
-    }
+    val schoolYear = AHUCache.getSchoolYear() ?: ""
 
-    val schoolTerm by lazy {
-        AHUCache.getSchoolTerm() ?: ""
-    }
+
+    val schoolTerm = AHUCache.getSchoolTerm() ?: ""
 
     val scheduleConfig = MutableLiveData<ScheduleConfigBean>()
 
@@ -51,6 +53,10 @@ class ScheduleViewModel : ViewModel() {
         isRefresh: Boolean = false
     ) {
         viewModelScope.launch(Dispatchers.Main) {
+            if (!AHUCache.isLogin()) {
+                schedule.value = Result.failure(Throwable("请先登录！"))
+                return@launch
+            }
             val result = AHURepository.getSchedule(schoolYear, schoolTerm, isRefresh)
             schedule.value = result
         }
@@ -59,25 +65,30 @@ class ScheduleViewModel : ViewModel() {
     fun loadConfig() {
         viewModelScope.launch {
             scheduleConfig.value = async {
-                val time = AHUCache.getSchoolTermStartTime(schoolYear, schoolTerm)
+                var time = AHUCache.getSchoolTermStartTime(schoolYear, schoolTerm)
+
+                if (time == null) {
+                    showSelectTimeDialog.call()
+                    time = "2022-2-21"
+                }
                 // 创建课程表配置
                 val scheduleConfigBean = ScheduleConfigBean()
                 // 课程表主题
-                scheduleConfigBean.theme = AHUCache.getScheduleTheme()
+                scheduleConfigBean.theme =
+                    AHUCache.getScheduleTheme() ?: DefaultDataUtils.getDefaultTheme()
                 // 是否显示全部课程
                 scheduleConfigBean.isShowAll = AHUCache.isShowAllCourse()
-                time?.let {
-                    //根据开学时间， 获取当前周数
-                    val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
-                        .parse(time)
+                //根据开学时间， 获取当前周数
+                val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
+                    .parse(time)
 
-                    // 开学时间
-                    scheduleConfigBean.startTime = date
-                    // 当前周数
-                    scheduleConfigBean.week = (TimeUtils.getTimeDistance(Date(), date) / 7 + 1).toInt()
-                    // 当前周几
-                    scheduleConfigBean.weekDay = Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK]
-                }
+                // 开学时间
+                scheduleConfigBean.startTime = date
+                // 当前周数
+                scheduleConfigBean.week = (TimeUtils.getTimeDistance(Date(), date) / 7 + 1).toInt()
+                // 当前周几
+                scheduleConfigBean.weekDay =
+                    Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK]
                 scheduleConfigBean
             }.await()
         }

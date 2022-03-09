@@ -81,7 +81,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:layout_weight="1"
-                        android:text="@{AHUCache.INSTANCE.login ?  @string/mine_tv_logout : @string/mine_tv_identity}"
+                        android:text="@{state.isLogin ?  @string/mine_tv_logout : @string/mine_tv_identity}"
                         tool:text="@string/mine_tv_identity" />
 
                     <androidx.appcompat.widget.AppCompatImageView

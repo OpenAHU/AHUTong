@@ -42,6 +42,11 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
         dataBinding.refreshLayout.setOnRefreshListener  { dataBinding.refreshLayout.isRefreshing = false; }
     }
 
+    override fun onResume() {
+        super.onResume()
+        mState.isLogin.value = AHUCache.isLogin()
+    }
+
     inner class ClickProxy {
         //about us
         fun aboutUs(view: View) {

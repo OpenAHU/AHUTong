@@ -3,6 +3,7 @@ package com.ahu.ahutong.ui.page.state
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.User
@@ -41,6 +42,7 @@ class LoginViewModel : ViewModel() {
                     AHUCache.saveCurrentUser(user)
                     // 保存智慧安大密码
                     AHUCache.saveWisdomPassword(wisdomPassword)
+                    AHUApplication.loginType.setValue(User.UserType.AHU_Wisdom)
                     Result.success(user)
                 } else {
                     throw Throwable("登录认证失败，请查看密码是否正确。")
