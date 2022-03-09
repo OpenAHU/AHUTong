@@ -60,12 +60,12 @@
                         app:layout_constraintBottom_toBottomOf="@id/icon_wallet"
                         app:layout_constraintLeft_toRightOf="@id/icon_wallet" />
 
-                    <androidx.appcompat.widget.AppCompatTextView
+                    <com.ahu.ahutong.ui.widget.AutoSizeTextView
                         android:id="@+id/tv_money"
-                        android:layout_width="wrap_content"
+                        android:layout_width="100dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        android:text="@{`￥`+ bean.money}"
+                        autoSizeText="@{`￥`+ bean.money}"
                         android:textAppearance="?textAppearanceListItem"
                         android:textSize="23sp"
                         app:layout_constraintLeft_toLeftOf="parent"

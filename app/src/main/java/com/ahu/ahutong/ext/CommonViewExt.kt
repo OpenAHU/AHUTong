@@ -8,6 +8,7 @@ import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import coil.load
+import com.ahu.ahutong.ui.widget.AutoSizeTextView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.imageview.ShapeableImageView
@@ -53,7 +54,10 @@ fun onIconClick(view: MaterialToolbar, action: (() -> Unit)?){
         action?.invoke()
     }
 }
-
+@BindingAdapter("autoSizeText")
+fun autoSizeText(view: AutoSizeTextView, text: CharSequence) {
+    view.setAutoSizeText(text)
+}
 fun NumberPickerView.defaultStyle(){
     setDividerColor(Color.GRAY)
     setDividerHeight(1f)
