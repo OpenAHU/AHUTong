@@ -39,6 +39,7 @@ public class AutoSizeTextView extends AppCompatTextView {
                 break;
             }
         }
+        setText(text);
     }
     private int dip2px(float dpValue) {
         final float scale = getResources().getDisplayMetrics().density;
