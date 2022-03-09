@@ -28,7 +28,7 @@ public class AutoSizeTextView extends AppCompatTextView {
     }
 
     public void setAutoSizeText(CharSequence text) {
-        int mTextViewWidth = dip2px( 100);
+        int mTextViewWidth = dip2px( 80);
         while (true) {
             float textWidth = getPaint().measureText((String) text);
             if (textWidth > mTextViewWidth) {

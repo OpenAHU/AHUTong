@@ -62,7 +62,7 @@
 
                     <com.ahu.ahutong.ui.widget.AutoSizeTextView
                         android:id="@+id/tv_money"
-                        android:layout_width="100dp"
+                        android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
                         autoSizeText="@{`￥`+ bean.money}"
