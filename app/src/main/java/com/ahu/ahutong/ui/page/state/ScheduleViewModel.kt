@@ -57,27 +57,31 @@ class ScheduleViewModel : ViewModel() {
     }
 
     fun loadConfig() {
-        // 获取开学时间
-        val time = AHUCache.getSchoolTermStartTime(schoolYear, schoolTerm)
-        // 创建课程表配置
-        val scheduleConfigBean = ScheduleConfigBean()
-        // 课程表主题
-        scheduleConfigBean.theme = AHUCache.getScheduleTheme()
-        // 是否显示全部课程
-        scheduleConfigBean.isShowAll = AHUCache.isShowAllCourse()
-        time?.let {
-            //根据开学时间， 获取当前周数
-            val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
-                .parse(time)
+        viewModelScope.launch {
+            scheduleConfig.value = async {
+                val time = AHUCache.getSchoolTermStartTime(schoolYear, schoolTerm)
+                // 创建课程表配置
+                val scheduleConfigBean = ScheduleConfigBean()
+                // 课程表主题
+                scheduleConfigBean.theme = AHUCache.getScheduleTheme()
+                // 是否显示全部课程
+                scheduleConfigBean.isShowAll = AHUCache.isShowAllCourse()
+                time?.let {
+                    //根据开学时间， 获取当前周数
+                    val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
+                        .parse(time)
 
-            // 开学时间
-            scheduleConfigBean.startTime = date
-            // 当前周数
-            scheduleConfigBean.week = (TimeUtils.getTimeDistance(Date(), date) / 7 + 1).toInt()
-            // 当前周几
-            scheduleConfigBean.weekDay = Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK]
+                    // 开学时间
+                    scheduleConfigBean.startTime = date
+                    // 当前周数
+                    scheduleConfigBean.week = (TimeUtils.getTimeDistance(Date(), date) / 7 + 1).toInt()
+                    // 当前周几
+                    scheduleConfigBean.weekDay = Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK]
+                }
+                scheduleConfigBean
+            }.await()
         }
-        scheduleConfig.value = scheduleConfigBean
+
     }
 
     /**
