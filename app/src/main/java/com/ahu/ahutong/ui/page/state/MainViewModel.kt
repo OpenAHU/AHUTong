@@ -4,16 +4,17 @@ import android.webkit.CookieManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ahu.ahutong.common.SingleLiveEvent
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.AppVersion
+import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.data.reptile.login.SinkWebViewClient
-import com.ahu.ahutong.ui.widget.schedule.bean.DefaultDataUtils
+import com.ahu.ahutong.utils.RSA
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.Exception
 
 /**
  * @Author: SinkDev
@@ -23,8 +24,7 @@ import java.lang.Exception
 class MainViewModel : ViewModel() {
 
     fun logout() {
-        AHUCache.clearCurrentUser()
-        AHUCache.saveWisdomPassword("")
+        AHUCache.logout()
         CookieManager.getInstance().removeAllCookies(null)
         CookieManager.getInstance().flush()
     }
@@ -33,6 +33,31 @@ class MainViewModel : ViewModel() {
     val latestVersions: MutableLiveData<Result<AHUResponse<AppVersion>>> = MutableLiveData()
 
     val localReptileLoginStatus = MutableLiveData(SinkWebViewClient.STATUS_LOGIN_BEFORE)
+
+    val retryLoginResult = SingleLiveEvent<Result<User>>()
+
+    fun retryLogin() = viewModelScope.launch {
+        withContext(Dispatchers.IO) {
+            val result = try {
+                val password = AHUCache.getWisdomPassword()!!
+                val encryptedPassword = RSA.encryptByPublicKey(password.toByteArray(Charsets.UTF_8))
+                val response = AHUService.API.login(
+                    AHUCache.getCurrentUser()!!.name,
+                    encryptedPassword,
+                    User.UserType.AHU_Wisdom
+                )
+                if (!response.isSuccessful) {
+                    Result.failure(Throwable(response.msg))
+                } else {
+                    Result.success(response.data)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Result.failure(e)
+            }
+            retryLoginResult.postValue(result)
+        }
+    }
 
     /**
      * App 更新

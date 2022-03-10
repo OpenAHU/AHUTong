@@ -3,6 +3,7 @@ package com.ahu.ahutong;
 import android.content.pm.PackageManager;
 
 import com.ahu.ahutong.common.ObservableData;
+import com.ahu.ahutong.common.SingleLiveEvent;
 import com.ahu.ahutong.data.model.User;
 import com.ahu.plugin.BathPlug;
 import com.ahu.plugin.BathPlugImpl;
@@ -25,6 +26,7 @@ import arch.sink.BaseApplication;
 public class AHUApplication extends BaseApplication {
     // 初始默认值为 AHU_Wisdom
     public static ObservableData<User.UserType> loginType = new ObservableData<>(User.UserType.AHU_Wisdom);
+    public static SingleLiveEvent<Boolean> retryLogin = new SingleLiveEvent<>();
 
     @Override
     public void onCreate() {

@@ -1,6 +1,8 @@
 package com.ahu.ahutong.common;
 
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.MainThread;
@@ -16,6 +18,8 @@ public class SingleLiveEvent<T> extends MutableLiveData<T> {
     private static final String TAG = "SingleLiveEvent";
 
     private final AtomicBoolean mPending = new AtomicBoolean(false);
+
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     @MainThread
     public void observe(LifecycleOwner owner, final Observer<? super T> observer) {
@@ -54,5 +58,14 @@ public class SingleLiveEvent<T> extends MutableLiveData<T> {
     @MainThread
     public void call() {
         setValue(null);
+    }
+
+    @Override
+    public void postValue(T value) {
+        handler.post(() -> setValue(value));
+    }
+
+    public void callFromOtherThread() {
+        handler.post(this::call);
     }
 }

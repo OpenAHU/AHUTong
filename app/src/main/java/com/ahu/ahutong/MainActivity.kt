@@ -10,6 +10,7 @@ import android.os.Looper
 import android.util.Log
 import android.webkit.WebView
 import android.widget.Toast
+import androidx.navigation.findNavController
 import arch.sink.ui.BarConfig
 import arch.sink.ui.page.BaseActivity
 import arch.sink.ui.page.DataBindingConfig
@@ -94,7 +95,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 Toast.makeText(this, "检查更新失败：${it.message}", Toast.LENGTH_SHORT).show()
             }
         }
-
         // 创建ProgressDialog
         val progressDialog = buildProgressDialog("正在切换本地数据源中！");
         AHUApplication.loginType.addObserver {
@@ -104,14 +104,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     val username = AHUCache.getCurrentUser()?.name
                     val password = AHUCache.getWisdomPassword()
                     if (username == null || password.isNullOrBlank()) {
-                        buildDialog("温馨提示", "登录状态过期，请重新登录！", "确定", { _, _ ->
-                            mState.logout()
-                        }).show()
                         return@post
                     }
                     // 打出提示
                     progressDialog.create()
-
                     // 启动登录
                     loginer.login(ReptileUser(username, password)) { status, e ->
                         // 更新实时登录状态
@@ -137,9 +133,38 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         }
                     }
                 }
-
             }
 
+        }
+
+        val loginDialog = buildProgressDialog("正在登录...");
+        AHUApplication.retryLogin.observe(this) {
+            handler.post {
+                buildDialog("温馨提示",
+                    "登录状态过期，如果您未修改密码请点击重新验证，如果密码已经被修改，请点击前往登录。",
+                    "重新验证", { _, _ ->
+                        mState.retryLogin()
+                        loginDialog.create()
+                    },
+                    "前往登录", { _, _ ->
+                        findNavController(R.id.fragment_container)
+                            .navigate(R.id.action_home_fragment_to_login_fragment)
+                        mState.logout()
+                    }
+                ).show()
+            }
+        }
+
+        mState.retryLoginResult.observe(this) {
+            it.onSuccess {
+                Toast.makeText(this, "重新登录成功！", Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                Toast.makeText(this, "重新登录失败：${it.message}", Toast.LENGTH_SHORT).show()
+                findNavController(R.id.fragment_container)
+                    .navigate(R.id.action_home_fragment_to_login_fragment)
+                mState.logout()
+            }
+            loginDialog.dismiss()
         }
     }
 

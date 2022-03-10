@@ -47,7 +47,7 @@ class LoginViewModel : ViewModel() {
                 } else {
                     throw Throwable("登录认证失败，请查看密码是否正确。")
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Result.failure(e)
             }
             serverLoginResult.value = result

@@ -17,14 +17,20 @@ public class ServerErrorInterceptor implements Interceptor {
     @NonNull
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
-        Response response = chain.proceed(chain.request());
-        Log.e("ServerErrorInterceptor", response.toString());
+        Response response;
+        try {
+            response = chain.proceed(chain.request());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Response.Builder()
+                    .code(500)
+                    .message("请求超时，服务器或网络异常，请稍后再试！")
+                    .build();
+        }
         if (response.code() == 400) {
             // token 过期
-            AHUCache.INSTANCE.clearCurrentUser();
-            AHUCache.INSTANCE.saveWisdomPassword("");
-        }
-        if (!response.isSuccessful()) {
+            AHUApplication.retryLogin.callFromOtherThread();
+        } else if (!response.isSuccessful()) {
             // 后端服务异常, 切换本地服务
             AHUApplication.loginType.setValue(User.UserType.AHU_LOCAL);
         }

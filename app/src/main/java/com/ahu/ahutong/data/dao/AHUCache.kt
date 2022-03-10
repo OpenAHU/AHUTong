@@ -252,5 +252,10 @@ object AHUCache {
         return null
     }
 
+    fun logout() {
+        clearCurrentUser()
+        saveWisdomPassword("")
+    }
+
 
 }
