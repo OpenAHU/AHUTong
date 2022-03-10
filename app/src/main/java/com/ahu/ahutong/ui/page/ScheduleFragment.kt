@@ -12,7 +12,9 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentScheduleBinding
+import com.ahu.ahutong.ui.dialog.SelectTimeDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 
@@ -21,7 +23,7 @@ import com.ahu.ahutong.ui.page.state.ScheduleViewModel
  * @Date 2021/7/27-19:14
  * @Email 468766131@qq.com
  */
-class ScheduleFragment : BaseFragment<FragmentScheduleBinding>() {
+class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SelectTimeDialog.CallBack {
     private lateinit var mState: ScheduleViewModel
     private lateinit var gState: MainViewModel
 
@@ -41,6 +43,11 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>() {
             it.onFailure {
                 Toast.makeText(requireContext(), "获取课表失败，${it.message}", Toast.LENGTH_SHORT).show()
             }
+        }
+        mState.showSelectTimeDialog.observe(this) {
+            val settingTimeDialog = SelectTimeDialog()
+            settingTimeDialog.setCallBack(this)
+            settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
         }
     }
 
@@ -78,6 +85,14 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>() {
             })
         }
         mState.refreshSchedule()
+    }
+
+    override fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int) {
+        mState.saveTime(schoolYear, schoolTerm, week)
+        //刷新
+        if (AHUCache.isLogin()) {
+            mState.refreshSchedule(schoolYear, schoolTerm)
+        }
     }
 
     override fun onResume() {

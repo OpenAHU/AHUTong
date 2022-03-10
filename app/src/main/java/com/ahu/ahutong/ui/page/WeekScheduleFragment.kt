@@ -32,7 +32,6 @@ import java.util.*
  * @Email: 468766131@qq.com
  */
 class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBinding>(),
-    SelectTimeDialog.CallBack,
     SelectScheduleDialog.SettingCallback {
     constructor() : this(1)
 
@@ -86,11 +85,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
             dataBinding.refreshLayout.isRefreshing = false
         }
 
-        pState.showSelectTimeDialog.observe(this) {
-            val settingTimeDialog = SelectTimeDialog()
-            settingTimeDialog.setCallBack(this)
-            settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
-        }
+
     }
 
 
@@ -178,14 +173,6 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
         return nestedScrollView
     }
 
-    override fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int) {
-        pState.saveTime(schoolYear, schoolTerm, week)
-        //刷新
-        if (AHUCache.isLogin()) {
-            pState.refreshSchedule(schoolYear, schoolTerm)
-            dataBinding.refreshLayout.isRefreshing = true
-        }
-    }
 
 
     // 以下是兔子Dialog的实现
@@ -198,7 +185,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
 
     override fun setStartTime() {
         val settingTimeDialog = SelectTimeDialog()
-        settingTimeDialog.setCallBack(this)
+        settingTimeDialog.setCallBack(requireParentFragment() as ScheduleFragment)
         settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
     }
 
