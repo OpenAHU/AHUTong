@@ -3,6 +3,7 @@ package com.ahu.ahutong.ui.dialog
 import android.app.Dialog
 import android.view.LayoutInflater
 import android.view.View
+import androidx.fragment.app.FragmentManager
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.User
@@ -21,6 +22,7 @@ import java.util.*
 class SelectTimeDialog : BottomDialog(), View.OnClickListener {
     private var callback: CallBack? = null
     private lateinit var binding: DialogTimeBinding
+    var isShowing = false
 
     companion object {
         private val schoolYears by lazy {
@@ -62,6 +64,16 @@ class SelectTimeDialog : BottomDialog(), View.OnClickListener {
                 week, 0, false
             )
         }
+    }
+
+    override fun show(manager: FragmentManager, tag: String?) {
+        super.show(manager, tag)
+        isShowing = true
+    }
+
+    override fun dismiss() {
+        super.dismiss()
+        isShowing = false
     }
 
     fun setCallBack(callback: CallBack) {

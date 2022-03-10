@@ -44,12 +44,13 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SelectTimeDial
                 Toast.makeText(requireContext(), "获取课表失败，${it.message}", Toast.LENGTH_SHORT).show()
             }
         }
-
+        val settingTimeDialog = SelectTimeDialog()
+        settingTimeDialog.setCallBack(this)
         // 显示选当前时间的Dialog
         mState.showSelectTimeDialog.observe(this) {
-            val settingTimeDialog = SelectTimeDialog()
-            settingTimeDialog.setCallBack(this)
-            settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
+            if (!settingTimeDialog.isShowing) {
+                settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
+            }
         }
     }
 
