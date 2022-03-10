@@ -184,9 +184,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
     }
 
     override fun setStartTime() {
-        val settingTimeDialog = SelectTimeDialog()
-        settingTimeDialog.setCallBack(requireParentFragment() as ScheduleFragment)
-        settingTimeDialog.show(parentFragmentManager, "SettingTimeDialog")
+        pState.showSelectTimeDialog.call()
     }
 
     override fun inputSchedule() {
