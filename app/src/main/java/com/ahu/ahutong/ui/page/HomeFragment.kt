@@ -26,7 +26,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private val discoveryFragment = DiscoveryFragment()
     private val mineFragment = MineFragment()
     private var currentFragment: Fragment = scheduleFragment
-    private lateinit var preFragment: Fragment
 
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(HomeViewModel::class.java)
@@ -65,10 +64,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     override fun onResume() {
         super.onResume()
-        if (::preFragment.isInitialized && preFragment != currentFragment) {
-            currentFragment.onResume()
-            preFragment = currentFragment
-        }
+        currentFragment.onResume()
     }
 
     inner class ActionProxy {
