@@ -11,7 +11,10 @@ import com.ahu.ahutong.data.model.User;
 import java.io.IOException;
 
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
+import okhttp3.Protocol;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class ServerErrorInterceptor implements Interceptor {
     @NonNull
@@ -25,6 +28,9 @@ public class ServerErrorInterceptor implements Interceptor {
             return new Response.Builder()
                     .code(500)
                     .message("请求超时，服务器或网络异常，请稍后再试！")
+                    .request(chain.request())
+                    .protocol(Protocol.HTTP_1_1)
+                    .body(ResponseBody.create("{}", MediaType.parse("application/json")))
                     .build();
         }
         if (response.code() == 400) {
