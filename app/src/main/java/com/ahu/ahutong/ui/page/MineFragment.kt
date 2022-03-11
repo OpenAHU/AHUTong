@@ -1,9 +1,12 @@
 package com.ahu.ahutong.ui.page
 
 import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.Toast
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
@@ -14,6 +17,9 @@ import com.ahu.ahutong.databinding.FragmentMineBinding
 import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.MineViewModel
+import java.io.File
+import java.net.URI
+import java.net.URL
 
 
 /**
@@ -39,7 +45,9 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dataBinding.refreshLayout.setOnRefreshListener  { dataBinding.refreshLayout.isRefreshing = false; }
+        dataBinding.refreshLayout.setOnRefreshListener {
+            dataBinding.refreshLayout.isRefreshing = false;
+        }
     }
 
     override fun onResume() {
@@ -64,27 +72,30 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
             }
         }
 
-        fun recommend() {
+        fun business() {
+            nav().navigate(R.id.action_home_fragment_to_business_fragment)
+        }
+
+        fun recommend(view: View) {
+            //调用android系统的分享窗口
             val intent = Intent()
             intent.action = Intent.ACTION_SEND
-            intent.putExtra(
-                Intent.EXTRA_TEXT,
-                "我正在使用安大通App，快来一起用吧，https://www.coolapk.com/apk/com.ahu.ahutong"
-            )
-            intent.type = "text/plain"
+            intent.type = "*/*"
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(view.context.packageResourcePath))
             startActivity(intent)
         }
 
         //login or logout
         fun login(view: View) {
             if (AHUCache.isLogin()) {
-                buildDialog("提示",
+                buildDialog(
+                    "提示",
                     "是否退出登录，点击确定您的登录状态将被删除！",
                     "确定", { _, _ ->
                         activityState.logout()
                         mState.isLogin.value = false
                     },
-                "取消"
+                    "取消"
                 ).show()
 
             } else {
@@ -104,5 +115,5 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
 
 
     }
-
 }
+

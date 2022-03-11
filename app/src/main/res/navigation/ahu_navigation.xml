@@ -16,6 +16,9 @@
             android:id="@+id/action_home_fragment_to_login_fragment"
             app:destination="@id/login_fragment"
             app:enterAnim="@anim/nav_default_enter_anim" />
+        <action
+            android:id="@+id/action_home_fragment_to_business_fragment"
+            app:destination="@id/business_fragment" />
     </fragment>
 
     <fragment
@@ -28,6 +31,10 @@
         android:name="com.ahu.ahutong.ui.page.DeveloperFragment"
         tools:layout="@layout/fragment_developer" />
     <fragment
+        android:id="@+id/business_fragment"
+        android:name="com.ahu.ahutong.ui.page.BusinessFragment"
+        tools:layout="@layout/fragment_business" />
+    <fragment
         android:id="@+id/login_fragment"
         android:name="com.ahu.ahutong.ui.page.LoginFragment"
         tools:layout="@layout/fragment_login" />
@@ -39,10 +46,10 @@
         android:id="@+id/classroom_fragment"
         android:name="com.ahu.ahutong.ui.page.ClassRoomFragment"
         tools:layout="@layout/fragment_classroom" />
-    <fragment
-        android:id="@+id/bathroom_fragment"
-        android:name="com.ahu.ahutong.ui.page.BathRoomFragment"
-        tools:layout="@layout/fragment_bathroom" />
+<!--    <fragment-->
+<!--        android:id="@+id/bathroom_fragment"-->
+<!--        android:name="com.ahu.ahutong.ui.page.BathRoomFragment"-->
+<!--        tools:layout="@layout/fragment_bathroom" />-->
     <fragment
         android:id="@+id/teldirectory_fragment"
         android:name="com.ahu.ahutong.ui.page.TelDirectoryFragment"

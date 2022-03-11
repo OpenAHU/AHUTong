@@ -20,7 +20,7 @@ class MoreViewModel : ViewModel() {
     }
     val life by lazy {
         listOf(
-            Tool("浴室开放", R.mipmap.bathroom, R.id.bathroom_fragment),
+            //Tool("浴室开放", R.mipmap.bathroom, R.id.bathroom_fragment),
             Tool("电话簿", R.mipmap.telephone_directory, R.id.teldirectory_fragment),
             Tool("垃圾分类", R.mipmap.rubbish, R.id.developer_fragment),
             Tool("校园生活",R.mipmap.school_life,R.id.developer_fragment),
