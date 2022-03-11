@@ -73,12 +73,10 @@ public class WidgetListService extends RemoteViewsService {
             String term = AHUCache.INSTANCE.getSchoolTerm();
 
             if (year == null || term == null) {
-                Toast.makeText(context, "请填写当前时间后再试", Toast.LENGTH_SHORT).show();
                 return;
             }
             String time = AHUCache.INSTANCE.getSchoolTermStartTime(year, term);
             if (time == null) {
-                Toast.makeText(context, "请填写当前时间后再试", Toast.LENGTH_SHORT).show();
                 return;
             }
             List<Course> courses = AHUCache.INSTANCE.getSchedule(year, term);
