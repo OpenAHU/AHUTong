@@ -69,7 +69,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     private fun observeData() {
-        // 检查更新
+    // 检查更新
         val localVersion = packageManager.getPackageInfo(packageName, 0).versionName
         mState.latestVersions.observe(this) {
             it.onSuccess {

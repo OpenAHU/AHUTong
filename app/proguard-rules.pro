@@ -76,29 +76,11 @@
 
 -printmapping map.txt
 
--assumenosideeffects class com.sink.library.log.SinkLog {
-    public *** v(...);
-    public *** i(...);
-    public *** d(...);
-    public *** w(...);
-    public *** e(...);
-    public *** it(...);
-    public *** vt(...);
-    public *** dt(...);
-    public *** wt(...);
-    public *** et(...);
-    public *** log(...);
-}
  #使用GSON、fastjson等框架时，所写的JSON对象类不混淆，否则无法将JSON解析成对应的对象
 -keepclassmembers class * {
     public <init>(org.json.JSONObject);
 }
--assumenosideeffects class com.sink.library.log.SinkLogManager{
-    public *** init(...);
-    public *** addLogPrinter(...);
-    public *** addFloatLogPrinter(...);
 
-}
 -assumenosideeffects class java.io.PrintStream {
       public *** println(...);
       public *** print(...);

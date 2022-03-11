@@ -13,6 +13,7 @@ import com.ahu.ahutong.ui.widget.schedule.bean.SimpleTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -66,10 +67,10 @@ class ScheduleViewModel : ViewModel() {
 
     fun loadConfig() {
         viewModelScope.launch {
-            scheduleConfig.value = async {
+            withContext(Dispatchers.IO) {
                 var time = AHUCache.getSchoolTermStartTime(schoolYear, schoolTerm)
                 if (time == null) {
-                    showSelectTimeDialog.call()
+                    showSelectTimeDialog.callFromOtherThread()
                     time = "2022-2-21"
                 }
                 // 创建课程表配置
@@ -90,7 +91,9 @@ class ScheduleViewModel : ViewModel() {
                 scheduleConfigBean.weekDay =
                     Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK]
                 scheduleConfigBean
-            }.await()
+            }.let {
+                scheduleConfig.postValue(it)
+            }
         }
 
     }

@@ -82,6 +82,7 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
                     "是否退出登录，点击确定您的登录状态将被删除！",
                     "确定", { _, _ ->
                         activityState.logout()
+                        mState.isLogin.value = false
                     },
                 "取消"
                 ).show()
