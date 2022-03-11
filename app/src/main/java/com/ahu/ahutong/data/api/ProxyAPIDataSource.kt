@@ -4,6 +4,7 @@ import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.model.*
+import retrofit2.HttpException
 
 class ProxyAPIDataSource(private val apiDataSource: APIDataSource) : BaseDataSource {
 
@@ -59,10 +60,16 @@ class ProxyAPIDataSource(private val apiDataSource: APIDataSource) : BaseDataSou
     }
 
     private fun <T> failureHandle(e: Exception): AHUResponse<T> {
-        e.printStackTrace()
-        AHUApplication.loginType.setValue(User.UserType.AHU_LOCAL)
         val ahuResponse = AHUResponse<T>()
-        ahuResponse.msg = "服务器或网络异常，请切换本地数据源！"
+        if (e is HttpException && e.code() == 400) {
+            // token 过期
+            AHUApplication.retryLogin.callFromOtherThread()
+            ahuResponse.msg = "登录状态过期！"
+        }else{
+            AHUApplication.loginType.setValue(User.UserType.AHU_LOCAL)
+            ahuResponse.msg = "服务器或网络异常，请切换本地数据源！"
+        }
+        e.printStackTrace()
         ahuResponse.code = -1
         return ahuResponse
     }

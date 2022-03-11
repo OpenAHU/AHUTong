@@ -1,11 +1,9 @@
 package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
@@ -13,7 +11,6 @@ import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentHomeBinding
 import com.ahu.ahutong.ui.page.state.HomeViewModel
-import com.sink.library.log.SinkLog
 
 /**
  * @Author SinkDev
@@ -76,11 +73,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 else -> -1
             }
             if (pos == -1) {
-                SinkLog.e("选中的ItemId不存在！")
                 return false
             }
             if (dataBinding.homeViewPager2.currentItem == pos) {
-                SinkLog.i("已在当前界面！")
                 return false
             }
             dataBinding.homeViewPager2.setCurrentItem(pos, false)

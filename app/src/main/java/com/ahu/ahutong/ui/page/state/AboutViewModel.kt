@@ -1,10 +1,8 @@
 package com.ahu.ahutong.ui.page.state
 
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
+
 import androidx.lifecycle.ViewModel
 import arch.sink.utils.Utils
-import com.sink.library.update.CookApkUpdate
 
 /**
  * @Author: SinkDev

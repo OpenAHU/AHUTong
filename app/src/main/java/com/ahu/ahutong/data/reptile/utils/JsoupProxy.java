@@ -1,16 +1,6 @@
 package com.ahu.ahutong.data.reptile.utils;
 
-import android.util.Log;
-
-import com.ahu.ahutong.data.reptile.ReptileManager;
-import com.sink.library.log.SinkLog;
-
 import org.jsoup.Connection;
-import org.jsoup.helper.HttpConnection;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 

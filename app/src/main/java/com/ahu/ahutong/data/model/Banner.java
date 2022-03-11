@@ -1,7 +1,6 @@
 package com.ahu.ahutong.data.model;
 
 import com.google.gson.annotations.SerializedName;
-import com.sink.library.log.SinkLog;
 
 import java.net.MalformedURLException;
 import java.net.URL;

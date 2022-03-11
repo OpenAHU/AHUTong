@@ -9,7 +9,6 @@ import com.ahu.ahutong.data.model.Banner
 import com.ahu.ahutong.databinding.ItemDiscoveryBannerBinding
 import com.ahu.ahutong.ui.adapter.base.BaseViewHolder
 import com.ahu.ahutong.ui.widget.banner.BannerView
-import com.sink.library.log.SinkLog
 
 class BannerItemHolder(val binding: ItemDiscoveryBannerBinding) :
     BaseViewHolder<ItemDiscoveryBannerBinding, List<Banner>>(binding) {
@@ -34,7 +33,7 @@ class BannerItemHolder(val binding: ItemDiscoveryBannerBinding) :
                         i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                         it.context.startActivity(i1)
                     } catch (e: Exception) {
-                        SinkLog.e(e)
+                        e.printStackTrace()
                     }
                 }
                 return imageView

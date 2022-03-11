@@ -3,11 +3,6 @@ package com.ahu.ahutong.data.api
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.model.*
-import com.ahu.ahutong.ext.isCampus
-import com.ahu.ahutong.ext.isEmptyRoomTime
-import com.ahu.ahutong.ext.isWeekday
-import com.sink.library.log.SinkLog
-import java.lang.IllegalArgumentException
 
 /**
  * @Author: SinkDev

@@ -86,7 +86,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             val intent = Intent(Intent.ACTION_VIEW)
                             intent.data = Uri.parse(it.data.url)
                         }, "取消"
-                    ).show()
+                    ).setCancelable(false).show()
                     return@onSuccess
 
                 }
@@ -129,7 +129,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                                     AHUApplication.loginType.setValue(User.UserType.AHU_LOCAL)
                                 }, "重新登录", { _, _ ->
                                     mState.logout()
-                                }).show()
+                                }).setCancelable(false).show()
                         }
                     }
                 }
@@ -151,7 +151,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             .navigate(R.id.action_home_fragment_to_login_fragment)
                         mState.logout()
                     }
-                ).show()
+                ).setCancelable(false).show()
             }
         }
 

@@ -1,7 +1,6 @@
 rootProject.name = "AHUTong"
 include ':app'
 include ':arch'
-include ':library'
 include ':simonlibrary'
 include ':plugin'
 include ':webview_reptile'

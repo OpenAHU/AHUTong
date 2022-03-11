@@ -12,7 +12,6 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ext.dp
 import com.ahu.ahutong.ui.widget.schedule.bean.*
-import com.sink.library.log.SinkLog
 import java.util.*
 
 /**
@@ -339,7 +338,6 @@ class ScheduleView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, d
      * @return ScheduleView
      */
     fun showAllCourse(isShowAllCourses: Boolean): ScheduleView {
-        SinkLog.i("set show all courses is $isShowAllCourses")
         this.isShowAllCourses = isShowAllCourses
         return this
     }

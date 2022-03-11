@@ -11,9 +11,7 @@ import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Banner
 import com.ahu.ahutong.data.model.Course
-import com.ahu.ahutong.data.model.Tool
 import com.ahu.ahutong.ui.adapter.DiscoveryAdapter
-import com.sink.library.log.SinkLog
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -50,10 +48,8 @@ class DiscoveryViewModel : ViewModel() {
         viewModelScope.launch {
             AHURepository.getBanner()
                 .onSuccess {
-                    SinkLog.it("BannerLog", it)
                     bannerData.value = it
                 }.onFailure {
-                    SinkLog.et("BannerLog", it)
                 }
         }
     }

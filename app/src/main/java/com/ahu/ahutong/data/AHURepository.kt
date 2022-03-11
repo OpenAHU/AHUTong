@@ -19,7 +19,6 @@ import com.ahu.ahutong.ext.isWeekday
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
-import com.sink.library.log.SinkLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -105,11 +104,9 @@ object AHURepository {
      */
     suspend fun getSchedule(schoolYear: String, schoolTerm: String, isRefresh: Boolean = false) =
         withContext(Dispatchers.IO) {
-            SinkLog.i("check argument start")
             if (!schoolTerm.isTerm()) {
                 throw IllegalArgumentException("schoolTerm must be 1 or 2")
             }
-            SinkLog.i("start get Schedule")
 
             // 本地优先
             if (!isRefresh) {
@@ -150,17 +147,14 @@ object AHURepository {
         checkRoomArgs(campus, weekday, time)
         return withContext(Dispatchers.IO) {
             try {
-                SinkLog.i("start get emptyRoom")
                 val response = dataSource.getEmptyRoom(campus, weekday, weekNum, time)
                 if (response.isSuccessful) {
-                    SinkLog.i("get emptyRoom success")
                     Result.success(response.data)
                 } else {
-                    SinkLog.e(response)
                     Result.failure(Throwable(response.msg))
                 }
             } catch (e: Exception) {
-                SinkLog.e(e)
+                e.printStackTrace()
                 Result.failure(e)
             }
         }
@@ -180,10 +174,8 @@ object AHURepository {
             }
         }
         try {
-            SinkLog.i("Get grade start")
             val response = dataSource.getGrade()
             if (response.isSuccessful) {
-                SinkLog.i("Get grade success")
                 //保存数据
                 AHUCache.saveGrade(response.data)
                 Result.success(response.data)
@@ -206,7 +198,6 @@ object AHURepository {
      */
     suspend fun getExamInfo(schoolYear: String, schoolTerm: String, isRefresh: Boolean = false) =
         withContext(Dispatchers.IO) {
-            SinkLog.i("check argument start")
             if (!schoolTerm.isTerm()) {
                 throw IllegalArgumentException("schoolTerm must be 1 or 2")
             }
@@ -218,19 +209,15 @@ object AHURepository {
             }
             //从网络上获取数据
             try {
-                SinkLog.i("Get exam info start")
                 val response = dataSource.getExamInfo(schoolYear, schoolTerm)
                 if (response.isSuccessful) {
-                    SinkLog.i("Get exam info success")
                     //保存数据
                     AHUCache.saveExamInfo(response.data)
                     Result.success(response.data)
                 } else {
-                    SinkLog.e("Get exam info fail, $response")
                     Result.failure(Throwable(response.msg))
                 }
             } catch (e: Exception) {
-                SinkLog.e("Get exam info fail, $e")
                 Result.failure(e)
             }
         }
@@ -280,7 +267,6 @@ object AHURepository {
      */
     private fun checkRoomArgs(campus: String, weekday: String, time: String) {
 
-        SinkLog.i("check argument start $time")
         if (!campus.isCampus()) {
             throw IllegalArgumentException("campus must be 1 or 2")
         }

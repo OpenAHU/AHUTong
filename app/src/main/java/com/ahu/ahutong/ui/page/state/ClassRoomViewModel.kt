@@ -7,7 +7,6 @@ import arch.sink.utils.TimeUtils
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Room
-import com.sink.library.log.SinkLog
 import kotlinx.coroutines.launch
 import okio.Sink
 import java.text.SimpleDateFormat

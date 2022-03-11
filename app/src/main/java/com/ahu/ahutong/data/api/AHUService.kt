@@ -1,13 +1,10 @@
 package com.ahu.ahutong.data.api
 
 import arch.sink.utils.Utils
-import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.AHUResponse
-import com.ahu.ahutong.data.api.interceptor.ServerErrorInterceptor
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.utils.SinkCookieJar
-import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import okhttp3.Cache
@@ -132,7 +129,6 @@ interface AHUService {
                 .cache(Cache(File(Utils.getApp().cacheDir, "app_cache"), Long.MAX_VALUE))
                 .retryOnConnectionFailure(true)
                 .cookieJar(cookieJar)   //设置CookieJar
-                .addInterceptor(ServerErrorInterceptor())  // 后端状态检测拦截器
             //debug
             if (BuildConfig.DEBUG) {
                 client.addInterceptor(logger)

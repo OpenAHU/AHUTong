@@ -10,17 +10,14 @@ import com.ahu.ahutong.data.reptile.utils.timeMap
 import com.ahu.ahutong.data.reptile.utils.weekdayMap
 import com.ahu.ahutong.ext.createFailureResponse
 import com.ahu.ahutong.ext.createSuccessResponse
-import com.google.gson.JsonParseException
 import com.google.gson.JsonParser
 import com.google.gson.JsonSyntaxException
 import com.google.gson.stream.MalformedJsonException
-import com.sink.library.log.SinkLog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Connection
 import org.jsoup.HttpStatusException
-import org.jsoup.Jsoup
 import java.math.RoundingMode
 import java.net.ConnectException
 import java.net.SocketTimeoutException
@@ -63,10 +60,10 @@ object WebViewReptile {
                 throw e
             }
             if (e is MalformedJsonException || e is JsonSyntaxException) {
-                return@withContext createFailureResponse("登录中或刷新过于频繁，如果使用的校园网请切换其他网络！")
+                return@withContext createFailureResponse("刷新过于频繁，如果使用的校园网请切换其他网络！")
             }
             e.printStackTrace()
-            return@withContext createFailureResponse(e.message ?: "未知异常，请尝试重新登录或联系开发者（高玉灿）！")
+            return@withContext createFailureResponse("刷新过于频繁，如果使用的校园网请切换其他网络！")
         }
     }
 
