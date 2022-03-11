@@ -114,7 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="@{`Copyright (c) 2021-2021 安大通.`}"
+            android:text="@{`Copyright (c) 2021-2022 安大通.`}"
             android:textAppearance="?android:textAppearanceSmall"
             tools:text="Copyright (c) 2021-2021 安大通." />
 
