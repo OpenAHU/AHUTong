@@ -26,7 +26,7 @@ interface BaseDataSource {
      * @return AHUResponse<List<Exam>>
      */
 
-    suspend fun getExamInfo(schoolYear: String,schoolTerm: String): AHUResponse<List<Exam>>
+    suspend fun getExamInfo(schoolYear: String, schoolTerm: String): AHUResponse<List<Exam>>
 
     /**
      * 获取空教室API
@@ -37,14 +37,16 @@ interface BaseDataSource {
      * @return AHUResponse<List<Room>>
      */
 
-    suspend fun getEmptyRoom(campus: String, weekday: String, weekNum: String, time: String): AHUResponse<List<Room>>
+    suspend fun getEmptyRoom(
+        campus: String,
+        weekday: String,
+        weekNum: String,
+        time: String
+    ): AHUResponse<List<Room>>
 
 
     suspend fun getGrade(): AHUResponse<Grade>
 
-    suspend fun getBanner(): AHUResponse<List<Banner>> {
-        return AHUService.API.getBanner()
-    }
 
     suspend fun getCardMoney(): AHUResponse<Card>
 }

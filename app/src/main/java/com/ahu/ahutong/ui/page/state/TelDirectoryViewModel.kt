@@ -13,7 +13,7 @@ class TelDirectoryViewModel : ViewModel() {
     companion object{
         val TelBook by lazy {
             mapOf(
-                "常用" to listOf<Tel>(
+                "常用" to listOf(
                     Tel("网络服务中心", "0551-63861118"),
                     Tel("一卡通办公室", "0551-63861077"),
                     Tel("报警电话", "0551-63861110"),
@@ -25,14 +25,14 @@ class TelDirectoryViewModel : ViewModel() {
                     Tel("大学生勤俭中心", "0551-63861181"),
                     Tel("图书馆", "0551-63861109")
                 ),
-                "教务处" to listOf<Tel>(
+                "教务处" to listOf(
                     Tel("综合办公室", "0551-63861055"),
                     Tel("考试考务中心", "0551-63861053"),
                     Tel("教学质量科", "0551-63861235"),
                     Tel("教学运行中心", "0551-63861203"),
                     Tel("学籍管理科", "0551-63861202")
                 ),
-                "团委" to listOf<Tel>(
+                "团委" to listOf(
                     Tel("团委办公室", "0551-63861121"),
                     Tel("创服中心", "0551-63861550"),
                     Tel("社团联合员会", "0551-63861182"),

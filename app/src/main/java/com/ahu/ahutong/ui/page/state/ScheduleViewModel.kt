@@ -68,7 +68,6 @@ class ScheduleViewModel : ViewModel() {
         viewModelScope.launch {
             scheduleConfig.value = async {
                 var time = AHUCache.getSchoolTermStartTime(schoolYear, schoolTerm)
-
                 if (time == null) {
                     showSelectTimeDialog.call()
                     time = "2022-2-21"
@@ -83,7 +82,6 @@ class ScheduleViewModel : ViewModel() {
                 //根据开学时间， 获取当前周数
                 val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
                     .parse(time)
-
                 // 开学时间
                 scheduleConfigBean.startTime = date
                 // 当前周数

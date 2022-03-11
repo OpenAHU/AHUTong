@@ -3,7 +3,9 @@ package com.ahu.ahutong.data
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.ahu.ahutong.AHUApplication
+import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.api.APIDataSource
+import com.ahu.ahutong.data.api.ProxyAPIDataSource
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.fake.FakeDataSource
@@ -40,13 +42,12 @@ object AHURepository {
                 dataSource = FakeDataSource()
                 return@addObserver
             }
-
             if (it == User.UserType.AHU_LOCAL) {
                 val user = AHUCache.getCurrentUser()!! // 加!!因为可以保证，已经登录
                 val password = AHUCache.getWisdomPassword()!!
                 dataSource = ReptileDataSource(ReptileUser(user.name, password))
             } else {
-                dataSource = APIDataSource()
+                dataSource = ProxyAPIDataSource(APIDataSource())
             }
         }
     }
@@ -253,7 +254,7 @@ object AHURepository {
 
     suspend fun getBanner() = withContext(Dispatchers.IO) {
         try {
-            val response = dataSource.getBanner()
+            val response = AHUService.API.getBanner()
             if (response.isSuccessful) {
                 val data = response.data.filter { it.isLegal }
                 AHUCache.saveBanner(data)
