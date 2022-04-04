@@ -60,6 +60,7 @@ public class ClassWidget extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.widget_date, DateUtils.getWeek());
         return remoteViews;
     }
+
     /**
      * 刷新时调用，添加时不会调用
      *
@@ -74,5 +75,20 @@ public class ClassWidget extends AppWidgetProvider {
         }
         appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
         super.onUpdate(context, appWidgetManager, appWidgetIds);
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if ("miui.appwidget.action.APPWIDGET_UPDATE".equals(intent.getAction())) {
+            int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+            // 根据应用自身逻辑更新视图
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            for (int appWidgetId : appWidgetIds) {
+                appWidgetManager.updateAppWidget(appWidgetId, update(context));
+            }
+            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
+        } else {
+            super.onReceive(context, intent);
+        }
     }
 }

@@ -1,12 +1,11 @@
 package com.ahu.ahutong.ui.page
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
-import android.content.pm.PackageInfo
-import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.Toast
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
@@ -17,9 +16,8 @@ import com.ahu.ahutong.databinding.FragmentMineBinding
 import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.MineViewModel
-import java.io.File
-import java.net.URI
-import java.net.URL
+import com.ahu.ahutong.widget.ClassWidget
+import com.ahu.ahutong.widget.WidgetDialog
 
 
 /**
@@ -47,6 +45,14 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.refreshLayout.setOnRefreshListener {
             dataBinding.refreshLayout.isRefreshing = false;
+        }
+        //判断用户是否添加了桌面小部件
+        val componentName = ComponentName(requireContext(),  ClassWidget::class.java)
+        val appWidgetIds: IntArray =
+            AppWidgetManager.getInstance(requireContext().applicationContext)
+                .getAppWidgetIds(componentName)
+        if (appWidgetIds.isEmpty()) {
+            WidgetDialog.showDialog(context)
         }
     }
 
@@ -113,7 +119,7 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
             nav().navigate(R.id.setting_fragment)
         }
 
-
     }
+
 }
 
