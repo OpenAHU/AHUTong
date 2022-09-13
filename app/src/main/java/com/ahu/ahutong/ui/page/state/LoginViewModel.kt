@@ -8,11 +8,14 @@ import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.utils.RSA
+import com.tencent.bugly.crashreport.CrashReport
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.Exception
+import java.lang.IllegalArgumentException
+import java.net.SocketTimeoutException
 
 /**
  * @Author: SinkDev
@@ -22,7 +25,7 @@ import java.lang.Exception
 class LoginViewModel : ViewModel() {
     val serverLoginResult = MutableLiveData<Result<User>>()
 
-    fun loginWithServer(username: String, teachPassword: String, wisdomPassword: String) =
+    fun loginWithServer(username: String, wisdomPassword: String) =
         viewModelScope.launch {
             val user = User()
             user.name = username
@@ -33,24 +36,19 @@ class LoginViewModel : ViewModel() {
                         RSA.encryptByPublicKey(wisdomPassword.toByteArray(Charsets.UTF_8))
                     AHUService.API.login(username, encryptedPassword, User.UserType.AHU_Wisdom)
                 }
-                // 教务登录
-                val teachResponse = withContext(Dispatchers.IO) {
-                    val encryptedPassword =
-                        RSA.encryptByPublicKey(teachPassword.toByteArray(Charsets.UTF_8))
-                    AHUService.API.login(username, encryptedPassword, User.UserType.AHU_Teach)
-                }
                 // 登录必须全部成功
-                if (wisdomResponse.isSuccessful && teachResponse.isSuccessful) {
+                if (wisdomResponse.isSuccessful) {
                     AHUCache.saveCurrentUser(user)
                     // 保存智慧安大密码
                     AHUCache.saveWisdomPassword(wisdomPassword)
                     AHUApplication.loginType.setValue(User.UserType.AHU_Wisdom)
                     Result.success(user)
                 } else {
-                    throw Throwable("登录认证失败，请查看密码是否正确。")
+                    Result.failure(IllegalArgumentException(wisdomResponse.msg))
                 }
             } catch (e: Throwable) {
-                Result.failure(Throwable("网络状态异常，或服务器异常！"))
+                CrashReport.postCatchedException(e) // 上报异常
+                Result.failure(e)
             }
             serverLoginResult.value = result
         }

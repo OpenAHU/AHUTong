@@ -25,7 +25,6 @@ public class AHUApplication extends BaseApplication {
     public void onCreate() {
         super.onCreate();
         CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG);
-
     }
 
     private static final BathPlugImpl bath = new BathPlugImpl();

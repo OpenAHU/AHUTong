@@ -59,13 +59,6 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
             }
         }
 
-        dataBinding.edTeachPassword.setOnFocusChangeListener { _, focus ->
-            if (focus) {
-                dataBinding.emoji.close()
-            } else {
-                dataBinding.emoji.open()
-            }
-        }
 
     }
 
@@ -77,13 +70,12 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
 
         fun login(view: View) {
             val username = dataBinding.edUserId.text.toString()
-            val teachPassword = dataBinding.edTeachPassword.text.toString()
             val wisdomPassword = dataBinding.edWisdomPassword.text.toString()
-            if (username.isEmpty() || teachPassword.isEmpty() || wisdomPassword.isEmpty()) {
+            if (username.isEmpty() || wisdomPassword.isEmpty()) {
                 Toast.makeText(requireContext(), "请不要输入空气哦！", Toast.LENGTH_SHORT).show()
                 return
             }
-            mState.loginWithServer(username, teachPassword, wisdomPassword)
+            mState.loginWithServer(username, wisdomPassword)
 
         }
     }
