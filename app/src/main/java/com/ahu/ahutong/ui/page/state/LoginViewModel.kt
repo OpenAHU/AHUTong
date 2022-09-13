@@ -34,13 +34,13 @@ class LoginViewModel : ViewModel() {
                 val wisdomResponse = withContext(Dispatchers.IO) {
                     val encryptedPassword =
                         RSA.encryptByPublicKey(wisdomPassword.toByteArray(Charsets.UTF_8))
+                    AHUCache.saveWisdomPassword(encryptedPassword)
                     AHUService.API.login(username, encryptedPassword, User.UserType.AHU_Wisdom)
                 }
                 // 登录必须全部成功
                 if (wisdomResponse.isSuccessful) {
                     AHUCache.saveCurrentUser(user)
                     // 保存智慧安大密码
-                    AHUCache.saveWisdomPassword(wisdomPassword)
                     Result.success(user)
                 } else {
                     Result.failure(IllegalArgumentException(wisdomResponse.msg))

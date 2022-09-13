@@ -32,17 +32,14 @@ class MainViewModel : ViewModel() {
 
     val latestVersions: MutableLiveData<Result<AHUResponse<AppVersion>>> = MutableLiveData()
 
-    val localReptileLoginStatus = MutableLiveData(SinkWebViewClient.STATUS_LOGIN_BEFORE)
-
     val retryLoginResult = SingleLiveEvent<Result<User>>()
 
     fun retryLogin() = viewModelScope.launch {
         withContext(Dispatchers.IO) {
             val result = try {
                 val password = AHUCache.getWisdomPassword()!!
-                val encryptedPassword = RSA.encryptByPublicKey(password.toByteArray(Charsets.UTF_8))
                 val response = AHUService.API.login(AHUCache.getCurrentUser()!!.name,
-                        encryptedPassword, User.UserType.AHU_Wisdom)
+                        password, User.UserType.AHU_Wisdom)
                 if (!response.isSuccessful) {
                     Result.failure(Throwable(response.msg))
                 } else {

@@ -27,12 +27,8 @@ class GradeViewModel : ViewModel() {
     companion object {
         val schoolYears by lazy {
             (AHUCache.getCurrentUser()
-                ?: throw IllegalStateException("未登录，无法打开成绩界面！"))
-                .getSchoolYears()
+                ?: throw IllegalStateException("未登录，无法打开成绩界面！")).getSchoolYears()
         }
-        val terms by lazy {
-            val result = mutableMapOf("1" to "0", "2" to "1")
-            result
-        }
+        val terms = mutableMapOf("1" to "0", "2" to "1")
     }
 }
