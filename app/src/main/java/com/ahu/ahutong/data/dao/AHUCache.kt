@@ -252,6 +252,14 @@ object AHUCache {
         return null
     }
 
+    fun isShowWidgetTip(): Boolean {
+        return kv.getBoolean("is_show_widget_dialog", true)
+    }
+
+    fun ignoreWidgetTip() {
+        kv.putBoolean("is_show_widget_dialog", false)
+    }
+
     fun logout() {
         clearCurrentUser()
         saveWisdomPassword("")

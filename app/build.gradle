@@ -18,12 +18,12 @@ android {
 
 
     signingConfigs {
-        debug {
-            storeFile file("./ahu.jks")
-            storePassword "SinkDev"
-            keyAlias "key0"
-            keyPassword "SinkDev"
-        }
+//        debug {
+//            storeFile file("./ahu.jks")
+//            storePassword "SinkDev"
+//            keyAlias "key0"
+//            keyPassword "SinkDev"
+//        }
 
         release {
             storeFile file("./ahu.jks")
