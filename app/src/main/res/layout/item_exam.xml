@@ -23,6 +23,7 @@
                 tools:text="科目：高等数学"
                 android:textSize="15sp"
                 android:textStyle="bold"
+                android:singleLine="true"
                 android:layout_marginTop="15dp"
                 android:textColor="?colorOnPrimary"
                 android:layout_width="match_parent"
