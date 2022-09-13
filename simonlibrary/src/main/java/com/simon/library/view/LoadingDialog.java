@@ -37,7 +37,7 @@ public class LoadingDialog {
         return this;
     }
 
-    public AlertDialog create() {
+    public AlertDialog createAndShow() {
         dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();

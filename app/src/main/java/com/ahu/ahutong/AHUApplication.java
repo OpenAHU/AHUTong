@@ -17,8 +17,6 @@ import arch.sink.BaseApplication;
  * @Email 468766131@qq.com
  */
 public class AHUApplication extends BaseApplication {
-    // 初始默认值为 AHU_Wisdom
-    public static ObservableData<User.UserType> loginType = new ObservableData<>(User.UserType.AHU_Wisdom);
     public static SingleLiveEvent<Boolean> retryLogin = new SingleLiveEvent<>();
 
     @Override
@@ -26,7 +24,6 @@ public class AHUApplication extends BaseApplication {
         super.onCreate();
         CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG);
     }
-
     private static final BathPlugImpl bath = new BathPlugImpl();
 
     /**

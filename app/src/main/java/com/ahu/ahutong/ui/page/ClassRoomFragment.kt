@@ -4,7 +4,6 @@ package com.ahu.ahutong.ui.page
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
@@ -82,7 +81,7 @@ class ClassRoomFragment : BaseFragment<FragmentClassroomBinding>(), ClassRoomDia
 
         fun search() {
             progressDialog = LoadingDialog(context).setMessage("正在加载中...")
-            progressDialog?.create()
+            progressDialog?.createAndShow()
             mState.searchEmptyRoom(mState.campus.value, mState.time.value)
         }
     }

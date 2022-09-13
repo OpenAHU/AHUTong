@@ -13,11 +13,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.*
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.model.User
-import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
 /**
@@ -67,16 +66,17 @@ class SettingFragment : PreferenceFragmentCompat() {
 
         findPreference<Preference>("clear")?.apply {
             setOnPreferenceClickListener {
-                buildDialog(
-                    "提示", "您是否确定要清除应用数据，其中包含您的登录状态、课表等, 且删除后无法恢复。",
-                    "确定", { _, _ ->
+                MaterialAlertDialogBuilder(requireActivity()).apply {
+                    setTitle("提示")
+                    setMessage("您是否确定要清除应用数据，其中包含您的登录状态、课表等, 且删除后无法恢复。")
+                    setPositiveButton("确定") { _, _ ->
                         //清除所有数据
                         activityState.logout()
                         AHUCache.clearAll()
                         Toast.makeText(requireContext(), "已清除所有数据", Toast.LENGTH_SHORT).show()
-                    }, "取消"
-                ).show()
-
+                    }
+                    setNegativeButton("取消", null)
+                }.show()
                 return@setOnPreferenceClickListener true
             }
         }
@@ -89,7 +89,6 @@ class SettingFragment : PreferenceFragmentCompat() {
         savedInstanceState: Bundle?
     ): View {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-
         return LinearLayout(requireContext()).apply {
             layoutParams = ViewGroup.LayoutParams(-1, -1)
             orientation = LinearLayout.VERTICAL

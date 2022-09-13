@@ -152,7 +152,7 @@ public class WidgetListService extends RemoteViewsService {
         public RemoteViews getViewAt(int position) {
             RemoteViews back;
             Object bean = mData.get(position);
-            if (bean instanceof String) {//如果是头，即 上午 下午 晚上
+            if (bean instanceof String) { //如果是头，即 上午 下午 晚上
                 back = new RemoteViews(context.getPackageName(), R.layout.item_widget_head);
                 back.setTextViewText(R.id.widget_head, (String) bean);
             } else if (bean==null||bean instanceof Boolean) {//如果是空闲状态

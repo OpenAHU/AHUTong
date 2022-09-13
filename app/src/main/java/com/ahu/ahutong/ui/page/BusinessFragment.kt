@@ -9,21 +9,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
-import com.ahu.ahutong.Constants
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Developer
 import com.ahu.ahutong.databinding.*
-import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
-import com.ahu.ahutong.ui.page.state.AboutViewModel
 import com.ahu.ahutong.ui.page.state.BusinessViewModel
-import com.ahu.ahutong.ui.page.state.DeveloperViewModel
-import com.ahu.ahutong.ui.page.state.MainViewModel
 import java.lang.Exception
 
-/**
-如果你想知道这个class是干什么的，请看文件的结尾
- */
+
 class BusinessFragment() : BaseFragment<FragmentBusinessBinding>() {
     private lateinit var mState: BusinessViewModel
 
@@ -69,10 +62,4 @@ class BusinessFragment() : BaseFragment<FragmentBusinessBinding>() {
 
         }
     }
-
-
 }
-
-/**
-如果你想知道这个class是干什么的，请看文件的开头
- */

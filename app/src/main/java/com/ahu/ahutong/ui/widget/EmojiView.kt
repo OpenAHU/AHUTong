@@ -19,11 +19,7 @@ class EmojiView(
     defStyleRes: Int = 0
 ): View(context, attrs, defStyleAttr, defStyleRes){
     constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0): this(
-        context,
-        attrs,
-        defStyleAttr,
-        0
-    )
+        context, attrs, defStyleAttr, 0)
     constructor(context: Context, attrs: AttributeSet? = null): this(context, attrs, 0, 0)
     constructor(context: Context): this(context, null, 0, 0)
 

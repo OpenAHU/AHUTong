@@ -16,15 +16,13 @@ import com.ahu.ahutong.BR
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentScheduleWeekBinding
 import com.ahu.ahutong.databinding.ItemPopCourseBinding
-import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.dialog.ChooseOneDialog
 import com.ahu.ahutong.ui.dialog.SelectScheduleDialog
-import com.ahu.ahutong.ui.dialog.SelectTimeDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleCourse
 import com.ahu.ahutong.widget.ClassWidget
-import java.util.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
  * @Author: SinkDev
@@ -63,13 +61,14 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
         }
 
         //课表数据
-        pState.schedule.observe(this) {
-            it.onSuccess {
+        pState.schedule.observe(this) { result ->
+            result.onSuccess {
                 if (it.isEmpty()) {
-                    buildDialog(
-                        "提示",
-                        "当前学期课表数据为空，请查看是否选择了正确的学年学期", "确定"
-                    ).show()
+                    MaterialAlertDialogBuilder(requireActivity()).apply {
+                        setTitle("提示")
+                        setMessage("当前学期课表数据为空，请查看是否选择了正确的学年学期")
+                        setPositiveButton("确定", null)
+                    }.show()
                 }
                 // 课表数据刷新
                 dataBinding.scheduleView
@@ -95,10 +94,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
         dataBinding.scheduleView.setCourseListener { v, scheduleCourse ->
             val popupView = getPopupView(scheduleCourse)
             popupView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-            popupWindow = PopupWindow(
-                v, popupView.measuredWidth,
-                popupView.measuredHeight, true
-            )
+            popupWindow = PopupWindow(v, popupView.measuredWidth, popupView.measuredHeight, true)
             popupWindow.animationStyle = R.style.pop_anim_style
             popupWindow.contentView = popupView
             popupWindow.isTouchable = true
@@ -145,15 +141,15 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
         val li = LinearLayout(context)
         li.orientation = LinearLayout.VERTICAL
         li.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
         )
         //填入课程视图
         for (course in scheduleCourse.courses) {
             val binding = ItemPopCourseBinding.inflate(layoutInflater)
             binding.course = course
             val layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
             )
             layoutParams.bottomMargin = 10
             binding.root.layoutParams = layoutParams
@@ -172,7 +168,6 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
         nestedScrollView.addView(li)
         return nestedScrollView
     }
-
 
 
     // 以下是兔子Dialog的实现

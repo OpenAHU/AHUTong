@@ -6,9 +6,9 @@ import com.ahu.ahutong.BR
 import com.ahu.ahutong.Constants
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentAboutBinding
-import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.AboutViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
  * @Author: SinkDev
@@ -38,7 +38,11 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>() {
         }
 
         fun updateLog() {
-            buildDialog("当前版本更新日志", Constants.UPDATE_LOG, "我知道了").show()
+            MaterialAlertDialogBuilder(requireActivity()).apply {
+                setTitle("当前版本更新日志")
+                setMessage(Constants.UPDATE_LOG)
+                setPositiveButton("我知道了", null)
+            }.show()
         }
     }
 }

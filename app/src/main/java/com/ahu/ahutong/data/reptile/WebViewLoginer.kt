@@ -1,7 +1,6 @@
 package com.ahu.ahutong.data.reptile
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebView
 import com.ahu.ahutong.data.reptile.login.SinkWebViewClient

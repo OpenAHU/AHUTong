@@ -26,8 +26,6 @@ public class User {
     }
 
     public enum UserType {
-        //使用教务系统登录的
-        AHU_Teach("1"),
         //使用智慧安大登录的
         AHU_Wisdom("2"),
         // 爬虫

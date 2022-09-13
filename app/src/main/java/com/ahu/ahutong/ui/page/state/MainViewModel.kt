@@ -41,11 +41,8 @@ class MainViewModel : ViewModel() {
             val result = try {
                 val password = AHUCache.getWisdomPassword()!!
                 val encryptedPassword = RSA.encryptByPublicKey(password.toByteArray(Charsets.UTF_8))
-                val response = AHUService.API.login(
-                    AHUCache.getCurrentUser()!!.name,
-                    encryptedPassword,
-                    User.UserType.AHU_Wisdom
-                )
+                val response = AHUService.API.login(AHUCache.getCurrentUser()!!.name,
+                        encryptedPassword, User.UserType.AHU_Wisdom)
                 if (!response.isSuccessful) {
                     Result.failure(Throwable(response.msg))
                 } else {

@@ -13,11 +13,11 @@ import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentMineBinding
-import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.MineViewModel
 import com.ahu.ahutong.widget.ClassWidget
 import com.ahu.ahutong.widget.WidgetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
 /**
@@ -43,11 +43,9 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dataBinding.refreshLayout.setOnRefreshListener {
-            dataBinding.refreshLayout.isRefreshing = false;
-        }
+
         //判断用户是否添加了桌面小部件
-        val componentName = ComponentName(requireContext(),  ClassWidget::class.java)
+        val componentName = ComponentName(requireContext(), ClassWidget::class.java)
         val appWidgetIds: IntArray =
             AppWidgetManager.getInstance(requireContext().applicationContext)
                 .getAppWidgetIds(componentName)
@@ -94,15 +92,15 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
         //login or logout
         fun login(view: View) {
             if (AHUCache.isLogin()) {
-                buildDialog(
-                    "提示",
-                    "是否退出登录，点击确定您的登录状态将被删除！",
-                    "确定", { _, _ ->
+                MaterialAlertDialogBuilder(requireActivity()).apply {
+                    setTitle("提示")
+                    setMessage("是否退出登录，点击确定您的登录状态将被删除！")
+                    setPositiveButton("确定") { _, _ ->
                         activityState.logout()
                         mState.isLogin.value = false
-                    },
-                    "取消"
-                ).show()
+                    }
+                    setNegativeButton("取消", null)
+                }.show()
 
             } else {
                 nav().navigate(R.id.action_home_fragment_to_login_fragment)

@@ -29,11 +29,11 @@ class ScheduleViewModel : ViewModel() {
     val showSelectTimeDialog = SingleLiveEvent<Boolean>()
 
     val schoolYear: String
-        get() = AHUCache.getSchoolYear() ?: ""
+        get() = AHUCache.getSchoolYear() ?: "2022"
 
 
     val schoolTerm: String
-        get() = AHUCache.getSchoolTerm() ?: ""
+        get() = AHUCache.getSchoolTerm() ?: "1"
 
     val scheduleConfig = MutableLiveData<ScheduleConfigBean>()
 

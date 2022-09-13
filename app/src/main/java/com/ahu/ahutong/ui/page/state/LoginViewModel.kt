@@ -41,7 +41,6 @@ class LoginViewModel : ViewModel() {
                     AHUCache.saveCurrentUser(user)
                     // 保存智慧安大密码
                     AHUCache.saveWisdomPassword(wisdomPassword)
-                    AHUApplication.loginType.setValue(User.UserType.AHU_Wisdom)
                     Result.success(user)
                 } else {
                     Result.failure(IllegalArgumentException(wisdomResponse.msg))

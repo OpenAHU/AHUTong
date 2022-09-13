@@ -17,7 +17,6 @@ class SinkWebViewClient : WebViewClient() {
     private var loginStatus = STATUS_LOGIN_BEFORE  // 0->未开始， 1->登录中， 2->成功， 3->登录失败
     private lateinit var user: ReptileUser
     private var loginCallback: (Int, Throwable?) -> Unit = { status, _ ->
-        Log.e("SINK", status.toString())
     }
 
     fun login(view: WebView, user: ReptileUser, loginCallback: (Int, Throwable?) -> Unit) {

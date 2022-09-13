@@ -9,9 +9,9 @@ import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.databinding.FragmentCourseBinding
-import com.ahu.ahutong.ext.buildDialog
 import com.ahu.ahutong.ui.dialog.ChooseOneDialog
 import com.ahu.ahutong.ui.page.state.CourseViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
  * @Author: SinkDev
@@ -81,24 +81,28 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>() {
                 }
             }
             //显示dialog
-            buildDialog("提示", "是否确认添加该课程?",
-                "确定", { _, _ ->
+            MaterialAlertDialogBuilder(requireActivity()).apply {
+                setTitle("提示")
+                setMessage("是否确认添加该课程?")
+                setPositiveButton("确定") { _, _ ->
                     mState.addCourse(course)
                     Toast.makeText(requireContext(), "添加成功, 返回刷新即可", Toast.LENGTH_SHORT).show()
-                }, "取消"
-            ).show()
+                }
+                setNegativeButton("取消", null)
+            }.show()
         }
 
         fun deleteCourse() {
             val course = arguments?.getSerializable("course") as Course
-            buildDialog("提示", "是否确认删除该课程, 本地添加课程移除后不可恢复.",
-                "确定", { _, _ ->
+            MaterialAlertDialogBuilder(requireActivity()).apply {
+                setTitle("提示")
+                setMessage("是否确认删除该课程, 本地添加课程移除后不可恢复！")
+                setPositiveButton("确定") { _, _ ->
                     mState.removeCourse(course)
                     Toast.makeText(requireContext(), "移除成功, 返回刷新即可", Toast.LENGTH_SHORT).show()
-
-                }, "取消"
-            ).show()
-
+                }
+                setNegativeButton("取消", null)
+            }.show()
         }
 
         /**
