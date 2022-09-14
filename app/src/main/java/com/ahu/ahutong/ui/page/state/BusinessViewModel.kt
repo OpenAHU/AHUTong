@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import arch.sink.utils.Utils
 import com.ahu.ahutong.data.model.Developer
 
-/**
-如果你想知道这个class是干什么的，请看文件的结尾
- */
+
 class BusinessViewModel : ViewModel() {
     val partner by lazy {
         listOf(
@@ -16,6 +14,3 @@ class BusinessViewModel : ViewModel() {
         )
     }
 }
-/**
-如果你想知道这个class是干什么的，请看文件的开头
- */

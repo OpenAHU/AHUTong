@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.lang.IllegalStateException
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -73,6 +74,10 @@ object AHURepository {
         //发射结果
         emit(result)
     }
+
+//    suspend fun getTermStartDate(schoolYear: String, schoolTerm: String): Result<Date> {
+//
+//    }
 
 
     /**
@@ -246,7 +251,6 @@ object AHURepository {
      * @param time String
      */
     private fun checkRoomArgs(campus: String, weekday: String, time: String) {
-
         if (!campus.isCampus()) {
             throw IllegalArgumentException("campus must be 1 or 2")
         }
@@ -257,6 +261,5 @@ object AHURepository {
             throw IllegalArgumentException("time must be 1-10")
         }
     }
-
 
 }

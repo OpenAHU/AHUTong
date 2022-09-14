@@ -1,5 +1,8 @@
 package com.ahu.ahutong.ui.page
 
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
@@ -28,13 +31,45 @@ class AboutFragment : BaseFragment<FragmentAboutBinding>() {
             .addBindingParam(BR.proxy, ClickProxy())
     }
 
+    override fun observeData() {
+        super.observeData()
+        // 获取本地版本信息
+        val localVersion = requireContext().packageManager
+            .getPackageInfo(requireContext().packageName, 0).versionName
+        // 主动检查，要提示
+        mState.latestVersions.observe(this) { result ->
+            result.onSuccess {
+                if (!it.isSuccessful) {
+                    Toast.makeText(requireContext(), "检查更新失败：${it.msg}", Toast.LENGTH_SHORT).show()
+                    return@onSuccess
+                }
+                if (it.data.version != localVersion) {
+                    MaterialAlertDialogBuilder(requireActivity()).apply {
+                        setTitle("更新")
+                        setMessage("发现新版本！\n新版特性：\n ${it.data.message}")
+                        setPositiveButton("前往下载") { _, _ ->
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data = Uri.parse(it.data.url)
+                            startActivity(intent)
+                        }
+                        setNegativeButton("取消", null)
+                    }.show()
+                    Toast.makeText(requireContext(), "当前已是最新版本！", Toast.LENGTH_SHORT).show()
+                    return@onSuccess
+                }
+            }.onFailure {
+                Toast.makeText(requireContext(), "${it.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     inner class ClickProxy {
         val back: (() -> Unit) = {
             nav().popBackStack()
         }
 
         fun checkUpdate() {
-            activityState.getAppLatestVersion()
+            mState.getAppLatestVersion()
         }
 
         fun updateLog() {

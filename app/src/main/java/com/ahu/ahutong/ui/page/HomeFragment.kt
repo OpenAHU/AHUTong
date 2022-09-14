@@ -1,8 +1,11 @@
 package com.ahu.ahutong.ui.page
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import arch.sink.ui.page.BaseFragment
@@ -11,6 +14,7 @@ import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.databinding.FragmentHomeBinding
 import com.ahu.ahutong.ui.page.state.HomeViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
  * @Author SinkDev
@@ -56,7 +60,37 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 }
             }
         }
+        // 检查更新
+        mState.getAppLatestVersion()
+    }
 
+    override fun observeData() {
+        super.observeData()
+        // 获取本地版本信息
+        val localVersion = requireContext().packageManager
+            .getPackageInfo(requireContext().packageName, 0).versionName
+        // 默认检查，不提示
+        mState.latestVersions.observe(this) { result ->
+            result.onSuccess {
+                if (!it.isSuccessful) {
+                    Toast.makeText(requireContext(), "检查更新失败：${it.msg}", Toast.LENGTH_SHORT).show()
+                    return@onSuccess
+                }
+                if (it.data.version != localVersion) {
+                    MaterialAlertDialogBuilder(requireActivity()).apply {
+                        setTitle("更新")
+                        setMessage("发现新版本！\n新版特性：\n ${it.data.message}")
+                        setPositiveButton("前往下载") { _, _ ->
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data = Uri.parse(it.data.url)
+                            startActivity(intent)
+                        }
+                        setNegativeButton("取消", null)
+                    }.show()
+                    return@onSuccess
+                }
+            }
+        }
     }
 
     override fun onResume() {
