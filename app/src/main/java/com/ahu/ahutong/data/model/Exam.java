@@ -10,14 +10,12 @@ import java.io.Serializable;
  * @Email 468766131@qq.com
  */
 public class Exam implements Serializable {
-
     /**
      * course : 课程名
      * location : 考试地点
      * time : 考试时间
      * seatNum : 座位号
      */
-
     @SerializedName("course")
     private String course;
     @SerializedName("location")

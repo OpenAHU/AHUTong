@@ -1,5 +1,7 @@
 package com.ahu.ahutong.data.model;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -202,6 +204,7 @@ public class Grade implements Serializable {
                 this.courseNature = courseNature;
             }
 
+            @NonNull
             @Override
             public String toString() {
                 return "GradeListBean{" +
@@ -215,6 +218,7 @@ public class Grade implements Serializable {
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "TermGradeListBean{" +
@@ -228,6 +232,7 @@ public class Grade implements Serializable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Grade{" +

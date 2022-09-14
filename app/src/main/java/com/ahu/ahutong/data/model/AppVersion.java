@@ -10,10 +10,6 @@ public class AppVersion {
     private String message;
     @SerializedName("url")
     private String url;
-    @SerializedName("plugVersion")
-    private String plugVersion;
-    @SerializedName("plugUrl")
-    private String plugUrl;
 
     public String getVersion() {
         return version;
@@ -37,22 +33,6 @@ public class AppVersion {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public String getPlugVersion() {
-        return plugVersion;
-    }
-
-    public void setPlugVersion(String plugVersion) {
-        this.plugVersion = plugVersion;
-    }
-
-    public String getPlugUrl() {
-        return plugUrl;
-    }
-
-    public void setPlugUrl(String plugUrl) {
-        this.plugUrl = plugUrl;
     }
 
 }

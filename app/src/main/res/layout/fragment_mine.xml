@@ -88,8 +88,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
                             android:layout_weight="1"
-                            android:text="@{state.isLogin ?  @string/mine_tv_logout : @string/mine_tv_identity}"
-                            tool:text="@string/mine_tv_identity" />
+                            android:text="@{ @string/mine_tv_logout}"
+                            tool:text="@string/mine_tv_logout" />
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:layout_width="20dp"

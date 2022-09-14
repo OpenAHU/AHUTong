@@ -1,6 +1,6 @@
 package com.ahu.ahutong.data;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 /**
  * @Author: Sink
@@ -40,6 +40,7 @@ public class AHUResponse<T> {
         return code == 0;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "AHUResponse{" +

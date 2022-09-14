@@ -1,13 +1,11 @@
 package com.ahu.ahutong.data
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.api.APIDataSource
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.fake.FakeDataSource
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.ext.isCampus
 import com.ahu.ahutong.ext.isEmptyRoomTime
@@ -21,7 +19,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.lang.IllegalStateException
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -30,11 +27,7 @@ import java.util.concurrent.TimeUnit
  * @Email: 468766131@qq.com
  */
 object AHURepository {
-    var dataSource: BaseDataSource = FakeDataSource()
-
-    init {
-        dataSource = APIDataSource()
-    }
+    var dataSource: BaseDataSource = APIDataSource()
 
 
     /**
@@ -92,7 +85,6 @@ object AHURepository {
             if (!schoolTerm.isTerm()) {
                 throw IllegalArgumentException("schoolTerm must be 1 or 2")
             }
-
             // 本地优先
             if (!isRefresh) {
                 val localData = AHUCache.getSchedule(schoolYear, schoolTerm).orEmpty()
@@ -123,12 +115,8 @@ object AHURepository {
      * @param time String
      * @return LiveData<Result<List<Room>>>
      */
-    suspend fun getEmptyRoom(
-        campus: String,
-        weekday: String,
-        weekNum: String,
-        time: String
-    ): Result<List<Room>> {
+    suspend fun getEmptyRoom(campus: String, weekday: String,
+            weekNum: String, time: String): Result<List<Room>> {
         checkRoomArgs(campus, weekday, time)
         return withContext(Dispatchers.IO) {
             try {

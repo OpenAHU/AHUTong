@@ -24,8 +24,6 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
-                app:navigationIcon="@drawable/icon_back"
-                onIconClick="@{proxy.back}"
                 app:title="登录"/>
         </com.google.android.material.appbar.AppBarLayout>
 

@@ -54,12 +54,9 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        mState.isLogin.value = AHUCache.isLogin()
-    }
 
     inner class ClickProxy {
+
         //about us
         fun aboutUs(view: View) {
             nav().navigate(R.id.about_fragment)
@@ -91,20 +88,17 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
 
         //login or logout
         fun login(view: View) {
-            if (AHUCache.isLogin()) {
-                MaterialAlertDialogBuilder(requireActivity()).apply {
-                    setTitle("提示")
-                    setMessage("是否退出登录，点击确定您的登录状态将被删除！")
-                    setPositiveButton("确定") { _, _ ->
-                        activityState.logout()
-                        mState.isLogin.value = false
-                    }
-                    setNegativeButton("取消", null)
-                }.show()
-
-            } else {
-                nav().navigate(R.id.action_home_fragment_to_login_fragment)
-            }
+            MaterialAlertDialogBuilder(requireActivity()).apply {
+                setTitle("提示")
+                setMessage("是否退出登录，点击确定您的登录状态将被删除！")
+                setPositiveButton("确定") { _, _ ->
+                    activityState.logout()
+                    // 跳转到登录界面
+                    nav().popBackStack()
+                    nav().navigate(R.id.login_fragment)
+                }
+                setNegativeButton("取消", null)
+            }.show()
         }
 
         //jump to developer fragment

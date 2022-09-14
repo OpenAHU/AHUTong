@@ -4,7 +4,7 @@ import arch.sink.utils.Utils
 import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.model.*
-import com.ahu.ahutong.utils.SinkCookieJar
+import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import okhttp3.Cache
@@ -80,13 +80,7 @@ interface AHUService {
     @GET("/api/grade")
     suspend fun getGrade(): AHUResponse<Grade>
 
-    /**
-     * 获取院系新闻
-     * @return AHUResponse<News>
-     */
-    @GET("/api/departmentNews")
-    suspend fun getNews(): AHUResponse<List<News>>
-
+    // 获取banner
     @GET("/api/banner/all")
     suspend fun getBanner(): AHUResponse<List<Banner>>
 
@@ -115,8 +109,7 @@ interface AHUService {
         private const val BASE_URL = "https://ahuer.cn"
 
         // Cookie 本地存储
-        private val cookieJar =
-            SinkCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
+        private val cookieJar = PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
 
         //创建AHUService对象
         val API: AHUService by lazy {

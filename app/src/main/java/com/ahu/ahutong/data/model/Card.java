@@ -1,5 +1,7 @@
 package com.ahu.ahutong.data.model;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 public class Card {
@@ -24,6 +26,7 @@ public class Card {
         this.transitionBalance = transitionBalance;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Card{" +

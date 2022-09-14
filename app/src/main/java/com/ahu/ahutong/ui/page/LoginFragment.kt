@@ -37,6 +37,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
             it.onSuccess {
                 Toast.makeText(requireContext(), "登录成功，欢迎您：${it.name}", Toast.LENGTH_SHORT).show()
                 nav().popBackStack()
+                nav().navigate(R.id.home_fragment)
             }.onFailure {
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }
@@ -64,9 +65,6 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
 
 
     inner class ClickProxy {
-        val back: (() -> Unit) = {
-            nav().popBackStack()
-        }
 
         fun login(view: View) {
             val username = dataBinding.edUserId.text.toString()
