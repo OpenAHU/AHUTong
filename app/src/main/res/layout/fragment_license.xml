@@ -2,9 +2,11 @@
 <layout>
 
     <data>
+
         <variable
             name="state"
             type="com.ahu.ahutong.ui.page.state.LicenseViewModel" />
+
         <variable
             name="proxy"
             type="com.ahu.ahutong.ui.page.LicenseFragment.ClickProxy" />
@@ -12,9 +14,10 @@
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"
@@ -28,10 +31,11 @@
                 app:navigationIcon="@drawable/icon_back"
                 app:title="@string/license" />
         </com.google.android.material.appbar.AppBarLayout>
+
         <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_license"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/recycler_license"/>
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 </layout>

@@ -40,10 +40,6 @@
         android:id="@+id/setting_fragment"
         android:name="com.ahu.ahutong.ui.page.SettingFragment" />
 
-    <fragment
-        android:id="@+id/classroom_fragment"
-        android:name="com.ahu.ahutong.ui.page.ClassRoomFragment"
-        tools:layout="@layout/fragment_classroom" />
 
     <fragment
         android:id="@+id/teldirectory_fragment"
@@ -61,10 +57,6 @@
         android:id="@+id/gradle_fragment"
         android:name="com.ahu.ahutong.ui.page.GradeFragment"
         tools:layout="@layout/fragment_grade" />
-    <fragment
-        android:id="@+id/garbage_fragment"
-        android:name="com.ahu.ahutong.ui.page.GarbageFragment"
-        tools:layout="@layout/fragment_garbage" />
     <fragment
         android:id="@+id/about_fragment"
         android:name="com.ahu.ahutong.ui.page.AboutFragment"
