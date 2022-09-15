@@ -46,10 +46,6 @@
         android:name="com.ahu.ahutong.ui.page.TelDirectoryFragment"
         tools:layout="@layout/fragment_teldirectory" />
     <fragment
-        android:id="@+id/more_fragment"
-        android:name="com.ahu.ahutong.ui.page.MoreFragment"
-        tools:layout="@layout/fragment_more" />
-    <fragment
         android:id="@+id/exam_fragment"
         android:name="com.ahu.ahutong.ui.page.ExamFragment"
         tools:layout="@layout/fragment_exam" />
