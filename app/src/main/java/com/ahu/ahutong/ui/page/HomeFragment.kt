@@ -30,7 +30,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(HomeViewModel::class.java)
-
     }
 
     override fun getDataBindingConfig(): DataBindingConfig {
@@ -40,9 +39,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //pager2
+        // pager2
         dataBinding.homeViewPager2.apply {
-            isUserInputEnabled = false //禁止滑动
+            isUserInputEnabled = false // 禁止滑动
             adapter = object : FragmentStateAdapter(requireActivity()) {
 
                 override fun getItemCount(): Int {

@@ -4,14 +4,15 @@ import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.api.APIDataSource
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.model.*
-import com.ahu.ahutong.ext.*
+import com.ahu.ahutong.data.model.Exam
+import com.ahu.ahutong.ext.await
+import com.ahu.ahutong.ext.awaitString
+import com.ahu.ahutong.ext.isTerm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.concurrent.TimeUnit
-
 
 /**
  * @Author: SinkDev
@@ -44,7 +45,7 @@ object AHURepository {
             try {
                 val response = dataSource.getSchedule(schoolYear, schoolTerm)
                 if (response.isSuccessful) {
-                    //缓存
+                    // 缓存
                     AHUCache.saveSchedule(schoolYear, schoolTerm, response.data)
                     Result.success(response.data)
                 } else {
@@ -70,7 +71,7 @@ object AHURepository {
         try {
             val response = dataSource.getGrade()
             if (response.isSuccessful) {
-                //保存数据
+                // 保存数据
                 AHUCache.saveGrade(response.data)
                 Result.success(response.data)
             } else {
@@ -110,9 +111,9 @@ object AHURepository {
                 val response = client.newCall(request).await()
                 if (response.isSuccessful) {
                     val body = response.body?.awaitString()
-                    if (body.toString().contains("暂无您的查询信息"))
+                    if (body.toString().contains("暂无您的查询信息")) {
                         Result.success(arrayListOf())
-                    else {
+                    } else {
                         val bodyLines = body!!.split(System.lineSeparator()).stream()
                             .filter { it.contains("<br>") }.iterator()
                         val exams = mutableListOf<Exam>()
@@ -143,7 +144,6 @@ object AHURepository {
                 Result.failure(Throwable("请求错误 $e"))
             }
         }
-
 
     /**
      *  获取余额

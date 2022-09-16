@@ -17,10 +17,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE
-import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_SETTLING
 import com.ahu.ahutong.R
-
 
 /**
  * @Author: SinkDev
@@ -44,14 +41,14 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
     private lateinit var adapter: BannerAdapter
     private val paint: Paint
 
-    //指示器的样子
+    // 指示器的样子
     var indicatorSelectedBitmap: Bitmap
     var indicatorUnselectedBitmap: Bitmap
 
-    //指示器大小
+    // 指示器大小
     private var indicatorViewSize: Int = 30
 
-    //指示器之间的距离
+    // 指示器之间的距离
     private var indicatorViewMargin: Int = 5
 
     private val mHander: Handler
@@ -75,7 +72,7 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
         viewPager2 = bannerView.findViewById(R.id.banner_viewpager)
         indicatorContainer = bannerView.findViewById(R.id.banner_indicator_container)
         viewPager2.registerOnPageChangeCallback(BannerPageChangeCallBack())
-        scaledTouchSlop = ViewConfiguration.get(context).scaledTouchSlop
+        scaledTouchSlop = ViewConfiguration.get(context!!).scaledTouchSlop
         paint = Paint()
         paint.color = Color.RED
         indicatorSelectedBitmap = getIndicatorBitmap(true)
@@ -98,10 +95,8 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
                         sendEmptyMessageDelayed(MESSAGE_CHANGE_PAGE, 8000)
                     }
                 }
-
             }
         }
-
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -146,7 +141,7 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
         if (adapter.getItemCount() == 0) {
             return
         }
-        //根据adapter设置viewPager的Adapter
+        // 根据adapter设置viewPager的Adapter
         viewPager2.adapter = object : RecyclerView.Adapter<BannerHolder>() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BannerHolder {
                 return BannerHolder(adapter.getImageView(this@BannerView, viewType))
@@ -158,22 +153,24 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
             }
 
             override fun getItemCount(): Int {
-                if (adapter.getItemCount() == 0)
+                if (adapter.getItemCount() == 0) {
                     return 0
+                }
                 return if (adapter.getItemCount() != 0) adapter.getItemCount() + 2 else 0
             }
 
             override fun getItemViewType(position: Int): Int {
-                return if (position == 0)
-                    adapter.getItemCount() - 1 //第一个放最后一张
-                else if (position == itemCount - 1)
-                    0 //最后一个放第一张
-                else
+                return if (position == 0) {
+                    adapter.getItemCount() - 1 // 第一个放最后一张
+                } else if (position == itemCount - 1) {
+                    0 // 最后一个放第一张
+                } else {
                     position - 1
+                }
             }
         }
 
-        //根据adapter设置指示器
+        // 根据adapter设置指示器
         var i = 0
         while (i < adapter.getItemCount()) {
             val imageView = ImageView(context)
@@ -187,9 +184,9 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
         indicatorView.forEach {
             indicatorContainer.addView(it)
         }
-        //设置默认选中
+        // 设置默认选中
         viewPager2.setCurrentItem(1, false)
-        //是否自动切换
+        // 是否自动切换
         if (isAutoPlay) {
             mHander.sendEmptyMessage(MESSAGE_CHANGE_START)
         }
@@ -215,7 +212,6 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
      * @return Int
      */
     fun getIndicatorViewSize() = indicatorViewSize
-
 
     /**
      * 设置指示器之间的距离
@@ -267,8 +263,10 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
             Bitmap.createBitmap(indicatorViewSize, indicatorViewSize, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawCircle(
-            indicatorViewSize.toFloat() / 2, indicatorViewSize.toFloat() / 2,
-            indicatorViewSize.toFloat() / 2, paint
+            indicatorViewSize.toFloat() / 2,
+            indicatorViewSize.toFloat() / 2,
+            indicatorViewSize.toFloat() / 2,
+            paint
         )
         canvas.save()
         return bitmap
@@ -277,7 +275,7 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
     inner class BannerPageChangeCallBack : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
-            //循环播放
+            // 循环播放
             if (position == 0) {
                 viewPager2.setCurrentItem(adapter.getItemCount(), false)
                 return
@@ -286,7 +284,7 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
                 viewPager2.setCurrentItem(1, false)
                 return
             }
-            //设置指示器
+            // 设置指示器
             indicatorView.forEachIndexed { index, imageView ->
                 if (index == position - 1) {
                     imageView.setImageBitmap(indicatorSelectedBitmap)
@@ -303,5 +301,4 @@ class BannerView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
     }
 
     inner class BannerHolder(itemView: ImageView) : RecyclerView.ViewHolder(itemView)
-
 }

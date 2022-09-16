@@ -3,61 +3,101 @@ package com.ahu.ahutong
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Bundle
-import androidx.navigation.findNavController
-import arch.sink.ui.BarConfig
-import arch.sink.ui.page.BaseActivity
-import arch.sink.ui.page.DataBindingConfig
-import arch.sink.utils.NightUtils
+import android.view.WindowManager
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.core.view.WindowCompat
+import androidx.navigation.NavHostController
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.databinding.ActivityMainBinding
+import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
+import com.ahu.ahutong.ui.screen.Login
+import com.ahu.ahutong.ui.theme.AHUTheme
+import com.ahu.ahutong.utils.animatedComposable
 import com.ahu.ahutong.widget.ClassWidget
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
-class MainActivity : BaseActivity<ActivityMainBinding>() {
-    private lateinit var mState: MainViewModel
+class MainActivity : ComponentActivity() {
+    private val mState: MainViewModel by viewModels()
+    private val loginViewModel: LoginViewModel by viewModels()
 
-
-    override fun initViewModel() {
-        mState = getActivityScopeViewModel(MainViewModel::class.java);
-    }
-
-    override fun getDataBindingConfig(): DataBindingConfig {
-        return DataBindingConfig(R.layout.activity_main, BR.state, mState)
-    }
-
-    override fun getBarConfig(): BarConfig {
-        val barConfig = BarConfig()
-        if (NightUtils.isNightMode(this)) {
-            barConfig.dark()
-        } else {
-            barConfig.light()
-        }
-        return barConfig
-    }
-
-    override fun loadInitData() {
-        super.loadInitData()
+    private fun loadInitData() {
         // 日活统计接口
         mState.addAppAccess()
-        //更新小部件数据
+        // 更新小部件数据
         val manager = AppWidgetManager.getInstance(this)
         val componentName = ComponentName(this, ClassWidget::class.java)
         val appWidgetIds = manager.getAppWidgetIds(componentName)
         manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
     }
 
-    override fun onStart() {
-        super.onStart()
-        // 不可以在onCreate方法使用 findNavController
-        // 根据登录状态进入判断是否进入登录界面
-        if (!AHUCache.isLogin()) {
-            val navController = findNavController(R.id.fragment_container)
-            // 退出当前界面
-            navController.popBackStack()
-            // 导航到登录
-            navController.navigate(R.id.login_fragment)
+    @OptIn(ExperimentalAnimationApi::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        loadInitData()
+        setContent {
+            AHUTheme {
+                val navController = rememberAnimatedNavController()
+                AnimatedNavHost(
+                    navController = navController,
+                    startDestination = "home"
+                ) {
+                    animatedComposable("home") {}
+                    animatedComposable("login") {
+                        Login(
+                            userId = loginViewModel.userID,
+                            onUserIdChanged = { loginViewModel.userID = it },
+                            password = loginViewModel.password,
+                            onPasswordChanged = { loginViewModel.password = it },
+                            onLoginButtonClicked = { login(navController = navController) }
+                        )
+                    }
+                }
+                if (!AHUCache.isLogin()) {
+                    // 退出当前界面
+                    navController.popBackStack()
+                    // 导航到登录
+                    navController.navigate("login")
+                }
+            }
         }
     }
 
-
+    private fun login(navController: NavHostController) {
+        if (loginViewModel.userID.text.isBlank() || loginViewModel.password.text.isBlank()) {
+            Toast.makeText(
+                this,
+                "请不要输入空气哦！",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            loginViewModel.loginWithServer(
+                userID = loginViewModel.userID.text,
+                wisdomPassword = loginViewModel.password.text
+            )
+        }
+        loginViewModel.serverLoginResult.observe(this) { result ->
+            result.onSuccess {
+                Toast.makeText(
+                    this,
+                    "登录成功，欢迎您：${it.name}",
+                    Toast.LENGTH_SHORT
+                ).show()
+                navController.popBackStack()
+                navController.navigate("home")
+            }.onFailure {
+                Toast.makeText(
+                    this,
+                    it.message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
 }

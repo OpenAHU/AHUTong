@@ -3,7 +3,6 @@ package com.ahu.ahutong.ui.page.state
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import arch.sink.utils.Utils
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.model.AppVersion
@@ -16,7 +15,7 @@ import kotlinx.coroutines.withContext
  * @Date 2021/7/27-18:50
  * @Email 468766131@qq.com
  */
-class HomeViewModel: ViewModel() {
+class HomeViewModel : ViewModel() {
 
     val latestVersions: MutableLiveData<Result<AHUResponse<AppVersion>>> = MutableLiveData()
 

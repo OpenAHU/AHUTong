@@ -17,21 +17,22 @@ public class BarConfig {
         this.color = color;
         this.light = light;
     }
-    public BarConfig(){
+
+    public BarConfig() {
         this(Color.TRANSPARENT, true);
     }
 
-    public BarConfig color(@ColorInt int color){
+    public BarConfig color(@ColorInt int color) {
         this.color = color;
         return this;
     }
 
-    public BarConfig light(){
+    public BarConfig light() {
         this.light = true;
         return this;
     }
 
-    public BarConfig dark(){
+    public BarConfig dark() {
         this.light = false;
         return this;
     }

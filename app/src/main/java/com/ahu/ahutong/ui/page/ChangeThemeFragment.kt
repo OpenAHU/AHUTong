@@ -14,11 +14,9 @@ import com.ahu.ahutong.databinding.ItemThemeSimpleBinding
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.page.state.ChangeThemeViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
-import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.widget.schedule.bean.DefaultDataUtils
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
 import com.ahu.ahutong.ui.widget.schedule.bean.SimpleTheme
-
 
 /**
  * @Author: SinkDev
@@ -56,7 +54,6 @@ class ChangeThemeFragment : BaseFragment<FragmentChangeThemeBinding>() {
                     }
                 }
             }
-
     }
 
     inner class ClickProxy {

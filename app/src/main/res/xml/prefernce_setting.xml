@@ -5,13 +5,13 @@
         app:iconSpaceReserved="false"
         app:title="主题">
         <Preference
-            app:title="@string/setting_change_theme"
+            app:iconSpaceReserved="false"
             app:key="change_theme"
-            app:iconSpaceReserved="false"/>
+            app:title="@string/setting_change_theme" />
         <Preference
-            app:title="@string/setting_diy_theme"
+            app:iconSpaceReserved="false"
             app:key="diy_theme"
-            app:iconSpaceReserved="false"/>
+            app:title="@string/setting_diy_theme" />
     </PreferenceCategory>
 
 
@@ -20,9 +20,9 @@
         app:title="课表">
 
         <SwitchPreference
-            app:title="@string/setting_show_all"
+            app:iconSpaceReserved="false"
             app:key="show_all"
-            app:iconSpaceReserved="false"/>
+            app:title="@string/setting_show_all" />
 
     </PreferenceCategory>
 
@@ -30,13 +30,13 @@
         app:iconSpaceReserved="false"
         app:title="其他">
         <Preference
-            app:title="@string/license"
+            app:iconSpaceReserved="false"
             app:key="license"
-            app:iconSpaceReserved="false"/>
+            app:title="@string/license" />
         <Preference
-            app:title="@string/setting_clear"
+            app:iconSpaceReserved="false"
             app:key="clear"
-            app:iconSpaceReserved="false"/>
+            app:title="@string/setting_clear" />
     </PreferenceCategory>
 
 </PreferenceScreen>

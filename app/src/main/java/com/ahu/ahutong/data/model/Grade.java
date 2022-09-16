@@ -63,6 +63,17 @@ public class Grade implements Serializable {
         this.termGradeList = termGradeList;
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return "Grade{" +
+                "totalGradePoint='" + totalGradePoint + '\'' +
+                ", totalCredit='" + totalCredit + '\'' +
+                ", totalGradePointAverage='" + totalGradePointAverage + '\'' +
+                ", termGradeList=" + termGradeList +
+                '}';
+    }
+
     public static class TermGradeListBean implements Serializable {
         /**
          * schoolYear : 学年
@@ -132,6 +143,19 @@ public class Grade implements Serializable {
 
         public void setGradeList(List<GradeListBean> gradeList) {
             this.gradeList = gradeList;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "TermGradeListBean{" +
+                    "schoolYear='" + schoolYear + '\'' +
+                    ", term='" + term + '\'' +
+                    ", termGradePoint='" + termGradePoint + '\'' +
+                    ", termTotalCredit='" + termTotalCredit + '\'' +
+                    ", termGradePointAverage='" + termGradePointAverage + '\'' +
+                    ", gradeList=" + gradeList +
+                    '}';
         }
 
         public static class GradeListBean implements Serializable {
@@ -217,29 +241,5 @@ public class Grade implements Serializable {
                         '}';
             }
         }
-
-        @NonNull
-        @Override
-        public String toString() {
-            return "TermGradeListBean{" +
-                    "schoolYear='" + schoolYear + '\'' +
-                    ", term='" + term + '\'' +
-                    ", termGradePoint='" + termGradePoint + '\'' +
-                    ", termTotalCredit='" + termTotalCredit + '\'' +
-                    ", termGradePointAverage='" + termGradePointAverage + '\'' +
-                    ", gradeList=" + gradeList +
-                    '}';
-        }
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return "Grade{" +
-                "totalGradePoint='" + totalGradePoint + '\'' +
-                ", totalCredit='" + totalCredit + '\'' +
-                ", totalGradePointAverage='" + totalGradePointAverage + '\'' +
-                ", termGradeList=" + termGradeList +
-                '}';
     }
 }

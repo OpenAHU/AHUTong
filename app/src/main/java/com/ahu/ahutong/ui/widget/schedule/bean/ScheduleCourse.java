@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import com.ahu.ahutong.data.model.Course;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,19 +41,19 @@ public class ScheduleCourse {
     public Integer getLength(int week, boolean showAll) {
         int length = 1;
         Course course = getCourse(week, showAll);
-        if (course != null){
+        if (course != null) {
             length = course.getLength();
         }
         return length;
     }
 
-    public Course getCourse(int week, boolean isShowAll){
+    public Course getCourse(int week, boolean isShowAll) {
         for (Course course : courses) {
-           if (course.getStartWeek() <= week && course.getEndWeek() >= week){
-               return course;
-           }
+            if (course.getStartWeek() <= week && course.getEndWeek() >= week) {
+                return course;
+            }
         }
-        if (isShowAll && courses.size() > 0){
+        if (isShowAll && courses.size() > 0) {
             return courses.get(0);
         }
         return null;

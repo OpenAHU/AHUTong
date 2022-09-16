@@ -49,7 +49,6 @@ class LicenseFragment : BaseFragment<FragmentLicenseBinding>() {
                         startActivity(intent)
                     }
                 }
-
             }
     }
 
@@ -58,5 +57,4 @@ class LicenseFragment : BaseFragment<FragmentLicenseBinding>() {
             nav().popBackStack()
         }
     }
-
 }

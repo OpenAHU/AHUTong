@@ -2,11 +2,9 @@ package com.ahu.ahutong.widget;
 
 import android.content.Context;
 
-
 import com.ahu.ahutong.R;
 import com.ahu.ahutong.data.dao.AHUCache;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.tencent.mmkv.MMKV;
 
 
 public class WidgetDialog {

@@ -1,17 +1,20 @@
 package com.ahu.webview_reptile
 
 import android.util.Log
-import android.webkit.*
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
 
 class SinkWebViewClient : WebViewClient() {
-    private var loginStatus = 0  // 0->未开始， 1->登录中， 2->成功， 3->登录失败
+    private var loginStatus = 0 // 0->未开始， 1->登录中， 2->成功， 3->登录失败
     private var isWvpn: Boolean = false
     var loginCallback: (String, Throwable?) -> Unit = { str, _ ->
         Log.e("SINK", str)
     }
 
     fun getIsWvpn(): Boolean {
-        return isWvpn;
+        return isWvpn
     }
 
     override fun shouldInterceptRequest(
@@ -31,10 +34,11 @@ class SinkWebViewClient : WebViewClient() {
         if (url == null) {
             return
         }
-        if (url.contains("one.ahu.edu.cn"))
+        if (url.contains("one.ahu.edu.cn")) {
             isWvpn = false
-        else if (url.contains("wvpn.ahu.edu.cn"))
+        } else if (url.contains("wvpn.ahu.edu.cn")) {
             isWvpn = true
+        }
         val key = if (isWvpn) KEY_LOGIN else KEY_LOGIN_ONE
         val loadUrl =
             if (isWvpn) "javascript:window.location='https://wvpn.ahu.edu.cn/https/77726476706e69737468656265737421fae05988777e69586b468ca88d1b203b/login_cas.aspx'"
@@ -63,7 +67,5 @@ class SinkWebViewClient : WebViewClient() {
                 loginCallback("登录成功", null)
             }
         }
-
     }
-
 }

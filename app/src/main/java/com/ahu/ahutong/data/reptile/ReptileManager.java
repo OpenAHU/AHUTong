@@ -23,13 +23,13 @@ public class ReptileManager {
         return INSTANCE;
     }
 
+    public CookieStore getCookieStore() {
+        return store;
+    }
+
     public ReptileManager setCookieStore(CookieStore store) {
         this.store = store;
         return this;
-    }
-
-    public CookieStore getCookieStore() {
-        return store;
     }
 
     public ReptileManager setCurrentUser(String username, String password) {

@@ -2,7 +2,6 @@ package com.ahu.ahutong.ext
 
 import com.ahu.ahutong.data.AHUResponse
 
-
 fun <T> createSuccessResponse(message: String, data: T): AHUResponse<T> {
     val ahuResponse = AHUResponse<T>()
     ahuResponse.msg = message

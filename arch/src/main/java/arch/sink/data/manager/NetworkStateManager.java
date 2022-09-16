@@ -13,7 +13,6 @@ import androidx.lifecycle.LifecycleOwner;
 
 import org.jetbrains.annotations.NotNull;
 
-import arch.sink.BaseApplication;
 import arch.sink.R;
 import arch.sink.utils.NetworkUtils;
 import arch.sink.utils.Utils;
@@ -33,7 +32,7 @@ public class NetworkStateManager implements DefaultLifecycleObserver {
     }
 
     @NonNull
-    public static NetworkStateManager getInstance(){
+    public static NetworkStateManager getInstance() {
         return INSTANCE;
     }
 
@@ -50,11 +49,12 @@ public class NetworkStateManager implements DefaultLifecycleObserver {
         Utils.getApp().
                 unregisterReceiver(networkStateReceiver);
     }
+
     static class NetworkStateReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION) && !NetworkUtils.isConnected()){
+            if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION) && !NetworkUtils.isConnected()) {
                 Toast.makeText(context, context.getString(R.string.network_not_good), Toast.LENGTH_SHORT).show();
             }
         }

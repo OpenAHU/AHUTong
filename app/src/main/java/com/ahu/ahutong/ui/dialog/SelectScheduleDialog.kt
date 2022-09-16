@@ -1,12 +1,7 @@
 package com.ahu.ahutong.ui.dialog
 
 import android.app.Dialog
-import android.util.Log
-import android.view.WindowManager
-import android.widget.LinearLayout
 import com.ahu.ahutong.databinding.DialogSettingBinding
-import com.ahu.ahutong.ext.dp
-import com.simon.library.DialogUtil
 import com.simon.library.view.BottomDialog
 
 /**
@@ -37,7 +32,6 @@ class SelectScheduleDialog : BottomDialog() {
         fun addCourse() {
             callback?.addCourse()
             dismiss()
-
         }
 
         fun setStartTime() {
@@ -65,7 +59,5 @@ class SelectScheduleDialog : BottomDialog() {
         fun setStartTime()
         fun inputSchedule()
         fun gotoSetting()
-
     }
-
 }

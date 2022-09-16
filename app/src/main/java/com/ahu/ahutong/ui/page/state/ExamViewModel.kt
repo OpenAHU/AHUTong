@@ -1,6 +1,5 @@
 package com.ahu.ahutong.ui.page.state
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +16,6 @@ class ExamViewModel : ViewModel() {
             data.value = Result.failure(Throwable("账户未登录"))
             return@launch
         }
-        data.value = AHURepository.getExamInfo(isRefresh,user.xh,user.name)
+        data.value = AHURepository.getExamInfo(isRefresh, user.xh, user.name)
     }
 }

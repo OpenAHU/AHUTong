@@ -10,14 +10,15 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import androidx.preference.*
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-
 
 /**
  * @Author: SinkDev
@@ -58,7 +59,7 @@ class SettingFragment : PreferenceFragmentCompat() {
         }
         findPreference<Preference>("license")?.apply {
             setOnPreferenceClickListener {
-                //跳转到开源协议
+                // 跳转到开源协议
                 findNavController().navigate(R.id.license_fragment)
                 return@setOnPreferenceClickListener true
             }
@@ -70,7 +71,7 @@ class SettingFragment : PreferenceFragmentCompat() {
                     setTitle("提示")
                     setMessage("您是否确定要清除应用数据，其中包含您的登录状态、课表等, 且删除后无法恢复。")
                     setPositiveButton("确定") { _, _ ->
-                        //清除所有数据
+                        // 清除所有数据
                         activityState.logout()
                         AHUCache.clearAll()
                         Toast.makeText(requireContext(), "已清除所有数据", Toast.LENGTH_SHORT).show()
@@ -82,7 +83,6 @@ class SettingFragment : PreferenceFragmentCompat() {
         }
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -92,20 +92,24 @@ class SettingFragment : PreferenceFragmentCompat() {
         return LinearLayout(requireContext()).apply {
             layoutParams = ViewGroup.LayoutParams(-1, -1)
             orientation = LinearLayout.VERTICAL
-            addView(AppBarLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(-1, LinearLayout.LayoutParams.WRAP_CONTENT)
-                fitsSystemWindows = true
-                addView(MaterialToolbar(requireContext()).apply {
-                    title = "设置"
-                    layoutParams =
-                        LinearLayout.LayoutParams(-1, LinearLayout.LayoutParams.WRAP_CONTENT)
-                    navigationIcon =
-                        AppCompatResources.getDrawable(getContext(), R.drawable.icon_back)
-                    setNavigationOnClickListener {
-                        findNavController().popBackStack()
-                    }
-                })
-            })
+            addView(
+                AppBarLayout(requireContext()).apply {
+                    layoutParams = LinearLayout.LayoutParams(-1, LinearLayout.LayoutParams.WRAP_CONTENT)
+                    fitsSystemWindows = true
+                    addView(
+                        MaterialToolbar(requireContext()).apply {
+                            title = "设置"
+                            layoutParams =
+                                LinearLayout.LayoutParams(-1, LinearLayout.LayoutParams.WRAP_CONTENT)
+                            navigationIcon =
+                                AppCompatResources.getDrawable(getContext(), R.drawable.icon_back)
+                            setNavigationOnClickListener {
+                                findNavController().popBackStack()
+                            }
+                        }
+                    )
+                }
+            )
             addView(view)
         }
     }

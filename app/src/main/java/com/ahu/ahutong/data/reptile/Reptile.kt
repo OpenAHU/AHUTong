@@ -1,25 +1,25 @@
 package com.ahu.ahutong.data.reptile
 //
-//import android.util.Log
-//import com.ahu.ahutong.data.AHUResponse
-//import com.ahu.ahutong.data.model.*
-//import com.ahu.ahutong.data.reptile.utils.DES
-//import com.ahu.ahutong.data.reptile.utils.timeMap
-//import com.ahu.ahutong.data.reptile.utils.weekdayMap
-//import com.google.gson.JsonParser
-//import com.sink.library.log.SinkLog
-//import kotlinx.coroutines.*
-//import org.jsoup.Connection
-//import org.jsoup.HttpStatusException
-//import org.jsoup.Jsoup
-//import java.math.RoundingMode
-//import java.net.ConnectException
-//import java.net.SocketTimeoutException
-//import java.text.DecimalFormat
-//import java.util.regex.Pattern
+// import android.util.Log
+// import com.ahu.ahutong.data.AHUResponse
+// import com.ahu.ahutong.data.model.*
+// import com.ahu.ahutong.data.reptile.utils.DES
+// import com.ahu.ahutong.data.reptile.utils.timeMap
+// import com.ahu.ahutong.data.reptile.utils.weekdayMap
+// import com.google.gson.JsonParser
+// import com.sink.library.log.SinkLog
+// import kotlinx.coroutines.*
+// import org.jsoup.Connection
+// import org.jsoup.HttpStatusException
+// import org.jsoup.Jsoup
+// import java.math.RoundingMode
+// import java.net.ConnectException
+// import java.net.SocketTimeoutException
+// import java.text.DecimalFormat
+// import java.util.regex.Pattern
 //
-//@Suppress("BlockingMethodInNonBlockingContext")
-//object Reptile {
+// @Suppress("BlockingMethodInNonBlockingContext")
+// object Reptile {
 //    /**
 //     * 登录
 //     * @param reptileUser User
@@ -649,4 +649,4 @@ package com.ahu.ahutong.data.reptile
 //        return Result.failure(e)
 //    }
 //
-//}
+// }

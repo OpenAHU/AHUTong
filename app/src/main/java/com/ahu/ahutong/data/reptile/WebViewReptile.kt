@@ -2,7 +2,6 @@
 
 package com.ahu.ahutong.data.reptile
 
-import android.util.Log
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.data.reptile.utils.JsoupProxy
@@ -26,13 +25,11 @@ import java.util.regex.Pattern
 
 object WebViewReptile {
 
-
     /**
      * 获取校园卡余额
      * @return AHUResponse<Card>
      */
-    suspend fun getCardMoney(): AHUResponse<Card> = withContext(Dispatchers.IO)
-    {
+    suspend fun getCardMoney(): AHUResponse<Card> = withContext(Dispatchers.IO) {
         try {
             val response = JsoupProxy.newSession()
                 .url(Constants.URL_CARD_MONEY)
@@ -80,8 +77,10 @@ object WebViewReptile {
                     .url(Constants.URL_TEACH_SCHEDULE.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
                     .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
-                    .header("Cookie",
-                            ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE))
+                    .header(
+                        "Cookie",
+                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
+                    )
                     .get().body()
                 val year = body.select("#ddlXN>option[selected=selected]").attr("value")
                 val term = body.select("#ddlXQ>option[selected=selected]").attr("value")
@@ -89,20 +88,22 @@ object WebViewReptile {
                     val __VIEWSTATE = body.select("#__VIEWSTATE").attr("value")
                     val __VIEWSTATEGENERATOR = body.select("#__VIEWSTATEGENERATOR").attr("value")
                     val data = mapOf(
-                            "__EVENTTARGET" to "",
-                            "__EVENTARGUMENT" to "",
-                            "__LASTFOCUS" to "",
-                            "__VIEWSTATE" to __VIEWSTATE,
-                            "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
-                            "ddlXN" to schoolYear,
-                            "ddlXQ" to schoolTerm
+                        "__EVENTTARGET" to "",
+                        "__EVENTARGUMENT" to "",
+                        "__LASTFOCUS" to "",
+                        "__VIEWSTATE" to __VIEWSTATE,
+                        "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
+                        "ddlXN" to schoolYear,
+                        "ddlXQ" to schoolTerm
                     )
                     body = JsoupProxy.newSession()
                         .url(Constants.URL_TEACH_SCHEDULE.format(ReptileManager.getInstance().currentUser.username))
                         .timeout(ReptileManager.getInstance().timeout)
                         .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
-                        .header("Cookie",
-                                ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE))
+                        .header(
+                            "Cookie",
+                            ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
+                        )
                         .data(data)
                         .post().body()
                 }
@@ -113,10 +114,10 @@ object WebViewReptile {
                         continue
                     }
                     val tds = tr.select("td")
-                    //解析上课时间、weekday、startTime、endTime
+                    // 解析上课时间、weekday、startTime、endTime
                     for ((courseMsg, location) in tds[8].text().split(";")
                         .zip(tds[9].text().split(";"))) {
-                        //创建课程
+                        // 创建课程
                         val course = Course()
                         course.courseId = tds[1].text()
                         course.name = tds[2].text()
@@ -124,17 +125,18 @@ object WebViewReptile {
                         course.teacher = tds[5].text()
                         course.location = location
                         course.singleDouble = "0"
-                        //正则匹配地址
+                        // 正则匹配地址
                         val pattern = Pattern.compile("(.{2})第(.+?)节\\{第(\\d+?)-(\\d+?)周.")
                         val matcher = pattern.matcher(courseMsg)
                         if (!matcher.find()) {
-                            //没有信息，跳过
+                            // 没有信息，跳过
                             continue
                         }
                         course.setWeekday(weekdayMap.get(matcher.group(1) ?: ""))
                         val times =
-                            matcher.group(2)?.split(",") ?: throw IllegalStateException("时间获取失败")
-                        //三节课的最后一节
+                            matcher.group(2)?.split(",")
+                                ?: throw IllegalStateException("时间获取失败")
+                        // 三节课的最后一节
                         if (times.size == 1) {
                             val course1 = courses[courses.lastIndex]
                             if (course1.courseId == course.courseId) {
@@ -147,7 +149,7 @@ object WebViewReptile {
                         course.setLength(times.size.toString())
                         course.setStartWeek(matcher.group(3))
                         course.setEndWeek(matcher.group(4))
-                        //添加进去
+                        // 添加进去
                         courses.add(course)
                     }
                 }
@@ -157,7 +159,10 @@ object WebViewReptile {
                     throw e
                 }
                 e.printStackTrace()
-                return@withContext createFailureResponse(e.message ?: "未知异常，请尝试重新登录或联系开发者（高玉灿）！")
+                return@withContext createFailureResponse(
+                    e.message
+                        ?: "未知异常，请尝试重新登录或联系开发者（高玉灿）！"
+                )
             }
         }
 
@@ -175,8 +180,8 @@ object WebViewReptile {
                     .timeout(ReptileManager.getInstance().timeout)
                     .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                     .header(
-                            "Cookie",
-                            ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
+                        "Cookie",
+                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                     )
                     .get().body()
 //                val year = body.select("#xnd>option[selected=selected]").attr("value")
@@ -205,7 +210,7 @@ object WebViewReptile {
 //                        .data(data)
 //                        .post()
 //                }
-                //解析html
+                // 解析html
                 val table = body.select("#DataGrid1").select("tr")
                 val exams = mutableListOf<Exam>()
                 for (tr in table) {
@@ -239,10 +244,10 @@ object WebViewReptile {
      * @return AHUResponse<List<Room>>
      */
     suspend fun getEmptyRoom(
-            campus: String,
-            weekday: String,
-            weekNum: String,
-            time: String
+        campus: String,
+        weekday: String,
+        weekNum: String,
+        time: String
     ): AHUResponse<List<Room>> =
         withContext(Dispatchers.IO) {
             try {
@@ -251,8 +256,8 @@ object WebViewReptile {
                     .timeout(ReptileManager.getInstance().timeout)
                     .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                     .header(
-                            "Cookie",
-                            ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
+                        "Cookie",
+                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                     )
                     .get().body()
                 val kssj = weekday + weekNum
@@ -261,30 +266,30 @@ object WebViewReptile {
                 val __VIEWSTATE = body.select("#__VIEWSTATE").attr("value")
                 val __VIEWSTATEGENERATOR = body.select("#__VIEWSTATEGENERATOR").attr("value")
                 val data = mapOf(
-                        "__VIEWSTATE" to __VIEWSTATE,
-                        "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
-                        "xiaoq" to campus,
-                        "jslb" to "",
-                        "min_zws" to "0",
-                        "max_zws" to "",
-                        "kssj" to kssj,
-                        "jssj" to kssj,
-                        "xqj" to weekday,
-                        "ddlDsz" to "单",
-                        "sjd" to sjd,
-                        "Button2" to "空教室查询"
+                    "__VIEWSTATE" to __VIEWSTATE,
+                    "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
+                    "xiaoq" to campus,
+                    "jslb" to "",
+                    "min_zws" to "0",
+                    "max_zws" to "",
+                    "kssj" to kssj,
+                    "jssj" to kssj,
+                    "xqj" to weekday,
+                    "ddlDsz" to "单",
+                    "sjd" to sjd,
+                    "Button2" to "空教室查询"
                 )
                 body = JsoupProxy.newSession()
                     .url(Constants.URL_TEACH_ROOM.format(ReptileManager.getInstance().currentUser.username))
                     .timeout(ReptileManager.getInstance().timeout)
                     .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                     .header(
-                            "Cookie",
-                            ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
+                        "Cookie",
+                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                     )
                     .data(data)
                     .post().body()
-                //解析html
+                // 解析html
                 val table = body.select("#DataGrid1").select("tr")
                 val rooms = mutableListOf<Room>()
                 for (tr in table) {
@@ -305,7 +310,6 @@ object WebViewReptile {
                 e.printStackTrace()
                 return@withContext createFailureResponse("获取空教室信息失败")
             }
-
         }
 
     /**
@@ -319,28 +323,28 @@ object WebViewReptile {
                 .timeout(ReptileManager.getInstance().timeout)
                 .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                 .header(
-                        "Cookie",
-                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
+                    "Cookie",
+                    ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                 )
                 .get().body()
-            //拼接请求体
+            // 拼接请求体
             val __VIEWSTATE = body.select("#__VIEWSTATE").attr("value")
             val __VIEWSTATEGENERATOR = body.select("#__VIEWSTATEGENERATOR").attr("value")
             val data = mapOf(
-                    "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
-                    "__VIEWSTATE" to __VIEWSTATE,
-                    "ddlXN" to "",
-                    "ddlXQ" to "",
-                    "Button2" to "在校学习成绩查询"
+                "__VIEWSTATEGENERATOR" to __VIEWSTATEGENERATOR,
+                "__VIEWSTATE" to __VIEWSTATE,
+                "ddlXN" to "",
+                "ddlXQ" to "",
+                "Button2" to "在校学习成绩查询"
             )
-            //请求全部成绩
+            // 请求全部成绩
             body = JsoupProxy.newSession()
                 .url(Constants.URL_TEACH_GRADE.format(ReptileManager.getInstance().currentUser.username))
                 .timeout(ReptileManager.getInstance().timeout)
                 .referrer(Constants.URL_TEACH_MAIN.format(ReptileManager.getInstance().currentUser.username))
                 .header(
-                        "Cookie",
-                        ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
+                    "Cookie",
+                    ReptileManager.getInstance().getCookie(Constants.URL_TEACH_BASE)
                 )
                 .data(data)
                 .post().body()
@@ -349,41 +353,41 @@ object WebViewReptile {
             grade.totalGradePoint = body.select("#xfjdzh").text().replace("学分绩点总和：", "")
             grade.totalGradePointAverage = body.select("#pjxfjd").text().replace("平均学分绩点：", "")
             grade.termGradeList = mutableListOf()
-            //当前schoolYear、schoolTerm
+            // 当前schoolYear、schoolTerm
             var schoolYear = ""
             var schoolTerm = ""
             var termGradeListBean = Grade.TermGradeListBean()
             var termTotalCredit = 0.0
             var termTotalGradePoint = 0.0
             var gradeList = mutableListOf<Grade.TermGradeListBean.GradeListBean>()
-            //解析成绩
+            // 解析成绩
             val table = body.select("#Datagrid1").select("tr")
             for (tr in table) {
                 if (tr.hasClass("datelisthead")) {
                     continue
                 }
                 val tds = tr.select("td")
-                //是否开启新学期
+                // 是否开启新学期
                 val year = tds[0].text()
                 val term = tds[1].text()
                 if (!year.equals(schoolYear) || !term.equals(schoolTerm)) {
                     if (gradeList.isNotEmpty()) {
-                        //填充信息
+                        // 填充信息
                         setTermGradeContent(
-                                termTotalGradePoint,
-                                termTotalCredit,
-                                termGradeListBean,
-                                schoolYear,
-                                schoolTerm,
-                                gradeList,
-                                grade
+                            termTotalGradePoint,
+                            termTotalCredit,
+                            termGradeListBean,
+                            schoolYear,
+                            schoolTerm,
+                            gradeList,
+                            grade
                         )
-                        //0
+                        // 0
                         termTotalCredit = 0.0
                         termTotalGradePoint = 0.0
                         gradeList = mutableListOf()
                     }
-                    //刷新学年学期
+                    // 刷新学年学期
                     schoolYear = year
                     schoolTerm = term
                     termGradeListBean = Grade.TermGradeListBean()
@@ -396,21 +400,21 @@ object WebViewReptile {
                 gradeListBean.gradePoint = tds[7].text()
                 gradeListBean.grade = tds[8].text()
                 gradeList.add(gradeListBean)
-                //加上credit、point
+                // 加上credit、point
                 termTotalCredit += gradeListBean.credit.toDouble()
                 termTotalGradePoint += gradeListBean.gradePoint.toDouble() * gradeListBean.credit.toDouble()
             }
-            //填充信息
+            // 填充信息
             setTermGradeContent(
-                    termTotalGradePoint,
-                    termTotalCredit,
-                    termGradeListBean,
-                    schoolYear,
-                    schoolTerm,
-                    gradeList,
-                    grade
+                termTotalGradePoint,
+                termTotalCredit,
+                termGradeListBean,
+                schoolYear,
+                schoolTerm,
+                gradeList,
+                grade
             )
-            //设置返回值
+            // 设置返回值
             return@withContext createSuccessResponse("OK", grade)
         } catch (e: Exception) {
             if (e is CancellationException) {
@@ -432,26 +436,26 @@ object WebViewReptile {
      * @param grade Grade
      */
     private fun setTermGradeContent(
-            termTotalGradePoint: Double,
-            termTotalCredit: Double,
-            termGradeListBean: Grade.TermGradeListBean,
-            schoolYear: String,
-            schoolTerm: String,
-            gradeList: MutableList<Grade.TermGradeListBean.GradeListBean>,
-            grade: Grade
+        termTotalGradePoint: Double,
+        termTotalCredit: Double,
+        termGradeListBean: Grade.TermGradeListBean,
+        schoolYear: String,
+        schoolTerm: String,
+        gradeList: MutableList<Grade.TermGradeListBean.GradeListBean>,
+        grade: Grade
     ) {
-        //计算平均绩点
+        // 计算平均绩点
         val gradePointAverage = termTotalGradePoint / termTotalCredit
         val df = DecimalFormat("#.00")
         df.roundingMode = RoundingMode.HALF_UP
-        //设置信息
+        // 设置信息
         termGradeListBean.termGradePointAverage = df.format(gradePointAverage)
         termGradeListBean.termTotalCredit = df.format(termTotalCredit)
         termGradeListBean.termGradePoint = df.format(termTotalGradePoint)
         termGradeListBean.schoolYear = schoolYear
         termGradeListBean.term = schoolTerm
         termGradeListBean.gradeList = gradeList
-        //添加数据
+        // 添加数据
         grade.termGradeList.add(termGradeListBean)
     }
 
@@ -477,6 +481,4 @@ object WebViewReptile {
         e.printStackTrace()
         return Result.failure(e)
     }
-
 }
-

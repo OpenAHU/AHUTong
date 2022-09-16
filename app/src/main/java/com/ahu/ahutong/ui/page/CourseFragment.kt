@@ -39,8 +39,6 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
     }
 
     inner class ClickProxy {
@@ -50,11 +48,11 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>() {
 
         fun saveOrAddCourse() {
             val course = mState.course.value ?: return
-            //读取一波输入内容
+            // 读取一波输入内容
             updateInputDate(course)
             course.apply {
-                if (length == 0 || name.isNullOrEmpty()
-                    || teacher.isNullOrEmpty() || location.isNullOrEmpty()
+                if (length == 0 || name.isNullOrEmpty() ||
+                    teacher.isNullOrEmpty() || location.isNullOrEmpty()
                 ) {
                     Toast.makeText(requireContext(), "请输入完整课程信息", Toast.LENGTH_SHORT).show()
                 }
@@ -74,13 +72,13 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>() {
                     Toast.makeText(requireContext(), "请选择星期", Toast.LENGTH_SHORT).show()
                     return
                 }
-                //添加的新信息
+                // 添加的新信息
                 if (isAdd) {
                     extra = ""
                     courseId = System.currentTimeMillis().toString()
                 }
             }
-            //显示dialog
+            // 显示dialog
             MaterialAlertDialogBuilder(requireActivity()).apply {
                 setTitle("提示")
                 setMessage("是否确认添加该课程?")
@@ -138,7 +136,6 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>() {
             }
             chooseOneDialog.show(parentFragmentManager, "chooseStartWeek")
         }
-
 
         fun chooseEndWeek() {
             val course = mState.course.value

@@ -3,13 +3,13 @@
     <item
         android:id="@+id/schedule_fragment"
         android:icon="@drawable/bottom_nav_schedule"
-        android:title="@string/title_schedule"/>
+        android:title="@string/title_schedule" />
     <item
         android:id="@+id/discovery_fragment"
         android:icon="@drawable/bottom_nav_discovery"
-        android:title="@string/title_discovery"/>
+        android:title="@string/title_discovery" />
     <item
         android:id="@+id/mine_fragment"
         android:icon="@drawable/bottom_nav_mine"
-        android:title="@string/title_mine"/>
+        android:title="@string/title_mine" />
 </menu>

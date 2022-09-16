@@ -11,6 +11,14 @@ public class User {
     @SerializedName("xh")
     private String xh;
 
+    public User() {
+
+    }
+
+    public User(String name) {
+        this.name = name;
+    }
+
     public String getName() {
         return name;
     }
@@ -18,19 +26,13 @@ public class User {
     public void setName(String name) {
         this.name = name;
     }
+
     public String getXh() {
         return xh;
     }
 
     public void setXh(String xh) {
         this.xh = xh;
-    }
-    public User() {
-
-    }
-
-    public User(String name) {
-        this.name = name;
     }
 
     public enum UserType {

@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
-import android.widget.Toast;
 
 import com.ahu.ahutong.R;
 import com.ahu.ahutong.data.dao.AHUCache;
@@ -35,6 +34,41 @@ import arch.sink.utils.TimeUtils;
  */
 public class WidgetListService extends RemoteViewsService {
 
+    /**
+     * 根据当前时间获取第几节
+     *
+     * @param time 当前时间 例子 1150 即11点50分
+     * @return 返回的第几节 按上述参数，则返回 4
+     */
+    private static int getTime(String time) {
+        int tim = Integer.parseInt(time);
+        if (tim >= 0 && tim <= 820) {
+            return 0;
+        } else if (tim >= 820 && tim <= 915) {
+            return 1;
+        } else if (tim >= 915 && tim <= 1020) {
+            return 2;
+        } else if (tim >= 1020 && tim <= 1115) {
+            return 3;
+        } else if (tim >= 1115 && tim <= 1400) {
+            return 4;
+        } else if (tim >= 1400 && tim <= 1455) {
+            return 5;
+        } else if (tim >= 1455 && tim <= 1550) {
+            return 6;
+        } else if (tim >= 1550 && tim <= 1645) {
+            return 7;
+        } else if (tim >= 1645 && tim <= 1900) {
+            return 8;
+        } else if (tim >= 1900 && tim <= 1955) {
+            return 9;
+        } else if (tim >= 1955 && tim <= 2050) {
+            return 10;
+        } else {
+            return 11;
+        }
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -46,9 +80,6 @@ public class WidgetListService extends RemoteViewsService {
     }
 
     static class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
-        private ArrayList<Object> mData;
-        private Context context;
-        private static int numTime;
         private static final String gray = "#FFCBCBCB";
         private static final String orange = "#FFFE9900";
         private static final Bitmap grayBitmap = BitmapUtils.createColorBitmap(gray);
@@ -57,6 +88,9 @@ public class WidgetListService extends RemoteViewsService {
         private static final int paleColor = Color.parseColor("#9a000000");
         private static final int blackColor = Color.BLACK;
         private static final String[] num2text = {"一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一"};
+        private static int numTime;
+        private ArrayList<Object> mData;
+        private Context context;
 
         public ListRemoteViewsFactory(Context context) {
             mData = new ArrayList<>();
@@ -155,7 +189,7 @@ public class WidgetListService extends RemoteViewsService {
             if (bean instanceof String) { //如果是头，即 上午 下午 晚上
                 back = new RemoteViews(context.getPackageName(), R.layout.item_widget_head);
                 back.setTextViewText(R.id.widget_head, (String) bean);
-            } else if (bean==null||bean instanceof Boolean) {//如果是空闲状态
+            } else if (bean == null || bean instanceof Boolean) {//如果是空闲状态
                 back = new RemoteViews(context.getPackageName(), R.layout.item_widget_content);
                 back.setTextViewText(R.id.widget_name, "空闲");
                 back.setTextViewText(R.id.widget_time, "无课程");
@@ -191,7 +225,7 @@ public class WidgetListService extends RemoteViewsService {
                     back.setTextColor(R.id.widget_name, blackColor);
                     back.setTextColor(R.id.widget_time, paleColor);
                 }
-            }else {
+            } else {
                 back = new RemoteViews(context.getPackageName(), R.layout.item_widget_content);
                 back.setTextViewText(R.id.widget_name, "空闲");
                 back.setTextViewText(R.id.widget_time, "无课程");
@@ -219,41 +253,6 @@ public class WidgetListService extends RemoteViewsService {
         @Override
         public boolean hasStableIds() {
             return true;
-        }
-    }
-
-    /**
-     * 根据当前时间获取第几节
-     *
-     * @param time 当前时间 例子 1150 即11点50分
-     * @return 返回的第几节 按上述参数，则返回 4
-     */
-    private static int getTime(String time) {
-        int tim = Integer.parseInt(time);
-        if (tim >= 0 && tim <= 820) {
-            return 0;
-        } else if (tim >= 820 && tim <= 915) {
-            return 1;
-        } else if (tim >= 915 && tim <= 1020) {
-            return 2;
-        } else if (tim >= 1020 && tim <= 1115) {
-            return 3;
-        } else if (tim >= 1115 && tim <= 1400) {
-            return 4;
-        } else if (tim >= 1400 && tim <= 1455) {
-            return 5;
-        } else if (tim >= 1455 && tim <= 1550) {
-            return 6;
-        } else if (tim >= 1550 && tim <= 1645) {
-            return 7;
-        } else if (tim >= 1645 && tim <= 1900) {
-            return 8;
-        } else if (tim >= 1900 && tim <= 1955) {
-            return 9;
-        } else if (tim >= 1955 && tim <= 2050) {
-            return 10;
-        } else {
-            return 11;
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.ahu.ahutong;
 
-import android.util.Base64;
 import android.util.Log;
 
 import com.ahu.ahutong.utils.RSA;

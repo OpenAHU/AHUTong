@@ -14,9 +14,9 @@
     </data>
 
     <LinearLayout
-        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="80dp"
+        android:gravity="center"
         android:onClick="@{(thisView) -> proxy.onClick(tool)}"
         android:orientation="vertical"
         tools:ignore="UseCompoundDrawables">

@@ -1,15 +1,13 @@
 package com.ahu.ahutong.data.reptile
 
-import android.widget.Toast
-import arch.sink.utils.Utils
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
-import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.model.*
+import com.ahu.ahutong.data.model.BathRoom
+import com.ahu.ahutong.data.model.Card
+import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.data.reptile.store.DefaultCookieStore
 import com.ahu.ahutong.ext.createFailureResponse
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * @Author: SinkDev
@@ -18,7 +16,7 @@ import kotlinx.coroutines.withContext
  */
 class ReptileDataSource(user: ReptileUser) : BaseDataSource {
     init {
-        //初始化
+        // 初始化
         ReptileManager.getInstance()
             .setCookieStore(DefaultCookieStore())
             .setCurrentUser(user.username, user.password)
@@ -31,11 +29,9 @@ class ReptileDataSource(user: ReptileUser) : BaseDataSource {
         return checkLoginStatus() ?: WebViewReptile.getSchedule(schoolYear, schoolTerm)
     }
 
-
     override suspend fun getGrade(): AHUResponse<Grade> {
         return checkLoginStatus() ?: WebViewReptile.getGrade()
     }
-
 
     override suspend fun getCardMoney(): AHUResponse<Card> {
         return checkLoginStatus() ?: WebViewReptile.getCardMoney()

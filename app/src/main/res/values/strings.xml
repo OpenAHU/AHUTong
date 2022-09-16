@@ -84,7 +84,9 @@
     <string name="discovery_course">今日课表</string>
     <string name="discovery_activity">校园信息</string>
     <string name="card_money">校园卡余额</string>
-    <string name="bathroom_time">10:30 - 21:00</string>
+    <string name="bathroom_time">10:30 – 21:00</string>
     <string name="recharge">充值</string>
     <string name="view_flow">查看流水</string>
+
+    <string name="log_in">登录</string>
 </resources>

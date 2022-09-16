@@ -26,7 +26,7 @@ class CourseItemHolder(val binding: ItemDiscoveryCourseBinding, courseClickActio
         }
     }
 
-    inner class CourseClickProxy(val action: (Course)-> Unit) {
+    inner class CourseClickProxy(val action: (Course) -> Unit) {
         fun onClick(course: Course) {
             action(course)
         }

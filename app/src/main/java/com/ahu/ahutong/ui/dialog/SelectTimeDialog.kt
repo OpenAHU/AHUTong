@@ -11,8 +11,6 @@ import com.ahu.ahutong.databinding.DialogTimeBinding
 import com.ahu.ahutong.ext.defaultStyle
 import com.ahu.ahutong.ext.getSchoolYears
 import com.simon.library.view.BottomDialog
-import java.lang.IllegalStateException
-import java.util.*
 
 /**
  * @Author: SinkDev
@@ -29,8 +27,10 @@ class SelectTimeDialog : BottomDialog(), View.OnClickListener {
             val defaultUser = User()
             defaultUser.name = "Y01717"
             // 求出用户的入学时间
-            (AHUCache.getCurrentUser()
-                ?: defaultUser).getSchoolYears()
+            (
+                AHUCache.getCurrentUser()
+                    ?: defaultUser
+                ).getSchoolYears()
         }
         private val week by lazy {
             val result = mutableListOf<String>()
@@ -55,13 +55,19 @@ class SelectTimeDialog : BottomDialog(), View.OnClickListener {
             pickerSchoolTerm.defaultStyle()
             pickerWeek.defaultStyle()
             pickerSchoolYear.setDisplayedValuesAndPickedIndex(
-                schoolYears, 0, false
+                schoolYears,
+                0,
+                false
             )
             pickerSchoolTerm.setDisplayedValuesAndPickedIndex(
-                arrayOf("第1学期", "第2学期"), 0, false
+                arrayOf("第1学期", "第2学期"),
+                0,
+                false
             )
             pickerWeek.setDisplayedValuesAndPickedIndex(
-                week, 0, false
+                week,
+                0,
+                false
             )
         }
     }
@@ -84,7 +90,6 @@ class SelectTimeDialog : BottomDialog(), View.OnClickListener {
         fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int)
     }
 
-
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.bt_ok -> {
@@ -98,7 +103,6 @@ class SelectTimeDialog : BottomDialog(), View.OnClickListener {
             R.id.bt_close -> {
                 dismiss()
             }
-
         }
     }
 

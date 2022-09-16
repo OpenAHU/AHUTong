@@ -1,8 +1,10 @@
 package com.ahu.ahutong.data.base
 
 import com.ahu.ahutong.data.AHUResponse
-import com.ahu.ahutong.data.api.AHUService
-import com.ahu.ahutong.data.model.*
+import com.ahu.ahutong.data.model.BathRoom
+import com.ahu.ahutong.data.model.Card
+import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.data.model.Grade
 
 /**
  * @Author: Sink
@@ -20,7 +22,6 @@ interface BaseDataSource {
     suspend fun getSchedule(schoolYear: String, schoolTerm: String): AHUResponse<List<Course>>
 
     suspend fun getGrade(): AHUResponse<Grade>
-
 
     suspend fun getCardMoney(): AHUResponse<Card>
 

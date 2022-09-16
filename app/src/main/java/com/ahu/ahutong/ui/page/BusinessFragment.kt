@@ -11,11 +11,10 @@ import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Developer
-import com.ahu.ahutong.databinding.*
+import com.ahu.ahutong.databinding.FragmentBusinessBinding
+import com.ahu.ahutong.databinding.ItemBusinessBinding
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.page.state.BusinessViewModel
-import java.lang.Exception
-
 
 class BusinessFragment() : BaseFragment<FragmentBusinessBinding>() {
     private lateinit var mState: BusinessViewModel
@@ -45,7 +44,6 @@ class BusinessFragment() : BaseFragment<FragmentBusinessBinding>() {
             }
     }
 
-
     inner class ClickProxy {
         val back: (() -> Unit) = {
             nav().popBackStack()
@@ -59,7 +57,6 @@ class BusinessFragment() : BaseFragment<FragmentBusinessBinding>() {
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "您并没有安装QQ或者Tim", Toast.LENGTH_SHORT).show()
             }
-
         }
     }
 }

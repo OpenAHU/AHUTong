@@ -25,7 +25,7 @@ public final class DialogUtil {
      * @param dialog  Dialog 对象，不能为 null
      * @param gravity Gravity 常量，具体请参考 {@code android.view.Gravity} 类
      */
-    public static void setGravity( Dialog dialog, int gravity) {
+    public static void setGravity(Dialog dialog, int gravity) {
 
         Window window = dialog.getWindow();
         if (window == null) {
@@ -42,7 +42,7 @@ public final class DialogUtil {
      * @param dialog Dialog 对象，不能为 null
      * @param width  宽度值
      */
-    public static void setWith( Dialog dialog, int width) {
+    public static void setWith(Dialog dialog, int width) {
         Window window = dialog.getWindow();
         if (window == null) {
             Log.e(TAG, "The Window of dialog is null.");
@@ -63,7 +63,7 @@ public final class DialogUtil {
      * @param dialog Dialog 对象，不能为 null
      * @param height 高度值
      */
-    public static void setHeight( Dialog dialog, int height) {
+    public static void setHeight(Dialog dialog, int height) {
 
         Window window = dialog.getWindow();
         if (window == null) {
@@ -125,7 +125,7 @@ public final class DialogUtil {
      * @param dialog   Dialog 对象，不能为 null
      * @param styleRes style 资源
      */
-    public static void setAnimations( Dialog dialog,  int styleRes) {
+    public static void setAnimations(Dialog dialog, int styleRes) {
         Window window = dialog.getWindow();
         if (window == null) {
             Log.e(TAG, "The Window of dialog is null.");
@@ -141,7 +141,7 @@ public final class DialogUtil {
      * @param dialog   Dialog 对象，不能为 null
      * @param drawable Drawable 对象，不能为 null
      */
-    public static void setBackgroundDrawable( Dialog dialog, Drawable drawable) {
+    public static void setBackgroundDrawable(Dialog dialog, Drawable drawable) {
 
         Window window = dialog.getWindow();
         if (window == null) {
@@ -158,7 +158,7 @@ public final class DialogUtil {
      * @param dialog     Dialog 对象，不能为 null
      * @param drawableId Drawable 资源的 ID
      */
-    public static void setBackgroundDrawableResource(Dialog dialog,int drawableId) {
+    public static void setBackgroundDrawableResource(Dialog dialog, int drawableId) {
         Window window = dialog.getWindow();
         if (window == null) {
             Log.e(TAG, "The Window of dialog is null.");

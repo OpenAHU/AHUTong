@@ -11,8 +11,8 @@ import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
-import com.ahu.ahutong.R
 import com.ahu.ahutong.BR
+import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentScheduleWeekBinding
 import com.ahu.ahutong.databinding.ItemPopCourseBinding
@@ -29,7 +29,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
  * @Date: 2021/8/27-下午3:33
  * @Email: 468766131@qq.com
  */
-class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBinding>(),
+class WeekScheduleFragment(val week: Int) :
+    BaseFragment<FragmentScheduleWeekBinding>(),
     SelectScheduleDialog.SettingCallback {
     constructor() : this(1)
 
@@ -48,7 +49,6 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
         return DataBindingConfig(R.layout.fragment_schedule_week, BR.state, pState)
     }
 
-
     override fun observeData() {
         // 不可以在数据观察后
         pState.scheduleConfig.observe(this) {
@@ -60,7 +60,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
                 .loadSchedule()
         }
 
-        //课表数据
+        // 课表数据
         pState.schedule.observe(this) { result ->
             result.onSuccess {
                 if (it.isEmpty()) {
@@ -74,43 +74,39 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
                 dataBinding.scheduleView
                     .data(it)
                     .loadSchedule()
-                //更新小部件
+                // 更新小部件
                 val manager = AppWidgetManager.getInstance(requireContext())
                 val componentName = ComponentName(requireActivity(), ClassWidget::class.java)
                 val appWidgetIds = manager.getAppWidgetIds(componentName)
                 manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
             }
-            //停止加载
+            // 停止加载
             dataBinding.refreshLayout.isRefreshing = false
         }
-
-
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //设置点击课程的事件
+        // 设置点击课程的事件
         dataBinding.scheduleView.setCourseListener { v, scheduleCourse ->
             val popupView = getPopupView(scheduleCourse)
-            popupView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+            popupView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
             popupWindow = PopupWindow(v, popupView.measuredWidth, popupView.measuredHeight, true)
             popupWindow.animationStyle = R.style.pop_anim_style
             popupWindow.contentView = popupView
             popupWindow.isTouchable = true
             popupWindow.isOutsideTouchable = true
             popupWindow.showAsDropDown(v)
-
         }
 
-        //兔子
+        // 兔子
         dataBinding.scheduleView.setSettingClickListener {
             val dialog = SelectScheduleDialog()
             dialog.setCallback(this)
             dialog.show(parentFragmentManager, "SettingScheduleDialog")
         }
 
-        //切换周数
+        // 切换周数
         dataBinding.scheduleView.setChangeWeekListener {
             val list = mutableListOf<String>()
             for (i in 1..18) {
@@ -123,13 +119,11 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
             chooseOneDialog.show(parentFragmentManager, "chooseStartWeek")
         }
 
-        //刷新
+        // 刷新
         dataBinding.refreshLayout.setOnRefreshListener {
             pState.refreshSchedule()
         }
-
     }
-
 
     /**
      * 创建课程详情界面
@@ -137,25 +131,26 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
      * @return NestedScrollView
      */
     private fun getPopupView(scheduleCourse: ScheduleCourse): NestedScrollView {
-        //创建课程视图的父容器
+        // 创建课程视图的父容器
         val li = LinearLayout(context)
         li.orientation = LinearLayout.VERTICAL
         li.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        //填入课程视图
+        // 填入课程视图
         for (course in scheduleCourse.courses) {
             val binding = ItemPopCourseBinding.inflate(layoutInflater)
             binding.course = course
             val layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
             )
             layoutParams.bottomMargin = 10
             binding.root.layoutParams = layoutParams
             li.addView(binding.root)
             binding.tvMore.setOnClickListener {
-                //点击消失
+                // 点击消失
                 popupWindow.dismiss()
                 val bundle = Bundle().apply {
                     putBoolean("add", false)
@@ -168,7 +163,6 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
         nestedScrollView.addView(li)
         return nestedScrollView
     }
-
 
     // 以下是兔子Dialog的实现
     override fun addCourse() {

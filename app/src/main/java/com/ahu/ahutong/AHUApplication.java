@@ -3,7 +3,6 @@ package com.ahu.ahutong;
 import com.ahu.ahutong.common.SingleLiveEvent;
 import com.tencent.bugly.crashreport.CrashReport;
 
-
 import arch.sink.BaseApplication;
 
 /**

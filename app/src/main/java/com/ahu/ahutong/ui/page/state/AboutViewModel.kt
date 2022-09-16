@@ -1,6 +1,5 @@
 package com.ahu.ahutong.ui.page.state
 
-
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,7 +19,9 @@ import kotlinx.coroutines.withContext
 class AboutViewModel : ViewModel() {
     val versionName: String by lazy {
         val packageInfo = Utils.getApp().packageManager.getPackageInfo(
-                Utils.getApp().packageName, 0)
+            Utils.getApp().packageName,
+            0
+        )
         packageInfo.versionName
     }
 

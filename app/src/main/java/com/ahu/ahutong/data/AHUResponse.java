@@ -36,7 +36,7 @@ public class AHUResponse<T> {
         this.code = code;
     }
 
-    public boolean isSuccessful(){
+    public boolean isSuccessful() {
         return code == 0;
     }
 

@@ -13,6 +13,13 @@ import java.util.Map;
 public class SinkHttpConnection extends HttpConnection {
     private static final Map<Integer, String> urlCache = new HashMap<>();
 
+    private static String getPlaintUrl(String proxyUrl) throws Exception {
+        if (!urlCache.containsKey(proxyUrl.hashCode())) {
+            urlCache.put(proxyUrl.hashCode(), VpnURL.getPlaintUrl(proxyUrl));
+        }
+        return urlCache.get(proxyUrl.hashCode());
+    }
+
     @NonNull
     @Override
     public Connection url(@NonNull String url) {
@@ -37,12 +44,5 @@ public class SinkHttpConnection extends HttpConnection {
             }
         }
         return super.referrer(referrer);
-    }
-
-    private static String getPlaintUrl(String proxyUrl) throws Exception {
-        if (!urlCache.containsKey(proxyUrl.hashCode())) {
-            urlCache.put(proxyUrl.hashCode(), VpnURL.getPlaintUrl(proxyUrl));
-        }
-        return urlCache.get(proxyUrl.hashCode());
     }
 }

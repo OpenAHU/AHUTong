@@ -1,7 +1,7 @@
 package com.ahu.ahutong.data.reptile.login
 
-import android.util.Log
-import android.webkit.*
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.ahu.ahutong.data.reptile.Constants
 import com.ahu.ahutong.data.reptile.ReptileManager
 import com.ahu.ahutong.data.reptile.ReptileUser
@@ -14,7 +14,7 @@ class SinkWebViewClient : WebViewClient() {
         const val STATUS_LOGIN_FAILURE = 3
     }
 
-    private var loginStatus = STATUS_LOGIN_BEFORE  // 0->未开始， 1->登录中， 2->成功， 3->登录失败
+    private var loginStatus = STATUS_LOGIN_BEFORE // 0->未开始， 1->登录中， 2->成功， 3->登录失败
     private lateinit var user: ReptileUser
     private var loginCallback: (Int, Throwable?) -> Unit = { status, _ ->
     }
@@ -32,7 +32,7 @@ class SinkWebViewClient : WebViewClient() {
         }
         when {
             // WVPN 的第一步
-            url.contains(Constants.KEY_WVPN_LOGIN)-> {
+            url.contains(Constants.KEY_WVPN_LOGIN) -> {
                 if (loginStatus != STATUS_LOGIN_BEFORE) {
                     loginStatus = STATUS_LOGIN_FAILURE
                     loginCallback(STATUS_LOGIN_FAILURE, Throwable("登录失败, 账号或者密码错误！"))
@@ -78,5 +78,4 @@ class SinkWebViewClient : WebViewClient() {
             }
         }
     }
-
 }
