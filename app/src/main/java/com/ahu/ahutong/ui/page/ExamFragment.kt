@@ -50,7 +50,7 @@ class ExamFragment : BaseFragment<FragmentExamBinding>() {
         }
 
         //加载数据
-        mState.loadExam()
+        mState.loadExam(false)
         dataBinding.refreshLayout.isRefreshing = true
 
     }
@@ -62,7 +62,7 @@ class ExamFragment : BaseFragment<FragmentExamBinding>() {
                 if (it.isEmpty())
                     Toast.makeText(requireContext(), R.string.empty_exam, Toast.LENGTH_SHORT).show()
                 else
-                    dataBinding.cardTip.text = "共 $it 条考试信息"
+                    dataBinding.cardTip.text = "共 ${it.size} 条考试信息"
                 adapter?.submitList(it)
             }.onFailure {
                 dataBinding.cardTip.text = it.message

@@ -11,15 +11,12 @@ import kotlinx.coroutines.launch
 
 class ExamViewModel : ViewModel() {
     val data = MutableLiveData<Result<List<Exam>>>()
-    fun loadExam() = viewModelScope.launch {
+    fun loadExam(isRefresh: Boolean = true) = viewModelScope.launch {
         val user = AHUCache.getCurrentUser()
         if (user == null) {
             data.value = Result.failure(Throwable("账户未登录"))
             return@launch
         }
-        Log.e("simon",user.name)
-//        Log.e("simon",user.xh)
-        data.value = Result.failure(Throwable("账户未登录"))
-        //data.value = AHURepository.getExamInfo(schoolYear)
+        data.value = AHURepository.getExamInfo(isRefresh,user.xh,user.name)
     }
 }

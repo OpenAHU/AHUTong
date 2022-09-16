@@ -1,25 +1,17 @@
 package com.ahu.ahutong.data
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.liveData
 import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.api.APIDataSource
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.*
-import com.ahu.ahutong.ext.isCampus
-import com.ahu.ahutong.ext.isEmptyRoomTime
-import com.ahu.ahutong.ext.isTerm
-import com.ahu.ahutong.ext.isWeekday
-import com.google.gson.Gson
-import com.google.gson.JsonParser
-import com.google.gson.reflect.TypeToken
+import com.ahu.ahutong.ext.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
+
 
 /**
  * @Author: SinkDev
@@ -90,39 +82,68 @@ object AHURepository {
         }
     }
 
-
     /**
      *  获取考试信息
-     * @param schoolYear String
-     * @param schoolTerm String
-     * @param isRefresh Boolean
+     * @param isRefresh Boolean 是否获取缓存
+     * @param studentID String
+     * @param studentName String
      * @return Result<(kotlin.collections.List<com.ahu.ahutong.data.model.Exam>..kotlin.collections.List<com.ahu.ahutong.data.model.Exam>?)>
      */
-    suspend fun getExamInfo(studentID: String) =
+    suspend fun getExamInfo(isRefresh: Boolean = false, studentID: String, studentName: String) =
         withContext(Dispatchers.IO) {
-//            if (!schoolTerm.isTerm()) {
-//                throw IllegalArgumentException("schoolTerm must be 1 or 2")
-//            }
-//            if (!isRefresh) {
-//                val localData = AHUCache.getExamInfo().orEmpty()
-//                if (localData.isNotEmpty()) {
-//                    return@withContext Result.success(localData)
-//                }
-//            }
-            //从网络上获取数据
+            if (!isRefresh) {
+                val localData = AHUCache.getExamInfo().orEmpty()
+                if (localData.isNotEmpty()) {
+                    return@withContext Result.success(localData)
+                }
+            }
             try {
-//                val response = dataSource.getExamInfo(schoolYear, schoolTerm)
-//                if (response.isSuccessful) {
-//                    //保存数据
-//                    AHUCache.saveExamInfo(response.data)
-//                    Result.success(response.data)
-//                } else {
-//                    Result.failure(Throwable(response.msg))
-//                }
+                val client = OkHttpClient.Builder()
+                    .readTimeout(5, TimeUnit.SECONDS)
+                    .writeTimeout(5, TimeUnit.SECONDS)
+                    .connectTimeout(15, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)
+                    .build()
+                val request = Request.Builder()
+                    .url("http://kskw.ahu.edu.cn/bkcx.asp?xh=$studentID")
+                    .build()
+                val response = client.newCall(request).await()
+                if (response.isSuccessful) {
+                    val body = response.body?.awaitString()
+                    if (body.toString().contains("暂无您的查询信息"))
+                        Result.success(arrayListOf())
+                    else {
+                        val bodyLines = body!!.split(System.lineSeparator()).stream()
+                            .filter { it.contains("<br>") }.iterator()
+                        val exams = mutableListOf<Exam>()
+                        while (bodyLines.hasNext()) {
+                            var theme = bodyLines.next()
+                            if (theme.contains("年")) {
+                                val current = Exam()
+                                val split1 = theme.split("/").toTypedArray()
+                                current.time = split1[0].substring(1 + split1[0].indexOf(":"))
+                                current.course = split1[1]
+                                theme = bodyLines.next()
+                                if (theme.contains("座")) {
+                                    val split2 = theme.split("/").toTypedArray()
+                                    current.seatNum =
+                                        split2[1].substring(1 + split2[1].indexOf("："))
+                                    current.location = split2[2].replace(studentName, "")
+                                    exams.add(current)
+                                }
+                            }
+                        }
+                        AHUCache.saveExamInfo(exams)
+                        Result.success(exams)
+                    }
+                } else {
+                    Result.failure(Throwable("请求错误，代码 ${response.code}"))
+                }
             } catch (e: Exception) {
-                //Result.failure(e)
+                Result.failure(Throwable("请求错误 $e"))
             }
         }
+
 
     /**
      *  获取余额
