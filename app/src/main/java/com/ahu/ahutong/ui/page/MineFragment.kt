@@ -11,14 +11,12 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.databinding.FragmentMineBinding
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.MineViewModel
 import com.ahu.ahutong.widget.ClassWidget
 import com.ahu.ahutong.widget.WidgetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-
 
 /**
  * @Author SinkDev
@@ -29,7 +27,6 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
 
     private lateinit var mState: MineViewModel
     private lateinit var activityState: MainViewModel
-
 
     override fun initViewModel() {
         mState = getFragmentScopeViewModel(MineViewModel::class.java)
@@ -44,7 +41,7 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //判断用户是否添加了桌面小部件
+        // 判断用户是否添加了桌面小部件
         val componentName = ComponentName(requireContext(), ClassWidget::class.java)
         val appWidgetIds: IntArray =
             AppWidgetManager.getInstance(requireContext().applicationContext)
@@ -54,10 +51,9 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
         }
     }
 
-
     inner class ClickProxy {
 
-        //about us
+        // about us
         fun aboutUs(view: View) {
             nav().navigate(R.id.about_fragment)
         }
@@ -78,7 +74,7 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
         }
 
         fun recommend(view: View) {
-            //调用android系统的分享窗口
+            // 调用android系统的分享窗口
             val intent = Intent()
             intent.action = Intent.ACTION_SEND
             intent.type = "*/*"
@@ -86,7 +82,7 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
             startActivity(intent)
         }
 
-        //login or logout
+        // login or logout
         fun login(view: View) {
             MaterialAlertDialogBuilder(requireActivity()).apply {
                 setTitle("提示")
@@ -101,17 +97,14 @@ class MineFragment : BaseFragment<FragmentMineBinding>() {
             }.show()
         }
 
-        //jump to developer fragment
+        // jump to developer fragment
         fun developer(view: View) {
             nav().navigate(R.id.action_home_fragment_to_developer_fragment)
         }
 
-        //jump to setting fragment
+        // jump to setting fragment
         fun setting(view: View) {
             nav().navigate(R.id.setting_fragment)
         }
-
     }
-
 }
-

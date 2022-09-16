@@ -1,48 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal">
+
         <ImageView
+            android:id="@+id/schedule_setting"
             android:layout_width="35dp"
             android:layout_height="50dp"
-            android:src="@mipmap/rabbit"
-            android:id="@+id/schedule_setting"
-            android:contentDescription="@string/schedule_setting" />
+            android:contentDescription="@string/schedule_setting"
+            android:src="@mipmap/rabbit" />
+
         <LinearLayout
+            android:id="@+id/schedule_weekday_list"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:id="@+id/schedule_weekday_list"
-            android:orientation="horizontal"/>
+            android:orientation="horizontal" />
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+
         <LinearLayout
             android:id="@+id/schedule_bottom"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal">
+
             <LinearLayout
-                android:layout_width="35dp"
-                android:orientation="vertical"
                 android:id="@+id/schedule_time_list"
-                android:layout_height="match_parent">
-            </LinearLayout>
+                android:layout_width="35dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"></LinearLayout>
 
             <LinearLayout
                 android:id="@+id/schedule_course_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal"/>
+                android:orientation="horizontal" />
         </LinearLayout>
     </ScrollView>
 

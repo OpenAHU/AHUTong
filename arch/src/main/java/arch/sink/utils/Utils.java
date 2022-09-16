@@ -119,7 +119,8 @@ public final class Utils {
                 throw new NullPointerException("u should init first");
             }
             return (Application) app;
-        } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException | InvocationTargetException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException |
+                 InvocationTargetException e) {
             e.printStackTrace();
         }
         throw new NullPointerException("u should init first");
@@ -382,7 +383,8 @@ public final class Utils {
                         return (Activity) activityField.get(activityRecord);
                     }
                 }
-            } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException |
+                     InvocationTargetException | IllegalAccessException e) {
                 e.printStackTrace();
             }
             return null;

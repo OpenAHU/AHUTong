@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:state_checked="true"
-        android:drawable="@drawable/discovery_radio_selected"
-        />
-    <item
-        android:state_checked="false"
-        android:drawable="@drawable/discovery_radio_unselected"/>
+    <item android:drawable="@drawable/discovery_radio_selected" android:state_checked="true" />
+    <item android:drawable="@drawable/discovery_radio_unselected" android:state_checked="false" />
 
 </selector>

@@ -32,7 +32,6 @@ class SimpleTheme(config: String) : ScheduleTheme.Theme(config) {
         colors = listOf<String>(color1, color2, color3, color4, color5)
     }
 
-
     override fun setWeekdayListHeader(linearLayout: LinearLayout) {
         return
     }
@@ -66,13 +65,12 @@ class SimpleTheme(config: String) : ScheduleTheme.Theme(config) {
         return jsonObject
     }
 
-
     private fun getRandomBackground(): GradientDrawable {
         val gradientDrawable = GradientDrawable()
-        //圆角矩形
+        // 圆角矩形
         gradientDrawable.shape = GradientDrawable.RECTANGLE
         gradientDrawable.cornerRadius = 15f
-        //随机颜色
+        // 随机颜色
         val index = num % colors.size
         gradientDrawable.colors =
             intArrayOf(Color.parseColor(colors[index]), Color.parseColor(colors[index]))
@@ -82,10 +80,10 @@ class SimpleTheme(config: String) : ScheduleTheme.Theme(config) {
 
     private fun getGrayBackground(): GradientDrawable {
         val gradientDrawable = GradientDrawable()
-        //圆角矩形
+        // 圆角矩形
         gradientDrawable.shape = GradientDrawable.RECTANGLE
         gradientDrawable.cornerRadius = 15f
-        //灰色颜色
+        // 灰色颜色
         gradientDrawable.colors = intArrayOf(Color.GRAY, Color.GRAY)
         return gradientDrawable
     }

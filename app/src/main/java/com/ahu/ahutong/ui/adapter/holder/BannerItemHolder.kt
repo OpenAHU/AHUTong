@@ -13,7 +13,6 @@ import com.ahu.ahutong.ui.widget.banner.BannerView
 class BannerItemHolder(val binding: ItemDiscoveryBannerBinding) :
     BaseViewHolder<ItemDiscoveryBannerBinding, List<Banner>>(binding) {
     override fun bind(data: List<Banner>) {
-
         binding.itemDiscoveryBanner.setAdapter(object : BannerView.BannerAdapter() {
             override fun getItemCount(): Int {
                 return if (data.isEmpty()) 0 else data.size

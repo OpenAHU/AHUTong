@@ -8,16 +8,16 @@ class GsonTest {
     @Test
     fun gsonTest() {
         val json = "{\n" +
-                "    \"code\": 0,\n" +
-                "    \"data\": \"SB\",\n" +
-                "    \"msg\": null,\n" +
-                "    \"success\": true,\n" +
-                "    \"successAndHasData\": true\n" +
-                "}"
+            "    \"code\": 0,\n" +
+            "    \"data\": \"SB\",\n" +
+            "    \"msg\": null,\n" +
+            "    \"success\": true,\n" +
+            "    \"successAndHasData\": true\n" +
+            "}"
         val resp = Gson().fromJson<AHUResponse<String>>(
             json,
             object : TypeToken<AHUResponse<String>>() {}.type
-        );
+        )
         println(resp)
     }
 }

@@ -50,13 +50,12 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }
             dataBinding.refreshLayout.isRefreshing = false
-
         }
-        
+
         mState.schoolYear.observe(this) {
             upDateData()
         }
-        
+
         mState.schoolTerm.observe(this) {
             upDateData()
         }
@@ -66,7 +65,7 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
         if (mState.schoolYear.value != null && mState.schoolTerm.value != null) {
             val grade = mState.grade
             if (grade == null) {
-                mState.getGarde();
+                mState.getGarde()
                 return
             }
             var yearGrade: Float = 0.0f
@@ -90,13 +89,12 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
                 df.roundingMode = RoundingMode.HALF_UP
                 mState.yearGradePointAverage.value = df.format(gradePointAverage)
             }
-
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //设置sp
+        // 设置sp
         dataBinding.spSchoolYear.adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
@@ -109,7 +107,7 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
         )
         dataBinding.spSchoolYear.onItemSelectedListener = this
         dataBinding.spTerm.onItemSelectedListener = this
-        //recycler
+        // recycler
         dataBinding.recycleGrades.layoutManager = LinearLayoutManager(requireContext())
         adapter = object : BaseAdapter<Grade.TermGradeListBean.GradeListBean, ItemGradeBinding>() {
             override fun layout(): Int {
@@ -131,17 +129,13 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
 
         mState.getGarde()
         dataBinding.refreshLayout.isRefreshing = true
-
-
     }
-
 
     inner class ClickProxy {
         val back: (() -> Unit) = {
             nav().popBackStack()
         }
     }
-
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         parent?.let {
@@ -168,6 +162,4 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
             }
         }
     }
-
-
 }

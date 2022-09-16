@@ -1,31 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <data>
+
         <variable
             name="state"
             type="com.ahu.ahutong.ui.page.state.DeveloperViewModel" />
+
         <variable
             name="proxy"
             type="com.ahu.ahutong.ui.page.DeveloperFragment.ClickProxy" />
     </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
             android:fitsSystemWindows="true"
-            android:id="@+id/appbar">
+            app:layout_constraintTop_toTopOf="parent">
+
             <com.google.android.material.appbar.MaterialToolbar
+                onIconClick="@{proxy.back}"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
                 app:navigationIcon="@drawable/icon_back"
-                onIconClick="@{proxy.back}"
                 app:title="@string/mine_tv_developer"
-                tools:title="@string/mine_tv_developer"/>
+                tools:title="@string/mine_tv_developer" />
         </com.google.android.material.appbar.AppBarLayout>
 
 

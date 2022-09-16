@@ -7,6 +7,4 @@ import androidx.lifecycle.ViewModel
  * @Date: 2021/8/25-下午9:57
  * @Email: 468766131@qq.com
  */
-class ChangeThemeViewModel: ViewModel() {
-
-}
+class ChangeThemeViewModel : ViewModel()

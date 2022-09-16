@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+
     <data>
+
         <variable
             name="state"
             type="com.ahu.ahutong.ui.page.state.ScheduleViewModel" />

@@ -14,7 +14,7 @@ public class TimeUtils {
      * 获得两个日期间距多少天
      *
      * @param beginDate 开始日期
-     * @param endDate 结束日期
+     * @param endDate   结束日期
      * @return 天数
      */
     public static long getTimeDistance(Date beginDate, Date endDate) {
@@ -32,7 +32,7 @@ public class TimeUtils {
         toCalendar.set(Calendar.SECOND, fromCalendar.getMinimum(Calendar.SECOND));
         toCalendar.set(Calendar.MILLISECOND, fromCalendar.getMinimum(Calendar.MILLISECOND));
 
-        long dayDistance = (toCalendar.getTime().getTime() - fromCalendar.getTime().getTime()) / (24 * 60 * 60 *1000)  ;
+        long dayDistance = (toCalendar.getTime().getTime() - fromCalendar.getTime().getTime()) / (24 * 60 * 60 * 1000);
         dayDistance = Math.abs(dayDistance);
 
         return dayDistance;

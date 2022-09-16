@@ -1,11 +1,11 @@
 package com.ahu.ahutong.ext
 
-import kotlinx.coroutines.suspendCancellableCoroutine
-import okhttp3.Call
-import okhttp3.Response
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CompletionHandler
+import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.Response
 import okhttp3.ResponseBody
 import java.io.IOException
 import kotlin.coroutines.resume
@@ -37,7 +37,6 @@ internal suspend inline fun ResponseBody.awaitString(): String {
         }
     }
 }
-
 
 internal class ContinuationCallback(
     private val call: Call,

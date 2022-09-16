@@ -15,7 +15,6 @@ import com.ahu.ahutong.databinding.FragmentDeveloperBinding
 import com.ahu.ahutong.databinding.ItemDeveloperBinding
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.page.state.DeveloperViewModel
-import java.lang.Exception
 
 /**
  *
@@ -23,7 +22,7 @@ import java.lang.Exception
  * @Date: 2021/7/31-下午8:40
  * @Email: 468766131@qq.com
  */
-class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>(){
+class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>() {
     private lateinit var mState: DeveloperViewModel
 
     override fun initViewModel() {
@@ -38,17 +37,17 @@ class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.recyclerDeveloper.layoutManager = LinearLayoutManager(requireContext())
-        dataBinding.recyclerDeveloper.adapter = object: BaseAdapter<Developer, ItemDeveloperBinding>(mState.developers){
+        dataBinding.recyclerDeveloper.adapter = object : BaseAdapter<Developer, ItemDeveloperBinding>(mState.developers) {
             override fun layout(): Int {
                 return R.layout.item_developer
             }
+
             override fun bindingData(binding: ItemDeveloperBinding, data: Developer) {
                 binding.dev = data
                 binding.proxy = ClickProxy()
             }
         }
     }
-
 
     inner class ClickProxy {
         val back: (() -> Unit) = {
@@ -60,14 +59,9 @@ class DeveloperFragment() : BaseFragment<FragmentDeveloperBinding>(){
                 val i1 = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
                 i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 view.context.startActivity(i1)
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 Toast.makeText(requireContext(), "您并没有安装QQ或者Tim", Toast.LENGTH_SHORT).show()
             }
-
         }
     }
-
-
-
-
 }

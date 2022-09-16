@@ -2,13 +2,13 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_head"
     android:layout_width="match_parent"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp"
-    android:textColor="#FF9197B1"
-    android:text="上午"
-    android:textSize="12.329987sp"
+    android:layout_height="wrap_content"
     android:clickable="false"
     android:focusable="false"
-    android:layout_height="wrap_content">
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:text="上午"
+    android:textColor="#FF9197B1"
+    android:textSize="12.329987sp">
 
 </TextView>

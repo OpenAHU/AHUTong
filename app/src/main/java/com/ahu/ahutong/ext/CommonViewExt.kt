@@ -3,7 +3,6 @@ package com.ahu.ahutong.ext
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.MenuItem
-import android.view.View
 import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
@@ -27,20 +26,23 @@ import com.simon.library.view.NumberPickerView
 @BindingAdapter("loadImg")
 fun loadImg(view: ShapeableImageView, url: String?) {
     view.isVisible = !url.isNullOrEmpty()
-    if (!url.isNullOrEmpty())
+    if (!url.isNullOrEmpty()) {
         view.load(url)
+    }
 }
+
 @BindingAdapter("loadColor")
-fun loadColor(view: ShapeableImageView, color: String?){
-    if (!color.isNullOrEmpty())
+fun loadColor(view: ShapeableImageView, color: String?) {
+    if (!color.isNullOrEmpty()) {
         view.setImageDrawable(ColorDrawable(Color.parseColor(color)))
+    }
 }
+
 @BindingAdapter("loadImg")
-fun loadImg(view: ImageView, id: Int){
-    if (id != 0){
+fun loadImg(view: ImageView, id: Int) {
+    if (id != 0) {
         view.load(id)
     }
-
 }
 
 @BindingAdapter("onSelectItem")
@@ -49,16 +51,18 @@ fun onSelectItem(view: BottomNavigationView, action: ((MenuItem) -> Boolean)?) {
 }
 
 @BindingAdapter("onIconClick")
-fun onIconClick(view: MaterialToolbar, action: (() -> Unit)?){
-    view.setNavigationOnClickListener{
+fun onIconClick(view: MaterialToolbar, action: (() -> Unit)?) {
+    view.setNavigationOnClickListener {
         action?.invoke()
     }
 }
+
 @BindingAdapter("autoSizeText")
 fun autoSizeText(view: AutoSizeTextView, text: CharSequence) {
     view.setAutoSizeText(text)
 }
-fun NumberPickerView.defaultStyle(){
+
+fun NumberPickerView.defaultStyle() {
     setDividerColor(Color.GRAY)
     setDividerHeight(1f)
     setDividerPadding(35f)

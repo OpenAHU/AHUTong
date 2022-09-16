@@ -7,8 +7,6 @@ import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
 
 /**
  * @Author SinkDev
@@ -79,7 +77,6 @@ object AHUCache {
         return kv.decodeString("password_wisdom")
     }
 
-
     /**
      * 保存课程表
      * @param schoolYear String
@@ -88,7 +85,7 @@ object AHUCache {
      */
     fun saveSchedule(schoolYear: String, schoolTerm: String, schdule: List<Course>) {
         val data = Gson().toJson(schdule)
-        kv.putString("${schoolYear}-${schoolTerm}.schedule", data)
+        kv.putString("$schoolYear-$schoolTerm.schedule", data)
     }
 
     /**
@@ -98,10 +95,9 @@ object AHUCache {
      * @return List<Course>
      */
     fun getSchedule(schoolYear: String, schoolTerm: String): List<Course>? {
-        val data = kv.getString("${schoolYear}-${schoolTerm}.schedule", "") ?: ""
+        val data = kv.getString("$schoolYear-$schoolTerm.schedule", "") ?: ""
         return data.fromJson(object : TypeToken<List<Course>>() {}.type)
     }
-
 
     /**
      * 保存成绩
@@ -139,7 +135,6 @@ object AHUCache {
         return data.fromJson(object : TypeToken<List<Exam>>() {}.type)
     }
 
-
     /**
      * 获取开学时间
      * @param schoolYear String yyyy-yyyy
@@ -147,7 +142,7 @@ object AHUCache {
      * @return String? yyyy-MM-dd
      */
     fun getSchoolTermStartTime(schoolYear: String, schoolTerm: String): String? {
-        return kv.decodeString("startTime-${schoolYear}-${schoolTerm}")
+        return kv.decodeString("startTime-$schoolYear-$schoolTerm")
     }
 
     /**
@@ -157,7 +152,7 @@ object AHUCache {
      * @param startTime String yyyy-MM-dd
      */
     fun saveSchoolTermStartTime(schoolYear: String, schoolTerm: String, startTime: String) {
-        kv.encode("startTime-${schoolYear}-${schoolTerm}", startTime)
+        kv.encode("startTime-$schoolYear-$schoolTerm", startTime)
     }
 
     /**
@@ -167,7 +162,6 @@ object AHUCache {
     fun getSchoolYear(): String? {
         return kv.decodeString("defaultSchoolYear")
     }
-
 
     /**
      * 保存默认的学年
@@ -208,7 +202,6 @@ object AHUCache {
     fun saveIsShowAllCourse(isCourse: Boolean) {
         kv.putBoolean("isShowAllCourse", isCourse)
     }
-
 
     /**
      * 保存ScheduleTheme
@@ -264,6 +257,4 @@ object AHUCache {
         clearCurrentUser()
         saveWisdomPassword("")
     }
-
-
 }

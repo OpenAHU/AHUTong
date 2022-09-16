@@ -13,12 +13,11 @@ class WebViewLoginer(val webView: WebView) {
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = client
         // 清理之前的Cookie
-        CookieManager.getInstance().removeAllCookies(null);
+        CookieManager.getInstance().removeAllCookies(null)
         CookieManager.getInstance().flush()
     }
 
     fun login(user: ReptileUser, loginCallback: (Int, Throwable?) -> Unit) {
         client.login(webView, user, loginCallback)
     }
-
 }

@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +19,6 @@ import com.ahu.ahutong.databinding.ItemTelBinding
 import com.ahu.ahutong.ext.dp
 import com.ahu.ahutong.ui.adapter.base.BaseAdapter
 import com.ahu.ahutong.ui.page.state.TelDirectoryViewModel
-
 
 class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
     private lateinit var mState: TelDirectoryViewModel
@@ -44,8 +42,8 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
             layoutParams.topMargin = 10.dp.toInt()
             layoutParams.bottomMargin = 10.dp.toInt()
             radioButton.layoutParams = layoutParams
-            radioButton.text = types;
-            radioButton.id = index;
+            radioButton.text = types
+            radioButton.id = index
             radioButton.setOnCheckedChangeListener { t, isChecked ->
                 if (isChecked) mState.theme.theme.setItem(t, true)
                 else t.setBackgroundColor(Color.TRANSPARENT)
@@ -73,7 +71,6 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
         dataBinding.recyclerType.check(0)
     }
 
-
     inner class ClickProxy {
         val back: (() -> Unit) = {
             nav().popBackStack()
@@ -81,10 +78,8 @@ class TelDirectoryFragment : BaseFragment<FragmentTeldirectoryBinding>() {
 
         fun gotoTel(view: View, tel: String) {
             val dialIntent =
-                Intent(Intent.ACTION_DIAL, Uri.parse("tel:$tel")) //跳转到拨号界面，同时传递电话号码
+                Intent(Intent.ACTION_DIAL, Uri.parse("tel:$tel")) // 跳转到拨号界面，同时传递电话号码
             startActivity(dialIntent)
         }
     }
-
-
 }

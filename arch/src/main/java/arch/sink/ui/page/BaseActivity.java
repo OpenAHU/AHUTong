@@ -9,7 +9,6 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.lifecycle.ViewModel;
@@ -19,19 +18,19 @@ import arch.sink.BaseApplication;
 import arch.sink.data.manager.NetworkStateManager;
 import arch.sink.ui.BarConfig;
 import arch.sink.ui.SinkBar;
-import arch.sink.utils.NightUtils;
 
 /**
  * @Author SinkDev
  * @Date 2021/7/18-17:16
  * @Email 468766131@qq.com
  */
-public abstract class BaseActivity<R extends  ViewDataBinding> extends AppCompatActivity {
+public abstract class BaseActivity<R extends ViewDataBinding> extends AppCompatActivity {
 
     protected R dataBinding;
     //ViewModelProvider
     private ViewModelProvider mApplicationVMProvider;
     private ViewModelProvider mActivityVMProvider;
+
     //initViewModel
     public abstract void initViewModel();
 
@@ -39,13 +38,14 @@ public abstract class BaseActivity<R extends  ViewDataBinding> extends AppCompat
     protected abstract DataBindingConfig getDataBindingConfig();
 
     @NonNull
-    protected BarConfig getBarConfig(){
+    protected BarConfig getBarConfig() {
         return new BarConfig();
     }
 
-    protected void loadInitData(){
+    protected void loadInitData() {
 
     }
+
     @Override
     protected void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,11 +78,12 @@ public abstract class BaseActivity<R extends  ViewDataBinding> extends AppCompat
 
     /**
      * 获取Application级的ViewModel
+     *
      * @param viewModelClass ViewModel Class
      * @return Application级的ViewModel
      */
-    protected <T extends ViewModel> T getApplicationScopeViewModel(Class<T> viewModelClass){
-        if (mApplicationVMProvider == null){
+    protected <T extends ViewModel> T getApplicationScopeViewModel(Class<T> viewModelClass) {
+        if (mApplicationVMProvider == null) {
             BaseApplication application = (BaseApplication) getApplication();
             mApplicationVMProvider = new ViewModelProvider(application,
                     ViewModelProvider.AndroidViewModelFactory.getInstance(application));
@@ -92,11 +93,12 @@ public abstract class BaseActivity<R extends  ViewDataBinding> extends AppCompat
 
     /**
      * 获取Activity级的ViewModel
+     *
      * @param viewModelClass ViewModel Class
      * @return Activity级的ViewModel
      */
-    protected <T extends ViewModel> T getActivityScopeViewModel(Class<T> viewModelClass){
-        if (mActivityVMProvider == null){
+    protected <T extends ViewModel> T getActivityScopeViewModel(Class<T> viewModelClass) {
+        if (mActivityVMProvider == null) {
             mActivityVMProvider = new ViewModelProvider(this);
         }
         return mActivityVMProvider.get(viewModelClass);

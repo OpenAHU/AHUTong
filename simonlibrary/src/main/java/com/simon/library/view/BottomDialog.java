@@ -1,17 +1,14 @@
 package com.simon.library.view;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 
 import com.simon.library.DialogUtil;
 import com.simon.library.R;
@@ -20,7 +17,7 @@ public abstract class BottomDialog extends DialogFragment {
     private static final String KEY_KEEP_ON_RESTARTED = "KEEP_ON_RESTARTED";
 
     @Override
-    public void onCreate( Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null && !savedInstanceState.getBoolean(KEY_KEEP_ON_RESTARTED, true)) {
             dismiss();
@@ -30,7 +27,7 @@ public abstract class BottomDialog extends DialogFragment {
 
     @NonNull
     @Override
-    public Dialog onCreateDialog( Bundle savedInstanceState) {
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = new Dialog(getContext(), getTheme());
         DialogUtil.setWith(dialog, WindowManager.LayoutParams.MATCH_PARENT);
         DialogUtil.setGravity(dialog, Gravity.BOTTOM);
@@ -61,7 +58,7 @@ public abstract class BottomDialog extends DialogFragment {
     /**
      * 禁止返回键关闭
      */
-    protected void cancelBackKey(Dialog dialog){
+    protected void cancelBackKey(Dialog dialog) {
         dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {

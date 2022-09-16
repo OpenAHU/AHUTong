@@ -47,8 +47,7 @@ public abstract class BaseFragment<R extends ViewDataBinding> extends Fragment {
     protected abstract DataBindingConfig getDataBindingConfig();
 
 
-
-    protected void observeData(){
+    protected void observeData() {
 
     }
 
@@ -68,7 +67,7 @@ public abstract class BaseFragment<R extends ViewDataBinding> extends Fragment {
         return dataBinding.getRoot();
     }
 
-    protected NavController nav(){
+    protected NavController nav() {
         return NavHostFragment.findNavController(this);
     }
 
@@ -82,14 +81,15 @@ public abstract class BaseFragment<R extends ViewDataBinding> extends Fragment {
 
     /**
      * 获取Application级的ViewModel
+     *
      * @param viewModelClass ViewModel Class
      * @return Application级的ViewModel
      */
-    protected <T extends ViewModel> T getApplicationScopeViewModel(Class<T> viewModelClass){
+    protected <T extends ViewModel> T getApplicationScopeViewModel(Class<T> viewModelClass) {
         if (getActivity() == null) {
             throw new IllegalStateException("Can't create ViewModelProvider for detached fragment");
         }
-        if (mApplicationVMProvider == null){
+        if (mApplicationVMProvider == null) {
             BaseApplication application = (BaseApplication) getActivity().getApplication();
             mApplicationVMProvider = new ViewModelProvider(application,
                     ViewModelProvider.AndroidViewModelFactory.getInstance(application));
@@ -99,14 +99,15 @@ public abstract class BaseFragment<R extends ViewDataBinding> extends Fragment {
 
     /**
      * 获取Activity级的ViewModel
+     *
      * @param viewModelClass ViewModel Class
      * @return Activity级的ViewModel
      */
-    protected <T extends ViewModel> T getActivityScopeViewModel(Class<T> viewModelClass){
+    protected <T extends ViewModel> T getActivityScopeViewModel(Class<T> viewModelClass) {
         if (getActivity() == null) {
             throw new IllegalStateException("Can't create ViewModelProvider for detached fragment");
         }
-        if (mActivityVMProvider == null){
+        if (mActivityVMProvider == null) {
             mActivityVMProvider = new ViewModelProvider(getActivity());
         }
         return mActivityVMProvider.get(viewModelClass);
@@ -114,11 +115,12 @@ public abstract class BaseFragment<R extends ViewDataBinding> extends Fragment {
 
     /**
      * 获取Fragment级的ViewModel
+     *
      * @param viewModelClass ViewModel Class
      * @return Fragment级的ViewModel
      */
-    protected  <T extends ViewModel> T getFragmentScopeViewModel(Class<T> viewModelClass){
-        if (mFragmentVMProvider == null){
+    protected <T extends ViewModel> T getFragmentScopeViewModel(Class<T> viewModelClass) {
+        if (mFragmentVMProvider == null) {
             mFragmentVMProvider = new ViewModelProvider(this);
         }
         return mFragmentVMProvider.get(viewModelClass);

@@ -1,11 +1,9 @@
 package com.ahu.ahutong.ui.page
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import arch.sink.ui.page.BaseFragment
@@ -92,7 +90,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SelectTimeDial
 
     override fun onSelectTime(schoolYear: String, schoolTerm: String, week: Int) {
         mState.saveTime(schoolYear, schoolTerm, week)
-        //刷新
+        // 刷新
         if (AHUCache.isLogin()) {
             mState.refreshSchedule(schoolYear, schoolTerm)
         }
@@ -103,7 +101,5 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SelectTimeDial
         if (::mState.isInitialized) {
             mState.loadConfig()
         }
-
     }
-
 }

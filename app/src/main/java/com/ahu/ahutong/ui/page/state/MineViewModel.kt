@@ -2,7 +2,6 @@ package com.ahu.ahutong.ui.page.state
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.User
 
 /**

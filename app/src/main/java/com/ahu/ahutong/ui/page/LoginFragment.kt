@@ -27,7 +27,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
     override fun observeData() {
         super.observeData()
         mState.serverLoginResult.observe(this) { result ->
-            dataBinding.btLogin.isClickable = true  // 恢复按钮
+            dataBinding.btLogin.isClickable = true // 恢复按钮
             result.onSuccess {
                 Toast.makeText(requireContext(), "登录成功，欢迎您：${it.name}", Toast.LENGTH_SHORT).show()
                 nav().popBackStack()
@@ -45,7 +45,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //设置动画
+        // 设置动画
         dataBinding.edWisdomPassword.setOnFocusChangeListener { _, focus ->
             if (focus) {
                 dataBinding.emoji.close()
@@ -53,10 +53,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
                 dataBinding.emoji.open()
             }
         }
-
-
     }
-
 
     inner class ClickProxy {
 
@@ -68,7 +65,6 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
                 return
             }
             mState.loginWithServer(userId, wisdomPassword)
-
         }
     }
 }

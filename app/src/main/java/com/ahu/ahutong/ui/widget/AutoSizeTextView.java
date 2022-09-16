@@ -2,7 +2,6 @@ package com.ahu.ahutong.ui.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
@@ -28,7 +27,7 @@ public class AutoSizeTextView extends AppCompatTextView {
     }
 
     public void setAutoSizeText(CharSequence text) {
-        int mTextViewWidth = dip2px( 80);
+        int mTextViewWidth = dip2px(80);
         while (true) {
             float textWidth = getPaint().measureText((String) text);
             if (textWidth > mTextViewWidth) {
@@ -41,6 +40,7 @@ public class AutoSizeTextView extends AppCompatTextView {
         }
         setText(text);
     }
+
     private int dip2px(float dpValue) {
         final float scale = getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);

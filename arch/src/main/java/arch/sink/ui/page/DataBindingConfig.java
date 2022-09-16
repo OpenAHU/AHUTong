@@ -1,6 +1,7 @@
 package arch.sink.ui.page;
 
 import android.util.SparseArray;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 
@@ -15,13 +16,14 @@ public class DataBindingConfig {
     @NonNull
     private final SparseArray<Object> bindingParams = new SparseArray<Object>();
 
-    public DataBindingConfig(int layout, int vmVarId,@NonNull ViewModel stateViewModel) {
+    public DataBindingConfig(int layout, int vmVarId, @NonNull ViewModel stateViewModel) {
         this.layout = layout;
         bindingParams.put(vmVarId, stateViewModel);
     }
 
     /**
      * 获取layout Id
+     *
      * @return layoutId
      */
     public int getLayout() {
@@ -35,12 +37,13 @@ public class DataBindingConfig {
 
     /**
      * 添加BindingParams
-     * @param id id
+     *
+     * @param id     id
      * @param object object
      */
-    public DataBindingConfig addBindingParam(int id, @NonNull Object object){
-         bindingParams.put(id, object);
-         return this;
+    public DataBindingConfig addBindingParam(int id, @NonNull Object object) {
+        bindingParams.put(id, object);
+        return this;
     }
 
 }

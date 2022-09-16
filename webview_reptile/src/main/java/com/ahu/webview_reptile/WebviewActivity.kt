@@ -5,19 +5,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.webkit.*
+import android.webkit.CookieManager
+import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import okhttp3.*
+import okhttp3.OkHttpClient
 
 class WebviewActivity : AppCompatActivity() {
 
     lateinit var webview: WebView
     val client = OkHttpClient()
     val handler = Handler(Looper.getMainLooper())
-
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,12 +28,11 @@ class WebviewActivity : AppCompatActivity() {
         sinkWebViewReptile.loginTeach()
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
-            GlobalScope.launch{
+            GlobalScope.launch {
                 val cookie = CookieManager.getInstance()
                     .getCookie("https://jwxt0.ahu.edu.cn")
                 Log.e("SINK", cookie)
             }
         }
     }
-
 }

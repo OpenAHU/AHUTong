@@ -1,16 +1,14 @@
 package com.ahu.ahutong.ui.page.state
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.model.Developer
 import com.ahu.ahutong.data.model.Tel
 import com.ahu.ahutong.ui.widget.schedule.bean.DefaultDataUtils
-import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
 
 class TelDirectoryViewModel : ViewModel() {
     val theme by lazy { AHUCache.getScheduleTheme() ?: DefaultDataUtils.getDefaultTheme() }
-    companion object{
+
+    companion object {
         val TelBook by lazy {
             mapOf(
                 "常用" to listOf(
@@ -46,7 +44,7 @@ class TelDirectoryViewModel : ViewModel() {
                     Tel("就业指导中心", "0551-63861355")
                 ),
                 "财务处" to listOf(
-                    Tel("办公室","0551-63861569"),
+                    Tel("办公室", "0551-63861569"),
                     Tel("收费管理科", "0551-63861561")
                 ),
                 "保卫处" to listOf(
@@ -79,5 +77,4 @@ class TelDirectoryViewModel : ViewModel() {
             )
         }
     }
-
 }

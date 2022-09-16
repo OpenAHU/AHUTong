@@ -33,7 +33,6 @@ class CourseViewModel : ViewModel() {
         AHUCache.saveSchedule(schoolYear, schoolTerm, newSchedule)
     }
 
-
     fun removeCourse(course: Course) {
         val schoolTerm = AHUCache.getSchoolTerm()
         val schoolYear = AHUCache.getSchoolYear()

@@ -26,7 +26,9 @@ class ChooseOneDialog(val list: List<String>) : BottomDialog() {
             picker.setDividerMarginR(25)
             picker.defaultStyle()
             picker.setDisplayedValuesAndPickedIndex(
-                list.toTypedArray(), 0, false
+                list.toTypedArray(),
+                0,
+                false
             )
             proxy = ClickProxy()
         }
@@ -37,7 +39,6 @@ class ChooseOneDialog(val list: List<String>) : BottomDialog() {
         selectListener = null
         binding.unbind()
     }
-
 
     inner class ClickProxy {
         fun cancel(view: View?) {

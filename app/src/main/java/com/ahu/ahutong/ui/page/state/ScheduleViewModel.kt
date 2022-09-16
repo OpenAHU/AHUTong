@@ -1,6 +1,8 @@
 package com.ahu.ahutong.ui.page.state
 
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import arch.sink.utils.TimeUtils
 import com.ahu.ahutong.common.SingleLiveEvent
 import com.ahu.ahutong.data.AHURepository
@@ -8,10 +10,7 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.widget.schedule.bean.DefaultDataUtils
 import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleConfigBean
-import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
-import com.ahu.ahutong.ui.widget.schedule.bean.SimpleTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -30,7 +29,6 @@ class ScheduleViewModel : ViewModel() {
 
     val schoolYear: String
         get() = AHUCache.getSchoolYear() ?: "2022"
-
 
     val schoolTerm: String
         get() = AHUCache.getSchoolTerm() ?: "1"
@@ -80,7 +78,7 @@ class ScheduleViewModel : ViewModel() {
                     AHUCache.getScheduleTheme() ?: DefaultDataUtils.getDefaultTheme()
                 // 是否显示全部课程
                 scheduleConfigBean.isShowAll = AHUCache.isShowAllCourse()
-                //根据开学时间， 获取当前周数
+                // 根据开学时间， 获取当前周数
                 val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
                     .parse(time)
                 // 开学时间
@@ -95,7 +93,6 @@ class ScheduleViewModel : ViewModel() {
                 scheduleConfig.postValue(it)
             }
         }
-
     }
 
     /**
@@ -107,7 +104,7 @@ class ScheduleViewModel : ViewModel() {
     fun saveTime(schoolYear: String, schoolTerm: String, week: Int) {
         AHUCache.saveSchoolYear(schoolYear)
         AHUCache.saveSchoolTerm(schoolTerm)
-        //推算开学日期
+        // 推算开学日期
         val instance = Calendar.getInstance(Locale.CHINA)
         instance.add(Calendar.DATE, (week - 1) * -7)
         instance.firstDayOfWeek = Calendar.MONDAY
@@ -116,9 +113,9 @@ class ScheduleViewModel : ViewModel() {
         scheduleConfig.value?.startTime = instance.time
         changeWeek(week)
         AHUCache.saveSchoolTermStartTime(
-            schoolYear, schoolTerm,
+            schoolYear,
+            schoolTerm,
             SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(instance.time)
         )
     }
-
 }

@@ -20,7 +20,7 @@ class SinkWebViewReptile(val webView: WebView) {
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = client
         // 清理之前的Cookie
-        CookieManager.getInstance().removeAllCookies(null);
+        CookieManager.getInstance().removeAllCookies(null)
         CookieManager.getInstance().flush()
     }
 
@@ -28,7 +28,6 @@ class SinkWebViewReptile(val webView: WebView) {
         client.loginCallback = loginCallback
         webView.loadUrl("https://wvpn.ahu.edu.cn/")
     }
-
 
     fun loginTeach() {
         login { str, e ->
@@ -39,10 +38,10 @@ class SinkWebViewReptile(val webView: WebView) {
     suspend fun getCardMoney() {
         val response = withContext(Dispatchers.IO) {
             val isWvpn = client.getIsWvpn()
-            val cookieSite=if (isWvpn) "https://wvpn.ahu.edu.cn/" else "http://one.ahu.edu.cn"
+            val cookieSite = if (isWvpn) "https://wvpn.ahu.edu.cn/" else "http://one.ahu.edu.cn"
             val url =
                 if (isWvpn) "https://wvpn.ahu.edu.cn/http/77726476706e69737468656265737421fff944d226387d1e7b0c9ce29b5b/tp_up/up/subgroup/getCardMoney"
-                    else "http://one.ahu.edu.cn/tp_up/up/subgroup/getCardMoney"
+                else "http://one.ahu.edu.cn/tp_up/up/subgroup/getCardMoney"
             val request = Request.Builder()
                 .header("Accept", "application/json")
                 .header("Cookie", CookieManager.getInstance().getCookie(cookieSite))
@@ -58,7 +57,7 @@ class SinkWebViewReptile(val webView: WebView) {
         }
         if (response.isSuccessful) {
             val json = response.body?.string() ?: return
-            Log.e("SINK", "success json = ${json}")
+            Log.e("SINK", "success json = $json")
         } else {
             Log.e("SINK", "error json = ${response.message}")
         }
@@ -67,7 +66,7 @@ class SinkWebViewReptile(val webView: WebView) {
     suspend fun getSchedule() {
         val response = withContext(Dispatchers.IO) {
             val isWvpn = client.getIsWvpn()
-            val cookieSite=if (isWvpn) "https://wvpn.ahu.edu.cn/" else "http://one.ahu.edu.cn"
+            val cookieSite = if (isWvpn) "https://wvpn.ahu.edu.cn/" else "http://one.ahu.edu.cn"
             val request = Request.Builder()
                 .header(
                     "Referer",
@@ -91,6 +90,4 @@ class SinkWebViewReptile(val webView: WebView) {
             Log.e("SINK", "error = ${response.message}")
         }
     }
-
-
 }

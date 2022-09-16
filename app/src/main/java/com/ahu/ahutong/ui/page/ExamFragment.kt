@@ -3,7 +3,6 @@ package com.ahu.ahutong.ui.page
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
@@ -44,25 +43,25 @@ class ExamFragment : BaseFragment<FragmentExamBinding>() {
             }
         }
         dataBinding.recyclerExams.adapter = adapter
-        //刷新
+        // 刷新
         dataBinding.refreshLayout.setOnRefreshListener {
             mState.loadExam()
         }
 
-        //加载数据
+        // 加载数据
         mState.loadExam(false)
         dataBinding.refreshLayout.isRefreshing = true
-
     }
 
     @SuppressLint("SetTextI18n")
     override fun observeData() {
         mState.data.observe(this) { result ->
             result.onSuccess {
-                if (it.isEmpty())
+                if (it.isEmpty()) {
                     Toast.makeText(requireContext(), R.string.empty_exam, Toast.LENGTH_SHORT).show()
-                else
+                } else {
                     dataBinding.cardTip.text = "共 ${it.size} 条考试信息"
+                }
                 adapter?.submitList(it)
             }.onFailure {
                 dataBinding.cardTip.text = it.message
@@ -76,6 +75,4 @@ class ExamFragment : BaseFragment<FragmentExamBinding>() {
             nav().popBackStack()
         }
     }
-
-
 }

@@ -1,27 +1,23 @@
 package com.ahu.ahutong.utils;
 
 
-
 import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyFactory;
-import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Cipher;
 
 public class RSA {
+    public static final String TRANSFORMATION = "RSA/ECB/PKCS1Padding";
     private static final int MAX_ENCRYPT_BLOCK = 117;
     private final static String RSA_ALGORITHM = "RSA";
     private final static String PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCPX8Mg9x2+a8go7O7UdZ/kjZGY\n" +
             "JlF8XTFpeoPS+LPcS7I7BNMo72j3mUQSK6KOmHPpWmrbV9FoU6JzLQCP4T+v+Bvy\n" +
             "JgUrGFAYpRy/QUUI16O6X4dNhvd0snDcbDrS7WrRyZEpg1o84++kScqY6WgWjDiM\n" +
             "DJVPO6b2nl+Xf4F6KwIDAQAB";
-    public static final String TRANSFORMATION = "RSA/ECB/PKCS1Padding";
 
     public static String encryptByPublicKey(byte[] data)
             throws Exception {
@@ -52,8 +48,6 @@ public class RSA {
         out.close();
         return Base64.encodeToString(encryptedData, Base64.DEFAULT);
     }
-
-
 
 
 }

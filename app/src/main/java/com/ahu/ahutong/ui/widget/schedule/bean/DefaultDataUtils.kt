@@ -48,7 +48,6 @@ object DefaultDataUtils {
         return simpleThemes[0]
     }
 
-
     private fun createSimpleTheme(name: String, colors: List<String>): ScheduleTheme {
         val jsonObject = JSONObject()
         jsonObject.put("name", name)

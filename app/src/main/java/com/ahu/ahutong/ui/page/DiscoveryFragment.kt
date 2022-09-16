@@ -16,7 +16,6 @@ import com.ahu.ahutong.ui.adapter.DiscoveryAdapter
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
 
-
 /**
  * @Author SinkDev
  * @Date 2021/7/27-19:42
@@ -34,7 +33,6 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
     override fun getDataBindingConfig(): DataBindingConfig {
         return DataBindingConfig(R.layout.fragment_discovery, BR.state, mState)
     }
-
 
     override fun observeData() {
         mState.bannerData.observe(this) {
@@ -91,6 +89,4 @@ class DiscoveryFragment : BaseFragment<FragmentDiscoveryBinding>() {
             nav().navigate(R.id.course_fragment, bundle)
         }
     }
-
-
 }

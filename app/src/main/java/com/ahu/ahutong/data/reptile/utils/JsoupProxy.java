@@ -1,6 +1,7 @@
 package com.ahu.ahutong.data.reptile.utils;
 
 import org.jsoup.Connection;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class JsoupProxy {
 
     private static String getPlaintUrl(String proxyUrl) throws Exception {
         if (!urlCache.containsKey(proxyUrl.hashCode())) {
-            urlCache.put(proxyUrl.hashCode(),  VpnURL.getPlaintUrl(proxyUrl));
+            urlCache.put(proxyUrl.hashCode(), VpnURL.getPlaintUrl(proxyUrl));
         }
         return urlCache.get(proxyUrl.hashCode());
     }

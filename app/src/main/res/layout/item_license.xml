@@ -25,9 +25,9 @@
             android:paddingHorizontal="10dp">
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:layout_marginTop="15dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
                 android:text="@{license.name + ` - ` + license.author}"
                 android:textAppearance="?textAppearanceListItem"
                 tools:text="AndroidX - Google" />

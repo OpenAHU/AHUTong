@@ -1,5 +1,9 @@
 package com.ahu.ahutong.ui.page.state
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +15,6 @@ import com.tencent.bugly.crashreport.CrashReport
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.IllegalArgumentException
 
 /**
  * @Author: SinkDev
@@ -19,12 +22,14 @@ import java.lang.IllegalArgumentException
  * @Email: 468766131@qq.com
  */
 class LoginViewModel : ViewModel() {
+    var userID by mutableStateOf(TextFieldValue())
+    var password by mutableStateOf(TextFieldValue())
     val serverLoginResult = MutableLiveData<Result<User>>()
 
     fun loginWithServer(userID: String, wisdomPassword: String) =
         viewModelScope.launch {
             val result: Result<User> = try {
-                //智慧安大登录
+                // 智慧安大登录
                 val wisdomResponse = withContext(Dispatchers.IO) {
                     val encryptedPassword =
                         RSA.encryptByPublicKey(wisdomPassword.toByteArray(Charsets.UTF_8))
@@ -33,7 +38,7 @@ class LoginViewModel : ViewModel() {
                 }
                 // 登录必须全部成功
                 if (wisdomResponse.isSuccessful) {
-                    wisdomResponse.data.xh=userID
+                    wisdomResponse.data.xh = userID
                     AHUCache.saveCurrentUser(wisdomResponse.data)
                     Result.success(wisdomResponse.data)
                 } else {
@@ -45,6 +50,4 @@ class LoginViewModel : ViewModel() {
             }
             serverLoginResult.value = result
         }
-
-
 }

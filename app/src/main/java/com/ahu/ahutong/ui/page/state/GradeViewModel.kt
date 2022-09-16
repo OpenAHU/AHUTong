@@ -8,8 +8,6 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.ext.getSchoolYears
 import kotlinx.coroutines.launch
-import java.lang.IllegalStateException
-import java.util.*
 
 class GradeViewModel : ViewModel() {
     val totalGradePointAverage = MutableLiveData<String>()
@@ -26,8 +24,10 @@ class GradeViewModel : ViewModel() {
 
     companion object {
         val schoolYears by lazy {
-            (AHUCache.getCurrentUser()
-                ?: throw IllegalStateException("未登录，无法打开成绩界面！")).getSchoolYears()
+            (
+                AHUCache.getCurrentUser()
+                    ?: throw IllegalStateException("未登录，无法打开成绩界面！")
+                ).getSchoolYears()
         }
         val terms = mutableMapOf("1" to "0", "2" to "1")
     }
