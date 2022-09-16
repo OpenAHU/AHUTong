@@ -98,9 +98,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="12sp"
+                        android:text="@{`等圈存:`+ bean.transitionBalance}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
-                        tools:text="未冻结" />
+                        tools:text="等圈存:100.3" />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tv_flow"
@@ -161,10 +162,10 @@
                         android:id="@+id/tv_north"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:paddingTop="6dp"
+                        android:paddingTop="8dp"
                         android:text="@{bean.bathrooms}"
                         android:textColor="@color/black"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/icon_bath"

@@ -8,7 +8,7 @@ public class Card {
     @SerializedName("balance")
     private Double balance;
     @SerializedName("transitionBalance")
-    private Integer transitionBalance;
+    private Double transitionBalance;
 
     public Double getBalance() {
         return balance;
@@ -18,11 +18,11 @@ public class Card {
         this.balance = balance;
     }
 
-    public Integer getTransitionBalance() {
+    public Double getTransitionBalance() {
         return transitionBalance;
     }
 
-    public void setTransitionBalance(Integer transitionBalance) {
+    public void setTransitionBalance(Double transitionBalance) {
         this.transitionBalance = transitionBalance;
     }
 

@@ -42,12 +42,12 @@ class DiscoveryViewModel : ViewModel() {
                     AHURepository.getCardMoney()
                         .onSuccess {
                             activityBean.value =
-                                DiscoveryAdapter.ActivityBean(it.balance.toString(), stringBuilder.toString())
+                                DiscoveryAdapter.ActivityBean(it.balance.toString(),it.transitionBalance.toString(), stringBuilder.toString())
                         }.onFailure {
-                            activityBean.value = DiscoveryAdapter.ActivityBean("0.00",  stringBuilder.toString())
+                            activityBean.value = DiscoveryAdapter.ActivityBean("0.00","0.00",  stringBuilder.toString())
                         }
                 }.onFailure {
-                    activityBean.value = DiscoveryAdapter.ActivityBean("0.00", "桔园:女生\n竹园:均可\n惠园:均可")
+                    activityBean.value = DiscoveryAdapter.ActivityBean("0.00","0.00", "桔园:女生\n竹园:均可\n惠园:均可")
                 }
         }
     }
