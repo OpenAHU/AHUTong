@@ -62,10 +62,10 @@
 
                     <com.ahu.ahutong.ui.widget.AutoSizeTextView
                         android:id="@+id/tv_money"
+                        autoSizeText="@{`￥`+ bean.money}"
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        autoSizeText="@{`￥`+ bean.money}"
                         android:textAppearance="?textAppearanceListItem"
                         android:textSize="23sp"
                         app:layout_constraintLeft_toLeftOf="parent"
@@ -159,24 +159,16 @@
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tv_north"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="@{`北区：` + bean.north}"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:paddingTop="6dp"
+                        android:text="@{bean.bathrooms}"
                         android:textColor="@color/black"
+                        android:textSize="16sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/icon_bath"
-                        tools:text="北区：女生" />
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="@{`南区/蕙园：` + bean.south}"
-                        android:textColor="@color/black"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_north"
-                        tools:text="南区/蕙园：男生" />
+                        app:layout_constraintTop_toBottomOf="@+id/icon_bath"
+                        tools:text="桔园:女生\n竹园:均可\n惠园:均" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

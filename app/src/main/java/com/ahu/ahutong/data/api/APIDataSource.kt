@@ -25,4 +25,8 @@ class APIDataSource: BaseDataSource {
     override suspend fun getCardMoney(): AHUResponse<Card> {
         return AHUService.API.getCardMoney()
     }
+
+    override suspend fun getBathRooms(): AHUResponse<List<BathRoom>> {
+        return AHUService.API.getBathRooms()
+    }
 }

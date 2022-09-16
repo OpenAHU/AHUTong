@@ -41,6 +41,10 @@ class ReptileDataSource(user: ReptileUser) : BaseDataSource {
         return checkLoginStatus() ?: WebViewReptile.getCardMoney()
     }
 
+    override suspend fun getBathRooms(): AHUResponse<List<BathRoom>> {
+        TODO("Not yet implemented")
+    }
+
     private fun <T> checkLoginStatus(): AHUResponse<T>? {
         if (!ReptileManager.getInstance().isLoginStatus) {
             return createFailureResponse("本地爬虫正在登录中,或当前登录密码错误！")

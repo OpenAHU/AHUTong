@@ -23,4 +23,6 @@ interface BaseDataSource {
 
 
     suspend fun getCardMoney(): AHUResponse<Card>
+
+    suspend fun getBathRooms(): AHUResponse<List<BathRoom>>
 }

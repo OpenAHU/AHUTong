@@ -66,6 +66,13 @@ interface AHUService {
     suspend fun getCardMoney(): AHUResponse<Card>
 
     /**
+     * 获取浴室开放
+     * @return AHUResponse<BathRoom>
+     */
+    @GET("/api/bathroom/open")
+    suspend fun getBathRooms(): AHUResponse<List<BathRoom>>
+
+    /**
      * 获取最新版本
      * @return AHUResponse<AppVersion>
      */
@@ -83,7 +90,8 @@ interface AHUService {
         private const val BASE_URL = "https://ahuer.cn"
 
         // Cookie 本地存储
-        private val cookieJar = PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
+        private val cookieJar =
+            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
 
         //创建AHUService对象
         val API: AHUService by lazy {

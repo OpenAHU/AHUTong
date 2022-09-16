@@ -30,7 +30,7 @@ class DiscoveryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         banners = mutableListOf()
         tools = Tool.defaultTools
         courses = mutableListOf()
-        activityBean = ActivityBean("0.00", "男生", "女生")
+        activityBean = ActivityBean("0.00", "桔园:女生\n竹园:均可\n惠园:均")
     }
 
 
@@ -111,7 +111,7 @@ class DiscoveryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
 
-    data class ActivityBean(val money: String, val north: String, val south: String)
+    data class ActivityBean(val money: String, val bathrooms: String)
 
 
     fun setBanners(data: List<Banner>) {

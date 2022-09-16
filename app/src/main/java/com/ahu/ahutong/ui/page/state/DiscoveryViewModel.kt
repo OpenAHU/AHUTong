@@ -13,6 +13,7 @@ import com.ahu.ahutong.data.model.Banner
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.adapter.DiscoveryAdapter
 import kotlinx.coroutines.launch
+import java.lang.StringBuilder
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,15 +32,22 @@ class DiscoveryViewModel : ViewModel() {
 
     fun loadActivityBean() {
         viewModelScope.launch {
-            val north = AHUApplication.getBath().north;
-            val south = AHUApplication.getBath().south
-            AHURepository.getCardMoney()
+            AHURepository.getBathRooms()
                 .onSuccess {
-                    activityBean.value =
-                        DiscoveryAdapter.ActivityBean(it.balance.toString(), north, south)
+                    val stringBuilder =StringBuilder()
+                    it.stream().forEach {
+                        stringBuilder.append(it.bathroom+":"+it.openStatus.replace("wm","均可").replace("w","女生").replace("m","男生"))
+                        stringBuilder.append("\n")
+                    }
+                    AHURepository.getCardMoney()
+                        .onSuccess {
+                            activityBean.value =
+                                DiscoveryAdapter.ActivityBean(it.balance.toString(), stringBuilder.toString())
+                        }.onFailure {
+                            activityBean.value = DiscoveryAdapter.ActivityBean("0.00",  stringBuilder.toString())
+                        }
                 }.onFailure {
-                    activityBean.value = DiscoveryAdapter.ActivityBean("0.00", north, south)
-                    Toast.makeText(Utils.getApp(), it.message, Toast.LENGTH_SHORT).show()
+                    activityBean.value = DiscoveryAdapter.ActivityBean("0.00", "桔园:女生\n竹园:均可\n惠园:均可")
                 }
         }
     }

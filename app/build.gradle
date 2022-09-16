@@ -93,8 +93,6 @@ android {
 }
 
 dependencies {
-
-    implementation project(path: ':plugin')
     def retrofitVersion = "2.9.0"
     implementation project(path: ':arch')
     implementation project(path: ':simonlibrary')

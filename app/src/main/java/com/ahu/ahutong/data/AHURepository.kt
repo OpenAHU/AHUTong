@@ -162,6 +162,19 @@ object AHURepository {
         }
     }
 
+    suspend fun getBathRooms() = withContext(Dispatchers.IO) {
+        try {
+            val response = dataSource.getBathRooms()
+            if (response.isSuccessful) {
+                Result.success(response.data)
+            } else {
+                Result.failure(Throwable(response.msg))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getBanner() = withContext(Dispatchers.IO) {
         try {
             val response = AHUService.API.getBanner()

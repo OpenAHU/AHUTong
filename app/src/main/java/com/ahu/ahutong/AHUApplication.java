@@ -1,11 +1,6 @@
 package com.ahu.ahutong;
 
-
-import com.ahu.ahutong.common.ObservableData;
 import com.ahu.ahutong.common.SingleLiveEvent;
-import com.ahu.ahutong.data.model.User;
-import com.ahu.plugin.BathPlug;
-import com.ahu.plugin.BathPlugImpl;
 import com.tencent.bugly.crashreport.CrashReport;
 
 
@@ -24,14 +19,5 @@ public class AHUApplication extends BaseApplication {
         super.onCreate();
         CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG);
     }
-    private static final BathPlugImpl bath = new BathPlugImpl();
 
-    /**
-     * 返回浴室开放计算类
-     *
-     * @return 类
-     */
-    public static BathPlug getBath() {
-        return bath;
-    }
 }
