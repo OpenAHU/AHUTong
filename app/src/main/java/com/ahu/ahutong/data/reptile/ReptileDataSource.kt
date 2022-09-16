@@ -31,21 +31,6 @@ class ReptileDataSource(user: ReptileUser) : BaseDataSource {
         return checkLoginStatus() ?: WebViewReptile.getSchedule(schoolYear, schoolTerm)
     }
 
-    override suspend fun getExamInfo(
-        schoolYear: String,
-        schoolTerm: String
-    ): AHUResponse<List<Exam>> {
-        return checkLoginStatus() ?: WebViewReptile.getExam(schoolYear, schoolTerm)
-    }
-
-    override suspend fun getEmptyRoom(
-        campus: String,
-        weekday: String,
-        weekNum: String,
-        time: String
-    ): AHUResponse<List<Room>> {
-        return checkLoginStatus() ?: WebViewReptile.getEmptyRoom(campus, weekday, weekNum, time)
-    }
 
     override suspend fun getGrade(): AHUResponse<Grade> {
         return checkLoginStatus() ?: WebViewReptile.getGrade()

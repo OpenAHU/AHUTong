@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.page.state
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,14 +11,15 @@ import kotlinx.coroutines.launch
 
 class ExamViewModel : ViewModel() {
     val data = MutableLiveData<Result<List<Exam>>>()
-    val size = MutableLiveData(0)
-    fun loadExam(isRefresh: Boolean = false) = viewModelScope.launch {
-        val schoolTerm = AHUCache.getSchoolTerm()
-        val schoolYear = AHUCache.getSchoolYear()
-        if (schoolYear == null || schoolTerm == null) {
-            data.value = Result.failure(Throwable("未填写当前学年，学期。"))
+    fun loadExam() = viewModelScope.launch {
+        val user = AHUCache.getCurrentUser()
+        if (user == null) {
+            data.value = Result.failure(Throwable("账户未登录"))
             return@launch
         }
-        data.value = AHURepository.getExamInfo(schoolYear, schoolTerm, isRefresh)
+        Log.e("simon",user.name)
+//        Log.e("simon",user.xh)
+        data.value = Result.failure(Throwable("账户未登录"))
+        //data.value = AHURepository.getExamInfo(schoolYear)
     }
 }

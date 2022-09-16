@@ -44,7 +44,7 @@
     <string name="img">这是一个图</string>
     <string name="require">查询</string>
     <string name="tip_empty_room">仅能获取当日数据</string>
-    <string name="empty_exam">当前没有考试哦！</string>
+    <string name="empty_exam">当前没有考试信息</string>
     <string name="schoolYear">学年：</string>
     <string name="term">学期：</string>
     <string name="term_grade">本学期绩点</string>

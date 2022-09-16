@@ -1,89 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-	<data>
+    <data>
 
-		<variable
-			name="state"
-			type="com.ahu.ahutong.ui.page.state.ExamViewModel" />
+        <variable
+            name="state"
+            type="com.ahu.ahutong.ui.page.state.ExamViewModel" />
 
-		<variable
-			name="proxy"
-			type="com.ahu.ahutong.ui.page.ExamFragment.ClickProxy" />
+        <variable
+            name="proxy"
+            type="com.ahu.ahutong.ui.page.ExamFragment.ClickProxy" />
 
-		<import
-			alias="view"
-			type="android.view.View" />
-	</data>
+        <import
+            alias="view"
+            type="android.view.View" />
+    </data>
 
-	<LinearLayout
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-		<com.google.android.material.appbar.AppBarLayout
-			android:id="@+id/appbar"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:fitsSystemWindows="true">
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true">
 
-			<com.google.android.material.appbar.MaterialToolbar
-				onIconClick="@{proxy.back}"
-				android:layout_width="match_parent"
-				android:layout_height="?actionBarSize"
-				app:navigationIcon="@drawable/icon_back"
-				app:title="@string/exam" />
-		</com.google.android.material.appbar.AppBarLayout>
+            <com.google.android.material.appbar.MaterialToolbar
+                onIconClick="@{proxy.back}"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                app:navigationIcon="@drawable/icon_back"
+                app:title="@string/exam" />
+        </com.google.android.material.appbar.AppBarLayout>
 
 
-		<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-			android:id="@+id/refresh_layout"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-			<androidx.core.widget.NestedScrollView
-				android:layout_width="match_parent"
-				android:layout_height="match_parent">
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-				<LinearLayout
-					android:layout_width="match_parent"
-					android:layout_height="match_parent"
-					android:gravity="center"
-					android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-					<ImageView
-						android:layout_width="250dp"
-						android:layout_height="120dp"
-						android:contentDescription="@string/exam"
-						android:src="@mipmap/exam" />
+                    <ImageView
+                        android:layout_width="250dp"
+                        android:layout_height="120dp"
+                        android:contentDescription="@string/exam"
+                        android:src="@mipmap/exam" />
 
-					<androidx.cardview.widget.CardView
-						android:id="@+id/card_tip"
-						android:layout_width="match_parent"
-						android:layout_height="50dp"
-						android:layout_margin="10dp"
-						android:visibility="@{state.size > 0 ? view.GONE : view.VISIBLE}"
-						app:cardBackgroundColor="@color/gray"
-						app:cardCornerRadius="5dp"
-						app:cardElevation="0dp">
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_margin="10dp"
+                        app:cardBackgroundColor="@color/gray"
+                        app:cardCornerRadius="5dp"
+                        app:cardElevation="0dp">
 
-						<TextView
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:layout_gravity="center"
-							android:text="@string/empty_exam" />
-					</androidx.cardview.widget.CardView>
+                        <TextView
+                            android:id="@+id/card_tip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@string/empty_exam" />
+                    </androidx.cardview.widget.CardView>
 
-					<androidx.recyclerview.widget.RecyclerView
-						android:id="@+id/recycler_exams"
-						android:layout_width="match_parent"
-						android:layout_height="match_parent"
-						android:layout_margin="5dp" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_exams"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp" />
 
-				</LinearLayout>
-			</androidx.core.widget.NestedScrollView>
-		</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-	</LinearLayout>
+    </LinearLayout>
 </layout>

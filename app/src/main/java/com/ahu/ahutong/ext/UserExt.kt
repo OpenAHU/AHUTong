@@ -5,7 +5,7 @@ import java.util.*
 
 fun User.getSchoolYears(): Array<String> {
     // 求出用户的入学时间
-    val startYear = this.name
+    val startYear = this.xh
         .substring(2, 4).toInt() + 2000
     val calendar = Calendar.getInstance()
     // 获取截至年份

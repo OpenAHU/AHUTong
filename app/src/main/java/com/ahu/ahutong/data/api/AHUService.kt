@@ -1,5 +1,6 @@
 package com.ahu.ahutong.data.api
 
+import android.util.Log
 import arch.sink.utils.Utils
 import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.AHUResponse
@@ -45,33 +46,6 @@ interface AHUService {
         @Query("schoolTerm") schoolTerm: String
     ): AHUResponse<List<Course>>
 
-    /**
-     * getExamInfo
-     * @param schoolYear String 2020-2021
-     * @param schoolTerm String 1,2
-     * @return AHUResponse<List<Exam>>
-     */
-    @GET("/api/examInfo")
-    suspend fun getExamInfo(
-        @Query("schoolYear") schoolYear: String,
-        @Query("schoolTerm") schoolTerm: String
-    ): AHUResponse<List<Exam>>
-
-    /**
-     * 获取空教室API
-     * @param campus 1为新区，2为老区
-     * @param weekday 星期几
-     * @param weekNum 第几周
-     * @param time 1为1，2节；2为3，4节；3为5，6节；4为7，8节；5为9，10，11节；6为上午；7为下午；8为晚上；9为白天；10为整天
-     * @return AHUResponse<List<Room>>
-     */
-    @GET("/api/emptyRoom")
-    suspend fun getEmptyRoom(
-        @Query("campus") campus: String,
-        @Query("weekday") weekday: String,
-        @Query("weeknum") weekNum: String,
-        @Query("time") time: String
-    ): AHUResponse<List<Room>>
 
     /**
      * 获取成绩
@@ -113,8 +87,9 @@ interface AHUService {
 
         //创建AHUService对象
         val API: AHUService by lazy {
-            val logger =
-                HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+            val logger = HttpLoggingInterceptor { message -> //打印retrofit日志
+                Log.i("RetrofitLog", "retrofitBack = $message")
+            }.apply { level = HttpLoggingInterceptor.Level.BODY }
             val client = OkHttpClient.Builder()
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS)

@@ -7,12 +7,6 @@ import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
 import com.ahu.ahutong.BR
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.AHURepository
-import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.model.User
-import com.ahu.ahutong.data.reptile.ReptileDataSource
-import com.ahu.ahutong.data.reptile.ReptileUser
-import com.ahu.ahutong.data.reptile.login.SinkWebViewClient
 import com.ahu.ahutong.databinding.FragmentLoginBinding
 import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
@@ -32,9 +26,9 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
 
     override fun observeData() {
         super.observeData()
-        mState.serverLoginResult.observe(this) {
+        mState.serverLoginResult.observe(this) { result ->
             dataBinding.btLogin.isClickable = true  // 恢复按钮
-            it.onSuccess {
+            result.onSuccess {
                 Toast.makeText(requireContext(), "登录成功，欢迎您：${it.name}", Toast.LENGTH_SHORT).show()
                 nav().popBackStack()
                 nav().navigate(R.id.home_fragment)
@@ -67,13 +61,13 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
     inner class ClickProxy {
 
         fun login(view: View) {
-            val username = dataBinding.edUserId.text.toString()
+            val userId = dataBinding.edUserId.text.toString()
             val wisdomPassword = dataBinding.edWisdomPassword.text.toString()
-            if (username.isEmpty() || wisdomPassword.isEmpty()) {
+            if (userId.isEmpty() || wisdomPassword.isEmpty()) {
                 Toast.makeText(requireContext(), "请不要输入空气哦！", Toast.LENGTH_SHORT).show()
                 return
             }
-            mState.loginWithServer(username, wisdomPassword)
+            mState.loginWithServer(userId, wisdomPassword)
 
         }
     }

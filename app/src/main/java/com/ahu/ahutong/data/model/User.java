@@ -8,6 +8,8 @@ public class User {
 
     @SerializedName("name")
     private String name;
+    @SerializedName("xh")
+    private String xh;
 
     public String getName() {
         return name;
@@ -16,7 +18,13 @@ public class User {
     public void setName(String name) {
         this.name = name;
     }
+    public String getXh() {
+        return xh;
+    }
 
+    public void setXh(String xh) {
+        this.xh = xh;
+    }
     public User() {
 
     }

@@ -1,7 +1,9 @@
 package com.ahu.ahutong.ui.page
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
@@ -44,7 +46,7 @@ class ExamFragment : BaseFragment<FragmentExamBinding>() {
         dataBinding.recyclerExams.adapter = adapter
         //刷新
         dataBinding.refreshLayout.setOnRefreshListener {
-            mState.loadExam(true)
+            mState.loadExam()
         }
 
         //加载数据
@@ -53,16 +55,17 @@ class ExamFragment : BaseFragment<FragmentExamBinding>() {
 
     }
 
+    @SuppressLint("SetTextI18n")
     override fun observeData() {
-        mState.data.observe(this){
-            it.onSuccess {
-                mState.size.value = it.size
-                if(it.size == 0){
-                    Toast.makeText(requireContext(), "当前没有考试信息。", Toast.LENGTH_SHORT).show()
-                }
+        mState.data.observe(this) { result ->
+            result.onSuccess {
+                if (it.isEmpty())
+                    Toast.makeText(requireContext(), R.string.empty_exam, Toast.LENGTH_SHORT).show()
+                else
+                    dataBinding.cardTip.text = "共 $it 条考试信息"
                 adapter?.submitList(it)
             }.onFailure {
-                Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                dataBinding.cardTip.text = it.message
             }
             dataBinding.refreshLayout.isRefreshing = false
         }

@@ -17,22 +17,6 @@ class APIDataSource: BaseDataSource {
         return AHUService.API.getSchedule(schoolYear, schoolTerm)
     }
 
-    override suspend fun getExamInfo(
-        schoolYear: String,
-        schoolTerm: String
-    ): AHUResponse<List<Exam>> {
-        return AHUService.API.getExamInfo(schoolYear, schoolTerm)
-    }
-
-    override suspend fun getEmptyRoom(
-        campus: String,
-        weekday: String,
-        weekNum: String,
-        time: String
-    ): AHUResponse<List<Room>> {
-       return AHUService.API.getEmptyRoom(campus, weekday, weekNum, time)
-    }
-
     override suspend fun getGrade(): AHUResponse<Grade> {
         return AHUService.API.getGrade()
     }

@@ -29,50 +29,6 @@ import java.util.concurrent.TimeUnit
 object AHURepository {
     var dataSource: BaseDataSource = APIDataSource()
 
-
-    /**
-     * 搜索垃圾
-     * @param keyword String
-     * @return LiveData<Result<List<Rubbish>>>
-     */
-    fun searchRubbish(keyword: String): LiveData<Result<List<Rubbish>>> = liveData(Dispatchers.IO) {
-        val result = try {
-            val client = OkHttpClient.Builder()
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(true)
-                .build()
-            val request = Request.Builder()
-                .url("https://api.tianapi.com/txapi/lajifenlei/?key=367f6d1bd8e7cacbb14485af77f1ed6b&word=$keyword")
-                .get()
-                .build()
-            val response = client.newCall(request).execute()
-            if (response.isSuccessful) {
-                val body = response.body
-                val jsonElement =
-                    JsonParser.parseString(body?.string() ?: "").asJsonObject["newslist"]
-                if (jsonElement == null) {
-                    Result.failure<List<Rubbish>>(Throwable("返回结果为空"))
-                } else {
-                    Result.success(Gson().fromJson(jsonElement,
-                            object : TypeToken<List<Rubbish>>() {}.type))
-                }
-            } else {
-                Result.failure(Throwable("response status is ${response.code}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-        //发射结果
-        emit(result)
-    }
-
-//    suspend fun getTermStartDate(schoolYear: String, schoolTerm: String): Result<Date> {
-//
-//    }
-
-
     /**
      * 获取课程表 本地优先
      * @param schoolYear String
@@ -106,33 +62,6 @@ object AHURepository {
                 Result.failure(e)
             }
         }
-
-    /**
-     * 查询空教室
-     * @param campus String
-     * @param weekday String
-     * @param weekNum String
-     * @param time String
-     * @return LiveData<Result<List<Room>>>
-     */
-    suspend fun getEmptyRoom(campus: String, weekday: String,
-            weekNum: String, time: String): Result<List<Room>> {
-        checkRoomArgs(campus, weekday, time)
-        return withContext(Dispatchers.IO) {
-            try {
-                val response = dataSource.getEmptyRoom(campus, weekday, weekNum, time)
-                if (response.isSuccessful) {
-                    Result.success(response.data)
-                } else {
-                    Result.failure(Throwable(response.msg))
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Result.failure(e)
-            }
-        }
-    }
-
 
     /**
      * 查询成绩 本地优先
@@ -169,29 +98,29 @@ object AHURepository {
      * @param isRefresh Boolean
      * @return Result<(kotlin.collections.List<com.ahu.ahutong.data.model.Exam>..kotlin.collections.List<com.ahu.ahutong.data.model.Exam>?)>
      */
-    suspend fun getExamInfo(schoolYear: String, schoolTerm: String, isRefresh: Boolean = false) =
+    suspend fun getExamInfo(studentID: String) =
         withContext(Dispatchers.IO) {
-            if (!schoolTerm.isTerm()) {
-                throw IllegalArgumentException("schoolTerm must be 1 or 2")
-            }
-            if (!isRefresh) {
-                val localData = AHUCache.getExamInfo().orEmpty()
-                if (localData.isNotEmpty()) {
-                    return@withContext Result.success(localData)
-                }
-            }
+//            if (!schoolTerm.isTerm()) {
+//                throw IllegalArgumentException("schoolTerm must be 1 or 2")
+//            }
+//            if (!isRefresh) {
+//                val localData = AHUCache.getExamInfo().orEmpty()
+//                if (localData.isNotEmpty()) {
+//                    return@withContext Result.success(localData)
+//                }
+//            }
             //从网络上获取数据
             try {
-                val response = dataSource.getExamInfo(schoolYear, schoolTerm)
-                if (response.isSuccessful) {
-                    //保存数据
-                    AHUCache.saveExamInfo(response.data)
-                    Result.success(response.data)
-                } else {
-                    Result.failure(Throwable(response.msg))
-                }
+//                val response = dataSource.getExamInfo(schoolYear, schoolTerm)
+//                if (response.isSuccessful) {
+//                    //保存数据
+//                    AHUCache.saveExamInfo(response.data)
+//                    Result.success(response.data)
+//                } else {
+//                    Result.failure(Throwable(response.msg))
+//                }
             } catch (e: Exception) {
-                Result.failure(e)
+                //Result.failure(e)
             }
         }
 
@@ -231,23 +160,4 @@ object AHURepository {
             }
         }
     }
-
-    /**
-     * 检查Room参数
-     * @param campus String
-     * @param weekday String
-     * @param time String
-     */
-    private fun checkRoomArgs(campus: String, weekday: String, time: String) {
-        if (!campus.isCampus()) {
-            throw IllegalArgumentException("campus must be 1 or 2")
-        }
-        if (!weekday.isWeekday()) {
-            throw IllegalArgumentException("weekday must be 1-7")
-        }
-        if (!time.isEmptyRoomTime()) {
-            throw IllegalArgumentException("time must be 1-10")
-        }
-    }
-
 }
