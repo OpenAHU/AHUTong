@@ -227,6 +227,7 @@ fun Login(
     }
 }
 
+// TODO: display progress bar while logging in
 private fun login(
     loginViewModel: LoginViewModel,
     navController: NavHostController,

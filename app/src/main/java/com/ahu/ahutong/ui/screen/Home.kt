@@ -18,6 +18,8 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.screen.component.CampusCard
 import com.ahu.ahutong.ui.screen.component.CourseCard
+import com.ahu.ahutong.ui.screen.component.PhoneBookCard
+import com.google.accompanist.flowlayout.FlowRow
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -32,7 +34,7 @@ fun Home(
             .verticalScroll(rememberScrollState())
             .background(96.n1 withNight 10.n1)
             .systemBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(
             text = "Hi, ${user.name}",
@@ -40,8 +42,15 @@ fun Home(
             style = MaterialTheme.typography.headlineLarge
         )
         CourseCard()
-        CampusCard(
-            balance = discoveryViewModel.balance
-        )
+        FlowRow(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            mainAxisSpacing = 16.dp,
+            crossAxisSpacing = 16.dp
+        ) {
+            CampusCard(
+                balance = discoveryViewModel.balance
+            )
+            PhoneBookCard()
+        }
     }
 }
