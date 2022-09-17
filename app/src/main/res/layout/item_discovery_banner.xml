@@ -7,8 +7,9 @@
     </data>
 
 
-    <com.youth.banner.Banner
+    <com.ahu.ahutong.ui.widget.banner.BannerView
         android:id="@+id/item_discovery_banner"
         android:layout_width="match_parent"
         android:layout_height="150dp" />
+
 </layout>
