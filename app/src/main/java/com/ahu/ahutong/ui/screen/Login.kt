@@ -6,10 +6,12 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -20,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -41,17 +44,17 @@ fun Login(
 ) {
     var focusIndex by remember { mutableStateOf(0) }
     var passwordVisible by remember { mutableStateOf(false) }
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(96.n1 withNight 10.n1)
-            .systemBarsPadding()
-            .imePadding(),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .imePadding()
     ) {
         Column(
-            modifier = Modifier.padding(top = 16.dp),
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .systemBarsPadding()
+                .padding(top = 16.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -110,10 +113,11 @@ fun Login(
                     fontFamily = FontFamily.Monospace
                 ),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Ascii,
+                    keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Next
                 ),
-                singleLine = true
+                singleLine = true,
+                cursorBrush = SolidColor(LocalContentColor.current)
             ) {
                 Box(
                     modifier = Modifier
@@ -156,7 +160,8 @@ fun Login(
                 keyboardActions = KeyboardActions(onDone = { onLoginButtonClicked() }),
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None
-                else PasswordVisualTransformation()
+                else PasswordVisualTransformation(),
+                cursorBrush = SolidColor(LocalContentColor.current)
             ) {
                 Box(
                     modifier = Modifier
@@ -190,7 +195,7 @@ fun Login(
             Text(
                 text = stringResource(id = R.string.login),
                 modifier = Modifier
-                    .align(Alignment.End)
+                    .align(Alignment.BottomEnd)
                     .padding(16.dp)
                     .clip(CircleShape)
                     .background(90.a1 withNight 85.a1)
