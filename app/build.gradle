@@ -97,6 +97,8 @@ dependencies {
     implementation project(path: ':arch')
     implementation project(path: ':simonlibrary')
 
+    implementation 'io.github.youth5201314:banner:2.2.2'
+
     implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'
     //大公司的库
     implementation 'com.tencent.bugly:crashreport:3.4.4'

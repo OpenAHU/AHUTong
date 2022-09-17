@@ -53,7 +53,7 @@ object WebViewReptile {
                 JsonParser.parseString(response.body()).asJsonObject.get("KHYE").asString
             val card = Card()
             card.balance = balance.toDouble()
-            card.transitionBalance = 0
+            card.transitionBalance = 0.0
             return@withContext createSuccessResponse("OK", card)
         } catch (e: Exception) {
             if (e is CancellationException) {
