@@ -1,5 +1,7 @@
 package com.ahu.ahutong.ui.screen
 
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
@@ -23,25 +25,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
+import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
 fun Login(
-    userId: TextFieldValue,
-    onUserIdChanged: (TextFieldValue) -> Unit,
-    password: TextFieldValue,
-    onPasswordChanged: (TextFieldValue) -> Unit,
-    onLoginButtonClicked: () -> Unit
+    loginViewModel: LoginViewModel = viewModel(),
+    navController: NavHostController
 ) {
+    val context = LocalContext.current as ComponentActivity
     var focusIndex by remember { mutableStateOf(0) }
     var passwordVisible by remember { mutableStateOf(false) }
     Box(
@@ -96,8 +100,8 @@ fun Login(
             }
             Spacer(modifier = Modifier)
             BasicTextField(
-                value = userId,
-                onValueChange = onUserIdChanged,
+                value = loginViewModel.userID,
+                onValueChange = { loginViewModel.userID = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -127,7 +131,7 @@ fun Login(
                     contentAlignment = Alignment.CenterStart
                 ) {
                     it()
-                    if (userId.text.isBlank()) {
+                    if (loginViewModel.userID.text.isBlank()) {
                         Text(
                             text = stringResource(id = R.string.hint_userid),
                             color = 30.n1 withNight 80.n1,
@@ -137,8 +141,8 @@ fun Login(
                 }
             }
             BasicTextField(
-                value = password,
-                onValueChange = onPasswordChanged,
+                value = loginViewModel.password,
+                onValueChange = { loginViewModel.password = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -157,7 +161,13 @@ fun Login(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done
                 ),
-                keyboardActions = KeyboardActions(onDone = { onLoginButtonClicked() }),
+                keyboardActions = KeyboardActions(onDone = {
+                    login(
+                        loginViewModel = loginViewModel,
+                        navController = navController,
+                        context = context
+                    )
+                }),
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None
                 else PasswordVisualTransformation(),
@@ -171,7 +181,7 @@ fun Login(
                     contentAlignment = Alignment.CenterStart
                 ) {
                     it()
-                    if (password.text.isBlank()) {
+                    if (loginViewModel.password.text.isBlank()) {
                         Text(
                             text = stringResource(id = R.string.hint_wisdom_password),
                             color = 30.n1 withNight 80.n1,
@@ -201,12 +211,53 @@ fun Login(
                     .background(90.a1 withNight 85.a1)
                     .clickable(
                         role = Role.Button,
-                        onClick = onLoginButtonClicked
+                        onClick = {
+                            login(
+                                loginViewModel = loginViewModel,
+                                navController = navController,
+                                context = context
+                            )
+                        }
                     )
                     .padding(24.dp, 16.dp),
                 color = 0.n1,
                 style = MaterialTheme.typography.titleMedium
             )
+        }
+    }
+}
+
+private fun login(
+    loginViewModel: LoginViewModel,
+    navController: NavHostController,
+    context: ComponentActivity
+) {
+    if (loginViewModel.userID.text.isBlank() || loginViewModel.password.text.isBlank()) {
+        Toast.makeText(
+            context,
+            "请不要输入空气哦！",
+            Toast.LENGTH_SHORT
+        ).show()
+    } else {
+        loginViewModel.loginWithServer(
+            userID = loginViewModel.userID.text,
+            wisdomPassword = loginViewModel.password.text
+        )
+    }
+    loginViewModel.serverLoginResult.observe(context) { result ->
+        result.onSuccess {
+            Toast.makeText(
+                context,
+                "登录成功，欢迎您：${it.name}",
+                Toast.LENGTH_SHORT
+            ).show()
+            navController.popBackStack()
+        }.onFailure {
+            Toast.makeText(
+                context,
+                it.message,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 }

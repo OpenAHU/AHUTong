@@ -1,6 +1,9 @@
 package com.ahu.ahutong.ui.page.state
 
 import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +24,8 @@ import java.util.*
  * @Email 330771794@qq.com
  */
 class DiscoveryViewModel : ViewModel() {
+    var balance by mutableStateOf(0.0)
+
     val bannerData: MutableLiveData<List<Banner>> by lazy {
         MutableLiveData<List<Banner>>()
     }
@@ -33,13 +38,20 @@ class DiscoveryViewModel : ViewModel() {
                 .onSuccess {
                     val stringBuilder = StringBuilder()
                     it.stream().forEach {
-                        stringBuilder.append(it.bathroom + ":" + it.openStatus.replace("wm", "均可").replace("w", "女生").replace("m", "男生"))
+                        stringBuilder.append(
+                            it.bathroom + ":" + it.openStatus.replace("wm", "均可").replace("w", "女生").replace("m", "男生")
+                        )
                         stringBuilder.append("\n")
                     }
                     AHURepository.getCardMoney()
                         .onSuccess {
+                            balance = it.balance
                             activityBean.value =
-                                DiscoveryAdapter.ActivityBean(it.balance.toString(), it.transitionBalance.toString(), stringBuilder.toString())
+                                DiscoveryAdapter.ActivityBean(
+                                    it.balance.toString(),
+                                    it.transitionBalance.toString(),
+                                    stringBuilder.toString()
+                                )
                         }.onFailure {
                             activityBean.value = DiscoveryAdapter.ActivityBean("0.00", "0.00", stringBuilder.toString())
                         }
@@ -83,5 +95,9 @@ class DiscoveryViewModel : ViewModel() {
         }.sortedBy {
             it.startTime
         }
+    }
+
+    init {
+        loadActivityBean()
     }
 }
