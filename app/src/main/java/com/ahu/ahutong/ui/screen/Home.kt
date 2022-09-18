@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
@@ -29,7 +30,8 @@ import com.kyant.monet.withNight
 
 @Composable
 fun Home(
-    discoveryViewModel: DiscoveryViewModel = viewModel()
+    discoveryViewModel: DiscoveryViewModel = viewModel(),
+    navController: NavHostController
 ) {
     val user = AHUCache.getCurrentUser() ?: return
     Column(
@@ -56,19 +58,29 @@ fun Home(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            mainAxisAlignment = MainAxisAlignment.Center
+            mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
+            crossAxisSpacing = 16.dp
         ) {
-            listOf(
-                R.string.grade to R.mipmap.score,
-                R.string.phone_book to R.mipmap.telephone_directory,
-                R.string.bathroom to R.mipmap.bathroom,
-                R.string.exam to R.mipmap.examination_room
-            ).forEach { (label, icon) ->
-                FunctionalButton(
-                    stringId = label,
-                    iconId = icon
-                )
-            }
+            FunctionalButton(
+                stringId = R.string.grade,
+                iconId = R.mipmap.score,
+                onClick = { navController.navigate("grade") }
+            )
+            FunctionalButton(
+                stringId = R.string.phone_book,
+                iconId = R.mipmap.telephone_directory,
+                onClick = { navController.navigate("phone_book") }
+            )
+            FunctionalButton(
+                stringId = R.string.bathroom,
+                iconId = R.mipmap.bathroom,
+                onClick = { navController.navigate("bathroom") }
+            )
+            FunctionalButton(
+                stringId = R.string.exam,
+                iconId = R.mipmap.examination_room,
+                onClick = { navController.navigate("exam") }
+            )
         }
         FlowRow(
             modifier = Modifier.padding(horizontal = 16.dp),

@@ -22,19 +22,23 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FunctionalButton(
     stringId: Int,
-    iconId: Int
+    iconId: Int,
+    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
-            .clickable(role = Role.Button) {}
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
             .padding(16.dp, 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
             painter = painterResource(id = iconId),
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(40.dp),
             contentDescription = null
         )
         Text(

@@ -5,11 +5,14 @@ import android.content.ComponentName
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.page.state.LoginViewModel
@@ -51,7 +54,10 @@ class MainActivity : ComponentActivity() {
                     startDestination = "home"
                 ) {
                     animatedComposable("home") {
-                        Home(discoveryViewModel = discoveryViewModel)
+                        Home(
+                            discoveryViewModel = discoveryViewModel,
+                            navController = navController
+                        )
                     }
                     animatedComposable("login") {
                         Login(
@@ -59,11 +65,19 @@ class MainActivity : ComponentActivity() {
                             navController = navController
                         )
                     }
+                    animatedComposable("grade") {}
+                    animatedComposable("phone_book") {}
+                    animatedComposable("bathroom") {}
+                    animatedComposable("exam") {}
                 }
                 LaunchedEffect(Unit) {
                     if (!AHUCache.isLogin()) {
                         navController.navigate("login")
                     }
+                }
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                BackHandler(enabled = navBackStackEntry?.destination?.route == "login") {
+                    finish()
                 }
             }
         }
