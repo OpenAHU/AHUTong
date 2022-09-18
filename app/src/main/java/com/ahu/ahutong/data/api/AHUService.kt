@@ -26,9 +26,9 @@ interface AHUService {
     @POST("/api/login")
     @FormUrlEncoded
     suspend fun login(
-        @Field("userId") userId: String,
-        @Field("password") password: String,
-        @Field("type") type: User.UserType
+            @Field("userId") userId: String,
+            @Field("password") password: String,
+            @Field("type") type: User.UserType
     ): AHUResponse<User>
 
     @GET("/api/logout")
@@ -42,8 +42,8 @@ interface AHUService {
      */
     @GET("/api/schedule")
     suspend fun getSchedule(
-        @Query("schoolYear") schoolYear: String,
-        @Query("schoolTerm") schoolTerm: String
+            @Query("schoolYear") schoolYear: String,
+            @Query("schoolTerm") schoolTerm: String
     ): AHUResponse<List<Course>>
 
 
@@ -91,24 +91,22 @@ interface AHUService {
 
         // Cookie 本地存储
         private val cookieJar =
-            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
+            AHUCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
 
         //创建AHUService对象
         val API: AHUService by lazy {
-            val logger = HttpLoggingInterceptor { message -> //打印retrofit日志
-                Log.i("RetrofitLog", "retrofitBack = $message")
-            }.apply { level = HttpLoggingInterceptor.Level.BODY }
+            val logger = HttpLoggingInterceptor().apply {
+                level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+                else HttpLoggingInterceptor.Level.NONE
+            }
             val client = OkHttpClient.Builder()
+                .addInterceptor(logger)
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .cache(Cache(File(Utils.getApp().cacheDir, "app_cache"), Long.MAX_VALUE))
                 .retryOnConnectionFailure(true)
                 .cookieJar(cookieJar)   //设置CookieJar
-            //debug
-            if (BuildConfig.DEBUG) {
-                client.addInterceptor(logger)
-            }
             //创建API
             Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
