@@ -20,6 +20,7 @@ import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
+import com.ahu.ahutong.ui.screen.component.BathroomCard
 import com.ahu.ahutong.ui.screen.component.CampusCard
 import com.ahu.ahutong.ui.screen.component.CourseCard
 import com.ahu.ahutong.ui.screen.component.FunctionalButton
@@ -90,6 +91,7 @@ fun Home(
             CampusCard(
                 balance = discoveryViewModel.balance
             )
+            BathroomCard(discoveryViewModel = discoveryViewModel)
         }
     }
 }
