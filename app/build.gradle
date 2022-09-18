@@ -11,6 +11,7 @@ android {
     lint {
         //即使报错也不会停止打包
         abortOnError false
+        //打包release版本的时候是否进行检测
         checkReleaseBuilds false
     }
     //关闭PNG合法性检查
@@ -24,13 +25,13 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     //multiDex的一些相关配置，这样配置可以让你的编译速度更快
-    /*dexOptions {
-        //不对Lib做preDex
-        preDexLibraries = false
-        //优化编译效率
-        incremental true
-        javaMaxHeapSize "8g"     //增加java堆内存大小
-    }*/
+//    dexOptions {
+//        //不对Lib做preDex
+//        preDexLibraries = false
+//        //优化编译效率
+//        incremental true
+//        javaMaxHeapSize "8g"     //增加java堆内存大小
+//    }
 
     signingConfigs {
 //        debug {
@@ -50,9 +51,9 @@ android {
 
     buildTypes {
         release {
-            jniDebuggable false  //关闭jni调试
-            debuggable false  //是否支持调试
-            zipAlignEnabled true  //是否支持zip
+//            jniDebuggable false  //关闭jni调试
+//            debuggable false  //是否支持调试
+//            zipAlignEnabled true  //是否支持zip
             shrinkResources true  // 移除无用的resource文件
             minifyEnabled true //是否对代码进行混淆，true表示混淆
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -65,14 +66,13 @@ android {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-
         }
     }
-    packagingOptions {
-        resources {
-            excludes += ['META-INF/ASL2.0', 'META-INF/LICENSE', 'META-INF/NOTICE', 'META-INF/MANIFEST.MF']
-        }
-    }
+//    packagingOptions {
+//        resources {
+//            excludes += ['META-INF/ASL2.0', 'META-INF/LICENSE', 'META-INF/NOTICE', 'META-INF/MANIFEST.MF']
+//        }
+//    }
 
 
     compileOptions {

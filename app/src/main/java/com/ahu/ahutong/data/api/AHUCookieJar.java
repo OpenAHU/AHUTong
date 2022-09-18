@@ -29,6 +29,13 @@ public class AHUCookieJar implements ClearableCookieJar {
         this.cache.addAll(persistor.loadAll());
     }
 
+    @Override
+    synchronized public void saveFromResponse(@NonNull HttpUrl url, @NonNull List<Cookie> cookies) {
+        Log.i(TAG, "saveFromResponse: " + url);
+        cache.addAll(cookies);
+        persistor.saveAll(filterPersistentCookies(cookies));
+    }
+
     private static List<Cookie> filterPersistentCookies(List<Cookie> cookies) {
         List<Cookie> persistentCookies = new ArrayList<>();
 
@@ -38,18 +45,6 @@ public class AHUCookieJar implements ClearableCookieJar {
 
         }
         return persistentCookies;
-    }
-
-    private static boolean isCookieExpired(Cookie cookie) {
-        Log.i(TAG, "isCookieExpired: ");
-        return cookie.expiresAt() < System.currentTimeMillis();
-    }
-
-    @Override
-    synchronized public void saveFromResponse(@NonNull HttpUrl url, @NonNull List<Cookie> cookies) {
-        Log.i(TAG, "saveFromResponse: " + url);
-        cache.addAll(cookies);
-        persistor.saveAll(filterPersistentCookies(cookies));
     }
 
     @NonNull
@@ -74,6 +69,11 @@ public class AHUCookieJar implements ClearableCookieJar {
         persistor.removeAll(cookiesToRemove);
 
         return validCookies;
+    }
+
+    private static boolean isCookieExpired(Cookie cookie) {
+        Log.i(TAG, "isCookieExpired: ");
+        return cookie.expiresAt() < System.currentTimeMillis();
     }
 
     @Override
