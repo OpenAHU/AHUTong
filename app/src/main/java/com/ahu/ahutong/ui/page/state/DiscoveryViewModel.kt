@@ -2,6 +2,7 @@ package com.ahu.ahutong.ui.page.state
 
 import android.widget.Toast
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.MutableLiveData
@@ -24,6 +25,7 @@ import java.util.*
  * @Email 330771794@qq.com
  */
 class DiscoveryViewModel : ViewModel() {
+    val bathroom = mutableStateMapOf<String, String>()
     var balance by mutableStateOf(0.0)
 
     val bannerData: MutableLiveData<List<Banner>> by lazy {
@@ -37,7 +39,9 @@ class DiscoveryViewModel : ViewModel() {
             AHURepository.getBathRooms()
                 .onSuccess {
                     val stringBuilder = StringBuilder()
+                    bathroom.clear()
                     it.stream().forEach {
+                        bathroom += it.bathroom to it.openStatus
                         stringBuilder.append(
                             it.bathroom + ":" + it.openStatus.replace("wm", "均可").replace("w", "女生").replace("m", "男生")
                         )
