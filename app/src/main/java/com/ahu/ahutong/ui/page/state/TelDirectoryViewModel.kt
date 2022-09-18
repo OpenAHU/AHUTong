@@ -1,15 +1,11 @@
 package com.ahu.ahutong.ui.page.state
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Tel
 import com.ahu.ahutong.ui.widget.schedule.bean.DefaultDataUtils
 
 class TelDirectoryViewModel : ViewModel() {
-    var selectedCategory by mutableStateOf("常用")
     val theme by lazy { AHUCache.getScheduleTheme() ?: DefaultDataUtils.getDefaultTheme() }
 
     companion object {

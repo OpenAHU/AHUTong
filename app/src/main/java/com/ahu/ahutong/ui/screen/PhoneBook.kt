@@ -37,6 +37,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -45,7 +49,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.page.state.TelDirectoryViewModel
 import com.kyant.monet.a1
@@ -54,7 +57,8 @@ import com.kyant.monet.withNight
 
 // TODO: implement search query & inclusive data
 @Composable
-fun PhoneBook(telDirectoryViewModel: TelDirectoryViewModel = viewModel()) {
+fun PhoneBook() {
+    var selectedCategory by rememberSaveable { mutableStateOf("常用") }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,13 +72,19 @@ fun PhoneBook(telDirectoryViewModel: TelDirectoryViewModel = viewModel()) {
             modifier = Modifier.padding(24.dp, 56.dp, 24.dp, 24.dp),
             style = MaterialTheme.typography.headlineLarge
         )
-        Categories(telDirectoryViewModel = telDirectoryViewModel)
-        Telephones(telDirectoryViewModel = telDirectoryViewModel)
+        Categories(
+            selectedCategory = selectedCategory,
+            onCategorySelected = { selectedCategory = it }
+        )
+        Telephones(selectedCategory = selectedCategory)
     }
 }
 
 @Composable
-private fun Categories(telDirectoryViewModel: TelDirectoryViewModel = viewModel()) {
+private fun Categories(
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit
+) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -83,7 +93,7 @@ private fun Categories(telDirectoryViewModel: TelDirectoryViewModel = viewModel(
             items = TelDirectoryViewModel.TelBook.keys.toList(),
             key = { it }
         ) { name ->
-            val isSelected = telDirectoryViewModel.selectedCategory == name
+            val isSelected = selectedCategory == name
             CompositionLocalProvider(
                 LocalIndication provides rememberRipple(
                     color = if (isSelected) 100.n1 withNight 0.n1
@@ -100,7 +110,7 @@ private fun Categories(telDirectoryViewModel: TelDirectoryViewModel = viewModel(
                                 else 92.a1 withNight 20.n1
                             ).value
                         )
-                        .clickable { telDirectoryViewModel.selectedCategory = name }
+                        .clickable { onCategorySelected(name) }
                         .padding(24.dp, 16.dp),
                     color = animateColorAsState(
                         targetValue = if (isSelected) 100.n1 withNight 0.n1
@@ -116,11 +126,11 @@ private fun Categories(telDirectoryViewModel: TelDirectoryViewModel = viewModel(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun Telephones(telDirectoryViewModel: TelDirectoryViewModel = viewModel()) {
+private fun Telephones(selectedCategory: String) {
     val context = LocalContext.current
     val density = LocalDensity.current
     AnimatedContent(
-        targetState = telDirectoryViewModel.selectedCategory,
+        targetState = selectedCategory,
         transitionSpec = {
             with(density) {
                 slideInVertically(
@@ -140,14 +150,14 @@ private fun Telephones(telDirectoryViewModel: TelDirectoryViewModel = viewModel(
                     fadeOut(animationSpec = tween(90))
             }
         }
-    ) { selectedCategory ->
+    ) { category ->
         Column(
             modifier = Modifier
                 .padding(16.dp, 24.dp)
                 .clip(RoundedCornerShape(32.dp)),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            TelDirectoryViewModel.TelBook.getValue(selectedCategory).forEach {
+            TelDirectoryViewModel.TelBook.getValue(category).forEach {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()

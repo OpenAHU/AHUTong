@@ -17,7 +17,6 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
-import com.ahu.ahutong.ui.page.state.TelDirectoryViewModel
 import com.ahu.ahutong.ui.screen.Home
 import com.ahu.ahutong.ui.screen.Login
 import com.ahu.ahutong.ui.screen.PhoneBook
@@ -31,7 +30,6 @@ class MainActivity : ComponentActivity() {
     private val mState: MainViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
     private val discoveryViewModel: DiscoveryViewModel by viewModels()
-    private val telDirectoryViewModel: TelDirectoryViewModel by viewModels()
 
     private fun loadInitData() {
         // 日活统计接口
@@ -69,9 +67,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     animatedComposable("grade") {}
-                    animatedComposable("phone_book") {
-                        PhoneBook(telDirectoryViewModel = telDirectoryViewModel)
-                    }
+                    animatedComposable("phone_book") { PhoneBook() }
                     animatedComposable("bathroom") {}
                     animatedComposable("exam") {}
                 }
