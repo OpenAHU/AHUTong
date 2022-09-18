@@ -162,7 +162,7 @@ private fun Telephones(selectedCategory: String) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(4.dp))
-                        .background(98.n1 withNight 20.n1)
+                        .background(100.n1 withNight 20.n1)
                         .clickable {
                             val dialIntent =
                                 Intent(Intent.ACTION_DIAL, Uri.parse("tel:${it.tel}")) // 跳转到拨号界面，同时传递电话号码
