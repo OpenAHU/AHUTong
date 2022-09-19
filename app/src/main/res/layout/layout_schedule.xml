@@ -23,7 +23,8 @@
             android:orientation="horizontal" />
     </LinearLayout>
 
-    <ScrollView
+    <!-- AHUScrollView 用于点击课表上移问题，非必要别动 -->
+    <com.ahu.ahutong.ui.widget.AHUScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -46,6 +47,6 @@
                 android:layout_height="match_parent"
                 android:orientation="horizontal" />
         </LinearLayout>
-    </ScrollView>
+    </com.ahu.ahutong.ui.widget.AHUScrollView>
 
 </LinearLayout>
