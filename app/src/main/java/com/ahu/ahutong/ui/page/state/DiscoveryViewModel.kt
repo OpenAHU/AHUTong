@@ -102,8 +102,5 @@ class DiscoveryViewModel : ViewModel() {
 
     init {
         loadActivityBean()
-        AHUCache.saveSchoolYear("2022-2023")
-        AHUCache.saveSchoolTerm("1")
-        loadCourse()
     }
 }

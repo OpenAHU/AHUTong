@@ -46,12 +46,17 @@ import com.kyant.monet.withNight
 fun CourseCard() {
     var isExpanded by rememberSaveable { mutableStateOf(false) }
     val schedule = remember { mutableStateListOf<Course>() }
+    var currentCourse by remember { mutableStateOf<Course?>(null) }
     LaunchedEffect(Unit) {
-        AHURepository.getSchedule("2022-2023", "1", true).onSuccess {
-            schedule += it
+        AHURepository.getSchedule("2022-2023", "1", true).onSuccess { courses ->
+            schedule += courses
+            currentCourse = schedule
+                .filter { 4 in it.startWeek..it.endWeek }
+                .filter { it.weekday == 1 }
+                .sortedBy { it.startTime }
+                .firstOrNull()
         }
     }
-    val currentCourse = schedule.first()
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
@@ -91,57 +96,59 @@ fun CourseCard() {
                     .fillMaxHeight()
                     .background(50.a1 withNight 80.a1)
             )
-            Column(
-                modifier = Modifier.padding(24.dp, 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // TODO: fix font color
-                Text(
-                    text = currentCourse.name,
-                    color = 100.n1,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            currentCourse?.let {
+                Column(
+                    modifier = Modifier.padding(24.dp, 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    // TODO: fix font color
+                    Text(
+                        text = it.name,
+                        color = 100.n1,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineMedium
+                    )
                     Row(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(95.a1 withNight 40.n1)
-                            .padding(8.dp, 2.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Timer,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = "${currentCourse.startTime} - ${currentCourse.startTime + currentCourse.length}",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(95.a1 withNight 40.n1)
-                            .padding(8.dp, 2.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Navigation,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = currentCourse.location,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        Row(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(95.a1 withNight 40.n1)
+                                .padding(8.dp, 2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Timer,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "${it.startTime} - ${it.startTime + it.length - 1}",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(95.a1 withNight 40.n1)
+                                .padding(8.dp, 2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Navigation,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = it.location,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
                     }
                 }
             }
