@@ -2,15 +2,23 @@ package com.ahu.ahutong.data.api
 
 import android.util.Log
 import arch.sink.utils.Utils
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.AHUResponse
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.*
+import com.ahu.ahutong.ext.awaitString
+import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import okhttp3.Cache
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
+import okio.Buffer
+import okio.GzipSource
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
@@ -101,6 +109,7 @@ interface AHUService {
             }
             val client = OkHttpClient.Builder()
                 .addInterceptor(logger)
+                .addInterceptor(LoginStateInterceptor())
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .connectTimeout(15, TimeUnit.SECONDS)
@@ -121,6 +130,37 @@ interface AHUService {
         @JvmStatic
         fun clearCookie() {
             cookieJar.clear()
+        }
+
+        class LoginStateInterceptor : Interceptor {
+            override fun intercept(chain: Interceptor.Chain): Response {
+                val response = chain.proceed(chain.request())
+                val responseBody = response.body
+                if (response.code == 400 && responseBody != null) {
+                    // 解决 Response#string() 函数仅能调用一次的问题
+                    val source = responseBody.source()
+                    source.request(Long.MAX_VALUE)
+                    var buffer = source.buffer
+                    if ("gzip".equals(response.headers["Content-Encoding"], ignoreCase = true)) {
+                        GzipSource(buffer.clone()).use { gzippedResponseBody ->
+                            buffer = Buffer()
+                            buffer.writeAll(gzippedResponseBody)
+                        }
+                    }
+                    val string = buffer.clone().readString(Charsets.UTF_8)
+
+                    if (!string.contains("session", ignoreCase = true) || !AHUCache.isLogin()) {
+                        return response
+                    }
+                    // 登录状态过期
+                    AHUApplication.sessionUpdated.callFromOtherThread()
+                    // 修改状态码，不抛出异常
+                    return response.newBuilder()
+                        .code(200).build()
+                }
+                return response
+            }
+
         }
     }
 
