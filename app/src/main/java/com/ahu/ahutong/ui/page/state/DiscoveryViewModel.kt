@@ -39,7 +39,6 @@ class DiscoveryViewModel : ViewModel() {
             AHURepository.getBathRooms()
                 .onSuccess {
                     val stringBuilder = StringBuilder()
-                    bathroom.clear()
                     it.stream().forEach {
                         bathroom += it.bathroom to it.openStatus
                         stringBuilder.append(
@@ -103,5 +102,8 @@ class DiscoveryViewModel : ViewModel() {
 
     init {
         loadActivityBean()
+        AHUCache.saveSchoolYear("2022-2023")
+        AHUCache.saveSchoolTerm("1")
+        loadCourse()
     }
 }

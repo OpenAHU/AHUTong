@@ -24,8 +24,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -33,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.data.model.Course
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -40,6 +45,13 @@ import com.kyant.monet.withNight
 @Composable
 fun CourseCard() {
     var isExpanded by rememberSaveable { mutableStateOf(false) }
+    val schedule = remember { mutableStateListOf<Course>() }
+    LaunchedEffect(Unit) {
+        AHURepository.getSchedule("2022-2023", "1", true).onSuccess {
+            schedule += it
+        }
+    }
+    val currentCourse = schedule.first()
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
@@ -85,7 +97,7 @@ fun CourseCard() {
             ) {
                 // TODO: fix font color
                 Text(
-                    text = "高等数学",
+                    text = currentCourse.name,
                     color = 100.n1,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineMedium
@@ -109,7 +121,7 @@ fun CourseCard() {
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "8:00 - 10:00",
+                            text = "${currentCourse.startTime} - ${currentCourse.startTime + currentCourse.length}",
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -127,7 +139,7 @@ fun CourseCard() {
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "博学南楼",
+                            text = currentCourse.location,
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
