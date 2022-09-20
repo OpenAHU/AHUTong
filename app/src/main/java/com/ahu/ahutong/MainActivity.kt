@@ -20,6 +20,7 @@ import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.screen.Home
 import com.ahu.ahutong.ui.screen.Login
 import com.ahu.ahutong.ui.screen.PhoneBook
+import com.ahu.ahutong.ui.screen.Schedule
 import com.ahu.ahutong.ui.theme.AHUTheme
 import com.ahu.ahutong.utils.animatedComposable
 import com.ahu.ahutong.widget.ClassWidget
@@ -66,6 +67,7 @@ class MainActivity : ComponentActivity() {
                             navController = navController
                         )
                     }
+                    animatedComposable("schedule") { Schedule() }
                     animatedComposable("grade") {}
                     animatedComposable("phone_book") { PhoneBook() }
                     animatedComposable("bathroom") {}

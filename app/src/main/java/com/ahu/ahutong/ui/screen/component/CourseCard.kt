@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.model.Course
 import com.kyant.monet.a1
@@ -43,7 +44,7 @@ import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
-fun CourseCard() {
+fun CourseCard(navController: NavHostController) {
     var isExpanded by rememberSaveable { mutableStateOf(false) }
     val schedule = remember { mutableStateListOf<Course>() }
     var currentCourse by remember { mutableStateOf<Course?>(null) }
@@ -51,7 +52,7 @@ fun CourseCard() {
         AHURepository.getSchedule("2022-2023", "1", true).onSuccess { courses ->
             schedule += courses
             currentCourse = schedule
-                .filter { 4 in it.startWeek..it.endWeek }
+                .filter { 5 in it.startWeek..it.endWeek }
                 .filter { it.weekday == 1 }
                 .sortedBy { it.startTime }
                 .firstOrNull()
@@ -218,7 +219,7 @@ fun CourseCard() {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(100.n1 withNight 20.n1)
-                .clickable {}
+                .clickable { navController.navigate("schedule") }
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically

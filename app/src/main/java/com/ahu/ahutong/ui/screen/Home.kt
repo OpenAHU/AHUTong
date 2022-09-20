@@ -48,7 +48,7 @@ fun Home(
             modifier = Modifier.padding(24.dp, 56.dp, 24.dp, 24.dp),
             style = MaterialTheme.typography.headlineLarge
         )
-        CourseCard()
+        CourseCard(navController = navController)
         Text(
             text = "功能",
             modifier = Modifier.padding(horizontal = 24.dp),
