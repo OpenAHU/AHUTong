@@ -111,7 +111,7 @@ private fun Categories(
                             ).value
                         )
                         .clickable { onCategorySelected(name) }
-                        .padding(24.dp, 16.dp),
+                        .padding(16.dp, 8.dp),
                     color = animateColorAsState(
                         targetValue = if (isSelected) 100.n1 withNight 0.n1
                         else 0.n1 withNight 100.n1
@@ -173,12 +173,12 @@ private fun Telephones(selectedCategory: String) {
                 ) {
                     Text(
                         text = it.name,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleMedium
                     )
                     Text(
                         text = it.tel,
                         color = 50.n1 withNight 80.n1,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }
