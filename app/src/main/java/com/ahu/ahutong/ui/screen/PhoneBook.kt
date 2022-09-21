@@ -16,11 +16,9 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,15 +52,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.model.Tel
 import com.ahu.ahutong.ui.page.state.TelDirectoryViewModel
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
-// TODO: implement search query & inclusive data
+// TODO: implement search query
 @Composable
 fun PhoneBook() {
+    val context = LocalContext.current
+    var dialData by remember { mutableStateOf<Tel?>(null) }
     var selectedCategory by rememberSaveable { mutableStateOf("师生综合服务大厅") }
     Column(
         modifier = Modifier
@@ -80,8 +83,26 @@ fun PhoneBook() {
             selectedCategory = selectedCategory,
             onCategorySelected = { selectedCategory = it }
         )
-        Telephones(selectedCategory = selectedCategory)
+        Telephones(
+            selectedCategory = selectedCategory,
+            onItemClick = {
+                if (it.tel != null && it.tel2 != null && it.tel != it.tel2) {
+                    dialData = it
+                } else {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_DIAL,
+                            Uri.parse("tel:0551-${it.tel ?: it.tel2}")
+                        )
+                    )
+                }
+            }
+        )
     }
+    DialDialog(
+        onDismiss = { dialData = null },
+        tel = dialData
+    )
 }
 
 @Composable
@@ -128,10 +149,12 @@ private fun Categories(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun Telephones(selectedCategory: String) {
-    val context = LocalContext.current
+private fun Telephones(
+    selectedCategory: String,
+    onItemClick: (Tel) -> Unit
+) {
     val density = LocalDensity.current
     AnimatedContent(
         targetState = selectedCategory,
@@ -167,17 +190,7 @@ private fun Telephones(selectedCategory: String) {
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(4.dp))
                         .background(100.n1 withNight 20.n1)
-                        .combinedClickable( // TODO: add user tip
-                            onDoubleClick = {
-                                val dialIntent =
-                                    Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${it.tel2}")) // 跳转到拨号界面，同时传递电话号码
-                                context.startActivity(dialIntent)
-                            }
-                        ) {
-                            val dialIntent =
-                                Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${it.tel}")) // 跳转到拨号界面，同时传递电话号码
-                            context.startActivity(dialIntent)
-                        }
+                        .clickable { onItemClick(it) }
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -232,4 +245,52 @@ private fun Tel(
         color = 50.n1 withNight 80.n1,
         style = MaterialTheme.typography.bodyLarge
     )
+}
+
+@Composable
+private fun DialDialog(
+    onDismiss: () -> Unit,
+    tel: Tel?
+) {
+    val context = LocalContext.current
+    if (tel != null) {
+        Dialog(onDismissRequest = onDismiss) {
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(100.n1 withNight 10.n1)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "请选择校区",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "磬苑",
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(90.a1 withNight 20.n1)
+                            .clickable {
+                                context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel}")))
+                                onDismiss()
+                            }
+                            .padding(16.dp, 8.dp)
+                    )
+                    Text(
+                        text = "龙河",
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(90.a1 withNight 20.n1)
+                            .clickable {
+                                context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel2}")))
+                                onDismiss()
+                            }
+                            .padding(16.dp, 8.dp)
+                    )
+                }
+            }
+        }
+    }
 }
