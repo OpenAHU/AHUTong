@@ -7,16 +7,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MonetizationOn
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,22 +23,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.R
+import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
 fun CampusCard(
-    balance: Double
+    balance: Double,
+    transitionBalance: Double
 ) {
     val context = LocalContext.current
     Column(
         modifier = Modifier
-            .width(IntrinsicSize.Max)
-            .clip(RoundedCornerShape(16.dp))
-            .background(100.n1 withNight 30.n1)
+            .clip(RoundedCornerShape(24.dp))
+            .background(100.n1 withNight 25.n1)
     ) {
         Column(
             modifier = Modifier.padding(24.dp, 16.dp),
@@ -53,14 +53,24 @@ fun CampusCard(
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
-                text = "¥ $balance",
-                style = MaterialTheme.typography.titleLarge
+                text = buildAnnotatedString {
+                    withStyle(MaterialTheme.typography.titleLarge.toSpanStyle()) {
+                        append("¥ $balance")
+                    }
+                    withStyle(
+                        MaterialTheme.typography.titleSmall.toSpanStyle().copy(color = 50.n1 withNight 80.n1)
+                    ) {
+                        append(" + ¥ $transitionBalance")
+                    }
+                }
             )
         }
-        Divider()
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .align(Alignment.End)
+                .padding(8.dp)
+                .clip(CircleShape)
+                .background(90.a1 withNight 40.n1)
                 .clickable {
                     try {
                         val i1 = Intent(
@@ -73,8 +83,8 @@ fun CampusCard(
                         Toast.makeText(context, "手机未安装支付宝 App", Toast.LENGTH_SHORT).show()
                     }
                 }
-                .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                .padding(12.dp, 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(

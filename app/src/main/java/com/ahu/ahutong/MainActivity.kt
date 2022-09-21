@@ -70,7 +70,6 @@ class MainActivity : ComponentActivity() {
                     animatedComposable("schedule") { Schedule() }
                     animatedComposable("grade") {}
                     animatedComposable("phone_book") { PhoneBook() }
-                    animatedComposable("bathroom") {}
                     animatedComposable("exam") {}
                 }
                 LaunchedEffect(Unit) {

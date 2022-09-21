@@ -21,14 +21,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,6 +53,7 @@ import androidx.compose.ui.window.Dialog
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Tel
 import com.ahu.ahutong.ui.page.state.TelDirectoryViewModel
+import com.google.accompanist.flowlayout.FlowRow
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -76,7 +74,7 @@ fun PhoneBook() {
     ) {
         Text(
             text = stringResource(id = R.string.phone_book),
-            modifier = Modifier.padding(24.dp, 56.dp, 24.dp, 24.dp),
+            modifier = Modifier.padding(24.dp),
             style = MaterialTheme.typography.headlineLarge
         )
         Categories(
@@ -110,14 +108,12 @@ private fun Categories(
     selectedCategory: String,
     onCategorySelected: (String) -> Unit
 ) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    FlowRow(
+        modifier = Modifier.padding(horizontal = 24.dp),
+        mainAxisSpacing = 8.dp,
+        crossAxisSpacing = 12.dp
     ) {
-        items(
-            items = TelDirectoryViewModel.TelBook.keys.toList(),
-            key = { it }
-        ) { name ->
+        TelDirectoryViewModel.TelBook.keys.forEach { name ->
             val isSelected = selectedCategory == name
             CompositionLocalProvider(
                 LocalIndication provides rememberRipple(
@@ -132,7 +128,7 @@ private fun Categories(
                         .background(
                             animateColorAsState(
                                 targetValue = if (isSelected) 40.a1 withNight 90.a1
-                                else 92.a1 withNight 20.n1
+                                else 100.n1 withNight 20.n1
                             ).value
                         )
                         .clickable { onCategorySelected(name) }
@@ -180,7 +176,7 @@ private fun Telephones(
     ) { category ->
         Column(
             modifier = Modifier
-                .padding(16.dp, 24.dp)
+                .padding(16.dp)
                 .clip(RoundedCornerShape(32.dp)),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
@@ -206,12 +202,15 @@ private fun Telephones(
                             it.tel != null && it.tel2 != null && it.tel == it.tel2 -> {
                                 Tel(tel = it.tel)
                             }
+
                             it.tel != null && it.tel2 == null -> {
                                 Tel(tel = it.tel, campus = "磬苑")
                             }
+
                             it.tel == null && it.tel2 != null -> {
                                 Tel(tel = it.tel2, campus = "龙河")
                             }
+
                             it.tel != null && it.tel2 != null && it.tel != it.tel2 -> {
                                 Tel(tel = it.tel, campus = "磬苑")
                                 Tel(tel = it.tel2, campus = "龙河")

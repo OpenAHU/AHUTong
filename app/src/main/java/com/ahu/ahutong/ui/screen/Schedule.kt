@@ -13,7 +13,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,7 +52,6 @@ import com.kyant.monet.LocalTonalPalettes
 import com.kyant.monet.PaletteStyle
 import com.kyant.monet.TonalPalettes.Companion.toTonalPalettes
 import com.kyant.monet.a1
-import com.kyant.monet.a3
 import com.kyant.monet.n1
 import com.kyant.monet.n2
 import com.kyant.monet.toColor
@@ -68,7 +66,7 @@ fun Schedule() {
     var week by rememberSaveable { mutableStateOf(1) }
     val schedule = remember { mutableStateListOf<Course>() }
     val courseColors = remember { mutableStateMapOf<String, Color>() }
-    val currentWeekSchedule = remember { mutableStateListOf<Course>() }
+    val weeklyCourses = remember { mutableStateListOf<Course>() }
     val baseColor = 50.a1.toSrgb().toHct()
     LaunchedEffect(Unit) {
         AHURepository.getSchedule("2022-2023", "1", true).onSuccess { courses ->
@@ -77,17 +75,13 @@ fun Schedule() {
             courseNames.forEachIndexed { index, name ->
                 courseColors += name to baseColor.copy(h = 360.0 * index / courseNames.size).toSrgb().toColor()
             }
-            currentWeekSchedule += schedule
-                .filter { week in it.startWeek..it.endWeek }
-                .sortedBy { it.weekday * 11 + it.startTime }
+            weeklyCourses += schedule.filter { week in it.startWeek..it.endWeek }
         }
     }
     LaunchedEffect(schedule, week) {
         withContext(Dispatchers.IO) {
-            currentWeekSchedule.clear()
-            currentWeekSchedule += schedule
-                .filter { week in it.startWeek..it.endWeek }
-                .sortedBy { it.weekday * 11 + it.startTime }
+            weeklyCourses.clear()
+            weeklyCourses += schedule.filter { week in it.startWeek..it.endWeek }
         }
     }
     Column(
@@ -99,7 +93,7 @@ fun Schedule() {
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Row(
-            modifier = Modifier.padding(24.dp, 56.dp, 24.dp, 24.dp),
+            modifier = Modifier.padding(24.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -140,10 +134,10 @@ fun Schedule() {
         }
         val mainColumnWidth = 32.dp
         val mainRowHeight = 24.dp
-        val cellWidth = 48.dp
+        val cellWidth = 56.dp
         val cellHeight = 48.dp
         val cellSpacing = 8.dp
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .horizontalScroll(rememberScrollState())
                 .padding(cellSpacing)
@@ -157,8 +151,7 @@ fun Schedule() {
                     modifier = Modifier
                         .size(cellWidth, mainRowHeight)
                         .offset(x = mainColumnWidth + (cellWidth + cellSpacing) * index + cellSpacing)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(92.a3 withNight 20.n2),
+                        .clip(RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -183,9 +176,8 @@ fun Schedule() {
                 Column(
                     modifier = Modifier
                         .size(mainColumnWidth, cellHeight)
-                        .offset(y = mainRowHeight + (cellWidth + cellSpacing) * (index - 1) + cellSpacing)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(92.a1 withNight 20.n2),
+                        .offset(y = mainRowHeight + (cellHeight + cellSpacing) * (index - 1) + cellSpacing)
+                        .clip(RoundedCornerShape(8.dp)),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -195,12 +187,12 @@ fun Schedule() {
                     )
                     Text(
                         text = time.substringBefore("-"),
-                        color = 50.n1 withNight 70.n1,
+                        color = 50.n1 withNight 80.n1,
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
             }
-            currentWeekSchedule.forEach {
+            weeklyCourses.forEach {
                 CompositionLocalProvider(
                     LocalTonalPalettes provides courseColors.getValue(it.name).toTonalPalettes(
                         style = PaletteStyle.Vibrant
@@ -240,7 +232,7 @@ fun Schedule() {
                                 .padding(2.dp),
                             textAlign = TextAlign.Center,
                             overflow = TextOverflow.Ellipsis,
-                            maxLines = 3,
+                            maxLines = 2,
                             style = MaterialTheme.typography.labelSmall
                         )
                     }

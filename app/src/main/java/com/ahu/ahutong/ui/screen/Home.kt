@@ -13,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -40,21 +39,16 @@ fun Home(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(96.n1 withNight 10.n1)
+            .padding(vertical = 24.dp)
             .systemBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(
             text = "Hi, ${user.name}",
-            modifier = Modifier.padding(24.dp, 56.dp, 24.dp, 24.dp),
+            modifier = Modifier.padding(24.dp),
             style = MaterialTheme.typography.headlineLarge
         )
         CourseCard(navController = navController)
-        Text(
-            text = "功能",
-            modifier = Modifier.padding(horizontal = 24.dp),
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -62,6 +56,11 @@ fun Home(
             mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
             crossAxisSpacing = 16.dp
         ) {
+            FunctionalButton(
+                stringId = R.string.title_schedule,
+                iconId = R.mipmap.schedule_on,
+                onClick = { navController.navigate("schedule") }
+            )
             FunctionalButton(
                 stringId = R.string.grade,
                 iconId = R.mipmap.score,
@@ -71,11 +70,6 @@ fun Home(
                 stringId = R.string.phone_book,
                 iconId = R.mipmap.telephone_directory,
                 onClick = { navController.navigate("phone_book") }
-            )
-            FunctionalButton(
-                stringId = R.string.bathroom,
-                iconId = R.mipmap.bathroom,
-                onClick = { navController.navigate("bathroom") }
             )
             FunctionalButton(
                 stringId = R.string.exam,
@@ -89,7 +83,8 @@ fun Home(
             crossAxisSpacing = 16.dp
         ) {
             CampusCard(
-                balance = discoveryViewModel.balance
+                balance = discoveryViewModel.balance,
+                transitionBalance = discoveryViewModel.transitionBalance
             )
             BathroomCard(discoveryViewModel = discoveryViewModel)
         }

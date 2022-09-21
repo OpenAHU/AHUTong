@@ -27,6 +27,7 @@ import java.util.*
 class DiscoveryViewModel : ViewModel() {
     val bathroom = mutableStateMapOf<String, String>()
     var balance by mutableStateOf(0.0)
+    var transitionBalance by mutableStateOf(0.0)
 
     val bannerData: MutableLiveData<List<Banner>> by lazy {
         MutableLiveData<List<Banner>>()
@@ -36,31 +37,15 @@ class DiscoveryViewModel : ViewModel() {
 
     fun loadActivityBean() {
         viewModelScope.launch {
-            AHURepository.getBathRooms()
-                .onSuccess {
-                    val stringBuilder = StringBuilder()
-                    it.stream().forEach {
-                        bathroom += it.bathroom to it.openStatus
-                        stringBuilder.append(
-                            it.bathroom + ":" + it.openStatus.replace("wm", "均可").replace("w", "女生").replace("m", "男生")
-                        )
-                        stringBuilder.append("\n")
-                    }
-                    AHURepository.getCardMoney()
-                        .onSuccess {
-                            balance = it.balance
-                            activityBean.value =
-                                DiscoveryAdapter.ActivityBean(
-                                    it.balance.toString(),
-                                    it.transitionBalance.toString(),
-                                    stringBuilder.toString()
-                                )
-                        }.onFailure {
-                            activityBean.value = DiscoveryAdapter.ActivityBean("0.00", "0.00", stringBuilder.toString())
-                        }
-                }.onFailure {
-                    activityBean.value = DiscoveryAdapter.ActivityBean("0.00", "0.00", "桔园:女生\n竹园:均可\n惠园:均可")
+            AHURepository.getBathRooms().onSuccess {
+                it.stream().forEach {
+                    bathroom += it.bathroom to it.openStatus
                 }
+                AHURepository.getCardMoney().onSuccess {
+                    balance = it.balance
+                    transitionBalance = it.transitionBalance
+                }
+            }
         }
     }
 
