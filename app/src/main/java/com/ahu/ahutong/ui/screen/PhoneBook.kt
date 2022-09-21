@@ -16,12 +16,15 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -41,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -58,7 +62,7 @@ import com.kyant.monet.withNight
 // TODO: implement search query & inclusive data
 @Composable
 fun PhoneBook() {
-    var selectedCategory by rememberSaveable { mutableStateOf("常用") }
+    var selectedCategory by rememberSaveable { mutableStateOf("师生综合服务大厅") }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -124,7 +128,7 @@ private fun Categories(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun Telephones(selectedCategory: String) {
     val context = LocalContext.current
@@ -163,9 +167,15 @@ private fun Telephones(selectedCategory: String) {
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(4.dp))
                         .background(100.n1 withNight 20.n1)
-                        .clickable {
+                        .combinedClickable( // TODO: add user tip
+                            onDoubleClick = {
+                                val dialIntent =
+                                    Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${it.tel2}")) // 跳转到拨号界面，同时传递电话号码
+                                context.startActivity(dialIntent)
+                            }
+                        ) {
                             val dialIntent =
-                                Intent(Intent.ACTION_DIAL, Uri.parse("tel:${it.tel}")) // 跳转到拨号界面，同时传递电话号码
+                                Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${it.tel}")) // 跳转到拨号界面，同时传递电话号码
                             context.startActivity(dialIntent)
                         }
                         .padding(16.dp),
@@ -175,13 +185,51 @@ private fun Telephones(selectedCategory: String) {
                         text = it.name,
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Text(
-                        text = it.tel,
-                        color = 50.n1 withNight 80.n1,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        when {
+                            it.tel != null && it.tel2 != null && it.tel == it.tel2 -> {
+                                Tel(tel = it.tel)
+                            }
+                            it.tel != null && it.tel2 == null -> {
+                                Tel(tel = it.tel, campus = "磬苑")
+                            }
+                            it.tel == null && it.tel2 != null -> {
+                                Tel(tel = it.tel2, campus = "龙河")
+                            }
+                            it.tel != null && it.tel2 != null && it.tel != it.tel2 -> {
+                                Tel(tel = it.tel, campus = "磬苑")
+                                Tel(tel = it.tel2, campus = "龙河")
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun Tel(
+    tel: String,
+    campus: String? = null
+) {
+    campus?.let {
+        Text(
+            text = it,
+            modifier = Modifier
+                .padding(4.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(90.a1 withNight 30.n1)
+                .padding(8.dp, 2.dp),
+            style = MaterialTheme.typography.labelSmall
+        )
+    }
+    Text(
+        text = tel,
+        color = 50.n1 withNight 80.n1,
+        style = MaterialTheme.typography.bodyLarge
+    )
 }
