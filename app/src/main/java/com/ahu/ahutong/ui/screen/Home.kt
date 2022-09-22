@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,6 +17,7 @@ import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
+import com.ahu.ahutong.ui.screen.component.AtAGlance
 import com.ahu.ahutong.ui.screen.component.BathroomCard
 import com.ahu.ahutong.ui.screen.component.CampusCard
 import com.ahu.ahutong.ui.screen.component.CourseCard
@@ -43,10 +42,8 @@ fun Home(
             .systemBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Text(
-            text = "Hi, ${user.name}",
-            modifier = Modifier.padding(24.dp),
-            style = MaterialTheme.typography.headlineLarge
+        AtAGlance(
+            user = user
         )
         CourseCard(navController = navController)
         FlowRow(
