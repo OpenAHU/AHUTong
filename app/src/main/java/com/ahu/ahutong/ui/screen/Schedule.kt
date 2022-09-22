@@ -10,41 +10,56 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.AHURepository
@@ -61,11 +76,13 @@ import com.kyant.monet.withNight
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
+// TODO: limit the range of week
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Schedule() {
     val currentWeekday = 5
-    var week by rememberSaveable { mutableStateOf(1) }
+    var currentWeekTextFieldValue by remember { mutableStateOf(TextFieldValue("1")) }
+    val currentWeek = currentWeekTextFieldValue.text.toIntOrNull()
     val schedule = remember { mutableStateListOf<Course>() }
     val courseColors = remember { mutableStateMapOf<String, Color>() }
     val weeklyCourses = remember { mutableStateListOf<Course>() }
@@ -78,13 +95,13 @@ fun Schedule() {
             courseNames.forEachIndexed { index, name ->
                 courseColors += name to baseColor.copy(h = 360.0 * index / courseNames.size).toSrgb().toColor()
             }
-            weeklyCourses += schedule.filter { week in it.startWeek..it.endWeek }
+            weeklyCourses += schedule.filter { currentWeek in it.startWeek..it.endWeek }
         }
     }
-    LaunchedEffect(schedule, week) {
+    LaunchedEffect(schedule, currentWeek) {
         withContext(Dispatchers.IO) {
             weeklyCourses.clear()
-            weeklyCourses += schedule.filter { week in it.startWeek..it.endWeek }
+            weeklyCourses += schedule.filter { currentWeek in it.startWeek..it.endWeek }
         }
     }
     Box {
@@ -100,37 +117,53 @@ fun Schedule() {
         ) {
             Row(
                 modifier = Modifier.padding(24.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "${stringResource(id = R.string.title_schedule)} (第",
                     style = MaterialTheme.typography.headlineLarge
                 )
-                Column(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(90.n1 withNight 30.n1)
-                        .combinedClickable(
-                            onDoubleClick = {
-                                if (week > 1) {
-                                    week--
-                                }
-                            }
-                        ) { week++ }
-                        .padding(horizontal = 8.dp)
-                ) {
-                    AnimatedContent(
-                        targetState = week,
-                        transitionSpec = {
-                            fadeIn() + slideInVertically { it } with
-                                fadeOut() + slideOutVertically { it }
-                        }
-                    ) {
-                        Text(
-                            text = it.toString(),
-                            style = MaterialTheme.typography.headlineLarge
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    IconButton(onClick = {
+                        currentWeekTextFieldValue = currentWeekTextFieldValue.copy(
+                            currentWeekTextFieldValue.text.toIntOrNull()?.minus(1)?.coerceAtLeast(1)?.toString()
+                                ?: "1"
                         )
+                    }) {
+                        Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = null)
+                    }
+                }
+                val strokeColor = 40.a1 withNight 80.a1
+                BasicTextField(
+                    value = currentWeekTextFieldValue,
+                    onValueChange = { currentWeekTextFieldValue = it },
+                    modifier = Modifier
+                        .width(IntrinsicSize.Min)
+                        .padding(horizontal = 8.dp)
+                        .drawBehind {
+                            drawLine(
+                                color = strokeColor,
+                                start = Offset(0f, size.height),
+                                end = Offset(size.width, size.height),
+                                strokeWidth = 4.dp.toPx(),
+                                cap = StrokeCap.Round
+                            )
+                        },
+                    textStyle = MaterialTheme.typography.headlineLarge.copy(color = LocalContentColor.current),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    singleLine = true,
+                    cursorBrush = SolidColor(LocalContentColor.current)
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    IconButton(onClick = {
+                        currentWeekTextFieldValue = currentWeekTextFieldValue.copy(
+                            currentWeekTextFieldValue.text.toIntOrNull()?.plus(1)?.toString() ?: "1"
+                        )
+                    }) {
+                        Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = null)
                     }
                 }
                 Text(
@@ -217,12 +250,14 @@ fun Schedule() {
                         )
                     }
                 }
-                weeklyCourses.forEach {
-                    CourseCard(
-                        course = it,
-                        color = courseColors.getValue(it.name),
-                        onClick = { detailedCourse = it }
-                    )
+                weeklyCourses.forEach { course ->
+                    key(course.hashCode()) {
+                        CourseCard(
+                            course = course,
+                            color = courseColors.getValue(course.name),
+                            onClick = { detailedCourse = it }
+                        )
+                    }
                 }
             }
         }
