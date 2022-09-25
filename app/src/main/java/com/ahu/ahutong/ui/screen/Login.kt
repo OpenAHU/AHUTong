@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.page.state.LoginViewModel
+import com.ahu.ahutong.ui.screen.component.LoadingIndicator
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -46,8 +48,8 @@ fun Login(
     navController: NavHostController
 ) {
     val context = LocalContext.current as ComponentActivity
-    var focusIndex by remember { mutableStateOf(0) }
-    var passwordVisible by remember { mutableStateOf(false) }
+    var focusIndex by rememberSaveable { mutableStateOf(0) }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -227,6 +229,24 @@ fun Login(
     }
 }
 
+@Composable
+fun LoggingIn() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(96.n1 withNight 10.n1)
+            .imePadding(),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(id = R.string.logging_in),
+            style = MaterialTheme.typography.headlineLarge
+        )
+        LoadingIndicator()
+    }
+}
+
 // TODO: display progress bar while logging in
 private fun login(
     loginViewModel: LoginViewModel,
@@ -253,6 +273,7 @@ private fun login(
                 Toast.LENGTH_SHORT
             ).show()
             navController.popBackStack()
+            navController.navigate("fill_in_info")
         }.onFailure {
             Toast.makeText(
                 context,

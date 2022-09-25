@@ -17,7 +17,10 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
+import com.ahu.ahutong.ui.page.state.ScheduleViewModel
+import com.ahu.ahutong.ui.screen.FillInInfo
 import com.ahu.ahutong.ui.screen.Home
+import com.ahu.ahutong.ui.screen.LoggingIn
 import com.ahu.ahutong.ui.screen.Login
 import com.ahu.ahutong.ui.screen.PhoneBook
 import com.ahu.ahutong.ui.screen.Schedule
@@ -31,6 +34,7 @@ class MainActivity : ComponentActivity() {
     private val mState: MainViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
     private val discoveryViewModel: DiscoveryViewModel by viewModels()
+    private val scheduleViewModel: ScheduleViewModel by viewModels()
 
     private fun loadInitData() {
         // 日活统计接口
@@ -40,6 +44,8 @@ class MainActivity : ComponentActivity() {
         val componentName = ComponentName(this, ClassWidget::class.java)
         val appWidgetIds = manager.getAppWidgetIds(componentName)
         manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
+
+        scheduleViewModel.loadConfig()
     }
 
     @OptIn(ExperimentalAnimationApi::class)
@@ -67,13 +73,24 @@ class MainActivity : ComponentActivity() {
                             navController = navController
                         )
                     }
-                    animatedComposable("schedule") { Schedule() }
+                    animatedComposable("logging_in") { LoggingIn() }
+                    animatedComposable("fill_in_info") {
+                        FillInInfo(
+                            scheduleViewModel = scheduleViewModel,
+                            navController = navController
+                        )
+                    }
+                    animatedComposable("schedule") {
+                        Schedule(scheduleViewModel = scheduleViewModel)
+                    }
                     animatedComposable("grade") {}
                     animatedComposable("phone_book") { PhoneBook() }
                     animatedComposable("exam") {}
                 }
-                LaunchedEffect(Unit) {
-                    if (!AHUCache.isLogin()) {
+                LaunchedEffect(loginViewModel.isLoggingIn) {
+                    if (loginViewModel.isLoggingIn) {
+                        navController.navigate("logging_in")
+                    } else if (!AHUCache.isLogin()) {
                         navController.navigate("login")
                     }
                 }

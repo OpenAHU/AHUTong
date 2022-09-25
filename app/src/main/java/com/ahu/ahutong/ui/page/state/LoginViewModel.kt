@@ -24,11 +24,13 @@ import kotlinx.coroutines.withContext
 class LoginViewModel : ViewModel() {
     var userID by mutableStateOf(TextFieldValue())
     var password by mutableStateOf(TextFieldValue())
+    var isLoggingIn by mutableStateOf(false)
     val serverLoginResult = MutableLiveData<Result<User>>()
 
     fun loginWithServer(userID: String, wisdomPassword: String) =
         viewModelScope.launch {
             val result: Result<User> = try {
+                isLoggingIn = true
                 // 智慧安大登录
                 val wisdomResponse = withContext(Dispatchers.IO) {
                     val encryptedPassword =
@@ -36,6 +38,7 @@ class LoginViewModel : ViewModel() {
                     AHUCache.saveWisdomPassword(encryptedPassword)
                     AHUService.API.login(userID, encryptedPassword, User.UserType.AHU_Wisdom)
                 }
+                isLoggingIn = false
                 // 登录必须全部成功
                 if (wisdomResponse.isSuccessful) {
                     wisdomResponse.data.xh = userID

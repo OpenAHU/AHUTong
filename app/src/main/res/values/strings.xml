@@ -89,4 +89,9 @@
     <string name="view_flow">查看流水</string>
 
     <string name="log_in">登录</string>
+    <string name="logging_in">登录中</string>
+    <string name="fill_in_info">完善信息</string>
+    <string name="school_year">学年</string>
+    <string name="school_term">学期</string>
+    <string name="current_week">当前周</string>
 </resources>

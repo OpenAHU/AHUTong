@@ -3,7 +3,6 @@ package com.ahu.ahutong.ui.screen
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -41,15 +40,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -61,9 +61,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.screen.course.CourseCard
 import com.ahu.ahutong.ui.screen.course.CourseCardSpec
 import com.ahu.ahutong.ui.screen.course.CourseDetails
@@ -75,13 +77,16 @@ import com.kyant.monet.toSrgb
 import com.kyant.monet.withNight
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Calendar
 
-// TODO: limit the range of week
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun Schedule() {
-    val currentWeekday = 5
-    var currentWeekTextFieldValue by remember { mutableStateOf(TextFieldValue("1")) }
+fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
+    val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
+    val currentWeekday = (scheduleConfig?.weekDay?.minus(1)?.mod(7))?.let { if (it == 0) 7 else it } ?: 1
+    var currentWeekTextFieldValue by rememberSaveable(scheduleConfig?.week, stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(scheduleConfig?.week?.toString() ?: "1"))
+    }
     val currentWeek = currentWeekTextFieldValue.text.toIntOrNull()
     val schedule = remember { mutableStateListOf<Course>() }
     val courseColors = remember { mutableStateMapOf<String, Color>() }
@@ -89,19 +94,29 @@ fun Schedule() {
     var detailedCourse by remember { mutableStateOf<Course?>(null) }
     val baseColor = 50.a1.toSrgb().toHct()
     LaunchedEffect(Unit) {
-        AHURepository.getSchedule("2022-2023", "1", true).onSuccess { courses ->
-            schedule += courses
-            val courseNames = schedule.map { it.name }.distinct()
-            courseNames.forEachIndexed { index, name ->
-                courseColors += name to baseColor.copy(h = 360.0 * index / courseNames.size).toSrgb().toColor()
+        AHURepository.getSchedule(scheduleViewModel.schoolYear, scheduleViewModel.schoolTerm, true)
+            .onSuccess { courses ->
+                schedule += courses
+                val courseNames = schedule.map { it.name }.distinct()
+                courseNames.forEachIndexed { index, name ->
+                    courseColors += name to baseColor.copy(h = 360.0 * index / courseNames.size).toSrgb().toColor()
+                }
+                weeklyCourses += schedule.filter { currentWeek in it.startWeek..it.endWeek }
             }
-            weeklyCourses += schedule.filter { currentWeek in it.startWeek..it.endWeek }
-        }
     }
     LaunchedEffect(schedule, currentWeek) {
         withContext(Dispatchers.IO) {
             weeklyCourses.clear()
             weeklyCourses += schedule.filter { currentWeek in it.startWeek..it.endWeek }
+        }
+    }
+    LaunchedEffect(currentWeek) {
+        currentWeek?.let {
+            scheduleViewModel.saveTime(
+                schoolYear = scheduleViewModel.schoolYear,
+                schoolTerm = scheduleViewModel.schoolTerm,
+                week = it
+            )
         }
     }
     Box {
@@ -111,7 +126,6 @@ fun Schedule() {
                 .verticalScroll(rememberScrollState())
                 .background(96.n1 withNight 10.n1)
                 .alpha(animateFloatAsState(targetValue = if (detailedCourse != null) 0.38f else 1f).value)
-                .blur(animateDpAsState(targetValue = if (detailedCourse != null) 16.dp else 0.dp).value)
                 .systemBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -201,18 +215,30 @@ fun Schedule() {
                     }
                 )
                 arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEachIndexed { index, weekday ->
-                    Box(
+                    Column(
                         modifier = with(CourseCardSpec) {
                             Modifier
                                 .size(cellWidth, mainRowHeight)
                                 .offset(x = mainColumnWidth + (cellWidth + cellSpacing) * index + cellSpacing)
                                 .clip(RoundedCornerShape(8.dp))
                         },
-                        contentAlignment = Alignment.Center
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = weekday,
                             style = MaterialTheme.typography.labelLarge
+                        )
+                        Text(
+                            text = Calendar.getInstance().apply {
+                                time = scheduleConfig!!.startTime
+                                add(Calendar.DAY_OF_WEEK, (currentWeek ?: 1) - 1)
+                                add(Calendar.DATE, index)
+                            }.let {
+                                "${it.get(Calendar.MONTH)}-${it.get(Calendar.DATE)}"
+                            },
+                            color = 50.n1 withNight 80.n1,
+                            style = MaterialTheme.typography.labelSmall
                         )
                     }
                 }

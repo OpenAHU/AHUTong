@@ -28,7 +28,7 @@ class ScheduleViewModel : ViewModel() {
     val showSelectTimeDialog = SingleLiveEvent<Boolean>()
 
     val schoolYear: String
-        get() = AHUCache.getSchoolYear() ?: "2022"
+        get() = AHUCache.getSchoolYear() ?: "2022-2023"
 
     val schoolTerm: String
         get() = AHUCache.getSchoolTerm() ?: "1"
