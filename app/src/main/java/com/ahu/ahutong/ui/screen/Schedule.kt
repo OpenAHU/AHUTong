@@ -77,13 +77,18 @@ import com.kyant.monet.toSrgb
 import com.kyant.monet.withNight
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
+    // 加载开学日期等配置信息
+    LaunchedEffect(Unit) {
+        scheduleViewModel.loadConfig()
+    }
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
-    val currentWeekday = (scheduleConfig?.weekDay?.minus(1)?.mod(7))?.let { if (it == 0) 7 else it } ?: 1
+    val currentWeekday = scheduleConfig?.weekDay ?: 1
     var currentWeekTextFieldValue by rememberSaveable(scheduleConfig?.week, stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(scheduleConfig?.week?.toString() ?: "1"))
     }
@@ -108,15 +113,6 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
         withContext(Dispatchers.IO) {
             weeklyCourses.clear()
             weeklyCourses += schedule.filter { currentWeek in it.startWeek..it.endWeek }
-        }
-    }
-    LaunchedEffect(currentWeek) {
-        currentWeek?.let {
-            scheduleViewModel.saveTime(
-                schoolYear = scheduleViewModel.schoolYear,
-                schoolTerm = scheduleViewModel.schoolTerm,
-                week = it
-            )
         }
     }
     Box {
@@ -155,13 +151,9 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         .width(IntrinsicSize.Min)
                         .padding(horizontal = 8.dp)
                         .drawBehind {
-                            drawLine(
-                                color = strokeColor,
-                                start = Offset(0f, size.height),
-                                end = Offset(size.width, size.height),
-                                strokeWidth = 4.dp.toPx(),
-                                cap = StrokeCap.Round
-                            )
+                            drawLine(color = strokeColor, start = Offset(0f, size.height),
+                                    end = Offset(size.width, size.height), strokeWidth = 4.dp.toPx(),
+                                    cap = StrokeCap.Round)
                         },
                     textStyle = MaterialTheme.typography.headlineLarge.copy(color = LocalContentColor.current),
                     keyboardOptions = KeyboardOptions(
@@ -190,28 +182,19 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     Modifier
                         .horizontalScroll(rememberScrollState())
                         .padding(cellSpacing)
-                        .size(
-                            mainColumnWidth + (cellWidth + cellSpacing) * 7,
-                            mainRowHeight + (cellHeight + cellSpacing) * 11
-                        )
+                        .size(mainColumnWidth + (cellWidth + cellSpacing) * 7,
+                                mainRowHeight + (cellHeight + cellSpacing) * 11)
                 }
             ) {
                 Box(
                     modifier = with(CourseCardSpec) {
                         Modifier
-                            .size(
-                                cellWidth + cellSpacing,
-                                mainRowHeight + cellHeight * 11 + cellSpacing * 12
-                            )
-                            .offset(
-                                mainColumnWidth + (cellWidth + cellSpacing) * (currentWeekday - 1) + cellSpacing / 2,
-                                -cellSpacing / 2
-                            )
-                            .border(
-                                width = 2.dp,
-                                color = 70.a1 withNight 60.a1,
-                                shape = RoundedCornerShape(16.dp)
-                            )
+                            .size(cellWidth + cellSpacing,
+                                    mainRowHeight + cellHeight * 11 + cellSpacing * 12)
+                            .offset(mainColumnWidth + (cellWidth + cellSpacing) *
+                                    (currentWeekday - 1) + cellSpacing / 2, -cellSpacing / 2)
+                            .border(width = 2.dp, color = 70.a1 withNight 60.a1,
+                                    shape = RoundedCornerShape(16.dp))
                     }
                 )
                 arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEachIndexed { index, weekday ->
@@ -232,10 +215,9 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         Text(
                             text = Calendar.getInstance().apply {
                                 time = scheduleConfig!!.startTime
-                                add(Calendar.DAY_OF_WEEK, (currentWeek ?: 1) - 1)
-                                add(Calendar.DATE, index)
+                                add(Calendar.DATE, ((currentWeek!! - 1) * 7) + index)
                             }.let {
-                                "${it.get(Calendar.MONTH)}-${it.get(Calendar.DATE)}"
+                                SimpleDateFormat("MM-dd", Locale.CHINA).format(it.time)
                             },
                             color = 50.n1 withNight 80.n1,
                             style = MaterialTheme.typography.labelSmall

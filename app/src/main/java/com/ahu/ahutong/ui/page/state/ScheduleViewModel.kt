@@ -86,8 +86,8 @@ class ScheduleViewModel : ViewModel() {
                 // 当前周数
                 scheduleConfigBean.week = (TimeUtils.getTimeDistance(Date(), date) / 7 + 1).toInt()
                 // 当前周几
-                scheduleConfigBean.weekDay =
-                    Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK]
+                scheduleConfigBean.weekDay = (Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK] - 1)
+                    .takeIf { it != 0 } ?: 7
                 scheduleConfigBean
             }.let {
                 scheduleConfig.postValue(it)
