@@ -32,8 +32,8 @@ class AboutViewModel : ViewModel() {
      * @return Job
      */
     fun getAppLatestVersion() = viewModelScope.launch {
-        latestVersions.value = withContext(Dispatchers.IO) {
-            try {
+        withContext(Dispatchers.IO) {
+            latestVersions.value = try {
                 Result.success(AHUService.API.getLatestVersion())
             } catch (e: Exception) {
                 Result.failure(Throwable("网络连接异常，获取最新版本失败！"))
