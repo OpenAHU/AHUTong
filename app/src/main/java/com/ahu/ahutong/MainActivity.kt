@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
                     animatedComposable("home") {
                         Home(
                             discoveryViewModel = discoveryViewModel,
+                            scheduleViewModel = scheduleViewModel,
                             navController = navController
                         )
                     }

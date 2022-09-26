@@ -17,6 +17,7 @@ import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
+import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.screen.component.AtAGlance
 import com.ahu.ahutong.ui.screen.component.BathroomCard
 import com.ahu.ahutong.ui.screen.component.CampusCard
@@ -30,6 +31,7 @@ import com.kyant.monet.withNight
 @Composable
 fun Home(
     discoveryViewModel: DiscoveryViewModel = viewModel(),
+    scheduleViewModel: ScheduleViewModel = viewModel(),
     navController: NavHostController
 ) {
     val user = AHUCache.getCurrentUser() ?: return
@@ -45,7 +47,10 @@ fun Home(
         AtAGlance(
             user = user
         )
-        CourseCard(navController = navController)
+        CourseCard(
+            scheduleViewModel = scheduleViewModel,
+            navController = navController
+        )
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()

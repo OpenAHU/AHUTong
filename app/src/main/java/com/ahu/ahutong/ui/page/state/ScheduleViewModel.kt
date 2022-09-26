@@ -22,6 +22,21 @@ import java.util.*
  * @Email 468766131@qq.com
  */
 class ScheduleViewModel : ViewModel() {
+    val timetable by lazy {
+        mapOf(
+            1 to "08:20-09:05",
+            2 to "09:15-10:00",
+            3 to "10:20-11:05",
+            4 to "11:15-12:00",
+            5 to "14:00-14:45",
+            6 to "14:55-15:40",
+            7 to "15:50-16:35",
+            8 to "16:45-17:30",
+            9 to "19:00-19:45",
+            10 to "19:55-20:40",
+            11 to "20:50-21:35"
+        )
+    }
 
     val schedule = MutableLiveData<Result<List<Course>>>()
 
@@ -34,6 +49,49 @@ class ScheduleViewModel : ViewModel() {
         get() = AHUCache.getSchoolTerm() ?: "1"
 
     val scheduleConfig = MutableLiveData<ScheduleConfigBean>()
+
+    /**
+     * @param from "hh:mm-hh:mm"
+     * @param to "hh:mm-hh:mm"
+     */
+    private fun getTimeRangeInMinutes(
+        from: String,
+        to: String = from
+    ): IntRange {
+        val format = SimpleDateFormat("hh-mm", Locale.CHINA)
+        val start = format.parse(
+            from
+                .take(5)
+                .replace(":", "-")
+        ).let {
+            val calendar = Calendar.getInstance(Locale.CHINA)
+            calendar.time = it!!
+            calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+        }
+        val end = format.parse(
+            to
+                .takeLast(5)
+                .replace(":", "-")
+        ).let {
+            val calendar = Calendar.getInstance(Locale.CHINA)
+            calendar.time = it!!
+            calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+        }
+        return start..end
+    }
+
+    fun getCourseTimeRangeInMinutes(course: Course): IntRange {
+        return getTimeRangeInMinutes(
+            from = timetable.getValue(course.startTime),
+            to = timetable.getValue(course.let { it.startTime + it.length - 1 })
+        )
+    }
+
+    fun findCurrentTimeByMinutes(minutes: Int): Int? {
+        return timetable.toList().find {
+            minutes <= getTimeRangeInMinutes(it.second).first
+        }?.first
+    }
 
     // 更新周
     fun changeWeek(week: Int) {

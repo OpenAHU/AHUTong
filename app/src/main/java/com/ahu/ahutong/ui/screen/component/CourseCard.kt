@@ -32,9 +32,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -42,21 +46,29 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.kyant.monet.a1
 import com.kyant.monet.a3
 import com.kyant.monet.n1
 import com.kyant.monet.n2
 import com.kyant.monet.withNight
 import kotlinx.coroutines.launch
+import java.util.*
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun CourseCard(navController: NavHostController) {
+fun CourseCard(
+    scheduleViewModel: ScheduleViewModel = viewModel(),
+    navController: NavHostController
+) {
     val scope = rememberCoroutineScope()
+    val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
+    val currentWeekday = (scheduleConfig?.weekDay?.minus(1)?.mod(7))?.let { if (it == 0) 7 else it } ?: 1
     val todayCourses = remember { mutableStateListOf<Course>() }
     val draggedFraction = remember { Animatable(0f) }
     val state = rememberDraggableState {
@@ -64,13 +76,32 @@ fun CourseCard(navController: NavHostController) {
             draggedFraction.snapTo((draggedFraction.value - it / 500f).coerceIn(0f..todayCourses.size - 1f))
         }
     }
+    val calendar = Calendar.getInstance(Locale.CHINA)
+    val current = calendar.time.let {
+        calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+    }
     LaunchedEffect(Unit) {
-        AHURepository.getSchedule("2022-2023", "1", true).onSuccess { courses ->
-            todayCourses += courses
-                .filter { 1 in it.startWeek..it.endWeek }
-                .filter { it.weekday == 5 }
-                .sortedBy { it.startTime }
-        }
+        AHURepository.getSchedule(scheduleViewModel.schoolYear, scheduleViewModel.schoolTerm, true)
+            .onSuccess { courses ->
+                todayCourses += courses
+                    .filter { scheduleConfig?.week in it.startWeek..it.endWeek }
+                    .filter { it.weekday == currentWeekday }
+                    .sortedBy { it.startTime }
+            }
+    }
+    var autoScrollLocked by remember { mutableStateOf(false) }
+    scheduleViewModel.findCurrentTimeByMinutes(current)?.let { time ->
+        todayCourses
+            .indexOfFirst { time <= it.startTime + it.length - 1 }
+            .takeIf { it != -1 }
+            ?.let {
+                if (!autoScrollLocked) {
+                    scope.launch {
+                        draggedFraction.snapTo(it.toFloat())
+                        autoScrollLocked = true
+                    }
+                }
+            }
     }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Box(
@@ -97,15 +128,23 @@ fun CourseCard(navController: NavHostController) {
                     }
                 )
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(
-                        animateFloatAsState(targetValue = if (draggedFraction.value == 0f) 0.3f else 0f).value
-                    )
-                    .fillMaxHeight()
-                    .background(50.a1 withNight 80.a1)
-            )
             todayCourses.getOrNull(draggedFraction.value.roundToInt())?.let { course ->
+                val range = scheduleViewModel.getCourseTimeRangeInMinutes(course)
+                println(current)
+                println(range.first)
+                println(range.last)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(
+                            animateFloatAsState(
+                                targetValue = if (current in range) {
+                                    (current.toFloat() - range.first) / (range.last.toFloat() - range.first)
+                                } else 0f
+                            ).value
+                        )
+                        .fillMaxHeight()
+                        .background(50.a1 withNight 80.a1)
+                )
                 Column(
                     modifier = Modifier.padding(24.dp, 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -126,7 +165,7 @@ fun CourseCard(navController: NavHostController) {
                                     } else draggedFraction.value.mod(1f) * 2 - 1f
                                 ).value
                             ),
-                        color = if (draggedFraction.value < 0.5f) 100.n1 else 0.n1 withNight 100.n1,
+                        color = if (current in range) 100.n1 else 0.n1 withNight 100.n1,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.headlineMedium
                     )

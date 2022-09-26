@@ -1,14 +1,5 @@
 package com.ahu.ahutong.ui.screen
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -49,7 +40,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -68,7 +58,7 @@ import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.screen.course.CourseCard
 import com.ahu.ahutong.ui.screen.course.CourseCardSpec
-import com.ahu.ahutong.ui.screen.course.CourseDetails
+import com.ahu.ahutong.ui.screen.course.CourseDetailDialog
 import com.kyant.monet.Hct.Companion.toHct
 import com.kyant.monet.a1
 import com.kyant.monet.n1
@@ -77,9 +67,8 @@ import com.kyant.monet.toSrgb
 import com.kyant.monet.withNight
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Calendar
+import java.util.*
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
@@ -125,7 +114,6 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .background(96.n1 withNight 10.n1)
-                .alpha(animateFloatAsState(targetValue = if (detailedCourse != null) 0.38f else 1f).value)
                 .systemBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -242,19 +230,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         )
                     }
                 }
-                mapOf(
-                    1 to "08:20-09:05",
-                    2 to "09:15-10:00",
-                    3 to "10:20-11:05",
-                    4 to "11:15-12:00",
-                    5 to "14:00-14:45",
-                    6 to "14:55-15:40",
-                    7 to "15:50-16:35",
-                    8 to "16:45-17:30",
-                    9 to "19:00-19:45",
-                    10 to "19:55-20:40",
-                    11 to "20:50-21:35"
-                ).forEach { (index, time) ->
+                scheduleViewModel.timetable.forEach { (index, time) ->
                     Column(
                         modifier = with(CourseCardSpec) {
                             Modifier
@@ -287,22 +263,11 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                 }
             }
         }
-        AnimatedContent(
-            targetState = detailedCourse,
-            transitionSpec = {
-                fadeIn() + slideInVertically { it } with
-                    fadeOut() + slideOutVertically { it }
-            }
-        ) {
-            it?.let {
-                CourseDetails(
-                    course = it,
-                    onDismiss = { detailedCourse = null }
-                )
-            }
+        detailedCourse?.let {
+            CourseDetailDialog(
+                course = it,
+                onDismiss = { detailedCourse = null }
+            )
         }
-    }
-    BackHandler(enabled = detailedCourse != null) {
-        detailedCourse = null
     }
 }
