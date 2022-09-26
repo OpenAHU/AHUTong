@@ -67,12 +67,17 @@ import com.kyant.monet.toSrgb
 import com.kyant.monet.withNight
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
+    // 加载开学日期等配置信息
+    LaunchedEffect(Unit) {
+        scheduleViewModel.loadConfig()
+    }
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
-    val currentWeekday = (scheduleConfig?.weekDay?.minus(1)?.mod(7))?.let { if (it == 0) 7 else it } ?: 1
+    val currentWeekday = scheduleConfig?.weekDay ?: 1
     var currentWeekTextFieldValue by rememberSaveable(scheduleConfig?.week, stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(scheduleConfig?.week?.toString() ?: "1"))
     }
@@ -97,15 +102,6 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
         withContext(Dispatchers.IO) {
             weeklyCourses.clear()
             weeklyCourses += schedule.filter { currentWeek in it.startWeek..it.endWeek }
-        }
-    }
-    LaunchedEffect(currentWeek) {
-        currentWeek?.let {
-            scheduleViewModel.saveTime(
-                schoolYear = scheduleViewModel.schoolYear,
-                schoolTerm = scheduleViewModel.schoolTerm,
-                week = it
-            )
         }
     }
     Box {
@@ -220,10 +216,9 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         Text(
                             text = Calendar.getInstance().apply {
                                 time = scheduleConfig!!.startTime
-                                add(Calendar.DAY_OF_WEEK, (currentWeek ?: 1) - 1)
-                                add(Calendar.DATE, index)
+                                add(Calendar.DATE, ((currentWeek!! - 1) * 7) + index)
                             }.let {
-                                "${it.get(Calendar.MONTH)}-${it.get(Calendar.DATE)}"
+                                SimpleDateFormat("MM-dd", Locale.CHINA).format(it.time)
                             },
                             color = 50.n1 withNight 80.n1,
                             style = MaterialTheme.typography.labelSmall
