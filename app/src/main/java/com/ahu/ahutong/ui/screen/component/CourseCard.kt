@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.screen.component
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
@@ -66,9 +67,14 @@ fun CourseCard(
     scheduleViewModel: ScheduleViewModel = viewModel(),
     navController: NavHostController
 ) {
+    // 加载正确的当前配置信息
+    LaunchedEffect(Unit) {
+        scheduleViewModel.loadConfig()
+    }
+
     val scope = rememberCoroutineScope()
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
-    val currentWeekday = (scheduleConfig?.weekDay?.minus(1)?.mod(7))?.let { if (it == 0) 7 else it } ?: 1
+    val currentWeekday = scheduleConfig?.weekDay ?: 1
     val todayCourses = remember { mutableStateListOf<Course>() }
     val draggedFraction = remember { Animatable(0f) }
     val state = rememberDraggableState {
@@ -109,39 +115,26 @@ fun CourseCard(
                 .height(IntrinsicSize.Min)
                 .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(32.dp))
-                .background(
-                    animateColorAsState(
-                        targetValue = if (draggedFraction.value < 0.5f) 90.a1 withNight 30.n1
-                        else 90.a3 withNight 30.n2
-                    ).value
-                )
+                .background(animateColorAsState(targetValue = if (draggedFraction.value < 0.5f) 90.a1 withNight 30.n1
+                else 90.a3 withNight 30.n2).value)
                 .pointerInput(Unit) {
                     detectTapGestures {
                         navController.navigate("schedule")
                     }
                 }
-                .draggable(
-                    state = state,
-                    orientation = Orientation.Horizontal,
-                    onDragStopped = {
-                        draggedFraction.animateTo(draggedFraction.value.roundToInt().toFloat())
-                    }
-                )
+                .draggable(state = state, orientation = Orientation.Horizontal, onDragStopped = {
+                    draggedFraction.animateTo(draggedFraction.value
+                        .roundToInt()
+                        .toFloat())
+                })
         ) {
             todayCourses.getOrNull(draggedFraction.value.roundToInt())?.let { course ->
                 val range = scheduleViewModel.getCourseTimeRangeInMinutes(course)
-                println(current)
-                println(range.first)
-                println(range.last)
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(
-                            animateFloatAsState(
-                                targetValue = if (current in range) {
-                                    (current.toFloat() - range.first) / (range.last.toFloat() - range.first)
-                                } else 0f
-                            ).value
-                        )
+                        .fillMaxWidth(animateFloatAsState(targetValue = if (current in range) {
+                            (current.toFloat() - range.first) / (range.last.toFloat() - range.first)
+                        } else 0f).value)
                         .fillMaxHeight()
                         .background(50.a1 withNight 80.a1)
                 )

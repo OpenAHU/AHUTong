@@ -58,21 +58,13 @@ class ScheduleViewModel : ViewModel() {
         from: String,
         to: String = from
     ): IntRange {
-        val format = SimpleDateFormat("hh-mm", Locale.CHINA)
-        val start = format.parse(
-            from
-                .take(5)
-                .replace(":", "-")
-        ).let {
+        val format = SimpleDateFormat("HH:mm", Locale.CHINA)
+        val start = format.parse(from.take(5)).let {
             val calendar = Calendar.getInstance(Locale.CHINA)
             calendar.time = it!!
             calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
         }
-        val end = format.parse(
-            to
-                .takeLast(5)
-                .replace(":", "-")
-        ).let {
+        val end = format.parse(to.takeLast(5)).let {
             val calendar = Calendar.getInstance(Locale.CHINA)
             calendar.time = it!!
             calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
@@ -83,7 +75,7 @@ class ScheduleViewModel : ViewModel() {
     fun getCourseTimeRangeInMinutes(course: Course): IntRange {
         return getTimeRangeInMinutes(
             from = timetable.getValue(course.startTime),
-            to = timetable.getValue(course.let { it.startTime + it.length - 1 })
+            to = timetable.getValue(course.startTime + course.length - 1 )
         )
     }
 
