@@ -25,6 +25,8 @@ import com.ahu.ahutong.data.model.User
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun AtAGlance(
@@ -65,9 +67,11 @@ fun AtAGlance(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "9月22日 周四",
+                text = SimpleDateFormat("MM月dd日 EE", Locale.CHINA)
+                    .format(Calendar.getInstance(Locale.CHINA).time),
                 style = MaterialTheme.typography.titleMedium
             )
+            // TODO: implement weather
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically

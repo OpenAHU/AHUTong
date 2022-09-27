@@ -1,9 +1,7 @@
 package com.ahu.ahutong.ui.screen.component
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
@@ -32,14 +30,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -49,56 +45,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.kyant.monet.a1
-import com.kyant.monet.a3
 import com.kyant.monet.n1
-import com.kyant.monet.n2
 import com.kyant.monet.withNight
 import kotlinx.coroutines.launch
-import java.util.*
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CourseCard(
     scheduleViewModel: ScheduleViewModel = viewModel(),
+    todayCourses: SnapshotStateList<Course>,
+    current: Int,
     navController: NavHostController
 ) {
-    // 加载正确的当前配置信息
-    LaunchedEffect(Unit) {
-        scheduleViewModel.loadConfig()
-    }
-
     val scope = rememberCoroutineScope()
-    val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
-    val currentWeekday = scheduleConfig?.weekDay ?: 1
-    val todayCourses = remember { mutableStateListOf<Course>() }
     val draggedFraction = remember { Animatable(0f) }
     val state = rememberDraggableState {
         scope.launch {
             draggedFraction.snapTo((draggedFraction.value - it / 500f).coerceIn(0f..todayCourses.size - 1f))
         }
     }
-    val calendar = Calendar.getInstance(Locale.CHINA)
-    val current = calendar.time.let {
-        calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
-    }
-    LaunchedEffect(Unit) {
-        AHURepository.getSchedule(scheduleViewModel.schoolYear, scheduleViewModel.schoolTerm, true)
-            .onSuccess { courses ->
-                todayCourses += courses
-                    .filter { scheduleConfig?.week in it.startWeek..it.endWeek }
-                    .filter { it.weekday == currentWeekday }
-                    .sortedBy { it.startTime }
-            }
-    }
     var autoScrollLocked by remember { mutableStateOf(false) }
     scheduleViewModel.findCurrentTimeByMinutes(current)?.let { time ->
         todayCourses
-            .indexOfFirst { time <= it.startTime + it.length - 1 }
+            .indexOfLast { time >= it.startTime + it.length - 1 }
             .takeIf { it != -1 }
             ?.let {
                 if (!autoScrollLocked) {
@@ -115,26 +88,31 @@ fun CourseCard(
                 .height(IntrinsicSize.Min)
                 .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(32.dp))
-                .background(animateColorAsState(targetValue = if (draggedFraction.value < 0.5f) 90.a1 withNight 30.n1
-                else 90.a3 withNight 30.n2).value)
+                .background(90.a1 withNight 30.n1)
                 .pointerInput(Unit) {
                     detectTapGestures {
                         navController.navigate("schedule")
                     }
                 }
                 .draggable(state = state, orientation = Orientation.Horizontal, onDragStopped = {
-                    draggedFraction.animateTo(draggedFraction.value
-                        .roundToInt()
-                        .toFloat())
+                    draggedFraction.animateTo(
+                        draggedFraction.value
+                            .roundToInt()
+                            .toFloat()
+                    )
                 })
         ) {
             todayCourses.getOrNull(draggedFraction.value.roundToInt())?.let { course ->
                 val range = scheduleViewModel.getCourseTimeRangeInMinutes(course)
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(animateFloatAsState(targetValue = if (current in range) {
-                            (current.toFloat() - range.first) / (range.last.toFloat() - range.first)
-                        } else 0f).value)
+                        .fillMaxWidth(
+                            animateFloatAsState(
+                                targetValue = if (current in range) {
+                                    (current.toFloat() - range.first) / (range.last.toFloat() - range.first)
+                                } else 0f
+                            ).value
+                        )
                         .fillMaxHeight()
                         .background(50.a1 withNight 80.a1)
                 )
