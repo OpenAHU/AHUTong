@@ -55,6 +55,7 @@ class WeekScheduleFragment(val week: Int) : BaseFragment<FragmentScheduleWeekBin
             dataBinding.scheduleView
                 .date(it.week, it.weekDay)
                 .theme(it.theme)
+                .data(pState.schedule.value?.getOrNull() ?: emptyList())
                 .startTime(it.startTime)
                 .showAllCourse(it.isShowAll)
                 .loadSchedule()
