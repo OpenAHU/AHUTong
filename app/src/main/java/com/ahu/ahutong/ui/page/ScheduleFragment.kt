@@ -100,7 +100,7 @@ class ScheduleFragment : BaseFragment<FragmentScheduleBinding>(), SelectTimeDial
 
     override fun onResume() {
         super.onResume()
-        if (::mState.isInitialized) {
+        if (::mState.isInitialized && mState.scheduleConfig.value == null) {
             mState.loadConfig()
         }
 
