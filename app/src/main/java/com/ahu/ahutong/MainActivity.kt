@@ -15,6 +15,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
+import com.ahu.ahutong.ui.page.state.GradeViewModel
 import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
@@ -38,6 +39,7 @@ class MainActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private val discoveryViewModel: DiscoveryViewModel by viewModels()
     private val scheduleViewModel: ScheduleViewModel by viewModels()
+    private val gradeViewModel: GradeViewModel by viewModels()
 
     private fun loadInitData() {
         // 日活统计接口
@@ -50,6 +52,9 @@ class MainActivity : ComponentActivity() {
 
         scheduleViewModel.loadConfig()
         scheduleViewModel.refreshSchedule()
+        if (AHUCache.getCurrentUser() != null) {
+            gradeViewModel.getGarde()
+        }
     }
 
     @OptIn(ExperimentalAnimationApi::class)
@@ -88,7 +93,9 @@ class MainActivity : ComponentActivity() {
                     animatedComposable("schedule") {
                         Schedule(scheduleViewModel = scheduleViewModel)
                     }
-                    animatedComposable("grade") { Grade() }
+                    animatedComposable("grade") {
+                        Grade(gradeViewModel = gradeViewModel)
+                    }
                     animatedComposable("phone_book") { PhoneBook() }
                     animatedComposable("exam") { Exam() }
                     animatedComposable("settings") {

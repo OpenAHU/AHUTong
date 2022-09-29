@@ -2,20 +2,7 @@ package com.ahu.ahutong.ui.screen
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.with
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,15 +35,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Tel
 import com.ahu.ahutong.ui.page.state.TelDirectoryViewModel
+import com.ahu.ahutong.ui.screen.component.AnimatedListContent
 import com.google.accompanist.flowlayout.FlowRow
 import com.kyant.monet.a1
 import com.kyant.monet.n1
@@ -164,35 +150,12 @@ private fun Categories(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun Telephones(
     selectedCategory: String,
     onItemClick: (Tel) -> Unit
 ) {
-    val density = LocalDensity.current
-    AnimatedContent(
-        targetState = selectedCategory,
-        transitionSpec = {
-            with(density) {
-                slideInVertically(
-                    animationSpec = spring(
-                        stiffness = Spring.StiffnessLow,
-                        visibilityThreshold = IntOffset.VisibilityThreshold
-                    )
-                ) { 48.dp.roundToPx() } +
-                    scaleIn(initialScale = 0.92f) +
-                    fadeIn(animationSpec = tween(220, delayMillis = 90)) with
-                    slideOutVertically(
-                    animationSpec = spring(
-                        stiffness = Spring.StiffnessLow,
-                        visibilityThreshold = IntOffset.VisibilityThreshold
-                    )
-                ) { 48.dp.roundToPx() } + scaleOut(targetScale = 0.92f) +
-                    fadeOut(animationSpec = tween(90))
-            }
-        }
-    ) { category ->
+    AnimatedListContent(targetState = selectedCategory) { category ->
         Column(
             modifier = Modifier
                 .padding(16.dp)
