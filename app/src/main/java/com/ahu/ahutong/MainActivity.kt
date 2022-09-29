@@ -18,12 +18,15 @@ import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
+import com.ahu.ahutong.ui.screen.Exam
 import com.ahu.ahutong.ui.screen.FillInInfo
+import com.ahu.ahutong.ui.screen.Grade
 import com.ahu.ahutong.ui.screen.Home
 import com.ahu.ahutong.ui.screen.LoggingIn
 import com.ahu.ahutong.ui.screen.Login
 import com.ahu.ahutong.ui.screen.PhoneBook
 import com.ahu.ahutong.ui.screen.Schedule
+import com.ahu.ahutong.ui.screen.Settings
 import com.ahu.ahutong.ui.theme.AHUTheme
 import com.ahu.ahutong.utils.animatedComposable
 import com.ahu.ahutong.widget.ClassWidget
@@ -85,10 +88,12 @@ class MainActivity : ComponentActivity() {
                     animatedComposable("schedule") {
                         Schedule(scheduleViewModel = scheduleViewModel)
                     }
-                    animatedComposable("grade") {}
+                    animatedComposable("grade") { Grade() }
                     animatedComposable("phone_book") { PhoneBook() }
-                    animatedComposable("exam") {}
-                    animatedComposable("settings") {}
+                    animatedComposable("exam") { Exam() }
+                    animatedComposable("settings") {
+                        Settings(navController = navController)
+                    }
                 }
                 LaunchedEffect(loginViewModel.isLoggingIn) {
                     if (loginViewModel.isLoggingIn) {
@@ -98,6 +103,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
+                // TODO
                 BackHandler(enabled = navBackStackEntry?.destination?.route == "login") {
                     finish()
                 }

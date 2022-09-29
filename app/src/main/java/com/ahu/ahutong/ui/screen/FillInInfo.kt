@@ -45,7 +45,7 @@ fun FillInInfo(
         mutableStateOf(TextFieldValue(scheduleViewModel.schoolTerm))
     }
     var currentWeek by rememberSaveable(scheduleConfig?.week, stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("1"))
+        mutableStateOf(TextFieldValue(scheduleConfig?.week?.toString() ?: "1"))
     }
     Box(
         modifier = Modifier
@@ -82,7 +82,7 @@ fun FillInInfo(
                     .background(100.n1 withNight 20.n1),
                 textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Ascii,
+                    keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,

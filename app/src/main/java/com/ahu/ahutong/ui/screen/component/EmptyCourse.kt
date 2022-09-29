@@ -22,7 +22,7 @@ import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
-fun EmptyCourseCard(navController: NavHostController) {
+fun EmptyCourse(navController: NavHostController) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Box(
             modifier = Modifier

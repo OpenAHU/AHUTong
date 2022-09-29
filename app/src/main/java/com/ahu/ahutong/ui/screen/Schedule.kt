@@ -148,13 +148,13 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     }
                 }
             }
-            // class schedule
+            // schedule
             Box(
                 modifier = with(CourseCardSpec) {
                     Modifier
                         .horizontalScroll(rememberScrollState())
                         .clip(RoundedCornerShape(32.dp))
-                        .background(100.n1)
+                        .background(100.n1 withNight 20.n1)
                         .padding(cellSpacing)
                         .size(
                             mainColumnWidth + (cellWidth + cellSpacing) * 7,
@@ -162,6 +162,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         )
                 }
             ) {
+                // TODO: current time indicator
                 // current weekday indicator
                 if (currentWeek == scheduleConfig?.week) {
                     Box(

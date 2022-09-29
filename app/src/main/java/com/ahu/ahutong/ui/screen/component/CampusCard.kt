@@ -43,7 +43,7 @@ fun CampusCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(100.n1 withNight 25.n1)
+            .background(100.n1 withNight 20.n1)
             .padding(24.dp, 16.dp, 16.dp, 24.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

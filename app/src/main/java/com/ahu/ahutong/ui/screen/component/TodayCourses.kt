@@ -61,7 +61,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun CourseCard(
+fun TodayCourses(
     scheduleViewModel: ScheduleViewModel = viewModel(),
     todayCourses: List<Course>,
     current: Int,
@@ -75,7 +75,7 @@ fun CourseCard(
         }
     }
     var autoScrollLocked by remember { mutableStateOf(false) }
-    // TODO: scroll to next course if finished
+    // TODO: bug
     scheduleViewModel.findCurrentTimeByMinutes(current)?.let { time ->
         todayCourses
             .indexOfLast { time >= it.startTime + it.length - 1 }

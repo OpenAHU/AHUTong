@@ -3,16 +3,27 @@ package com.ahu.ahutong.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -20,12 +31,12 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
-import com.ahu.ahutong.ui.screen.component.AtAGlance
-import com.ahu.ahutong.ui.screen.component.BathroomCard
+import com.ahu.ahutong.ui.screen.component.BathroomOpenStates
 import com.ahu.ahutong.ui.screen.component.CampusCard
-import com.ahu.ahutong.ui.screen.component.CourseCard
-import com.ahu.ahutong.ui.screen.component.EmptyCourseCard
+import com.ahu.ahutong.ui.screen.component.EmptyCourse
 import com.ahu.ahutong.ui.screen.component.FunctionalButton
+import com.ahu.ahutong.ui.screen.component.SquigglyUnderlinedText
+import com.ahu.ahutong.ui.screen.component.TodayCourses
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.kyant.monet.n1
@@ -54,27 +65,47 @@ fun Home(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(96.n1 withNight 10.n1)
-            .padding(vertical = 24.dp)
-            .systemBarsPadding(),
+            .systemBarsPadding()
+            .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        AtAGlance(
-            user = user,
-            navController = navController
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SquigglyUnderlinedText(
+                text = buildAnnotatedString {
+                    withStyle(style = MaterialTheme.typography.headlineLarge.toSpanStyle()) {
+                        append("Hi, ")
+                        withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
+                            append(user.name)
+                        }
+                    }
+                }
+            )
+            IconButton(onClick = { navController.navigate("settings") }) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = null
+                )
+            }
+        }
         if (todayCourses.isNotEmpty()) {
             if (current <= scheduleViewModel.getCourseTimeRangeInMinutes(todayCourses.last()).last) {
-                CourseCard(
+                TodayCourses(
                     scheduleViewModel = scheduleViewModel,
                     todayCourses = todayCourses,
                     current = current,
                     navController = navController
                 )
             } else {
-                EmptyCourseCard(navController = navController)
+                EmptyCourse(navController = navController)
             }
         } else {
-            EmptyCourseCard(navController = navController)
+            EmptyCourse(navController = navController)
         }
         FlowRow(
             modifier = Modifier
@@ -113,7 +144,7 @@ fun Home(
                 balance = discoveryViewModel.balance,
                 transitionBalance = discoveryViewModel.transitionBalance
             )
-            BathroomCard(discoveryViewModel = discoveryViewModel)
+            BathroomOpenStates(discoveryViewModel = discoveryViewModel)
         }
     }
 }

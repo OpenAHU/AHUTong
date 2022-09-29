@@ -26,14 +26,14 @@ import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
-fun BathroomCard(
+fun BathroomOpenStates(
     discoveryViewModel: DiscoveryViewModel = viewModel()
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(100.n1 withNight 25.n1)
+            .background(100.n1 withNight 20.n1)
             .padding(vertical = 16.dp)
     ) {
         Text(
