@@ -178,6 +178,7 @@ fun FillInInfo(
                 text = stringResource(id = R.string.ok),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
                     .padding(16.dp)
                     .clip(CircleShape)
                     .background(90.a1 withNight 85.a1)
