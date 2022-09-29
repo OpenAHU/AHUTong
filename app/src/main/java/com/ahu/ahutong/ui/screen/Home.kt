@@ -10,19 +10,14 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.screen.component.AtAGlance
@@ -44,20 +39,15 @@ fun Home(
     navController: NavHostController
 ) {
     val user = AHUCache.getCurrentUser() ?: return
-    val todayCourses = remember { mutableStateListOf<Course>() }
+    val schedule = scheduleViewModel.schedule.observeAsState().value?.getOrNull() ?: emptyList()
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
+    val todayCourses = schedule
+        .filter { scheduleConfig?.week in it.startWeek..it.endWeek }
+        .filter { it.weekday == (scheduleConfig?.weekDay ?: 1) }
+        .sortedBy { it.startTime }
     val calendar = Calendar.getInstance(Locale.CHINA)
     val current = calendar.time.let {
         calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
-    }
-    LaunchedEffect(Unit) {
-        AHURepository.getSchedule(scheduleViewModel.schoolYear, scheduleViewModel.schoolTerm, true)
-            .onSuccess { courses ->
-                todayCourses += courses
-                    .filter { scheduleConfig?.week in it.startWeek..it.endWeek }
-                    .filter { it.weekday == (scheduleConfig?.weekDay ?: 1) }
-                    .sortedBy { it.startTime }
-            }
     }
     Column(
         modifier = Modifier
@@ -69,7 +59,8 @@ fun Home(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         AtAGlance(
-            user = user
+            user = user,
+            navController = navController
         )
         if (todayCourses.isNotEmpty()) {
             if (current <= scheduleViewModel.getCourseTimeRangeInMinutes(todayCourses.last()).last) {

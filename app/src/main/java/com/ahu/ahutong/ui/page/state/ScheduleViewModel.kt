@@ -51,8 +51,8 @@ class ScheduleViewModel : ViewModel() {
     val scheduleConfig = MutableLiveData<ScheduleConfigBean>()
 
     /**
-     * @param from "hh:mm-hh:mm"
-     * @param to "hh:mm-hh:mm"
+     * @param from "HH:mm-HH:mm"
+     * @param to "HH:mm-HH:mm"
      */
     private fun getTimeRangeInMinutes(
         from: String,
@@ -75,7 +75,7 @@ class ScheduleViewModel : ViewModel() {
     fun getCourseTimeRangeInMinutes(course: Course): IntRange {
         return getTimeRangeInMinutes(
             from = timetable.getValue(course.startTime),
-            to = timetable.getValue(course.startTime + course.length - 1 )
+            to = timetable.getValue(course.startTime + course.length - 1)
         )
     }
 

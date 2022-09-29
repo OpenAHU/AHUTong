@@ -35,13 +35,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.toRect
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -57,7 +63,7 @@ import kotlin.math.roundToInt
 @Composable
 fun CourseCard(
     scheduleViewModel: ScheduleViewModel = viewModel(),
-    todayCourses: SnapshotStateList<Course>,
+    todayCourses: List<Course>,
     current: Int,
     navController: NavHostController
 ) {
@@ -69,6 +75,7 @@ fun CourseCard(
         }
     }
     var autoScrollLocked by remember { mutableStateOf(false) }
+    // TODO: scroll to next course if finished
     scheduleViewModel.findCurrentTimeByMinutes(current)?.let { time ->
         todayCourses
             .indexOfLast { time >= it.startTime + it.length - 1 }
@@ -104,42 +111,61 @@ fun CourseCard(
         ) {
             todayCourses.getOrNull(draggedFraction.value.roundToInt())?.let { course ->
                 val range = scheduleViewModel.getCourseTimeRangeInMinutes(course)
+                val elapsedFraction = if (current in range) {
+                    (current.toFloat() - range.first) / (range.last.toFloat() - range.first)
+                } else 0f
+                var elapsedWidth by remember { mutableStateOf(0) }
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(
-                            animateFloatAsState(
-                                targetValue = if (current in range) {
-                                    (current.toFloat() - range.first) / (range.last.toFloat() - range.first)
-                                } else 0f
-                            ).value
-                        )
+                        .fillMaxWidth(animateFloatAsState(targetValue = elapsedFraction).value)
                         .fillMaxHeight()
+                        .onSizeChanged { elapsedWidth = it.width }
                         .background(50.a1 withNight 80.a1)
                 )
                 Column(
                     modifier = Modifier.padding(24.dp, 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // TODO: fix font color
-                    Text(
-                        text = course.name,
+                    val offsetX = 48.dp * if (draggedFraction.value.mod(1f) < 0.5f) {
+                        -draggedFraction.value.mod(1f)
+                    } else 1f - draggedFraction.value.mod(1f)
+                    Box(
                         modifier = Modifier
-                            .offset(
-                                x = 48.dp * if (draggedFraction.value.mod(1f) < 0.5f) {
-                                    -draggedFraction.value.mod(1f)
-                                } else 1f - draggedFraction.value.mod(1f)
-                            )
+                            .offset(x = offsetX)
                             .alpha(
                                 animateFloatAsState(
                                     targetValue = if (draggedFraction.value.mod(1f) < 0.5f) {
                                         1f - draggedFraction.value.mod(1f) * 2
                                     } else draggedFraction.value.mod(1f) * 2 - 1f
                                 ).value
+                            )
+                    ) {
+                        Text(
+                            text = course.name,
+                            color = if (current in range) 0.n1 else 0.n1 withNight 100.n1,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        Text(
+                            text = course.name,
+                            modifier = Modifier.clip(
+                                object : Shape {
+                                    override fun createOutline(
+                                        size: Size,
+                                        layoutDirection: LayoutDirection,
+                                        density: Density
+                                    ) = Outline.Rectangle(
+                                        with(density) {
+                                            size.toRect().copy(right = elapsedWidth - 24.dp.toPx() - offsetX.toPx())
+                                        }
+                                    )
+                                }
                             ),
-                        color = if (current in range) 100.n1 else 0.n1 withNight 100.n1,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineMedium
-                    )
+                            color = if (current in range) 100.n1 else 0.n1 withNight 100.n1,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,

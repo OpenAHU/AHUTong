@@ -4,10 +4,12 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -28,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.R
-import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -38,23 +39,27 @@ fun CampusCard(
     transitionBalance: Double
 ) {
     val context = LocalContext.current
-    Column(
+    Row(
         modifier = Modifier
+            .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(100.n1 withNight 25.n1)
+            .padding(24.dp, 16.dp, 16.dp, 24.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(24.dp, 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(
                 text = stringResource(id = R.string.card_money),
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.titleMedium
             )
             Text(
                 text = buildAnnotatedString {
-                    withStyle(MaterialTheme.typography.titleLarge.toSpanStyle()) {
+                    withStyle(
+                        MaterialTheme.typography.titleLarge.toSpanStyle()
+                            .copy(fontWeight = FontWeight.Bold)
+                    ) {
                         append("¥ $balance")
                     }
                     withStyle(
@@ -67,10 +72,7 @@ fun CampusCard(
         }
         Row(
             modifier = Modifier
-                .align(Alignment.End)
-                .padding(8.dp)
                 .clip(CircleShape)
-                .background(90.a1 withNight 40.n1)
                 .clickable {
                     try {
                         val i1 = Intent(
@@ -83,6 +85,11 @@ fun CampusCard(
                         Toast.makeText(context, "手机未安装支付宝 App", Toast.LENGTH_SHORT).show()
                     }
                 }
+                .border(
+                    width = 2.dp,
+                    color = 90.n1 withNight 40.n1,
+                    shape = CircleShape
+                )
                 .padding(12.dp, 8.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically

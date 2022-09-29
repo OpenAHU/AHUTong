@@ -1,59 +1,51 @@
 package com.ahu.ahutong.ui.screen
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.screen.course.CourseCard
@@ -65,45 +57,24 @@ import com.kyant.monet.n1
 import com.kyant.monet.toColor
 import com.kyant.monet.toSrgb
 import com.kyant.monet.withNight
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
-    // 加载开学日期等配置信息
-    LaunchedEffect(Unit) {
-        scheduleViewModel.loadConfig()
-    }
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
     val currentWeekday = scheduleConfig?.weekDay ?: 1
-    var currentWeekTextFieldValue by rememberSaveable(scheduleConfig?.week, stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(scheduleConfig?.week?.toString() ?: "1"))
-    }
-    val currentWeek = currentWeekTextFieldValue.text.toIntOrNull()
-    val schedule = remember { mutableStateListOf<Course>() }
-    val courseColors = remember { mutableStateMapOf<String, Color>() }
-    val weeklyCourses = remember { mutableStateListOf<Course>() }
-    var detailedCourse by remember { mutableStateOf<Course?>(null) }
+    var currentWeek by remember { mutableStateOf(scheduleConfig?.week ?: 1) }
+    val schedule = scheduleViewModel.schedule.observeAsState().value?.getOrNull() ?: emptyList()
     val baseColor = 50.a1.toSrgb().toHct()
-    LaunchedEffect(Unit) {
-        AHURepository.getSchedule(scheduleViewModel.schoolYear, scheduleViewModel.schoolTerm, true)
-            .onSuccess { courses ->
-                schedule += courses
-                val courseNames = schedule.map { it.name }.distinct()
-                courseNames.forEachIndexed { index, name ->
-                    courseColors += name to baseColor.copy(h = 360.0 * index / courseNames.size).toSrgb().toColor()
-                }
-                weeklyCourses += schedule.filter { currentWeek in it.startWeek..it.endWeek }
-            }
+    val courseColors = run {
+        val courseNames = schedule.map { it.name }.distinct()
+        courseNames.mapIndexed { index, name ->
+            name to baseColor.copy(h = 360.0 * index / courseNames.size).toSrgb().toColor()
+        }.toMap()
     }
-    LaunchedEffect(schedule, currentWeek) {
-        withContext(Dispatchers.IO) {
-            weeklyCourses.clear()
-            weeklyCourses += schedule.filter { currentWeek in it.startWeek..it.endWeek }
-        }
-    }
+    val currentWeekCourses = schedule.filter { currentWeek in it.startWeek..it.endWeek }
+    var detailedCourse by remember { mutableStateOf<Course?>(null) }
     Box {
         Column(
             modifier = Modifier
@@ -113,66 +84,77 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                 .systemBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            // header
             Row(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp, 8.dp, 16.dp, 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${stringResource(id = R.string.title_schedule)} (第",
-                    style = MaterialTheme.typography.headlineLarge
+                    text = stringResource(id = R.string.title_schedule),
+                    style = MaterialTheme.typography.headlineMedium
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    IconButton(onClick = {
-                        currentWeekTextFieldValue = currentWeekTextFieldValue.copy(
-                            currentWeekTextFieldValue.text.toIntOrNull()?.minus(1)?.coerceAtLeast(1)?.toString()
-                                ?: "1"
+                Row {
+                    IconButton(onClick = { currentWeek = scheduleConfig?.week ?: 1 }) {
+                        Icon(
+                            imageVector = Icons.Default.MyLocation,
+                            contentDescription = null
                         )
-                    }) {
-                        Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = null)
+                    }
+                    IconButton(onClick = {}) {
+                        Icon(
+                            imageVector = Icons.Default.Fullscreen,
+                            contentDescription = null
+                        )
                     }
                 }
-                val strokeColor = 40.a1 withNight 80.a1
-                BasicTextField(
-                    value = currentWeekTextFieldValue,
-                    onValueChange = { currentWeekTextFieldValue = it },
-                    modifier = Modifier
-                        .width(IntrinsicSize.Min)
-                        .padding(horizontal = 8.dp)
-                        .drawBehind {
-                            drawLine(
-                                color = strokeColor,
-                                start = Offset(0f, size.height),
-                                end = Offset(size.width, size.height),
-                                strokeWidth = 4.dp.toPx(),
-                                cap = StrokeCap.Round
-                            )
-                        },
-                    textStyle = MaterialTheme.typography.headlineLarge.copy(color = LocalContentColor.current),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    singleLine = true,
-                    cursorBrush = SolidColor(LocalContentColor.current)
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    IconButton(onClick = {
-                        currentWeekTextFieldValue = currentWeekTextFieldValue.copy(
-                            currentWeekTextFieldValue.text.toIntOrNull()?.plus(1)?.toString() ?: "1"
-                        )
-                    }) {
-                        Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = null)
-                    }
-                }
-                Text(
-                    text = "周)",
-                    style = MaterialTheme.typography.headlineLarge
-                )
             }
+            // week selector
+            // TODO: auto center selected week item
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(18) {
+                    val week = it + 1
+                    val isSelected = week == currentWeek
+                    CompositionLocalProvider(
+                        LocalIndication provides rememberRipple(
+                            color = if (isSelected) 100.n1 withNight 0.n1
+                            else 0.n1 withNight 100.n1
+                        )
+                    ) {
+                        Text(
+                            text = week.toString(),
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(
+                                    animateColorAsState(
+                                        targetValue = if (isSelected) 40.a1 withNight 90.a1
+                                        else 100.n1 withNight 20.n1
+                                    ).value
+                                )
+                                .clickable { currentWeek = week }
+                                .padding(16.dp, 8.dp),
+                            color = animateColorAsState(
+                                targetValue = if (isSelected) 100.n1 withNight 0.n1
+                                else 0.n1 withNight 100.n1
+                            ).value,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+            }
+            // class schedule
             Box(
                 modifier = with(CourseCardSpec) {
                     Modifier
                         .horizontalScroll(rememberScrollState())
+                        .clip(RoundedCornerShape(32.dp))
+                        .background(100.n1)
                         .padding(cellSpacing)
                         .size(
                             mainColumnWidth + (cellWidth + cellSpacing) * 7,
@@ -180,24 +162,27 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         )
                 }
             ) {
-                Box(
-                    modifier = with(CourseCardSpec) {
-                        Modifier
-                            .size(
-                                cellWidth + cellSpacing,
-                                mainRowHeight + cellHeight * 11 + cellSpacing * 12
-                            )
-                            .offset(
-                                mainColumnWidth + (cellWidth + cellSpacing) * (currentWeekday - 1) + cellSpacing / 2,
-                                -cellSpacing / 2
-                            )
-                            .border(
-                                width = 2.dp,
-                                color = 70.a1 withNight 60.a1,
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                    }
-                )
+                // current weekday indicator
+                if (currentWeek == scheduleConfig?.week) {
+                    Box(
+                        modifier = with(CourseCardSpec) {
+                            Modifier
+                                .size(
+                                    cellWidth + cellSpacing,
+                                    mainRowHeight + cellHeight * 11 + cellSpacing * 12
+                                )
+                                .offset(
+                                    x = mainColumnWidth + (cellWidth + cellSpacing) * (currentWeekday - 1) + cellSpacing / 2
+                                )
+                                .border(
+                                    width = 2.dp,
+                                    color = 70.a1 withNight 60.a1,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                        }
+                    )
+                }
+                // weekday tags
                 arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEachIndexed { index, weekday ->
                     Column(
                         modifier = with(CourseCardSpec) {
@@ -216,7 +201,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         Text(
                             text = Calendar.getInstance().apply {
                                 time = scheduleConfig!!.startTime
-                                add(Calendar.DATE, ((currentWeek!! - 1) * 7) + index)
+                                add(Calendar.DATE, ((currentWeek - 1) * 7) + index)
                             }.let {
                                 SimpleDateFormat("MM-dd", Locale.CHINA).format(it.time)
                             },
@@ -225,6 +210,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         )
                     }
                 }
+                // time tags
                 scheduleViewModel.timetable.forEach { (index, time) ->
                     Column(
                         modifier = with(CourseCardSpec) {
@@ -247,17 +233,19 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         )
                     }
                 }
-                weeklyCourses.forEach { course ->
+                // courses
+                currentWeekCourses.forEach { course ->
                     key(course.hashCode()) {
                         CourseCard(
                             course = course,
-                            color = courseColors.getValue(course.name),
+                            color = courseColors.getOrElse(course.name) { 50.a1 },
                             onClick = { detailedCourse = it }
                         )
                     }
                 }
             }
         }
+        // course dialog
         detailedCourse?.let {
             CourseDetailDialog(
                 course = it,

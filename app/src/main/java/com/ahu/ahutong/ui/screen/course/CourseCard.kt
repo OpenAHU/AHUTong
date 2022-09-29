@@ -35,6 +35,7 @@ fun CourseCard(
     color: Color,
     onClick: (Course) -> Unit
 ) {
+    // TODO: 卡顿
     CompositionLocalProvider(LocalTonalPalettes provides color.toTonalPalettes(style = PaletteStyle.Vibrant)) {
         Column(
             modifier = with(CourseCardSpec) {

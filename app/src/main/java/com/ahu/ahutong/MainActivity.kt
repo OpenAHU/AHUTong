@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity() {
         manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
 
         scheduleViewModel.loadConfig()
+        scheduleViewModel.refreshSchedule()
     }
 
     @OptIn(ExperimentalAnimationApi::class)
@@ -87,6 +88,7 @@ class MainActivity : ComponentActivity() {
                     animatedComposable("grade") {}
                     animatedComposable("phone_book") { PhoneBook() }
                     animatedComposable("exam") {}
+                    animatedComposable("settings") {}
                 }
                 LaunchedEffect(loginViewModel.isLoggingIn) {
                     if (loginViewModel.isLoggingIn) {
