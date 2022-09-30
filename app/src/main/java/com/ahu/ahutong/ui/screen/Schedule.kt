@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -133,7 +134,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                                 .background(
                                     animateColorAsState(
                                         targetValue = if (isSelected) 40.a1 withNight 90.a1
-                                        else 100.n1 withNight 20.n1
+                                        else Color.Transparent
                                     ).value
                                 )
                                 .clickable { currentWeek = week }

@@ -57,7 +57,7 @@ fun Home(
         .filter { it.weekday == (scheduleConfig?.weekDay ?: 1) }
         .sortedBy { it.startTime }
     val calendar = Calendar.getInstance(Locale.CHINA)
-    val current = calendar.time.let {
+    val currentMinutes = calendar.time.let {
         calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
     }
     Column(
@@ -94,11 +94,11 @@ fun Home(
             }
         }
         if (todayCourses.isNotEmpty()) {
-            if (current <= scheduleViewModel.getCourseTimeRangeInMinutes(todayCourses.last()).last) {
+            if (currentMinutes <= scheduleViewModel.getCourseTimeRangeInMinutes(todayCourses.last()).last) {
                 TodayCourses(
                     scheduleViewModel = scheduleViewModel,
                     todayCourses = todayCourses,
-                    current = current,
+                    currentMinutes = currentMinutes,
                     navController = navController
                 )
             } else {

@@ -64,7 +64,7 @@ import kotlin.math.roundToInt
 fun TodayCourses(
     scheduleViewModel: ScheduleViewModel = viewModel(),
     todayCourses: List<Course>,
-    current: Int,
+    currentMinutes: Int,
     navController: NavHostController
 ) {
     val scope = rememberCoroutineScope()
@@ -75,20 +75,19 @@ fun TodayCourses(
         }
     }
     var autoScrollLocked by remember { mutableStateOf(false) }
-    // TODO: bug
-    scheduleViewModel.findCurrentTimeByMinutes(current)?.let { time ->
-        todayCourses
-            .indexOfLast { time >= it.startTime + it.length - 1 }
-            .takeIf { it != -1 }
-            ?.let {
-                if (!autoScrollLocked) {
-                    scope.launch {
-                        draggedFraction.snapTo(it.toFloat())
-                        autoScrollLocked = true
-                    }
+    todayCourses
+        .indexOfFirst {
+            val range = scheduleViewModel.getCourseTimeRangeInMinutes(it)
+            if (currentMinutes in range) true
+            else currentMinutes < range.first
+        }.let {
+            if (!autoScrollLocked) {
+                scope.launch {
+                    draggedFraction.snapTo(it.toFloat())
+                    autoScrollLocked = true
                 }
             }
-    }
+        }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Box(
             modifier = Modifier
@@ -111,8 +110,8 @@ fun TodayCourses(
         ) {
             todayCourses.getOrNull(draggedFraction.value.roundToInt())?.let { course ->
                 val range = scheduleViewModel.getCourseTimeRangeInMinutes(course)
-                val elapsedFraction = if (current in range) {
-                    (current.toFloat() - range.first) / (range.last.toFloat() - range.first)
+                val elapsedFraction = if (currentMinutes in range) {
+                    (currentMinutes.toFloat() - range.first) / (range.last.toFloat() - range.first)
                 } else 0f
                 var elapsedWidth by remember { mutableStateOf(0) }
                 Box(
@@ -142,7 +141,7 @@ fun TodayCourses(
                     ) {
                         Text(
                             text = course.name,
-                            color = if (current in range) 0.n1 else 0.n1 withNight 100.n1,
+                            color = if (currentMinutes in range) 0.n1 else 0.n1 withNight 100.n1,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.headlineMedium
                         )
@@ -161,7 +160,7 @@ fun TodayCourses(
                                     )
                                 }
                             ),
-                            color = if (current in range) 100.n1 else 0.n1 withNight 100.n1,
+                            color = if (currentMinutes in range) 100.n1 else 0.n1 withNight 100.n1,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.headlineMedium
                         )

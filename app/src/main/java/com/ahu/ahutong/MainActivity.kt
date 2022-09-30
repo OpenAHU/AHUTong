@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
     private val developerViewModel: DeveloperViewModel by viewModels()
     private val businessViewModel: BusinessViewModel by viewModels()
 
+    // TODO: refresh after logging in
     private fun initViewModels() {
         discoveryViewModel.loadActivityBean()
         scheduleViewModel.loadConfig()
