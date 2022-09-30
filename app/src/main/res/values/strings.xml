@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">安大通</string>
-    <string name="app_version">1.0.0-beta5</string>
     <string name="title_schedule">课表</string>
     <string name="title_discovery">发现</string>
     <string name="title_mine">我的</string>
@@ -10,6 +9,7 @@
     <string name="mine_tv_recommend">推荐给好友</string>
     <string name="mine_tv_feedback">意见反馈</string>
     <string name="mine_tv_about_us">关于我们</string>
+    <string name="contributors">贡献名单</string>
     <string name="mine_tv_developer">开发者列表</string>
     <string name="mine_tv_business">商务合作</string>
     <string name="tools_logo">tools logo</string>

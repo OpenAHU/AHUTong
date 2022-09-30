@@ -1,5 +1,8 @@
 package com.ahu.ahutong.ui.screen
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,23 +26,37 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.ahu.ahutong.Constants
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.ui.page.state.AboutViewModel
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
-fun Settings(navController: NavHostController) {
+fun Settings(
+    aboutViewModel: AboutViewModel = viewModel(),
+    navController: NavHostController
+) {
+    val context = LocalContext.current as ComponentActivity
+    var isUpdateLogShown by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -84,7 +101,7 @@ fun Settings(navController: NavHostController) {
                         style = MaterialTheme.typography.headlineMedium
                     )
                     Text(
-                        text = stringResource(id = R.string.app_version),
+                        text = aboutViewModel.versionName,
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -94,7 +111,13 @@ fun Settings(navController: NavHostController) {
                     modifier = Modifier
                         .clip(CircleShape)
                         .background(100.n1 withNight 30.n1)
-                        .clickable {}
+                        .clickable {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW).apply {
+                                    data = Uri.parse("https://github.com/OpenAHU/AHUTong")
+                                }
+                            )
+                        }
                         .padding(12.dp, 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
@@ -113,7 +136,13 @@ fun Settings(navController: NavHostController) {
                     modifier = Modifier
                         .clip(CircleShape)
                         .background(100.n1 withNight 30.n1)
-                        .clickable {}
+                        .clickable {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW).apply {
+                                    data = Uri.parse("https://gitee.com/SinkDev/AHUTong")
+                                }
+                            )
+                        }
                         .padding(12.dp, 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
@@ -222,45 +251,67 @@ fun Settings(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
-                text = "开源协议",
+                text = stringResource(id = R.string.license),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
-                    .clickable {}
+                    .clickable { navController.navigate("settings__license") }
                     .padding(24.dp, 16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "贡献名单",
+                text = stringResource(id = R.string.contributors),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
-                    .clickable {}
+                    .clickable { navController.navigate("settings__contributors") }
                     .padding(24.dp, 16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "更新内容",
+                text = stringResource(id = R.string.update_intro),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
-                    .clickable {}
+                    .clickable { isUpdateLogShown = true }
                     .padding(24.dp, 16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "检查更新",
+                text = stringResource(id = R.string.check_update),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
-                    .clickable {}
+                    .clickable { aboutViewModel.checkForUpdate(context) }
                     .padding(24.dp, 16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
+        }
+    }
+    if (isUpdateLogShown) {
+        Dialog(onDismissRequest = { isUpdateLogShown = false }) {
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(96.n1 withNight 10.n1)
+                    .padding(vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.update_intro),
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    style = MaterialTheme.typography.headlineLarge
+                )
+                Text(
+                    text = Constants.UPDATE_LOG,
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
     }
 }

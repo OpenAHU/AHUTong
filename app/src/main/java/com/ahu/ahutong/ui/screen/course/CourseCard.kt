@@ -70,9 +70,11 @@ fun CourseCard(
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
+                // TODO: more shortenings
                 text = course.location
                     .replace("博学", "博")
-                    .replace("楼", ""),
+                    .replace("楼", "")
+                    .replace("夫图书馆", ""),
                 modifier = Modifier
                     .padding(4.dp)
                     .clip(RoundedCornerShape(8.dp))

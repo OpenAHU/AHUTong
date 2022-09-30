@@ -14,8 +14,12 @@ import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.ui.page.state.AboutViewModel
+import com.ahu.ahutong.ui.page.state.BusinessViewModel
+import com.ahu.ahutong.ui.page.state.DeveloperViewModel
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.page.state.GradeViewModel
+import com.ahu.ahutong.ui.page.state.LicenseViewModel
 import com.ahu.ahutong.ui.page.state.LoginViewModel
 import com.ahu.ahutong.ui.page.state.MainViewModel
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
@@ -28,6 +32,8 @@ import com.ahu.ahutong.ui.screen.Login
 import com.ahu.ahutong.ui.screen.PhoneBook
 import com.ahu.ahutong.ui.screen.Schedule
 import com.ahu.ahutong.ui.screen.Settings
+import com.ahu.ahutong.ui.screen.settings.Contributors
+import com.ahu.ahutong.ui.screen.settings.License
 import com.ahu.ahutong.ui.theme.AHUTheme
 import com.ahu.ahutong.utils.animatedComposable
 import com.ahu.ahutong.widget.ClassWidget
@@ -40,6 +46,10 @@ class MainActivity : ComponentActivity() {
     private val discoveryViewModel: DiscoveryViewModel by viewModels()
     private val scheduleViewModel: ScheduleViewModel by viewModels()
     private val gradeViewModel: GradeViewModel by viewModels()
+    private val aboutViewModel: AboutViewModel by viewModels()
+    private val licenseViewModel: LicenseViewModel by viewModels()
+    private val developerViewModel: DeveloperViewModel by viewModels()
+    private val businessViewModel: BusinessViewModel by viewModels()
 
     private fun initViewModels() {
         discoveryViewModel.loadActivityBean()
@@ -104,7 +114,19 @@ class MainActivity : ComponentActivity() {
                     animatedComposable("phone_book") { PhoneBook() }
                     animatedComposable("exam") { Exam() }
                     animatedComposable("settings") {
-                        Settings(navController = navController)
+                        Settings(
+                            aboutViewModel = aboutViewModel,
+                            navController = navController
+                        )
+                    }
+                    animatedComposable("settings__license") {
+                        License(licenseViewModel = licenseViewModel)
+                    }
+                    animatedComposable("settings__contributors") {
+                        Contributors(
+                            developerViewModel = developerViewModel,
+                            businessViewModel = businessViewModel
+                        )
                     }
                 }
                 LaunchedEffect(loginViewModel.isLoggingIn) {
@@ -115,8 +137,9 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
                 // TODO
-                BackHandler(enabled = navBackStackEntry?.destination?.route == "login") {
+                BackHandler(enabled = currentRoute == "login") {
                     finish()
                 }
             }

@@ -75,14 +75,16 @@ fun CampusCard(
                 .clip(CircleShape)
                 .clickable {
                     try {
-                        val i1 = Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("alipays://platformapi/startapp?appId=2019090967125695&page=pages%2Findex%2Findex&enbsv=0.3.2106171038.6&chInfo=ch_share__chsub_CopyLink")
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("alipays://platformapi/startapp?appId=2019090967125695&page=pages%2Findex%2Findex&enbsv=0.3.2106171038.6&chInfo=ch_share__chsub_CopyLink")
+                            ).apply {
+                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            }
                         )
-                        i1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        context.startActivity(i1)
                     } catch (e: Exception) {
-                        Toast.makeText(context, "手机未安装支付宝 App", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "请安装支付宝", Toast.LENGTH_SHORT).show()
                     }
                 }
                 .border(

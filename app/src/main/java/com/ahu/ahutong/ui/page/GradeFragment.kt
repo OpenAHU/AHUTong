@@ -51,29 +51,29 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
             dataBinding.refreshLayout.isRefreshing = false
         }*/
 
-        mState.schoolYear.observe(this) {
+        /*mState.schoolYear.observe(this) {
             upDateData()
         }
 
         mState.schoolTerm.observe(this) {
             upDateData()
-        }
+        }*/
     }
 
     private fun upDateData() {
-        if (mState.schoolYear.value != null && mState.schoolTerm.value != null) {
+        if (mState.schoolYear != null && mState.schoolTerm != null) {
             val grade = mState.grade
             if (grade == null) {
                 mState.getGarde()
                 return
             }
-            var yearGrade: Float = 0.0f
+            var yearGrade = 0f
             var termTotal = 0f
             for (termGrade in grade.termGradeList) {
-                if (termGrade.schoolYear.equals(mState.schoolYear.value)) {
+                if (termGrade.schoolYear.equals(mState.schoolYear)) {
                     yearGrade += (termGrade.termGradePointAverage.toFloat() * termGrade.termGradePoint.toFloat())
                     termTotal += termGrade.termGradePoint.toFloat()
-                    if (termGrade.term.equals(mState.schoolTerm.value)) {
+                    if (termGrade.term.equals(mState.schoolTerm)) {
                         mState.termGradePointAverage = termGrade.termGradePointAverage
                         adapter?.submitList(termGrade.gradeList)
                     }
@@ -139,11 +139,11 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
         parent?.let {
             when (it.id) {
                 R.id.sp_schoolYear -> {
-                    mState.schoolYear.value = GradeViewModel.schoolYears[position]
+                    mState.schoolYear = GradeViewModel.schoolYears[position]
                 }
 
                 R.id.sp_term -> {
-                    mState.schoolTerm.value = GradeViewModel.terms.keys.toTypedArray()[position]
+                    mState.schoolTerm = GradeViewModel.terms.keys.toTypedArray()[position]
                 }
             }
         }
@@ -153,11 +153,11 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
         parent?.let {
             when (it.id) {
                 R.id.sp_schoolYear -> {
-                    mState.schoolYear.value = null
+                    mState.schoolYear = null
                 }
 
                 R.id.sp_term -> {
-                    mState.schoolTerm.value = null
+                    mState.schoolTerm = null
                 }
             }
         }
