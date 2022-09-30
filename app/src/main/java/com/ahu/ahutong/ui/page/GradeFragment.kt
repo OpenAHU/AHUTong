@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import arch.sink.ui.page.BaseFragment
 import arch.sink.ui.page.DataBindingConfig
@@ -36,11 +35,11 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
     }
 
     override fun observeData() {
-        super.observeData()
+        super.observeData()/*
         mState.result.observe(this) {
             it.onSuccess {
                 mState.grade = it
-                mState.totalGradePointAverage.value = it.totalGradePointAverage
+                mState.totalGradePointAverage = it.totalGradePointAverage
                 if (mState.schoolTerm.value == null || mState.schoolYear.value == null) {
                     Toast.makeText(requireContext(), "请选择学年，学期", Toast.LENGTH_SHORT).show()
                     return@observe
@@ -50,7 +49,7 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
                 Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
             }
             dataBinding.refreshLayout.isRefreshing = false
-        }
+        }*/
 
         mState.schoolYear.observe(this) {
             upDateData()
@@ -71,23 +70,22 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
             var yearGrade: Float = 0.0f
             var termTotal = 0f
             for (termGrade in grade.termGradeList) {
-                print(termGrade)
                 if (termGrade.schoolYear.equals(mState.schoolYear.value)) {
                     yearGrade += (termGrade.termGradePointAverage.toFloat() * termGrade.termGradePoint.toFloat())
                     termTotal += termGrade.termGradePoint.toFloat()
                     if (termGrade.term.equals(mState.schoolTerm.value)) {
-                        mState.termGradePointAverage.value = termGrade.termGradePointAverage
+                        mState.termGradePointAverage = termGrade.termGradePointAverage
                         adapter?.submitList(termGrade.gradeList)
                     }
                 }
             }
             if (termTotal == 0f) {
-                mState.yearGradePointAverage.value = "暂无"
+                mState.yearGradePointAverage = "暂无"
             } else {
                 val gradePointAverage = yearGrade / termTotal
                 val df = DecimalFormat("#.##")
                 df.roundingMode = RoundingMode.HALF_UP
-                mState.yearGradePointAverage.value = df.format(gradePointAverage)
+                mState.yearGradePointAverage = df.format(gradePointAverage)
             }
         }
     }
@@ -143,6 +141,7 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
                 R.id.sp_schoolYear -> {
                     mState.schoolYear.value = GradeViewModel.schoolYears[position]
                 }
+
                 R.id.sp_term -> {
                     mState.schoolTerm.value = GradeViewModel.terms.keys.toTypedArray()[position]
                 }
@@ -156,6 +155,7 @@ class GradeFragment : BaseFragment<FragmentGradeBinding>(), AdapterView.OnItemSe
                 R.id.sp_schoolYear -> {
                     mState.schoolYear.value = null
                 }
+
                 R.id.sp_term -> {
                     mState.schoolTerm.value = null
                 }

@@ -84,8 +84,4 @@ class DiscoveryViewModel : ViewModel() {
             it.startTime
         }
     }
-
-    init {
-        loadActivityBean()
-    }
 }

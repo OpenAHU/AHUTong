@@ -35,26 +35,31 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 class MainActivity : ComponentActivity() {
-    private val mState: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
     private val discoveryViewModel: DiscoveryViewModel by viewModels()
     private val scheduleViewModel: ScheduleViewModel by viewModels()
     private val gradeViewModel: GradeViewModel by viewModels()
 
+    private fun initViewModels() {
+        discoveryViewModel.loadActivityBean()
+        scheduleViewModel.loadConfig()
+        scheduleViewModel.refreshSchedule()
+        if (AHUCache.getCurrentUser() != null) {
+            gradeViewModel.getGarde()
+        }
+    }
+
     private fun loadInitData() {
         // 日活统计接口
-        mState.addAppAccess()
+        mainViewModel.addAppAccess()
         // 更新小部件数据
         val manager = AppWidgetManager.getInstance(this)
         val componentName = ComponentName(this, ClassWidget::class.java)
         val appWidgetIds = manager.getAppWidgetIds(componentName)
         manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
 
-        scheduleViewModel.loadConfig()
-        scheduleViewModel.refreshSchedule()
-        if (AHUCache.getCurrentUser() != null) {
-            gradeViewModel.getGarde()
-        }
+        initViewModels()
     }
 
     @OptIn(ExperimentalAnimationApi::class)
