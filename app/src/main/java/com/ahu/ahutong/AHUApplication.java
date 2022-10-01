@@ -4,6 +4,7 @@ import com.ahu.ahutong.common.SingleLiveEvent;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import arch.sink.BaseApplication;
+import kotlin.Unit;
 
 /**
  * @Author SinkDev
@@ -11,7 +12,7 @@ import arch.sink.BaseApplication;
  * @Email 468766131@qq.com
  */
 public class AHUApplication extends BaseApplication {
-    public static SingleLiveEvent<Boolean> retryLogin = new SingleLiveEvent<>();
+    public static SingleLiveEvent<Unit> sessionUpdated = new SingleLiveEvent<>();
 
     @Override
     public void onCreate() {

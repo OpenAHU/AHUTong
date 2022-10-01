@@ -23,8 +23,8 @@ class ImageBannerAdapter(data: List<Banner?>?) :
         val imageView = ImageView(parent.context)
         //注意，必须设置为match_parent，这个是viewpager2强制要求的
         imageView.layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
         )
         imageView.scaleType = ImageView.ScaleType.FIT_XY
         return BannerViewHolder(imageView)
@@ -32,10 +32,8 @@ class ImageBannerAdapter(data: List<Banner?>?) :
 
     override fun onBindView(holder: BannerViewHolder?, data: Banner?, position: Int, size: Int) {
         holder?.imageView!!.also {
-            it.load(data!!.imageUrl) {
-                crossfade(true) //淡入淡出
-                crossfade(240)
-            }
+            // 淡出会导致第一张图初次显示不能 FIT_XY
+            it.load(data?.imageUrl)
         }.setOnClickListener {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(data?.detailUrl))
@@ -47,8 +45,6 @@ class ImageBannerAdapter(data: List<Banner?>?) :
         }
     }
 
-    inner class BannerViewHolder(var imageView: ImageView) : RecyclerView.ViewHolder(
-        imageView
-    )
+    inner class BannerViewHolder(var imageView: ImageView) : RecyclerView.ViewHolder(imageView)
 
 }

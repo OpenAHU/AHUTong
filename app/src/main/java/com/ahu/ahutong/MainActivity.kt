@@ -3,6 +3,7 @@ package com.ahu.ahutong
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -40,6 +41,7 @@ import com.ahu.ahutong.utils.animatedComposable
 import com.ahu.ahutong.widget.ClassWidget
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
@@ -53,7 +55,6 @@ class MainActivity : ComponentActivity() {
     private val developerViewModel: DeveloperViewModel by viewModels()
     private val businessViewModel: BusinessViewModel by viewModels()
 
-    // TODO: refresh after logging in
     private fun initViewModels() {
         discoveryViewModel.loadActivityBean()
         scheduleViewModel.loadConfig()
@@ -82,6 +83,12 @@ class MainActivity : ComponentActivity() {
         loadInitData()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+        loginViewModel.serverLoginResult.observe(this) { result ->
+            result.onSuccess {
+                initViewModels()
+            }
+        }
         setContent {
             AHUTheme {
                 val navController = rememberAnimatedNavController()
@@ -142,6 +149,28 @@ class MainActivity : ComponentActivity() {
                         navController.navigate("login")
                     }
                 }
+
+                AHUApplication.sessionUpdated.observe(this) {
+                    // 防止多次的弹出
+                    if (!AHUCache.isLogin()) return@observe
+                    // 登录过期
+                    mainViewModel.logout()
+                    // 重新登录
+                    MaterialAlertDialogBuilder(this).apply {
+                        setTitle("提示")
+                        setMessage("当前登录状态已过期，请重新登录!")
+                        setCancelable(false)
+                        setPositiveButton("重新登录") { _, _ ->
+                            // 退出当前界面
+                            while (navController.popBackStack()) {
+                                Log.d(TAG, "popBackStack")
+                            }
+                            // 导航到登录
+                            navController.navigate("login")
+                        }
+                    }.show()
+                }
+
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
                 // TODO
@@ -150,5 +179,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        val TAG = MainActivity::class.simpleName!!
     }
 }

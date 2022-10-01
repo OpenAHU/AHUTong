@@ -12,6 +12,6 @@ public class RSATest {
     @Test
     public void testEncrypt() throws Exception {
         String encrypt = RSA.encryptByPublicKey("123".getBytes(StandardCharsets.UTF_8));
-        Log.i("encode", encrypt);
+        Log.d("testEncrypt", encrypt);
     }
 }
