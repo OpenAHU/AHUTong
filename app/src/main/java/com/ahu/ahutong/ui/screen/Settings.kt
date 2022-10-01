@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Code
@@ -47,6 +46,7 @@ import com.ahu.ahutong.Constants
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.page.state.AboutViewModel
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -76,7 +76,7 @@ fun Settings(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(32.dp))
+                .clip(SmoothRoundedCornerShape(32.dp))
                 .background(90.a1 withNight 20.n1)
                 .padding(24.dp, 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -170,7 +170,7 @@ fun Settings(
             Column(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(32.dp))
+                    .clip(SmoothRoundedCornerShape(32.dp))
                     .background(100.n1 withNight 20.n1)
                     .padding(bottom = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -248,14 +248,14 @@ fun Settings(
         Column(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(32.dp)),
+                .clip(SmoothRoundedCornerShape(32.dp)),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
                 text = stringResource(id = R.string.license),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(SmoothRoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
                     .clickable { navController.navigate("settings__license") }
                     .padding(24.dp, 16.dp),
@@ -265,7 +265,7 @@ fun Settings(
                 text = stringResource(id = R.string.contributors),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(SmoothRoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
                     .clickable { navController.navigate("settings__contributors") }
                     .padding(24.dp, 16.dp),
@@ -275,7 +275,7 @@ fun Settings(
                 text = stringResource(id = R.string.mine_tv_feedback),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(SmoothRoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
                     .clickable {
                         try {
@@ -298,7 +298,7 @@ fun Settings(
                 text = stringResource(id = R.string.update_intro),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(SmoothRoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
                     .clickable { isUpdateLogShown = true }
                     .padding(24.dp, 16.dp),
@@ -308,7 +308,7 @@ fun Settings(
                 text = stringResource(id = R.string.check_update),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(SmoothRoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
                     .clickable { aboutViewModel.checkForUpdate(context) }
                     .padding(24.dp, 16.dp),
@@ -320,7 +320,7 @@ fun Settings(
         Dialog(onDismissRequest = { isUpdateLogShown = false }) {
             Column(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(32.dp))
+                    .clip(SmoothRoundedCornerShape(32.dp))
                     .background(96.n1 withNight 10.n1)
                     .padding(vertical = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)

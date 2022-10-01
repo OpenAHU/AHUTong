@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.page.state.LicenseViewModel
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -47,14 +47,14 @@ fun License(
             style = MaterialTheme.typography.headlineLarge
         )
         Column(
-            modifier = Modifier.clip(RoundedCornerShape(32.dp)),
+            modifier = Modifier.clip(SmoothRoundedCornerShape(32.dp)),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             licenseViewModel.license.forEach {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(SmoothRoundedCornerShape(4.dp))
                         .background(100.n1 withNight 20.n1)
                         .clickable {
                             context.startActivity(

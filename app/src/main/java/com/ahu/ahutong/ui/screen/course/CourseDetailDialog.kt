@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Navigation
@@ -21,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.google.accompanist.flowlayout.FlowRow
 import com.kyant.monet.a1
 import com.kyant.monet.n1
@@ -34,7 +34,7 @@ fun CourseDetailDialog(
     Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(32.dp))
+                .clip(SmoothRoundedCornerShape(32.dp))
                 .background(96.n1 withNight 10.n1)
                 .padding(vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)

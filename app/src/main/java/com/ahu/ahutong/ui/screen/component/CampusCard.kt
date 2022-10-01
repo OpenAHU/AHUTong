@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MonetizationOn
 import androidx.compose.material3.Icon
@@ -32,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.R
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -45,7 +45,7 @@ fun CampusCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(SmoothRoundedCornerShape(24.dp))
             .background(100.n1 withNight 20.n1)
             .padding(24.dp, 16.dp, 16.dp, 24.dp),
         horizontalArrangement = Arrangement.SpaceBetween,

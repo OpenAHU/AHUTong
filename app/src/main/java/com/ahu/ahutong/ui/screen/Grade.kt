@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.page.state.GradeViewModel
 import com.ahu.ahutong.ui.screen.component.AnimatedListContent
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -192,14 +192,14 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .clip(RoundedCornerShape(32.dp)),
+                        .clip(SmoothRoundedCornerShape(32.dp)),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     it.forEach {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(4.dp))
+                                .clip(SmoothRoundedCornerShape(4.dp))
                                 .background(100.n1 withNight 20.n1)
                                 .clickable {}
                                 .padding(24.dp, 16.dp),

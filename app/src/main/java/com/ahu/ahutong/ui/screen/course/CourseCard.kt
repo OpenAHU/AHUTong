@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.LocalTonalPalettes
 import com.kyant.monet.PaletteStyle
 import com.kyant.monet.TonalPalettes.Companion.toTonalPalettes
@@ -54,7 +54,7 @@ fun CourseCard(
                         mainColumnWidth + (cellWidth + cellSpacing) * (course.weekday - 1) + cellSpacing,
                         mainRowHeight + (cellHeight + cellSpacing) * (course.startTime - 1) + cellSpacing
                     )
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(SmoothRoundedCornerShape(8.dp))
                     .background(70.a1 withNight 60.a1)
                     .pointerInput(Unit) {
                         detectTapGestures { onClick(course) }
@@ -79,7 +79,7 @@ fun CourseCard(
                     .replace("夫图书馆", ""),
                 modifier = Modifier
                     .padding(4.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(SmoothRoundedCornerShape(8.dp))
                     .background(95.a1 withNight 30.n2)
                     .padding(2.dp),
                 textAlign = TextAlign.Center,

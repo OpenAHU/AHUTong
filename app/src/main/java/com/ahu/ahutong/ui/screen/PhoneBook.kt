@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -42,6 +41,7 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Tel
 import com.ahu.ahutong.ui.page.state.TelDirectoryViewModel
 import com.ahu.ahutong.ui.screen.component.AnimatedListContent
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.google.accompanist.flowlayout.FlowRow
 import com.kyant.monet.a1
 import com.kyant.monet.n1
@@ -158,14 +158,14 @@ private fun Telephones(
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .clip(RoundedCornerShape(32.dp)),
+                .clip(SmoothRoundedCornerShape(32.dp)),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             TelDirectoryViewModel.TelBook.getValue(category).forEach {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(SmoothRoundedCornerShape(4.dp))
                         .background(100.n1 withNight 20.n1)
                         .clickable { onItemClick(it) }
                         .padding(16.dp),
@@ -214,7 +214,7 @@ private fun Tel(
             text = it,
             modifier = Modifier
                 .padding(4.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(SmoothRoundedCornerShape(8.dp))
                 .background(90.a1 withNight 30.n1)
                 .padding(8.dp, 2.dp),
             style = MaterialTheme.typography.labelSmall
@@ -237,7 +237,7 @@ private fun DialDialog(
         Dialog(onDismissRequest = onDismiss) {
             Column(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(32.dp))
+                    .clip(SmoothRoundedCornerShape(32.dp))
                     .background(100.n1 withNight 10.n1)
                     .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)

@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.Timer
@@ -52,6 +51,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.page.state.ScheduleViewModel
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -78,37 +78,59 @@ fun TodayCourses(
             draggedFraction.snapTo((draggedFraction.value - it / 500f).coerceIn(0f..todayCourses.size - 1f))
         }
     }
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Box(
-            modifier = Modifier
-                .height(IntrinsicSize.Min)
-                .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(32.dp))
-                .background(90.a1 withNight 30.n1)
-                .pointerInput(Unit) {
-                    detectTapGestures {
-                        navController.navigate("schedule")
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(SmoothRoundedCornerShape(32.dp))
+            .background(100.n1 withNight 20.n1)
+            .padding(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        todayCourses.getOrNull(draggedFraction.value.roundToInt())?.let { course ->
+            val range = scheduleViewModel.getCourseTimeRangeInMinutes(course)
+            Text(
+                text = if (currentMinutes in range) "正在上课"
+                else {
+                    val distance = range.first - currentMinutes
+                    if (distance >= 0) {
+                        val hour = distance / 60
+                        val minutes = distance - hour * 60
+                        if (hour > 0) "还有 $hour 小时 $minutes 分钟上课"
+                        else "还有 $minutes 分钟上课"
+                    } else "已经上完了"
+                },
+                modifier = Modifier.padding(horizontal = 24.dp),
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Box(
+                modifier = Modifier
+                    .height(IntrinsicSize.Min)
+                    .clip(SmoothRoundedCornerShape(32.dp))
+                    .background(90.a1 withNight 30.n1)
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            navController.navigate("schedule")
+                        }
                     }
-                }
-                .draggable(state = state, orientation = Orientation.Horizontal, onDragStopped = {
-                    draggedFraction.animateTo(
-                        draggedFraction.value
-                            .roundToInt()
-                            .toFloat()
-                    )
-                })
-        ) {
-            todayCourses.getOrNull(draggedFraction.value.roundToInt())?.let { course ->
-                val range = scheduleViewModel.getCourseTimeRangeInMinutes(course)
-                val elapsedFraction = if (currentMinutes in range) {
+                    .draggable(state = state, orientation = Orientation.Horizontal, onDragStopped = {
+                        draggedFraction.animateTo(
+                            draggedFraction.value
+                                .roundToInt()
+                                .toFloat()
+                        )
+                    })
+            ) {
+                val ongoingFraction = if (currentMinutes in range) {
                     (currentMinutes.toFloat() - range.first) / (range.last.toFloat() - range.first)
                 } else 0f
-                var elapsedWidth by rememberSaveable { mutableStateOf(0) }
+                var ongingWidth by rememberSaveable { mutableStateOf(0) }
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(animateFloatAsState(targetValue = elapsedFraction).value)
+                        .fillMaxWidth(animateFloatAsState(targetValue = ongoingFraction).value)
                         .fillMaxHeight()
-                        .onSizeChanged { elapsedWidth = it.width }
+                        .onSizeChanged { ongingWidth = it.width }
                         .background(50.a1 withNight 80.a1)
                 )
                 Column(
@@ -139,7 +161,7 @@ fun TodayCourses(
                                         density: Density
                                     ) = Outline.Rectangle(
                                         with(density) {
-                                            size.toRect().copy(right = elapsedWidth - 24.dp.toPx() - offsetX.toPx())
+                                            size.toRect().copy(right = ongingWidth - 24.dp.toPx() - offsetX.toPx())
                                         }
                                     )
                                 }
@@ -200,7 +222,7 @@ fun TodayCourses(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
         ) {
-            (0 until todayCourses.size).forEach {
+            todayCourses.indices.forEach {
                 Box(
                     modifier = Modifier
                         .size(8.dp)

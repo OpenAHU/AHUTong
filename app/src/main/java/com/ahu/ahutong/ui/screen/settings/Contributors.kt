@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,6 +31,7 @@ import coil.compose.AsyncImage
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.page.state.BusinessViewModel
 import com.ahu.ahutong.ui.page.state.DeveloperViewModel
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -66,14 +66,14 @@ fun Contributors(
                 style = MaterialTheme.typography.titleMedium
             )
             Column(
-                modifier = Modifier.clip(RoundedCornerShape(32.dp)),
+                modifier = Modifier.clip(SmoothRoundedCornerShape(32.dp)),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 list.forEach {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(SmoothRoundedCornerShape(4.dp))
                             .background(100.n1 withNight 20.n1)
                             .clickable {
                                 try {

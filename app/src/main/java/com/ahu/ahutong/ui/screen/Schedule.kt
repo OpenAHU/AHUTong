@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
@@ -53,6 +52,7 @@ import com.ahu.ahutong.ui.page.state.ScheduleViewModel
 import com.ahu.ahutong.ui.screen.course.CourseCard
 import com.ahu.ahutong.ui.screen.course.CourseCardSpec
 import com.ahu.ahutong.ui.screen.course.CourseDetailDialog
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.Hct.Companion.toHct
 import com.kyant.monet.a1
 import com.kyant.monet.n1
@@ -161,7 +161,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     Modifier
                         .fillMaxWidth()
                         .height(mainRowHeight + (cellHeight + cellSpacing) * 11 + 24.dp)
-                        .clip(RoundedCornerShape(32.dp))
+                        .clip(SmoothRoundedCornerShape(32.dp))
                         .background(100.n1 withNight 20.n1)
                         .padding(cellSpacing)
                 }
@@ -182,7 +182,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                                 .border(
                                     width = 2.dp,
                                     color = 70.a1 withNight 60.a1,
-                                    shape = RoundedCornerShape(16.dp)
+                                    shape = SmoothRoundedCornerShape(16.dp)
                                 )
                         }
                     )
@@ -194,7 +194,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                             Modifier
                                 .size(cellWidth, mainRowHeight)
                                 .offset(x = mainColumnWidth + (cellWidth + cellSpacing) * index + cellSpacing)
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(SmoothRoundedCornerShape(8.dp))
                         },
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -222,7 +222,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                             Modifier
                                 .size(mainColumnWidth, cellHeight)
                                 .offset(y = mainRowHeight + (cellHeight + cellSpacing) * (index - 1) + cellSpacing)
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(SmoothRoundedCornerShape(8.dp))
                         },
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
