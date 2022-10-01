@@ -18,6 +18,7 @@ import com.ahu.ahutong.ui.page.state.AboutViewModel
 import com.ahu.ahutong.ui.page.state.BusinessViewModel
 import com.ahu.ahutong.ui.page.state.DeveloperViewModel
 import com.ahu.ahutong.ui.page.state.DiscoveryViewModel
+import com.ahu.ahutong.ui.page.state.ExamViewModel
 import com.ahu.ahutong.ui.page.state.GradeViewModel
 import com.ahu.ahutong.ui.page.state.LicenseViewModel
 import com.ahu.ahutong.ui.page.state.LoginViewModel
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
     private val discoveryViewModel: DiscoveryViewModel by viewModels()
     private val scheduleViewModel: ScheduleViewModel by viewModels()
     private val gradeViewModel: GradeViewModel by viewModels()
+    private val examViewModel: ExamViewModel by viewModels()
     private val aboutViewModel: AboutViewModel by viewModels()
     private val licenseViewModel: LicenseViewModel by viewModels()
     private val developerViewModel: DeveloperViewModel by viewModels()
@@ -61,6 +63,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // TODO: fix widget
     private fun loadInitData() {
         // 日活统计接口
         mainViewModel.addAppAccess()
@@ -113,7 +116,9 @@ class MainActivity : ComponentActivity() {
                         Grade(gradeViewModel = gradeViewModel)
                     }
                     animatedComposable("phone_book") { PhoneBook() }
-                    animatedComposable("exam") { Exam() }
+                    animatedComposable("exam") {
+                        Exam(examViewModel = examViewModel)
+                    }
                     animatedComposable("settings") {
                         Settings(
                             aboutViewModel = aboutViewModel,

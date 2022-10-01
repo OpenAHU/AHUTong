@@ -2,6 +2,7 @@ package com.ahu.ahutong.ui.screen
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -267,6 +268,29 @@ fun Settings(
                     .clip(RoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
                     .clickable { navController.navigate("settings__contributors") }
+                    .padding(24.dp, 16.dp),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = stringResource(id = R.string.mine_tv_feedback),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(100.n1 withNight 20.n1)
+                    .clickable {
+                        try {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3DL3WKrBqXGuSoqrpbm4zVqHWN-WyB-Y29")
+                                ).apply {
+                                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                }
+                            )
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "请安装 QQ 或 Tim", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                     .padding(24.dp, 16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
