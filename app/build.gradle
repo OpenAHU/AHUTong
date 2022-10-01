@@ -15,7 +15,7 @@ android {
     }*/
     //关闭PNG合法性检查
     aaptOptions.cruncherEnabled = false
-    aaptOptions.useNewCruncher = false
+    // aaptOptions.useNewCruncher = false
     defaultConfig {
         applicationId "com.ahu.ahutong"
         minSdkVersion 24
@@ -99,7 +99,7 @@ android {
 dependencies {
     def retrofitVersion = "2.9.0"
     def composeVersion = "1.3.0-beta03"
-    def accompanistVersion = "0.26.3-beta"
+    def accompanistVersion = "0.26.4-beta"
     implementation project(path: ':arch')
     implementation project(path: ':simonlibrary')
 
@@ -123,6 +123,7 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended:$composeVersion"
     implementation "androidx.compose.material3:material3:1.0.0-beta03"
     implementation "androidx.navigation:navigation-compose:2.5.2"
+    implementation "androidx.glance:glance-appwidget:1.0.0-alpha04"
     implementation "com.google.accompanist:accompanist-flowlayout:$accompanistVersion"
     implementation "com.google.accompanist:accompanist-navigation-animation:$accompanistVersion"
     implementation "io.coil-kt:coil-compose:2.2.0"

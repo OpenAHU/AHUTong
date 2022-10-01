@@ -40,6 +40,20 @@
         </activity>
 
         <receiver
+            android:name=".appwidget.ScheduleAppWidgetReceiver"
+            android:enabled="@bool/glance_appwidget_available"
+            android:exported="false"
+            android:label="课表">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/app_widget_info" />
+        </receiver>
+
+        <receiver
             android:name=".widget.ClassWidget"
             android:exported="true"
             android:label="@string/app_name"
