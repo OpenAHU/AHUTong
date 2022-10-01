@@ -19,6 +19,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.data.model.Course
 import com.kyant.monet.LocalTonalPalettes
@@ -33,6 +34,7 @@ import com.kyant.monet.withNight
 fun CourseCard(
     course: Course,
     color: Color,
+    cellWidth: Dp,
     onClick: (Course) -> Unit
 ) {
     CompositionLocalProvider(

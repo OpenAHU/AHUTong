@@ -5,7 +5,6 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -150,17 +151,19 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                 }
             }
             // schedule
+            val cellWidth = (
+                LocalConfiguration.current.screenWidthDp.dp -
+                    CourseCardSpec.mainColumnWidth -
+                    CourseCardSpec.cellSpacing * 9
+                ) / 7
             Box(
                 modifier = with(CourseCardSpec) {
                     Modifier
-                        .horizontalScroll(rememberScrollState())
+                        .fillMaxWidth()
+                        .height(mainRowHeight + (cellHeight + cellSpacing) * 11 + 24.dp)
                         .clip(RoundedCornerShape(32.dp))
                         .background(100.n1 withNight 20.n1)
                         .padding(cellSpacing)
-                        .size(
-                            mainColumnWidth + (cellWidth + cellSpacing) * 7,
-                            mainRowHeight + (cellHeight + cellSpacing) * 11
-                        )
                 }
             ) {
                 // TODO: current time indicator
@@ -185,7 +188,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     )
                 }
                 // weekday tags
-                arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEachIndexed { index, weekday ->
+                arrayOf("周一", "周二", "周三", "周四", "周五", "周六", "周日").forEachIndexed { index, weekday ->
                     Column(
                         modifier = with(CourseCardSpec) {
                             Modifier
@@ -241,6 +244,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         CourseCard(
                             course = course,
                             color = courseColors.getOrElse(course.name) { 50.a1 },
+                            cellWidth = cellWidth,
                             onClick = { detailedCourse = it }
                         )
                     }
