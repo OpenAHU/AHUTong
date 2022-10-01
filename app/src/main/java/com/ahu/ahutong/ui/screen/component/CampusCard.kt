@@ -3,6 +3,8 @@ package com.ahu.ahutong.ui.screen.component
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,6 +35,7 @@ import com.ahu.ahutong.R
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CampusCard(
     balance: Double,
@@ -54,21 +57,23 @@ fun CampusCard(
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium
             )
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        MaterialTheme.typography.titleLarge.toSpanStyle()
-                            .copy(fontWeight = FontWeight.Bold)
-                    ) {
-                        append("¥ $balance")
+            AnimatedContent(targetState = balance to transitionBalance) { (balance, transitionBalance) ->
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            MaterialTheme.typography.titleLarge.toSpanStyle()
+                                .copy(fontWeight = FontWeight.Bold)
+                        ) {
+                            append("¥ $balance")
+                        }
+                        withStyle(
+                            MaterialTheme.typography.titleSmall.toSpanStyle().copy(color = 50.n1 withNight 80.n1)
+                        ) {
+                            append(" + ¥ $transitionBalance")
+                        }
                     }
-                    withStyle(
-                        MaterialTheme.typography.titleSmall.toSpanStyle().copy(color = 50.n1 withNight 80.n1)
-                    ) {
-                        append(" + ¥ $transitionBalance")
-                    }
-                }
-            )
+                )
+            }
         }
         Row(
             modifier = Modifier

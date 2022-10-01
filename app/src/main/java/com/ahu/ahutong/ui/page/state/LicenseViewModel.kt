@@ -9,6 +9,7 @@ import com.ahu.ahutong.data.model.License
  * @Email: 468766131@qq.com
  */
 class LicenseViewModel : ViewModel() {
+    // TODO: complete
     val license by lazy {
         listOf(
             License(

@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,7 +51,7 @@ import com.kyant.monet.withNight
 @Composable
 fun PhoneBook() {
     val context = LocalContext.current
-    var dialData by remember { mutableStateOf<Tel?>(null) }
+    var dialData by rememberSaveable { mutableStateOf<Tel?>(null) }
     var selectedCategory by rememberSaveable { mutableStateOf("师生综合服务大厅") }
     Column(
         modifier = Modifier

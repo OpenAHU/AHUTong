@@ -57,7 +57,7 @@ fun CourseDetailDialog(
                 Row(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(90.a1 withNight 40.n1)
+                        .background(90.a1 withNight 30.n1)
                         .padding(12.dp, 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
@@ -75,7 +75,7 @@ fun CourseDetailDialog(
                 Row(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(90.a1 withNight 40.n1)
+                        .background(90.a1 withNight 30.n1)
                         .padding(12.dp, 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically

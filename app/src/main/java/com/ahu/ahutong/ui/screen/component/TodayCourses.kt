@@ -1,7 +1,5 @@
 package com.ahu.ahutong.ui.screen.component
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
@@ -34,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,8 +57,8 @@ import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlin.math.sign
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun TodayCourses(
     scheduleViewModel: ScheduleViewModel = viewModel(),
@@ -68,26 +67,17 @@ fun TodayCourses(
     navController: NavHostController
 ) {
     val scope = rememberCoroutineScope()
-    val draggedFraction = remember { Animatable(0f) }
+    val selectedCourseIndex = todayCourses.indexOfFirst {
+        val range = scheduleViewModel.getCourseTimeRangeInMinutes(it)
+        if (currentMinutes in range) true
+        else currentMinutes < range.first
+    }
+    val draggedFraction = remember { Animatable(selectedCourseIndex.toFloat()) }
     val state = rememberDraggableState {
         scope.launch {
             draggedFraction.snapTo((draggedFraction.value - it / 500f).coerceIn(0f..todayCourses.size - 1f))
         }
     }
-    var autoScrollLocked by remember { mutableStateOf(false) }
-    todayCourses
-        .indexOfFirst {
-            val range = scheduleViewModel.getCourseTimeRangeInMinutes(it)
-            if (currentMinutes in range) true
-            else currentMinutes < range.first
-        }.let {
-            if (!autoScrollLocked) {
-                scope.launch {
-                    draggedFraction.snapTo(it.toFloat())
-                    autoScrollLocked = true
-                }
-            }
-        }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Box(
             modifier = Modifier
@@ -113,7 +103,7 @@ fun TodayCourses(
                 val elapsedFraction = if (currentMinutes in range) {
                     (currentMinutes.toFloat() - range.first) / (range.last.toFloat() - range.first)
                 } else 0f
-                var elapsedWidth by remember { mutableStateOf(0) }
+                var elapsedWidth by rememberSaveable { mutableStateOf(0) }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(animateFloatAsState(targetValue = elapsedFraction).value)
@@ -125,19 +115,13 @@ fun TodayCourses(
                     modifier = Modifier.padding(24.dp, 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    val offsetX = 48.dp * if (draggedFraction.value.mod(1f) < 0.5f) {
-                        -draggedFraction.value.mod(1f)
-                    } else 1f - draggedFraction.value.mod(1f)
+                    val partialFraction = draggedFraction.value.mod(1f)
+                    val offsetX = 56.dp * (partialFraction.roundToInt() - partialFraction)
+                    val alpha = sign(partialFraction - 0.5f) * (partialFraction * 2 - 1f)
                     Box(
                         modifier = Modifier
                             .offset(x = offsetX)
-                            .alpha(
-                                animateFloatAsState(
-                                    targetValue = if (draggedFraction.value.mod(1f) < 0.5f) {
-                                        1f - draggedFraction.value.mod(1f) * 2
-                                    } else draggedFraction.value.mod(1f) * 2 - 1f
-                                ).value
-                            )
+                            .alpha(alpha)
                     ) {
                         Text(
                             text = course.name,
@@ -170,47 +154,43 @@ fun TodayCourses(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        AnimatedContent(targetState = course) {
-                            Row(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(95.a1 withNight 40.n1)
-                                    .padding(8.dp, 2.dp)
-                                    .animateContentSize(),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Timer,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = "${it.startTime} - ${it.startTime + it.length - 1}",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
+                        Row(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(95.a1 withNight 40.n1)
+                                .padding(8.dp, 2.dp)
+                                .animateContentSize(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Timer,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "${course.startTime} - ${course.startTime + course.length - 1}",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
-                        AnimatedContent(targetState = course) {
-                            Row(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(95.a1 withNight 40.n1)
-                                    .padding(8.dp, 2.dp)
-                                    .animateContentSize(),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Navigation,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = it.location,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
+                        Row(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(95.a1 withNight 40.n1)
+                                .padding(8.dp, 2.dp)
+                                .animateContentSize(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Navigation,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = course.location,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
                     }
                 }

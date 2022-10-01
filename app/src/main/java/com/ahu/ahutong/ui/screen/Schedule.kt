@@ -36,7 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +65,7 @@ import java.util.*
 fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
     val currentWeekday = scheduleConfig?.weekDay ?: 1
-    var currentWeek by remember { mutableStateOf(scheduleConfig?.week ?: 1) }
+    var currentWeek by rememberSaveable { mutableStateOf(scheduleConfig?.week ?: 1) }
     val schedule = scheduleViewModel.schedule.observeAsState().value?.getOrNull() ?: emptyList()
     val baseColor = 50.a1.toSrgb().toHct()
     val courseColors = run {
@@ -75,7 +75,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
         }.toMap()
     }
     val currentWeekCourses = schedule.filter { currentWeek in it.startWeek..it.endWeek }
-    var detailedCourse by remember { mutableStateOf<Course?>(null) }
+    var detailedCourse by rememberSaveable { mutableStateOf<Course?>(null) }
     Box {
         Column(
             modifier = Modifier
