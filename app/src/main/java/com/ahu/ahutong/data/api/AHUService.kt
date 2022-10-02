@@ -5,7 +5,13 @@ import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.model.*
+import com.ahu.ahutong.data.model.AppVersion
+import com.ahu.ahutong.data.model.Banner
+import com.ahu.ahutong.data.model.BathRoom
+import com.ahu.ahutong.data.model.Card
+import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.data.model.Grade
+import com.ahu.ahutong.data.model.User
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import okhttp3.Cache
@@ -17,7 +23,11 @@ import okio.Buffer
 import okio.GzipSource
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.*
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Query
 import java.io.File
 import java.util.concurrent.TimeUnit
 

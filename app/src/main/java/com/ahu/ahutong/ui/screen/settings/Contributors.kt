@@ -29,9 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.ahu.ahutong.R
-import com.ahu.ahutong.ui.page.state.BusinessViewModel
-import com.ahu.ahutong.ui.page.state.DeveloperViewModel
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
+import com.ahu.ahutong.ui.state.BusinessViewModel
+import com.ahu.ahutong.ui.state.DeveloperViewModel
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -45,7 +45,6 @@ fun Contributors(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(96.n1 withNight 10.n1)
             .systemBarsPadding()
             .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)

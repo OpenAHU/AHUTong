@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="collapsed_header_height">60dp</dimen>
-    <dimen name="collapsed_float_offset_y">-10dp</dimen>
-    <dimen name="collapsed_float_zero">0dp</dimen>
-    <dimen name="collapsed_search_margin_right">70dp</dimen>
-    <dimen name="collapsed_search_height">30dp</dimen>
-    <dimen name="collapsed_search_margin_left2right">20dp</dimen>
-</resources>

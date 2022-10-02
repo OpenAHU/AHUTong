@@ -45,24 +45,26 @@ import androidx.navigation.NavHostController
 import com.ahu.ahutong.Constants
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.ui.page.state.AboutViewModel
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
+import com.ahu.ahutong.ui.state.AboutViewModel
+import com.ahu.ahutong.ui.state.MainViewModel
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
 fun Settings(
-    aboutViewModel: AboutViewModel = viewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    mainViewModel: MainViewModel = viewModel(),
+    aboutViewModel: AboutViewModel = viewModel()
 ) {
     val context = LocalContext.current as ComponentActivity
-    var isUpdateLogShown by rememberSaveable { mutableStateOf(false) }
+    var isClearCacheDialogShown by rememberSaveable { mutableStateOf(false) }
+    var isUpdateLogDialogShown by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(96.n1 withNight 10.n1)
             .systemBarsPadding()
             .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -201,7 +203,7 @@ fun Settings(
                             .weight(1f)
                             .clip(CircleShape)
                             .background(100.n1 withNight 30.n1)
-                            .clickable { navController.navigate("fill_in_info") }
+                            .clickable { navController.navigate("info") }
                             .padding(12.dp, 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically
@@ -288,9 +290,21 @@ fun Settings(
                                 }
                             )
                         } catch (e: Exception) {
-                            Toast.makeText(context, "请安装 QQ 或 Tim", Toast.LENGTH_SHORT).show()
+                            Toast
+                                .makeText(context, "请安装 QQ 或 Tim", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
+                    .padding(24.dp, 16.dp),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = stringResource(id = R.string.setting_clear),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(SmoothRoundedCornerShape(4.dp))
+                    .background(100.n1 withNight 20.n1)
+                    .clickable { isClearCacheDialogShown = true }
                     .padding(24.dp, 16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
@@ -300,7 +314,7 @@ fun Settings(
                     .fillMaxWidth()
                     .clip(SmoothRoundedCornerShape(4.dp))
                     .background(100.n1 withNight 20.n1)
-                    .clickable { isUpdateLogShown = true }
+                    .clickable { isUpdateLogDialogShown = true }
                     .padding(24.dp, 16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
@@ -316,8 +330,39 @@ fun Settings(
             )
         }
     }
-    if (isUpdateLogShown) {
-        Dialog(onDismissRequest = { isUpdateLogShown = false }) {
+    if (isClearCacheDialogShown) {
+        Dialog(onDismissRequest = { isClearCacheDialogShown = false }) {
+            Column(
+                modifier = Modifier
+                    .clip(SmoothRoundedCornerShape(32.dp))
+                    .background(96.n1 withNight 10.n1)
+                    .padding(vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                Text(
+                    text = "请注意，清除应用数据后，您的登录状态、课表等将会被永久删除。",
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    style = MaterialTheme.typography.headlineLarge
+                )
+                Text(
+                    text = "清除数据",
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .clip(CircleShape)
+                        .background(90.a1 withNight 30.n1)
+                        .clickable {
+                            mainViewModel.logout()
+                            AHUCache.clearAll()
+                            Toast.makeText(context, "已清除所有数据", Toast.LENGTH_SHORT).show()
+                        }
+                        .padding(12.dp, 8.dp),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+    }
+    if (isUpdateLogDialogShown) {
+        Dialog(onDismissRequest = { isUpdateLogDialogShown = false }) {
             Column(
                 modifier = Modifier
                     .clip(SmoothRoundedCornerShape(32.dp))

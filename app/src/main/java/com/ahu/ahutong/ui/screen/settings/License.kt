@@ -23,8 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
-import com.ahu.ahutong.ui.page.state.LicenseViewModel
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
+import com.ahu.ahutong.ui.state.LicenseViewModel
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -37,7 +37,6 @@ fun License(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(96.n1 withNight 10.n1)
             .systemBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {

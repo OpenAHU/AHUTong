@@ -3,7 +3,11 @@
 package com.ahu.ahutong.data.reptile
 
 import com.ahu.ahutong.data.AHUResponse
-import com.ahu.ahutong.data.model.*
+import com.ahu.ahutong.data.model.Card
+import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.data.model.Exam
+import com.ahu.ahutong.data.model.Grade
+import com.ahu.ahutong.data.model.Room
 import com.ahu.ahutong.data.reptile.utils.JsoupProxy
 import com.ahu.ahutong.data.reptile.utils.timeMap
 import com.ahu.ahutong.data.reptile.utils.weekdayMap
@@ -469,11 +473,13 @@ object WebViewReptile {
                     Result.failure(Throwable("请求地址异常，界面找不到！"))
                 }
             }
+
             is SocketTimeoutException -> {
                 if (e.message == "timeout") {
                     return Result.failure(Throwable("当前网络不稳定，请求失败"))
                 }
             }
+
             is ConnectException -> {
                 return Result.failure(Throwable("当前没有网络连接哦！"))
             }

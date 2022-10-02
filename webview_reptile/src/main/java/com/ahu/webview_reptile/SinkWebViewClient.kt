@@ -58,10 +58,12 @@ class SinkWebViewClient : WebViewClient() {
                 loginCallback("登录中", null)
                 loginStatus = 1
             }
+
             url.contains("m=up#act=portal/viewhome") -> {
                 loginStatus = 1
                 view?.loadUrl(loadUrl)
             }
+
             url.contains(main) -> {
                 loginStatus = 2
                 loginCallback("登录成功", null)
