@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.main.component.AnimatedListContent
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.GradeViewModel
@@ -39,6 +41,11 @@ import com.kyant.monet.withNight
 
 @Composable
 fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
+    LaunchedEffect(Unit) {
+        if (AHUCache.isLogin()) {
+            gradeViewModel.getGarde()
+        }
+    }
     val grade = gradeViewModel.grade
     val schoolYears = GradeViewModel.schoolYears
     val schoolTerms = GradeViewModel.terms.keys.toTypedArray()

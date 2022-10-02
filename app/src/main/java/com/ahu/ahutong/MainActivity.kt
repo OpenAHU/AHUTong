@@ -15,7 +15,6 @@ import androidx.core.view.WindowCompat
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.Main
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
-import com.ahu.ahutong.ui.state.GradeViewModel
 import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
@@ -27,7 +26,6 @@ class MainActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private val discoveryViewModel: DiscoveryViewModel by viewModels()
     private val scheduleViewModel: ScheduleViewModel by viewModels()
-    private val gradeViewModel: GradeViewModel by viewModels()
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,8 +79,5 @@ class MainActivity : ComponentActivity() {
         discoveryViewModel.loadActivityBean()
         scheduleViewModel.loadConfig()
         scheduleViewModel.refreshSchedule()
-        if (AHUCache.isLogin()) {
-            gradeViewModel.getGarde()
-        }
     }
 }
