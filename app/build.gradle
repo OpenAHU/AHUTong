@@ -135,8 +135,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "androidx.core:core-ktx:$androidxCore"
-    implementation "androidx.appcompat:appcompat:$googleMaterial"
-    implementation "com.google.android.material:material:$googleMaterial"
+    implementation "androidx.appcompat:appcompat:$appCompat"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

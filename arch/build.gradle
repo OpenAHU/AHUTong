@@ -40,7 +40,7 @@ dependencies {
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
     api "androidx.core:core-ktx:$androidxCore"
-    api "androidx.appcompat:appcompat:$googleMaterial"
+    api "androidx.appcompat:appcompat:$appCompat"
     api "com.google.android.material:material:$googleMaterial"
     api 'org.jetbrains:annotations:21.0.1'
     testImplementation 'junit:junit:4.13.2'
