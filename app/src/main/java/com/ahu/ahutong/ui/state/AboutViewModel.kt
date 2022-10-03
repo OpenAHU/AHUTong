@@ -47,7 +47,7 @@ class AboutViewModel : ViewModel() {
     }
 
     // TODO: fix crash
-    fun checkForUpdate(context: ComponentActivity) {
+    fun checkForUpdates(context: ComponentActivity) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 latestVersions.value = try {

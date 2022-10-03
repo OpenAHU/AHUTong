@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.screen.main.component.LoadingIndicator
@@ -92,7 +91,7 @@ fun BoxScope.LoginDynamicIsland(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     LoadingIndicator(
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(56.dp),
                         color = 100.n1,
                         strokeWidth = 6.dp
                     )
@@ -101,9 +100,7 @@ fun BoxScope.LoginDynamicIsland(
                         modifier = Modifier.padding(4.dp),
                         color = 100.n1,
                         fontWeight = FontWeight.Bold,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 3,
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
             }
@@ -119,7 +116,7 @@ fun BoxScope.LoginDynamicIsland(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = null,
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(56.dp),
                         tint = 100.n1
                     )
                     Text(
@@ -127,9 +124,7 @@ fun BoxScope.LoginDynamicIsland(
                         modifier = Modifier.padding(4.dp),
                         color = 100.n1,
                         fontWeight = FontWeight.Bold,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 3,
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
             }
@@ -145,7 +140,7 @@ fun BoxScope.LoginDynamicIsland(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(56.dp),
                         tint = 100.n1
                     )
                     Text(
@@ -153,9 +148,7 @@ fun BoxScope.LoginDynamicIsland(
                         modifier = Modifier.padding(4.dp),
                         color = 100.n1,
                         fontWeight = FontWeight.Bold,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 3,
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
             }

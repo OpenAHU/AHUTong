@@ -19,9 +19,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Article
+import androidx.compose.material.icons.outlined.ClearAll
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Login
+import androidx.compose.material.icons.outlined.PeopleOutline
+import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -253,80 +259,50 @@ fun Settings(
                 .clip(SmoothRoundedCornerShape(32.dp)),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Text(
-                text = stringResource(id = R.string.license),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(SmoothRoundedCornerShape(4.dp))
-                    .background(100.n1 withNight 20.n1)
-                    .clickable { navController.navigate("settings__license") }
-                    .padding(24.dp, 16.dp),
-                style = MaterialTheme.typography.titleMedium
+            SettingItem(
+                label = stringResource(id = R.string.license),
+                icon = Icons.Outlined.Article,
+                onClick = { navController.navigate("settings__license") }
             )
-            Text(
-                text = stringResource(id = R.string.contributors),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(SmoothRoundedCornerShape(4.dp))
-                    .background(100.n1 withNight 20.n1)
-                    .clickable { navController.navigate("settings__contributors") }
-                    .padding(24.dp, 16.dp),
-                style = MaterialTheme.typography.titleMedium
+            SettingItem(
+                label = stringResource(id = R.string.contributors),
+                icon = Icons.Outlined.PeopleOutline,
+                onClick = { navController.navigate("settings__contributors") }
             )
-            Text(
-                text = stringResource(id = R.string.mine_tv_feedback),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(SmoothRoundedCornerShape(4.dp))
-                    .background(100.n1 withNight 20.n1)
-                    .clickable {
-                        try {
-                            context.startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3DL3WKrBqXGuSoqrpbm4zVqHWN-WyB-Y29")
-                                ).apply {
-                                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                }
-                            )
-                        } catch (e: Exception) {
-                            Toast
-                                .makeText(context, "请安装 QQ 或 Tim", Toast.LENGTH_SHORT)
-                                .show()
-                        }
+            SettingItem(
+                label = stringResource(id = R.string.mine_tv_feedback),
+                icon = Icons.Outlined.Feedback,
+                onClick = {
+                    try {
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3DL3WKrBqXGuSoqrpbm4zVqHWN-WyB-Y29")
+                            ).apply {
+                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            }
+                        )
+                    } catch (e: Exception) {
+                        Toast
+                            .makeText(context, "请安装 QQ 或 Tim", Toast.LENGTH_SHORT)
+                            .show()
                     }
-                    .padding(24.dp, 16.dp),
-                style = MaterialTheme.typography.titleMedium
+                }
             )
-            Text(
-                text = stringResource(id = R.string.setting_clear),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(SmoothRoundedCornerShape(4.dp))
-                    .background(100.n1 withNight 20.n1)
-                    .clickable { isClearCacheDialogShown = true }
-                    .padding(24.dp, 16.dp),
-                style = MaterialTheme.typography.titleMedium
+            SettingItem(
+                label = stringResource(id = R.string.setting_clear),
+                icon = Icons.Outlined.ClearAll,
+                onClick = { isClearCacheDialogShown = true }
             )
-            Text(
-                text = stringResource(id = R.string.update_intro),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(SmoothRoundedCornerShape(4.dp))
-                    .background(100.n1 withNight 20.n1)
-                    .clickable { isUpdateLogDialogShown = true }
-                    .padding(24.dp, 16.dp),
-                style = MaterialTheme.typography.titleMedium
+            SettingItem(
+                label = stringResource(id = R.string.update_intro),
+                icon = Icons.Outlined.Article,
+                onClick = { isUpdateLogDialogShown = true }
             )
-            Text(
-                text = stringResource(id = R.string.check_update),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(SmoothRoundedCornerShape(4.dp))
-                    .background(100.n1 withNight 20.n1)
-                    .clickable { aboutViewModel.checkForUpdate(context) }
-                    .padding(24.dp, 16.dp),
-                style = MaterialTheme.typography.titleMedium
+            SettingItem(
+                label = stringResource(id = R.string.check_update),
+                icon = Icons.Outlined.Update,
+                onClick = { aboutViewModel.checkForUpdates(context) }
             )
         }
     }
@@ -340,12 +316,12 @@ fun Settings(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 Text(
-                    text = "请注意，清除应用数据后，您的登录状态、课表等将会被永久删除。",
+                    text = "您的登录状态、课表等信息将会被永久清除",
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    style = MaterialTheme.typography.headlineLarge
+                    style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = "清除数据",
+                    text = "清除",
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                         .clip(CircleShape)
@@ -382,5 +358,31 @@ fun Settings(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun SettingItem(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SmoothRoundedCornerShape(4.dp))
+            .background(100.n1 withNight 20.n1)
+            .clickable(onClick = onClick)
+            .padding(24.dp, 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium
+        )
     }
 }

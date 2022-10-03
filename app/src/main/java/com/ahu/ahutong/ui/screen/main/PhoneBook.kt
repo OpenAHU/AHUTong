@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Tel
-import com.ahu.ahutong.ui.screen.main.component.AnimatedListContent
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.TelDirectoryViewModel
 import com.google.accompanist.flowlayout.FlowRow
@@ -153,48 +152,46 @@ private fun Telephones(
     selectedCategory: String,
     onItemClick: (Tel) -> Unit
 ) {
-    AnimatedListContent(targetState = selectedCategory) { category ->
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .clip(SmoothRoundedCornerShape(32.dp)),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            TelDirectoryViewModel.TelBook.getValue(category).forEach {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(SmoothRoundedCornerShape(4.dp))
-                        .background(100.n1 withNight 20.n1)
-                        .clickable { onItemClick(it) }
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .clip(SmoothRoundedCornerShape(32.dp)),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        TelDirectoryViewModel.TelBook.getValue(selectedCategory).forEach {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(SmoothRoundedCornerShape(4.dp))
+                    .background(100.n1 withNight 20.n1)
+                    .clickable { onItemClick(it) }
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = it.name,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = it.name,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        when {
-                            it.tel != null && it.tel2 != null && it.tel == it.tel2 -> {
-                                Tel(tel = it.tel)
-                            }
+                    when {
+                        it.tel != null && it.tel2 != null && it.tel == it.tel2 -> {
+                            Tel(tel = it.tel)
+                        }
 
-                            it.tel != null && it.tel2 == null -> {
-                                Tel(tel = it.tel, campus = "磬苑")
-                            }
+                        it.tel != null && it.tel2 == null -> {
+                            Tel(tel = it.tel, campus = "磬苑")
+                        }
 
-                            it.tel == null && it.tel2 != null -> {
-                                Tel(tel = it.tel2, campus = "龙河")
-                            }
+                        it.tel == null && it.tel2 != null -> {
+                            Tel(tel = it.tel2, campus = "龙河")
+                        }
 
-                            it.tel != null && it.tel2 != null && it.tel != it.tel2 -> {
-                                Tel(tel = it.tel, campus = "磬苑")
-                                Tel(tel = it.tel2, campus = "龙河")
-                            }
+                        it.tel != null && it.tel2 != null && it.tel != it.tel2 -> {
+                            Tel(tel = it.tel, campus = "磬苑")
+                            Tel(tel = it.tel2, campus = "龙河")
                         }
                     }
                 }

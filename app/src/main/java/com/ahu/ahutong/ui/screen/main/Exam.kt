@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
-import com.ahu.ahutong.ui.screen.main.component.AnimatedListContent
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.ExamViewModel
 import com.kyant.monet.n1
@@ -51,39 +50,37 @@ fun Exam(
             style = MaterialTheme.typography.headlineMedium
         )
         if (!exam.isNullOrEmpty()) {
-            AnimatedListContent(targetState = exam) {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .clip(SmoothRoundedCornerShape(32.dp)),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    it.forEach {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(SmoothRoundedCornerShape(4.dp))
-                                .background(100.n1 withNight 20.n1)
-                                .clickable {}
-                                .padding(24.dp, 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = it.course,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "开始时间：${it.time}",
-                                color = 30.n1 withNight 90.n1,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = "地点：${it.location}，座位号：${it.seatNum}",
-                                color = 50.n1 withNight 80.n1,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .clip(SmoothRoundedCornerShape(32.dp)),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                exam.forEach {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(SmoothRoundedCornerShape(4.dp))
+                            .background(100.n1 withNight 20.n1)
+                            .clickable {}
+                            .padding(24.dp, 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = it.course,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "开始时间：${it.time}",
+                            color = 30.n1 withNight 90.n1,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "地点：${it.location}，座位号：${it.seatNum}",
+                            color = 50.n1 withNight 80.n1,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 }
             }

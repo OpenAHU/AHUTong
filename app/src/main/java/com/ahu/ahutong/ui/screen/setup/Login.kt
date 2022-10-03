@@ -39,10 +39,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillNode
+import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalAutofill
+import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -60,6 +68,7 @@ import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Login(
     loginViewModel: LoginViewModel = viewModel(),
@@ -132,6 +141,7 @@ fun Login(
                 }
             }
             Spacer(modifier = Modifier)
+            // TODO: create a common text field
             BasicTextField(
                 value = userID,
                 onValueChange = { userID = it },
@@ -144,13 +154,17 @@ fun Login(
                         if (it.isFocused) {
                             focusIndex = 0
                         }
-                    },
+                    }
+                    .autofill(
+                        autofillTypes = listOf(AutofillType.Username),
+                        onFill = { userID = userID.copy(text = it) }
+                    ),
                 textStyle = LocalTextStyle.current.copy(
                     color = LocalContentColor.current,
                     fontFamily = FontFamily.Monospace
                 ),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
+                    keyboardType = KeyboardType.Ascii,
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
@@ -185,7 +199,11 @@ fun Login(
                         if (it.isFocused) {
                             focusIndex = 1
                         }
-                    },
+                    }
+                    .autofill(
+                        autofillTypes = listOf(AutofillType.Password),
+                        onFill = { password = password.copy(text = it) }
+                    ),
                 textStyle = LocalTextStyle.current.copy(
                     color = LocalContentColor.current,
                     fontFamily = FontFamily.Monospace
@@ -261,5 +279,31 @@ private fun logIn(
             userID = userID,
             wisdomPassword = password
         )
+    }
+}
+
+// TODO: fix autofill randomly broken
+@OptIn(ExperimentalComposeUiApi::class)
+private fun Modifier.autofill(
+    autofillTypes: List<AutofillType>,
+    onFill: ((String) -> Unit)
+) = composed {
+    val autofill = LocalAutofill.current
+    val autofillNode = AutofillNode(
+        onFill = onFill,
+        autofillTypes = autofillTypes
+    )
+    LocalAutofillTree.current += autofillNode
+
+    this.onGloballyPositioned {
+        autofillNode.boundingBox = it.boundsInWindow()
+    }.onFocusChanged { focusState ->
+        autofill?.run {
+            if (focusState.isFocused) {
+                requestAutofillForNode(autofillNode)
+            } else {
+                cancelAutofillForNode(autofillNode)
+            }
+        }
     }
 }

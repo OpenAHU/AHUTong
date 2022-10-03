@@ -21,9 +21,9 @@ fun SquigglyUnderlinedText(
     val extendedSpans = remember {
         ExtendedSpans(
             SquigglyUnderlineSpanPainter(
-                width = 3.sp,
-                wavelength = 20.sp,
-                amplitude = 2.sp,
+                width = 2.5.sp,
+                wavelength = 60.sp,
+                amplitude = 1.5.sp,
                 bottomOffset = 2.sp,
                 animator = underlineAnimator
             )

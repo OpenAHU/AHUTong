@@ -190,6 +190,7 @@ fun TodayCourses(
                             )
                             Text(
                                 text = "${course.startTime} - ${course.startTime + course.length - 1}",
+                                maxLines = 1,
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
@@ -209,6 +210,7 @@ fun TodayCourses(
                             )
                             Text(
                                 text = course.location,
+                                maxLines = 1,
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
