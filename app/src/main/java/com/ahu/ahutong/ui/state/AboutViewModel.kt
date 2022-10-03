@@ -1,7 +1,5 @@
 package com.ahu.ahutong.ui.state
 
-import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.MutableLiveData
@@ -11,7 +9,6 @@ import arch.sink.utils.Utils
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.model.AppVersion
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,7 +57,7 @@ class AboutViewModel : ViewModel() {
                         }
                         if (it.data.version != localVersion) {
                             // TODO: use Compose
-                            MaterialAlertDialogBuilder(context).apply {
+                            /*MaterialAlertDialogBuilder(context).apply {
                                 setTitle("更新")
                                 setMessage("发现新版本！\n新版特性：\n ${it.data.message}")
                                 setPositiveButton("前往下载") { _, _ ->
@@ -71,7 +68,7 @@ class AboutViewModel : ViewModel() {
                                     )
                                 }
                                 setNegativeButton("取消", null)
-                            }.show()
+                            }.show()*/
                             Toast.makeText(context, "当前已是最新版本！", Toast.LENGTH_SHORT).show()
                             return@onSuccess
                         }
