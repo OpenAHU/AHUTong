@@ -79,6 +79,6 @@ class MainActivity : ComponentActivity() {
     private fun initViewModels() {
         discoveryViewModel.loadActivityBean()
         scheduleViewModel.loadConfig()
-        scheduleViewModel.refreshSchedule()
+        scheduleViewModel.refreshSchedule(isRefresh = true)
     }
 }
