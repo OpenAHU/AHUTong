@@ -12,6 +12,7 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.setup.Info
 import com.ahu.ahutong.ui.screen.setup.Login
 import com.ahu.ahutong.ui.screen.setup.Splash
+import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.utils.animatedComposable
@@ -26,9 +27,16 @@ import kotlinx.coroutines.delay
 fun Setup(
     loginViewModel: LoginViewModel = viewModel(),
     scheduleViewModel: ScheduleViewModel = viewModel(),
+    aboutViewModel: AboutViewModel = viewModel(),
     onSetup: () -> Unit
 ) {
     val navController = rememberAnimatedNavController()
+    // 用户从老版本升级到 1.0.0-beta6 或更新版本时清空缓存
+    LaunchedEffect(Unit) {
+        if (aboutViewModel.versionName < "1.0.0-beta6") {
+            AHUCache.clearAll()
+        }
+    }
     AnimatedNavHost(
         navController = navController,
         startDestination = "splash",

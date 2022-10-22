@@ -46,7 +46,8 @@ fun Main(
     loginViewModel: LoginViewModel = viewModel(),
     discoveryViewModel: DiscoveryViewModel = viewModel(),
     scheduleViewModel: ScheduleViewModel = viewModel(),
-    isReLoginShown: Boolean
+    isReLoginShown: Boolean,
+    onReLoginDismiss: () -> Unit
 ) {
     AnimatedNavHost(
         navController = navController,
@@ -108,7 +109,7 @@ fun Main(
     }
     if (isReLoginShown) {
         Dialog(
-            onDismissRequest = {},
+            onDismissRequest = { onReLoginDismiss() },
             properties = DialogProperties(
                 dismissOnBackPress = false,
                 dismissOnClickOutside = false
@@ -124,7 +125,7 @@ fun Main(
                 Text(
                     text = "当前登录状态已过期，请重新登录!",
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    style = MaterialTheme.typography.headlineLarge
+                    style = MaterialTheme.typography.titleLarge
                 )
                 Text(
                     text = "重新登录",
@@ -132,7 +133,10 @@ fun Main(
                         .padding(horizontal = 16.dp)
                         .clip(CircleShape)
                         .background(90.a1 withNight 30.n1)
-                        .clickable { navController.navigate("login") }
+                        .clickable {
+                            navController.navigate("login")
+                            onReLoginDismiss()
+                        }
                         .padding(12.dp, 8.dp),
                     style = MaterialTheme.typography.titleMedium
                 )

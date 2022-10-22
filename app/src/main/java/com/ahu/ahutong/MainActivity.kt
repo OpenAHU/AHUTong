@@ -53,7 +53,8 @@ class MainActivity : ComponentActivity() {
                     loginViewModel = loginViewModel,
                     discoveryViewModel = discoveryViewModel,
                     scheduleViewModel = scheduleViewModel,
-                    isReLoginShown = isReLoginDialogShown
+                    isReLoginShown = isReLoginDialogShown,
+                    onReLoginDismiss = { isReLoginDialogShown = false }
                 )
                 LaunchedEffect(Unit) {
                     if (!AHUCache.isLogin()) {

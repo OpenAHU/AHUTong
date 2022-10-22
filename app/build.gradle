@@ -7,12 +7,12 @@ plugins {
 android {
     compileSdkVersion 33
     buildToolsVersion "33.0.0"
-    /*lintOptions {
+    lintOptions {
         //即使报错也不会停止打包
         abortOnError false
         //打包release版本的时候是否进行检测
         checkReleaseBuilds false
-    }*/
+    }
     //关闭PNG合法性检查
     aaptOptions.cruncherEnabled = false
     // aaptOptions.useNewCruncher = false
@@ -21,7 +21,7 @@ android {
         minSdkVersion 24
         targetSdkVersion sdkVersion
         versionCode 1
-        versionName "1.0.0-beta5"
+        versionName "1.0.0-beta6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     //multiDex的一些相关配置，这样配置可以让你的编译速度更快
