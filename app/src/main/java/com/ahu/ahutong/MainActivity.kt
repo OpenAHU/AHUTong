@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.Main
+import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private val discoveryViewModel: DiscoveryViewModel by viewModels()
     private val scheduleViewModel: ScheduleViewModel by viewModels()
+    private val aboutViewModel: AboutViewModel by viewModels()
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +55,7 @@ class MainActivity : ComponentActivity() {
                     loginViewModel = loginViewModel,
                     discoveryViewModel = discoveryViewModel,
                     scheduleViewModel = scheduleViewModel,
+                    aboutViewModel = aboutViewModel,
                     isReLoginShown = isReLoginDialogShown,
                     onReLoginDismiss = { isReLoginDialogShown = false }
                 )

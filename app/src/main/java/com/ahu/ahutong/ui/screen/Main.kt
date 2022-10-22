@@ -28,6 +28,7 @@ import com.ahu.ahutong.ui.screen.settings.License
 import com.ahu.ahutong.ui.screen.setup.Info
 import com.ahu.ahutong.ui.screen.setup.Login
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
+import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
@@ -46,6 +47,7 @@ fun Main(
     loginViewModel: LoginViewModel = viewModel(),
     discoveryViewModel: DiscoveryViewModel = viewModel(),
     scheduleViewModel: ScheduleViewModel = viewModel(),
+    aboutViewModel: AboutViewModel = viewModel(),
     isReLoginShown: Boolean,
     onReLoginDismiss: () -> Unit
 ) {
@@ -67,6 +69,7 @@ fun Main(
             Setup(
                 loginViewModel = loginViewModel,
                 scheduleViewModel = scheduleViewModel,
+                aboutViewModel = aboutViewModel,
                 onSetup = { navController.popBackStack() }
             )
         }
@@ -97,7 +100,8 @@ fun Main(
         animatedComposable("settings") {
             Settings(
                 navController = navController,
-                mainViewModel = mainViewModel
+                mainViewModel = mainViewModel,
+                aboutViewModel = aboutViewModel
             )
         }
         animatedComposable("settings__license") {
