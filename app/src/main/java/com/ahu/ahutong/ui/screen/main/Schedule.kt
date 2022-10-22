@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -101,6 +102,12 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     IconButton(onClick = { currentWeek = scheduleConfig?.week ?: 1 }) {
                         Icon(
                             imageVector = Icons.Default.MyLocation,
+                            contentDescription = null
+                        )
+                    }
+                    IconButton(onClick = { scheduleViewModel.refreshSchedule(isRefresh = true) }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
                             contentDescription = null
                         )
                     }
@@ -240,7 +247,13 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     }
                 }
                 // courses
-                currentWeekCourses.forEach { course ->
+                currentWeekCourses.filter {
+                    when (it.singleDouble) {
+                        "1" -> currentWeek % 2 == 1
+                        "2" -> currentWeek % 2 == 0
+                        else -> true
+                    }
+                }.forEach { course ->
                     key(course.hashCode()) {
                         CourseCard(
                             course = course,
