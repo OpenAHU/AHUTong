@@ -59,9 +59,17 @@ fun Home(
     val user = AHUCache.getCurrentUser() ?: return
     val schedule = scheduleViewModel.schedule.observeAsState().value?.getOrNull() ?: emptyList()
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
+    val currentWeek = scheduleConfig?.week ?: 1
     val todayCourses = schedule
         .filter { scheduleConfig?.week in it.startWeek..it.endWeek }
         .filter { it.weekday == (scheduleConfig?.weekDay ?: 1) }
+        .filter {
+            when (it.singleDouble) {
+                "1" -> currentWeek % 2 == 1
+                "2" -> currentWeek % 2 == 0
+                else -> true
+            }
+        }
         .sortedBy { it.startTime }
     val calendar = Calendar.getInstance(Locale.CHINA)
     val currentMinutes = calendar.time.let {
