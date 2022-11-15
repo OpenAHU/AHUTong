@@ -5,12 +5,11 @@ plugins {
 android {
     compileSdkVersion 33
     buildToolsVersion "33.0.0"
+    namespace 'com.simon.library'
 
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion sdkVersion
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
