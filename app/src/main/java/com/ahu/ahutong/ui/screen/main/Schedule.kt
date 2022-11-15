@@ -3,7 +3,6 @@ package com.ahu.ahutong.ui.screen.main
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,14 +61,17 @@ import com.kyant.monet.n1
 import com.kyant.monet.toColor
 import com.kyant.monet.toSrgb
 import com.kyant.monet.withNight
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
+    val scope = rememberCoroutineScope()
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
     val currentWeekday = scheduleConfig?.weekDay ?: 1
     var currentWeek by rememberSaveable { mutableStateOf(scheduleConfig?.week ?: 1) }
+    val state = rememberLazyListState(initialFirstVisibleItemIndex = (currentWeek - 3).coerceAtLeast(0))
     val schedule = scheduleViewModel.schedule.observeAsState().value?.getOrNull() ?: emptyList()
     val baseColor = 50.a1.toSrgb().toHct()
     val courseColors = run {
@@ -99,7 +103,14 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Row {
-                    IconButton(onClick = { currentWeek = scheduleConfig?.week ?: 1 }) {
+                    IconButton(
+                        onClick = {
+                            currentWeek = scheduleConfig?.week ?: 1
+                            scope.launch {
+                                state.animateScrollToItem((currentWeek - 3).coerceAtLeast(0))
+                            }
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.Default.MyLocation,
                             contentDescription = null
@@ -120,8 +131,8 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                 }
             }
             // week selector
-            // TODO: auto center selected week item
             LazyRow(
+                state = state,
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -169,32 +180,12 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                         .fillMaxWidth()
                         .height(mainRowHeight + (cellHeight + cellSpacing) * 11 + 16.dp)
                         .clip(SmoothRoundedCornerShape(32.dp))
-                        .background(100.n1 withNight 20.n1)
+                        .background(99.n1 withNight 20.n1)
                         .padding(vertical = 8.dp)
                         .padding(cellSpacing)
                 }
             ) {
                 // TODO: current time indicator
-                // current weekday indicator
-                if (currentWeek == scheduleConfig?.week) {
-                    Box(
-                        modifier = with(CourseCardSpec) {
-                            Modifier
-                                .size(
-                                    cellWidth + cellSpacing,
-                                    mainRowHeight + cellHeight * 11 + cellSpacing * 12
-                                )
-                                .offset(
-                                    x = mainColumnWidth + (cellWidth + cellSpacing) * (currentWeekday - 1) + cellSpacing / 2
-                                )
-                                .border(
-                                    width = 2.dp,
-                                    color = 70.a1 withNight 60.a1,
-                                    shape = SmoothRoundedCornerShape(16.dp)
-                                )
-                        }
-                    )
-                }
                 // weekday tags
                 arrayOf("周一", "周二", "周三", "周四", "周五", "周六", "周日").forEachIndexed { index, weekday ->
                     Column(
@@ -203,6 +194,11 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                                 .size(cellWidth, mainRowHeight)
                                 .offset(x = mainColumnWidth + (cellWidth + cellSpacing) * index + cellSpacing)
                                 .clip(SmoothRoundedCornerShape(8.dp))
+                                .then(
+                                    if (currentWeek == scheduleConfig?.week && index + 1 == currentWeekday) {
+                                        Modifier.background(90.a1)
+                                    } else Modifier
+                                )
                         },
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally

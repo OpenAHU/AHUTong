@@ -56,7 +56,7 @@ fun CourseCard(
                         mainColumnWidth + (cellWidth + cellSpacing) * (course.weekday - 1) + cellSpacing,
                         mainRowHeight + (cellHeight + cellSpacing) * (course.startTime - 1) + cellSpacing
                     )
-                    .clip(SmoothRoundedCornerShape(12.dp))
+                    .clip(SmoothRoundedCornerShape(8.dp))
                     .background(70.a1 withNight 60.a1)
                     .pointerInput(Unit) {
                         detectTapGestures { onClick(course) }
@@ -83,7 +83,7 @@ fun CourseCard(
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
                     .padding(4.dp)
-                    .clip(SmoothRoundedCornerShape(8.dp))
+                    .clip(SmoothRoundedCornerShape(6.dp))
                     .background(95.a1 withNight 30.n2)
                     .padding(2.dp),
                 textAlign = TextAlign.Center,

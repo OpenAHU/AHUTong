@@ -349,7 +349,7 @@ fun Settings(
                 Text(
                     text = stringResource(id = R.string.update_intro),
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    style = MaterialTheme.typography.headlineLarge
+                    style = MaterialTheme.typography.headlineMedium
                 )
                 Text(
                     text = Constants.UPDATE_LOG,

@@ -42,7 +42,7 @@ fun CourseDetailDialog(
             Text(
                 text = course.name,
                 modifier = Modifier.padding(horizontal = 24.dp),
-                style = MaterialTheme.typography.headlineLarge
+                style = MaterialTheme.typography.headlineMedium
             )
             Text(
                 text = "第 ${course.startWeek}-${course.endWeek} 周${

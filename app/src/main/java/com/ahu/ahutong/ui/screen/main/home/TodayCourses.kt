@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Navigation
@@ -45,6 +46,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -81,27 +83,46 @@ fun TodayCourses(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clip(SmoothRoundedCornerShape(32.dp))
-            .background(100.n1 withNight 20.n1)
             .padding(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         todayCourses.getOrNull(draggedFraction.value.roundToInt())?.let { course ->
             val range = ScheduleViewModel.getCourseTimeRangeInMinutes(course)
-            Text(
-                text = if (currentMinutes in range) "正在上课"
-                else {
-                    val distance = range.first - currentMinutes
-                    if (distance >= 0) {
-                        val hour = distance / 60
-                        val minutes = distance - hour * 60
-                        if (hour > 0) "还有 $hour 小时 $minutes 分钟上课"
-                        else "还有 $minutes 分钟上课"
-                    } else "已经上完了"
-                },
-                modifier = Modifier.padding(horizontal = 24.dp),
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (currentMinutes in range) "正在上课"
+                    else {
+                        val distance = range.first - currentMinutes
+                        if (distance >= 0) {
+                            val hour = distance / 60
+                            val minutes = distance - hour * 60
+                            if (hour > 0) "还有 $hour 小时 $minutes 分钟"
+                            else "还有 $minutes 分钟"
+                        } else "已经结束"
+                    },
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)) {
+                    todayCourses.indices.forEach {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (it == draggedFraction.value.roundToInt()) 50.a1 withNight 80.a1
+                                    else 90.n1 withNight 30.n1
+                                )
+                        )
+                    }
+                }
+            }
             Box(
                 modifier = Modifier
                     .height(IntrinsicSize.Min)
@@ -113,24 +134,36 @@ fun TodayCourses(
                         }
                     }
                     .draggable(state = state, orientation = Orientation.Horizontal, onDragStopped = {
-                        draggedFraction.animateTo(
-                            draggedFraction.value
-                                .roundToInt()
-                                .toFloat()
-                        )
+                        draggedFraction.animateTo(draggedFraction.value.roundToInt().toFloat())
                     })
             ) {
                 val ongoingFraction = if (currentMinutes in range) {
                     (currentMinutes.toFloat() - range.first) / (range.last.toFloat() - range.first)
                 } else 0f
-                var ongingWidth by rememberSaveable { mutableStateOf(0) }
+                var ongoingWidth by rememberSaveable { mutableStateOf(0) }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(animateFloatAsState(targetValue = ongoingFraction).value)
                         .fillMaxHeight()
-                        .onSizeChanged { ongingWidth = it.width }
+                        .onSizeChanged { ongoingWidth = it.width }
                         .background(50.a1 withNight 80.a1)
                 )
+                if (ongoingFraction != 0f) {
+                    (1 until course.length).forEach {
+                        Box(
+                            modifier = Modifier
+                                .width(2.dp)
+                                .fillMaxHeight()
+                                .offset {
+                                    IntOffset(
+                                        (ongoingWidth / ongoingFraction / course.length * it).toInt() - 1.dp.roundToPx(),
+                                        0
+                                    )
+                                }
+                                .background(70.a1 withNight 90.a1)
+                        )
+                    }
+                }
                 Column(
                     modifier = Modifier.padding(24.dp, 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -159,7 +192,7 @@ fun TodayCourses(
                                         density: Density
                                     ) = Outline.Rectangle(
                                         with(density) {
-                                            size.toRect().copy(right = ongingWidth - 24.dp.toPx() - offsetX.toPx())
+                                            size.toRect().copy(right = ongoingWidth - 24.dp.toPx() - offsetX.toPx())
                                         }
                                     )
                                 }
@@ -216,22 +249,6 @@ fun TodayCourses(
                         }
                     }
                 }
-            }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
-        ) {
-            todayCourses.indices.forEach {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (it == draggedFraction.value.roundToInt()) 50.a1 withNight 80.a1
-                            else 90.n1 withNight 30.n1
-                        )
-                )
             }
         }
     }
