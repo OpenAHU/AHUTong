@@ -46,12 +46,12 @@ fun CourseDetailDialog(
             )
             Text(
                 text = "第 ${course.startWeek}-${course.endWeek} 周${
-                when (course.singleDouble) {
-                    "1" -> "（单周）"
-                    "2" -> "（双周）"
-                    else -> ""
+                when {
+                    course.singleDouble == "0" -> ""
+                    course.startWeek % 2 == 1 -> "（单周）"
+                    else -> "（双周）"
                 }
-                }，每周 ${course.weekday}，第 ${course.startTime}-${course.startTime + course.length - 1} 节课",
+                }的周 ${course.weekday}，第 ${course.startTime}-${course.startTime + course.length - 1} 节课",
                 modifier = Modifier.padding(horizontal = 24.dp),
                 style = MaterialTheme.typography.titleMedium
             )

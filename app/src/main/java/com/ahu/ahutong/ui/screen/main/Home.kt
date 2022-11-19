@@ -64,11 +64,8 @@ fun Home(
         .filter { scheduleConfig?.week in it.startWeek..it.endWeek }
         .filter { it.weekday == (scheduleConfig?.weekDay ?: 1) }
         .filter {
-            when (it.singleDouble) {
-                "1" -> currentWeek % 2 == 1
-                "2" -> currentWeek % 2 == 0
-                else -> true
-            }
+            if (it.singleDouble == "0") true
+            else currentWeek % 2 == it.startWeek % 2
         }
         .sortedBy { it.startTime }
     val calendar = Calendar.getInstance(Locale.CHINA)

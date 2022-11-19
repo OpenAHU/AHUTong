@@ -80,7 +80,12 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
             name to baseColor.copy(h = 360.0 * index / courseNames.size).toSrgb().toColor()
         }.toMap()
     }
-    val currentWeekCourses = schedule.filter { currentWeek in it.startWeek..it.endWeek }
+    val currentWeekCourses = schedule
+        .filter { currentWeek in it.startWeek..it.endWeek }
+        .filter {
+            if (it.singleDouble == "0") true
+            else currentWeek % 2 == it.startWeek % 2
+        }
     var detailedCourse by rememberSaveable { mutableStateOf<Course?>(null) }
     Box {
         Column(
@@ -243,13 +248,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     }
                 }
                 // courses
-                currentWeekCourses.filter {
-                    when (it.singleDouble) {
-                        "1" -> currentWeek % 2 == 1
-                        "2" -> currentWeek % 2 == 0
-                        else -> true
-                    }
-                }.forEach { course ->
+                currentWeekCourses.forEach { course ->
                     key(course.hashCode()) {
                         CourseCard(
                             course = course,
