@@ -34,6 +34,7 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
+import androidx.glance.layout.wrapContentHeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
@@ -69,6 +70,10 @@ class ScheduleAppWidget : GlanceAppWidget() {
         val todayCourses = schedule
             .filter { week in it.startWeek..it.endWeek }
             .filter { it.weekday == weekDay }
+            .filter {
+                if (it.singleDouble == "0") true
+                else week % 2 == it.startWeek % 2
+            }
             .sortedBy { it.startTime }
 
         // TODO: go to schedule screen directly & don't launch multiple activities
@@ -119,7 +124,11 @@ class ScheduleAppWidget : GlanceAppWidget() {
                 if (todayCourses.isNotEmpty()) {
                     LazyColumn(modifier = baseModifier.fillMaxSize()) {
                         items(todayCourses) { course ->
-                            Column(modifier = baseModifier.padding(16.dp, 4.dp)) {
+                            Column(
+                                modifier = baseModifier
+                                    .wrapContentHeight()
+                                    .padding(16.dp, 4.dp)
+                            ) {
                                 Column(
                                     modifier = baseModifier
                                         .fillMaxWidth()
@@ -145,12 +154,11 @@ class ScheduleAppWidget : GlanceAppWidget() {
                                                 fontSize = 16.sp
                                             )
                                         )
-                                        // TODO: more shortenings
                                         Text(
                                             text = course.location
                                                 .replace("博学", "博")
                                                 .replace("楼", "")
-                                                .replace("夫图书馆", ""),
+                                                .replace("育场", ""),
                                             modifier = baseModifier.fillMaxWidth(),
                                             style = TextStyle(
                                                 color = ColorProvider(R.color.material_dynamic_neutral40),

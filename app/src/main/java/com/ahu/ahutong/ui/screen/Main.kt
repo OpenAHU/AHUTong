@@ -13,11 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.screen.main.Exam
 import com.ahu.ahutong.ui.screen.main.Grade
 import com.ahu.ahutong.ui.screen.main.Home
@@ -51,6 +54,7 @@ fun Main(
     isReLoginShown: Boolean,
     onReLoginDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
     AnimatedNavHost(
         navController = navController,
         startDestination = "home",
@@ -70,7 +74,10 @@ fun Main(
                 loginViewModel = loginViewModel,
                 scheduleViewModel = scheduleViewModel,
                 aboutViewModel = aboutViewModel,
-                onSetup = { navController.popBackStack() }
+                onSetup = {
+                    navController.popBackStack()
+                    GlanceAppWidgetManager(context).requestPinGlanceAppWidget(ScheduleAppWidgetReceiver::class.java)
+                }
             )
         }
         animatedComposable("login") {

@@ -77,8 +77,7 @@ fun CourseCard(
                 text = course.location
                     .replace("博学", "博")
                     .replace("楼", "")
-                    .replace("育场", "")
-                    .replace("夫图书馆", ""),
+                    .replace("育场", ""),
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)

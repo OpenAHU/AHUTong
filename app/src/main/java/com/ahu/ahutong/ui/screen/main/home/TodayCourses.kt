@@ -133,9 +133,13 @@ fun TodayCourses(
                             navController.navigate("schedule")
                         }
                     }
-                    .draggable(state = state, orientation = Orientation.Horizontal, onDragStopped = {
-                        draggedFraction.animateTo(draggedFraction.value.roundToInt().toFloat())
-                    })
+                    .draggable(
+                        state = state,
+                        orientation = Orientation.Horizontal,
+                        onDragStopped = {
+                            draggedFraction.animateTo(draggedFraction.value.roundToInt().toFloat())
+                        }
+                    )
             ) {
                 val ongoingFraction = if (currentMinutes in range) {
                     (currentMinutes.toFloat() - range.first) / (range.last.toFloat() - range.first)
@@ -166,7 +170,7 @@ fun TodayCourses(
                 }
                 Column(
                     modifier = Modifier.padding(24.dp, 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     val partialFraction = draggedFraction.value.mod(1f)
                     val offsetX = 56.dp * (partialFraction.roundToInt() - partialFraction)
@@ -242,7 +246,10 @@ fun TodayCourses(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = course.location,
+                                text = course.location
+                                    .replace("博学", "博")
+                                    .replace("楼", "")
+                                    .replace("育场", ""),
                                 maxLines = 1,
                                 style = MaterialTheme.typography.bodyLarge
                             )

@@ -1,5 +1,7 @@
 package com.ahu.ahutong
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -12,6 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
+import androidx.glance.appwidget.updateAll
+import androidx.lifecycle.viewModelScope
+import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.Main
 import com.ahu.ahutong.ui.state.AboutViewModel
@@ -20,7 +25,9 @@ import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.ui.theme.AHUTheme
+import com.ahu.ahutong.widget.ClassWidget
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
@@ -38,11 +45,11 @@ class MainActivity : ComponentActivity() {
         // 日活统计接口
         mainViewModel.addAppAccess()
 
-        initViewModels()
+        init()
 
         loginViewModel.serverLoginResult.observe(this) { result ->
             result.onSuccess {
-                initViewModels()
+                init(refreshSchedule = true)
             }
         }
 
@@ -79,9 +86,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun initViewModels() {
+    private fun init(refreshSchedule: Boolean = false) {
         discoveryViewModel.loadActivityBean()
         scheduleViewModel.loadConfig()
-        scheduleViewModel.refreshSchedule(isRefresh = true)
+        scheduleViewModel.refreshSchedule(isRefresh = refreshSchedule)
+        // 更新小部件数据
+        val manager = AppWidgetManager.getInstance(this)
+        val componentName = ComponentName(this, ClassWidget::class.java)
+        val appWidgetIds = manager.getAppWidgetIds(componentName)
+        manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
+        mainViewModel.viewModelScope.launch {
+            ScheduleAppWidgetReceiver().glanceAppWidget.updateAll(this@MainActivity)
+        }
     }
 }
