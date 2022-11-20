@@ -7,12 +7,17 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -234,36 +239,53 @@ private fun DialDialog(
             Column(
                 modifier = Modifier
                     .clip(SmoothRoundedCornerShape(32.dp))
-                    .background(100.n1 withNight 10.n1)
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .background(96.n1 withNight 10.n1)
             ) {
-                Text(
-                    text = "请选择校区",
-                    style = MaterialTheme.typography.headlineMedium
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Text(
+                        text = "请选择校区",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(80.n1 withNight 30.n1)
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min)
+                ) {
                     Text(
                         text = "磬苑",
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .background(90.a1 withNight 20.n1)
+                            .weight(1f)
                             .clickable {
                                 context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel}")))
                                 onDismiss()
                             }
-                            .padding(16.dp, 8.dp)
+                            .padding(24.dp, 16.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .width(2.dp)
+                            .fillMaxHeight()
+                            .background(80.n1 withNight 30.n1)
                     )
                     Text(
                         text = "龙河",
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .background(90.a1 withNight 20.n1)
+                            .weight(1f)
                             .clickable {
                                 context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel2}")))
                                 onDismiss()
                             }
-                            .padding(16.dp, 8.dp)
+                            .padding(24.dp, 16.dp)
                     )
                 }
             }

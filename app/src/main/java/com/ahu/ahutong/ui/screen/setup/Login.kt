@@ -282,7 +282,6 @@ private fun logIn(
     }
 }
 
-// TODO: fix autofill randomly broken
 @OptIn(ExperimentalComposeUiApi::class)
 private fun Modifier.autofill(
     autofillTypes: List<AutofillType>,

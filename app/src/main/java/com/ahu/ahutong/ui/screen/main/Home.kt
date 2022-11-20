@@ -37,10 +37,10 @@ import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.main.component.SquigglyUnderlinedText
-import com.ahu.ahutong.ui.screen.main.home.BathroomOpenStatus
+import com.ahu.ahutong.ui.screen.main.home.BathroomOpening
 import com.ahu.ahutong.ui.screen.main.home.CampusCard
 import com.ahu.ahutong.ui.screen.main.home.EmptyCourse
-import com.ahu.ahutong.ui.screen.main.home.FunctionalButton
+import com.ahu.ahutong.ui.screen.main.home.IconButton
 import com.ahu.ahutong.ui.screen.main.home.TodayCourses
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
@@ -137,25 +137,25 @@ fun Home(
                 mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
                 crossAxisSpacing = 16.dp
             ) {
-                FunctionalButton(
+                IconButton(
                     stringId = R.string.title_schedule,
                     iconId = R.drawable.ic_schedule,
                     tint = Color(0xFF2196F3),
                     onClick = { navController.navigate("schedule") }
                 )
-                FunctionalButton(
+                IconButton(
                     stringId = R.string.grade,
                     iconId = R.drawable.ic_grade,
                     tint = Color(0xFFFFC107),
                     onClick = { navController.navigate("grade") }
                 )
-                FunctionalButton(
+                IconButton(
                     stringId = R.string.phone_book,
                     iconId = R.drawable.ic_phonebook,
                     tint = Color(0xFF009688),
                     onClick = { navController.navigate("phone_book") }
                 )
-                FunctionalButton(
+                IconButton(
                     stringId = R.string.exam,
                     iconId = R.drawable.ic_exam,
                     tint = Color(0xFF4CAF50),
@@ -163,18 +163,17 @@ fun Home(
                 )
             }
         }
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            SlideInContent(visible = 2 in discoveryViewModel.visibilities) {
+        SlideInContent(visible = 2 in discoveryViewModel.visibilities) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 CampusCard(
                     balance = discoveryViewModel.balance,
                     transitionBalance = discoveryViewModel.transitionBalance
                 )
-            }
-            SlideInContent(visible = 3 in discoveryViewModel.visibilities) {
-                BathroomOpenStatus(discoveryViewModel = discoveryViewModel)
+                BathroomOpening(discoveryViewModel = discoveryViewModel)
             }
         }
     }

@@ -6,18 +6,17 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MonetizationOn
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,21 +36,25 @@ import com.kyant.monet.withNight
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun CampusCard(
+fun RowScope.CampusCard(
     balance: Double,
     transitionBalance: Double
 ) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
-            .fillMaxWidth()
+            .weight(1f)
+            .height(IntrinsicSize.Min)
             .clip(SmoothRoundedCornerShape(24.dp))
-            .background(100.n1 withNight 20.n1)
-            .padding(24.dp, 16.dp, 16.dp, 24.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .background(100.n1 withNight 20.n1),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(24.dp, 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             Text(
                 text = stringResource(id = R.string.card_money),
                 fontWeight = FontWeight.Bold,
@@ -75,9 +78,15 @@ fun CampusCard(
                 )
             }
         }
-        Row(
+        Box(
             modifier = Modifier
-                .clip(CircleShape)
+                .width(2.dp)
+                .fillMaxHeight()
+                .background(96.n1 withNight 10.n1)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
                 .clickable {
                     try {
                         context.startActivity(
@@ -92,22 +101,11 @@ fun CampusCard(
                         Toast.makeText(context, "请安装支付宝", Toast.LENGTH_SHORT).show()
                     }
                 }
-                .border(
-                    width = 2.dp,
-                    color = 90.n1 withNight 40.n1,
-                    shape = CircleShape
-                )
-                .padding(12.dp, 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Outlined.MonetizationOn,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
             Text(
-                text = stringResource(id = R.string.recharge),
+                text = "充\n值",
                 style = MaterialTheme.typography.titleMedium
             )
         }

@@ -21,7 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Article
 import androidx.compose.material.icons.outlined.ClearAll
-import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Login
@@ -111,58 +110,6 @@ fun Settings(
                     )
                     Text(
                         text = aboutViewModel.versionName,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(100.n1 withNight 30.n1)
-                        .clickable {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW).apply {
-                                    data = Uri.parse("https://github.com/OpenAHU/AHUTong")
-                                }
-                            )
-                        }
-                        .padding(12.dp, 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Code,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = "GitHub",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(100.n1 withNight 30.n1)
-                        .clickable {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW).apply {
-                                    data = Uri.parse("https://gitee.com/SinkDev/AHUTong")
-                                }
-                            )
-                        }
-                        .padding(12.dp, 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Code,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = "Gitee",
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -331,7 +278,7 @@ fun Settings(
                             AHUCache.clearAll()
                             Toast.makeText(context, "已清除所有数据", Toast.LENGTH_SHORT).show()
                         }
-                        .padding(12.dp, 8.dp),
+                        .padding(16.dp, 8.dp),
                     style = MaterialTheme.typography.titleMedium
                 )
             }

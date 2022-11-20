@@ -63,7 +63,7 @@ fun Info(
         mutableStateOf(TextFieldValue(scheduleViewModel.schoolTerm))
     }
     var currentWeek by rememberSaveable(scheduleConfig?.week, stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("1"))
+        mutableStateOf(TextFieldValue(scheduleConfig?.week?.toString() ?: "1"))
     }
     Box(
         modifier = Modifier

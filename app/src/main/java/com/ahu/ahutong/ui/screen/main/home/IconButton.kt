@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 
 @Composable
-fun FunctionalButton(
+fun IconButton(
     stringId: Int,
     iconId: Int,
     tint: Color,

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Navigation
@@ -46,7 +45,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -152,22 +150,6 @@ fun TodayCourses(
                         .onSizeChanged { ongoingWidth = it.width }
                         .background(50.a1 withNight 80.a1)
                 )
-                if (ongoingFraction != 0f) {
-                    (1 until course.length).forEach {
-                        Box(
-                            modifier = Modifier
-                                .width(2.dp)
-                                .fillMaxHeight()
-                                .offset {
-                                    IntOffset(
-                                        (ongoingWidth / ongoingFraction / course.length * it).toInt() - 1.dp.roundToPx(),
-                                        0
-                                    )
-                                }
-                                .background(70.a1 withNight 90.a1)
-                        )
-                    }
-                }
                 Column(
                     modifier = Modifier.padding(24.dp, 16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)

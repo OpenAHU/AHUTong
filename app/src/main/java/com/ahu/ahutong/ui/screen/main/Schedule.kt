@@ -22,7 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.ripple.rememberRipple
@@ -108,6 +108,12 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Row {
+                    IconButton(onClick = {}) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null
+                        )
+                    }
                     IconButton(
                         onClick = {
                             currentWeek = scheduleConfig?.week ?: 1
@@ -124,12 +130,6 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     IconButton(onClick = { scheduleViewModel.refreshSchedule(isRefresh = true) }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = null
-                        )
-                    }
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Default.Fullscreen,
                             contentDescription = null
                         )
                     }

@@ -2,11 +2,16 @@ package com.ahu.ahutong.ui.screen.main.schedule
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Navigation
@@ -21,8 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
-import com.google.accompanist.flowlayout.FlowRow
-import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -36,36 +39,42 @@ fun CourseDetailDialog(
             modifier = Modifier
                 .clip(SmoothRoundedCornerShape(32.dp))
                 .background(96.n1 withNight 10.n1)
-                .padding(vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Text(
-                text = course.name,
-                modifier = Modifier.padding(horizontal = 24.dp),
-                style = MaterialTheme.typography.headlineMedium
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                Text(
+                    text = course.name,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Text(
+                    text = "第 ${course.startWeek}-${course.endWeek} 周${
+                    when {
+                        course.singleDouble == "0" -> ""
+                        course.startWeek % 2 == 1 -> "（单周）"
+                        else -> "（双周）"
+                    }
+                    }的周 ${course.weekday}，第 ${course.startTime}-${course.startTime + course.length - 1} 节课",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .background(80.n1 withNight 30.n1)
             )
-            Text(
-                text = "第 ${course.startWeek}-${course.endWeek} 周${
-                when {
-                    course.singleDouble == "0" -> ""
-                    course.startWeek % 2 == 1 -> "（单周）"
-                    else -> "（双周）"
-                }
-                }的周 ${course.weekday}，第 ${course.startTime}-${course.startTime + course.length - 1} 节课",
-                modifier = Modifier.padding(horizontal = 24.dp),
-                style = MaterialTheme.typography.titleMedium
-            )
-            FlowRow(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                mainAxisSpacing = 8.dp,
-                crossAxisSpacing = 12.dp
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
             ) {
                 Row(
                     modifier = Modifier
-                        .clip(CircleShape)
-                        .background(90.a1 withNight 30.n1)
-                        .padding(12.dp, 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                        .weight(1f)
+                        .padding(24.dp, 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -78,12 +87,15 @@ fun CourseDetailDialog(
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
-                Row(
+                Box(
                     modifier = Modifier
-                        .clip(CircleShape)
-                        .background(90.a1 withNight 30.n1)
-                        .padding(12.dp, 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                        .width(2.dp)
+                        .fillMaxHeight()
+                        .background(80.n1 withNight 30.n1)
+                )
+                Row(
+                    modifier = Modifier.padding(24.dp, 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
