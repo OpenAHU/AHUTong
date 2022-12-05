@@ -76,6 +76,9 @@ fun Main(
                 aboutViewModel = aboutViewModel,
                 onSetup = {
                     navController.popBackStack()
+                    discoveryViewModel.loadActivityBean()
+                    scheduleViewModel.loadConfig()
+                    scheduleViewModel.refreshSchedule(isRefresh = true)
                     GlanceAppWidgetManager(context).requestPinGlanceAppWidget(ScheduleAppWidgetReceiver::class.java)
                 }
             )

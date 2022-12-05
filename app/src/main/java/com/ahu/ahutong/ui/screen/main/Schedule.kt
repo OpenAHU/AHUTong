@@ -193,23 +193,21 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                 // TODO: current time indicator
                 // weekday tags
                 arrayOf("周一", "周二", "周三", "周四", "周五", "周六", "周日").forEachIndexed { index, weekday ->
+                    val isCurrentWeekday = currentWeek == scheduleConfig?.week && index + 1 == currentWeekday
                     Column(
                         modifier = with(CourseCardSpec) {
                             Modifier
                                 .size(cellWidth, mainRowHeight)
                                 .offset(x = mainColumnWidth + (cellWidth + cellSpacing) * index + cellSpacing)
                                 .clip(SmoothRoundedCornerShape(8.dp))
-                                .then(
-                                    if (currentWeek == scheduleConfig?.week && index + 1 == currentWeekday) {
-                                        Modifier.background(90.a1)
-                                    } else Modifier
-                                )
+                                .background(if (isCurrentWeekday) 90.a1 else Color.Unspecified)
                         },
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = weekday,
+                            color = if (isCurrentWeekday) 0.n1 else Color.Unspecified,
                             style = MaterialTheme.typography.labelLarge
                         )
                         Text(
@@ -219,7 +217,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                             }.let {
                                 SimpleDateFormat("MM-dd", Locale.CHINA).format(it.time)
                             },
-                            color = 50.n1 withNight 80.n1,
+                            color = if (isCurrentWeekday) 0.n1 else 50.n1 withNight 80.n1,
                             style = MaterialTheme.typography.labelSmall
                         )
                     }

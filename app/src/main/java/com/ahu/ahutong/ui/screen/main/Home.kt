@@ -39,9 +39,8 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.main.component.SquigglyUnderlinedText
 import com.ahu.ahutong.ui.screen.main.home.BathroomOpening
 import com.ahu.ahutong.ui.screen.main.home.CampusCard
-import com.ahu.ahutong.ui.screen.main.home.EmptyCourse
 import com.ahu.ahutong.ui.screen.main.home.IconButton
-import com.ahu.ahutong.ui.screen.main.home.TodayCourses
+import com.ahu.ahutong.ui.screen.main.home.TodayCourseList
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.google.accompanist.flowlayout.FlowRow
@@ -115,21 +114,27 @@ fun Home(
                 currentMinutes <= ScheduleViewModel.getCourseTimeRangeInMinutes(todayCourses.last()).last
             } else false
             AnimatedContent(targetState = hasRemainingCourses) {
-                if (it) {
-                    TodayCourses(
-                        todayCourses = todayCourses,
-                        currentMinutes = currentMinutes,
-                        navController = navController
-                    )
-                } else {
-                    EmptyCourse(
-                        isEmpty = todayCourses.isEmpty(),
-                        navController = navController
-                    )
-                }
+                TodayCourseList(
+                    todayCourses = todayCourses,
+                    currentMinutes = currentMinutes,
+                    navController = navController
+                )
             }
         }
         SlideInContent(visible = 1 in discoveryViewModel.visibilities) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CampusCard(
+                    balance = discoveryViewModel.balance,
+                    transitionBalance = discoveryViewModel.transitionBalance
+                )
+                BathroomOpening(discoveryViewModel = discoveryViewModel)
+            }
+        }
+        SlideInContent(visible = 3 in discoveryViewModel.visibilities) {
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -161,19 +166,6 @@ fun Home(
                     tint = Color(0xFF4CAF50),
                     onClick = { navController.navigate("exam") }
                 )
-            }
-        }
-        SlideInContent(visible = 2 in discoveryViewModel.visibilities) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CampusCard(
-                    balance = discoveryViewModel.balance,
-                    transitionBalance = discoveryViewModel.transitionBalance
-                )
-                BathroomOpening(discoveryViewModel = discoveryViewModel)
             }
         }
     }
