@@ -1,4 +1,4 @@
-package com.ahu.ahutong.ui.screen.main.component
+package com.ahu.ahutong.ui.component
 
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearEasing

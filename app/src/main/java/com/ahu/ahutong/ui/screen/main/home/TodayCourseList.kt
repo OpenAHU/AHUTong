@@ -43,6 +43,7 @@ fun TodayCourseList(
     currentMinutes: Int,
     navController: NavHostController
 ) {
+    if (todayCourses.isEmpty()) return
     val currentCourseIndex = todayCourses.indexOfFirst {
         val range = ScheduleViewModel.getCourseTimeRangeInMinutes(it)
         if (currentMinutes in range) true

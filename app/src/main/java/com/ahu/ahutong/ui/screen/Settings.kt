@@ -70,13 +70,12 @@ fun Settings(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .systemBarsPadding()
-            .padding(bottom = 24.dp),
+            .systemBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(
             text = stringResource(id = R.string.setting),
-            modifier = Modifier.padding(24.dp),
+            modifier = Modifier.padding(24.dp, 32.dp),
             style = MaterialTheme.typography.headlineLarge
         )
         Column(

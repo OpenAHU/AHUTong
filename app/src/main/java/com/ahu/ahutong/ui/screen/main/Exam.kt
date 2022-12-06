@@ -44,9 +44,7 @@ fun Exam(
     ) {
         Text(
             text = stringResource(id = R.string.exam),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp, 8.dp, 16.dp, 8.dp),
+            modifier = Modifier.padding(24.dp, 32.dp),
             style = MaterialTheme.typography.headlineMedium
         )
         if (!exam.isNullOrEmpty()) {

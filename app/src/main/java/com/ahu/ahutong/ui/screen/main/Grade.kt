@@ -60,9 +60,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp, 8.dp, 16.dp, 8.dp),
+            modifier = Modifier.padding(24.dp, 32.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
