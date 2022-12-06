@@ -155,6 +155,7 @@ fun TodayCourseList(
                 )
                 Text(
                     text = course.name,
+                    modifier = Modifier.weight(1f),
                     fontWeight = if (currentMinutes in ScheduleViewModel.getCourseTimeRangeInMinutes(course)) FontWeight.Bold
                     else FontWeight.Normal,
                     maxLines = 1,
@@ -165,7 +166,6 @@ fun TodayCourseList(
                         .replace("博学", "博")
                         .replace("楼", "")
                         .replace("育场", ""),
-                    modifier = Modifier.weight(1f),
                     color = 50.n1 withNight 80.n1,
                     fontWeight = if (currentMinutes in ScheduleViewModel.getCourseTimeRangeInMinutes(course)) FontWeight.Bold
                     else FontWeight.Normal,

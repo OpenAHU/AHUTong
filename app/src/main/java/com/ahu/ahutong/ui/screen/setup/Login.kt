@@ -100,16 +100,20 @@ fun Login(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .systemBarsPadding()
-                .padding(top = 16.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
                 text = stringResource(id = R.string.log_in),
+                modifier = Modifier.padding(24.dp, 32.dp),
                 style = MaterialTheme.typography.headlineLarge
             )
             Spacer(modifier = Modifier)
-            Box(modifier = Modifier.height(128.dp)) {
+            Box(
+                modifier = Modifier
+                    .height(128.dp)
+                    .align(Alignment.CenterHorizontally)
+            ) {
                 Image(
                     painter = if (focusIndex == 0) painterResource(id = R.mipmap.emoji_username)
                     else painterResource(id = R.mipmap.emoji_password),
@@ -146,7 +150,6 @@ fun Login(
                 value = userID,
                 onValueChange = { userID = it },
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .clip(CircleShape)
                     .background(100.n1 withNight 20.n1)
@@ -191,7 +194,6 @@ fun Login(
                 value = password,
                 onValueChange = { password = it },
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .clip(CircleShape)
                     .background(100.n1 withNight 20.n1)

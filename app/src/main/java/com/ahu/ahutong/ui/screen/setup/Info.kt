@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
@@ -35,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -59,9 +63,7 @@ fun Info(
     var schoolYear by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(scheduleViewModel.schoolYear))
     }
-    var schoolTerm by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(scheduleViewModel.schoolTerm))
-    }
+    var schoolTerm by rememberSaveable { mutableStateOf(scheduleViewModel.schoolTerm) }
     var currentWeek by rememberSaveable(scheduleConfig?.week, stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(scheduleConfig?.week?.toString() ?: "1"))
     }
@@ -74,12 +76,12 @@ fun Info(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .systemBarsPadding()
-                .padding(top = 16.dp, bottom = 96.dp),
+                .padding(bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
                 text = stringResource(id = R.string.fill_in_info),
-                modifier = Modifier.padding(horizontal = 24.dp),
+                modifier = Modifier.padding(24.dp, 32.dp),
                 style = MaterialTheme.typography.headlineLarge
             )
             Spacer(modifier = Modifier)
@@ -93,7 +95,6 @@ fun Info(
                 value = schoolYear,
                 onValueChange = { schoolYear = it },
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .clip(CircleShape)
                     .background(100.n1 withNight 20.n1),
@@ -121,30 +122,26 @@ fun Info(
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium
             )
-            BasicTextField(
-                value = schoolTerm,
-                onValueChange = { schoolTerm = it },
+            LazyRow(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .clip(CircleShape)
                     .background(100.n1 withNight 20.n1),
-                textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next
-                ),
-                singleLine = true,
-                cursorBrush = SolidColor(LocalContentColor.current)
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .height(64.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    it()
+                items(arrayOf("1", "2", "3")) {
+                    val isSelected = schoolTerm == it
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(if (isSelected) 90.a1 else Color.Unspecified)
+                            .clickable { schoolTerm = it }
+                            .padding(16.dp, 8.dp),
+                        color = if (isSelected) 0.n1 else Color.Unspecified,
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 }
             }
             Text(
@@ -157,7 +154,6 @@ fun Info(
                 value = currentWeek,
                 onValueChange = { currentWeek = it },
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .clip(CircleShape)
                     .background(100.n1 withNight 20.n1),
@@ -169,7 +165,7 @@ fun Info(
                 keyboardActions = KeyboardActions(onDone = {
                     scheduleViewModel.saveTime(
                         schoolYear = schoolYear.text,
-                        schoolTerm = schoolTerm.text,
+                        schoolTerm = schoolTerm,
                         week = currentWeek.text.toIntOrNull() ?: 1
                     )
                     onSetup()
@@ -202,7 +198,7 @@ fun Info(
                         onClick = {
                             scheduleViewModel.saveTime(
                                 schoolYear = schoolYear.text,
-                                schoolTerm = schoolTerm.text,
+                                schoolTerm = schoolTerm,
                                 week = currentWeek.text.toIntOrNull() ?: 1
                             )
                             onSetup()

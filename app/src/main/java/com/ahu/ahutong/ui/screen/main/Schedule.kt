@@ -22,7 +22,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.ripple.rememberRipple
@@ -44,11 +43,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.screen.main.schedule.CourseCard
 import com.ahu.ahutong.ui.screen.main.schedule.CourseCardSpec
@@ -95,25 +92,54 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
             .padding(bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // header
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp, 8.dp, 16.dp, 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(end = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = stringResource(id = R.string.title_schedule),
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Row {
-                IconButton(onClick = {}) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null
-                    )
+            // week selector
+            LazyRow(
+                modifier = Modifier.weight(1f),
+                state = state,
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(20) {
+                    val week = it + 1
+                    val isSelected = week == currentWeek
+                    CompositionLocalProvider(
+                        LocalIndication provides rememberRipple(
+                            color = if (isSelected) 100.n1 withNight 0.n1
+                            else 0.n1 withNight 100.n1
+                        )
+                    ) {
+                        Text(
+                            text = week.toString(),
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(
+                                    animateColorAsState(
+                                        targetValue = if (isSelected) 40.a1 withNight 90.a1
+                                        else Color.Transparent
+                                    ).value
+                                )
+                                .clickable { currentWeek = week }
+                                .padding(16.dp, 8.dp),
+                            color = animateColorAsState(
+                                targetValue = if (isSelected) 100.n1 withNight 0.n1
+                                else 0.n1 withNight 100.n1
+                            ).value,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 }
+            }
+            // actions
+            Row(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(100.n1 withNight 30.n1)
+            ) {
                 IconButton(
                     onClick = {
                         currentWeek = scheduleConfig?.week ?: 1
@@ -135,43 +161,6 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                 }
             }
         }
-        // week selector
-        LazyRow(
-            state = state,
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(18) {
-                val week = it + 1
-                val isSelected = week == currentWeek
-                CompositionLocalProvider(
-                    LocalIndication provides rememberRipple(
-                        color = if (isSelected) 100.n1 withNight 0.n1
-                        else 0.n1 withNight 100.n1
-                    )
-                ) {
-                    Text(
-                        text = week.toString(),
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(
-                                animateColorAsState(
-                                    targetValue = if (isSelected) 40.a1 withNight 90.a1
-                                    else Color.Transparent
-                                ).value
-                            )
-                            .clickable { currentWeek = week }
-                            .padding(16.dp, 8.dp),
-                        color = animateColorAsState(
-                            targetValue = if (isSelected) 100.n1 withNight 0.n1
-                            else 0.n1 withNight 100.n1
-                        ).value,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
-        }
         // schedule
         val cellWidth = (
             LocalConfiguration.current.screenWidthDp.dp -
@@ -183,10 +172,10 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
             modifier = with(CourseCardSpec) {
                 Modifier
                     .fillMaxWidth()
-                    .height(mainRowHeight + (cellHeight + cellSpacing) * 11 + 16.dp)
+                    .height(mainRowHeight + (cellHeight + cellSpacing) * 11 + 24.dp)
                     .clip(SmoothRoundedCornerShape(32.dp))
                     .background(99.n1 withNight 20.n1)
-                    .padding(vertical = 8.dp)
+                    .padding(top = 8.dp)
                     .padding(cellSpacing)
             }
         ) {

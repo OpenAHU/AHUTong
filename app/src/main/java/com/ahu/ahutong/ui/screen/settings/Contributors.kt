@@ -51,7 +51,7 @@ fun Contributors(
     ) {
         Text(
             text = stringResource(id = R.string.contributors),
-            modifier = Modifier.padding(24.dp),
+            modifier = Modifier.padding(24.dp, 32.dp),
             style = MaterialTheme.typography.headlineLarge
         )
         mapOf(
