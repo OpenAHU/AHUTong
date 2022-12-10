@@ -1,5 +1,11 @@
 package com.ahu.ahutong.ui.screen.main.home
 
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -22,9 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -34,7 +39,6 @@ import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
@@ -44,11 +48,10 @@ fun TodayCourseList(
     navController: NavHostController
 ) {
     if (todayCourses.isEmpty()) return
-    val currentCourseIndex = todayCourses.indexOfFirst {
+    val currentCourseIndex = todayCourses.indexOfLast {
         val range = ScheduleViewModel.getCourseTimeRangeInMinutes(it)
-        if (currentMinutes in range) true
-        else currentMinutes < range.first
-    }.takeIf { it != -1 } ?: todayCourses.lastIndex
+        currentMinutes > range.first
+    }.coerceAtLeast(0)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -61,8 +64,14 @@ fun TodayCourseList(
                 val offColor = 70.n1 withNight 60.n1
                 val onColor = 50.a1 withNight 90.a1
                 val activatedColor = Color(0xFFFBC02D) withNight Color(0xFFFFECB3)
-                val textMeasurer = rememberTextMeasurer()
-                val textStyle = MaterialTheme.typography.labelMedium.copy(color = 100.n1 withNight 0.n1)
+                val radius by rememberInfiniteTransition().animateFloat(
+                    initialValue = 8f,
+                    targetValue = 4f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(500, easing = EaseInOut),
+                        repeatMode = RepeatMode.Reverse
+                    )
+                )
                 drawBehind {
                     drawLine(
                         color = offColor,
@@ -111,24 +120,13 @@ fun TodayCourseList(
                     val currentCourseRange =
                         ScheduleViewModel.getCourseTimeRangeInMinutes(todayCourses[currentCourseIndex])
                     if (currentMinutes in currentCourseRange) {
-                        val ongoingFraction =
-                            (currentMinutes.toFloat() - currentCourseRange.first) / (currentCourseRange.last.toFloat() - currentCourseRange.first)
                         drawCircle(
                             color = activatedColor,
-                            radius = 12.dp.toPx(),
+                            radius = radius.dp.toPx(),
                             center = Offset(
                                 4.dp.toPx(),
                                 40.dp.toPx() * currentCourseIndex + 12.dp.toPx()
                             )
-                        )
-                        drawText(
-                            textMeasurer = textMeasurer,
-                            text = "${(ongoingFraction * 100f).roundToInt()}",
-                            topLeft = Offset(
-                                -4.dp.toPx(),
-                                40.dp.toPx() * currentCourseIndex + 3.dp.toPx()
-                            ),
-                            style = textStyle
                         )
                     }
                 }
