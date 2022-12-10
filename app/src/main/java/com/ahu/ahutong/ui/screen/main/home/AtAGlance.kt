@@ -51,7 +51,7 @@ fun AtAGlance(
     val date = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(Date())
     Column(
         modifier = Modifier.padding(vertical = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         Row(
             modifier = Modifier
@@ -76,7 +76,7 @@ fun AtAGlance(
                 .fillMaxWidth()
                 .clip(SmoothRoundedCornerShape(32.dp))
                 .clickable { navController.navigate("schedule") }
-                .padding(32.dp, 16.dp),
+                .padding(horizontal = 32.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(

@@ -70,12 +70,14 @@ fun Home(
             currentMinutes = currentMinutes,
             navController = navController
         )
-        SlideInContent(visible = 0 in discoveryViewModel.visibilities) {
-            TodayCourseList(
-                todayCourses = todayCourses,
-                currentMinutes = currentMinutes,
-                navController = navController
-            )
+        if (todayCourses.isNotEmpty()) {
+            SlideInContent(visible = 0 in discoveryViewModel.visibilities) {
+                TodayCourseList(
+                    todayCourses = todayCourses,
+                    currentMinutes = currentMinutes,
+                    navController = navController
+                )
+            }
         }
         SlideInContent(visible = 1 in discoveryViewModel.visibilities) {
             Row(
