@@ -167,7 +167,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                 CourseCardSpec.mainColumnWidth -
                 CourseCardSpec.cellSpacing * 9
             ) / 7
-        val cellHeight = cellWidth
+        val cellHeight = 48.dp
         Box(
             modifier = with(CourseCardSpec) {
                 Modifier
