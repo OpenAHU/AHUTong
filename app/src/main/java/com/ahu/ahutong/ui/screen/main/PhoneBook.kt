@@ -2,14 +2,13 @@ package com.ahu.ahutong.ui.screen.main
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,18 +17,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,16 +36,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Tel
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.TelDirectoryViewModel
-import com.google.accompanist.flowlayout.FlowRow
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -115,39 +114,26 @@ private fun Categories(
     selectedCategory: String,
     onCategorySelected: (String) -> Unit
 ) {
-    FlowRow(
-        modifier = Modifier.padding(horizontal = 24.dp),
-        mainAxisSpacing = 8.dp,
-        crossAxisSpacing = 12.dp
+    LazyRow(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .clip(CircleShape)
+            .background(100.n1 withNight 20.n1),
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        TelDirectoryViewModel.TelBook.keys.forEach { name ->
-            val isSelected = selectedCategory == name
-            CompositionLocalProvider(
-                LocalIndication provides rememberRipple(
-                    color = if (isSelected) 100.n1 withNight 0.n1
-                    else 0.n1 withNight 100.n1
-                )
-            ) {
-                Text(
-                    text = name,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(
-                            animateColorAsState(
-                                targetValue = if (isSelected) 40.a1 withNight 90.a1
-                                else 100.n1 withNight 20.n1
-                            ).value
-                        )
-                        .clickable { onCategorySelected(name) }
-                        .padding(16.dp, 8.dp),
-                    color = animateColorAsState(
-                        targetValue = if (isSelected) 100.n1 withNight 0.n1
-                        else 0.n1 withNight 100.n1
-                    ).value,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
+        items(TelDirectoryViewModel.TelBook.keys.toList()) {
+            val isSelected = it == selectedCategory
+            Text(
+                text = it,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(if (isSelected) 90.a1 else Color.Unspecified)
+                    .clickable { onCategorySelected(it) }
+                    .padding(16.dp, 8.dp),
+                color = if (isSelected) 0.n1 else Color.Unspecified,
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }
@@ -262,14 +248,15 @@ private fun DialDialog(
                         .height(IntrinsicSize.Min)
                 ) {
                     Text(
-                        text = "磬苑",
+                        text = "磬苑校区",
                         modifier = Modifier
                             .weight(1f)
                             .clickable {
                                 context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel}")))
                                 onDismiss()
                             }
-                            .padding(24.dp, 16.dp)
+                            .padding(24.dp, 16.dp),
+                        textAlign = TextAlign.Center
                     )
                     Box(
                         modifier = Modifier
@@ -278,14 +265,15 @@ private fun DialDialog(
                             .background(80.n1 withNight 30.n1)
                     )
                     Text(
-                        text = "龙河",
+                        text = "龙河校区",
                         modifier = Modifier
                             .weight(1f)
                             .clickable {
                                 context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel2}")))
                                 onDismiss()
                             }
-                            .padding(24.dp, 16.dp)
+                            .padding(24.dp, 16.dp),
+                        textAlign = TextAlign.Center
                     )
                 }
             }

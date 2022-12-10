@@ -1,7 +1,5 @@
 package com.ahu.ahutong.ui.screen.main
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,15 +15,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,74 +67,50 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
             )
         }
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .clip(CircleShape)
+                .background(100.n1 withNight 20.n1),
+            contentPadding = PaddingValues(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(schoolYears) {
                 val isSelected = it == gradeViewModel.schoolYear
-                CompositionLocalProvider(
-                    LocalIndication provides rememberRipple(
-                        color = if (isSelected) 100.n1 withNight 0.n1
-                        else 0.n1 withNight 100.n1
-                    )
-                ) {
-                    Text(
-                        text = it,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(
-                                animateColorAsState(
-                                    targetValue = if (isSelected) 40.a1 withNight 90.a1
-                                    else 100.n1 withNight 20.n1
-                                ).value
-                            )
-                            .clickable {
-                                gradeViewModel.schoolYear = it
-                                gradeViewModel.schoolTerm = schoolTerms.firstOrNull()
-                            }
-                            .padding(16.dp, 8.dp),
-                        color = animateColorAsState(
-                            targetValue = if (isSelected) 100.n1 withNight 0.n1
-                            else 0.n1 withNight 100.n1
-                        ).value,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+                Text(
+                    text = it,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(if (isSelected) 90.a1 else Color.Unspecified)
+                        .clickable {
+                            gradeViewModel.schoolYear = it
+                            gradeViewModel.schoolTerm = schoolTerms.firstOrNull()
+                        }
+                        .padding(16.dp, 8.dp),
+                    color = if (isSelected) 0.n1 else Color.Unspecified,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .clip(CircleShape)
+                .background(100.n1 withNight 20.n1),
+            contentPadding = PaddingValues(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(schoolTerms) {
+            items(arrayOf("1", "2", "3")) {
                 val isSelected = it == gradeViewModel.schoolTerm
-                CompositionLocalProvider(
-                    LocalIndication provides rememberRipple(
-                        color = if (isSelected) 100.n1 withNight 0.n1
-                        else 0.n1 withNight 100.n1
-                    )
-                ) {
-                    Text(
-                        text = it,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(
-                                animateColorAsState(
-                                    targetValue = if (isSelected) 40.a1 withNight 90.a1
-                                    else 100.n1 withNight 20.n1
-                                ).value
-                            )
-                            .clickable { gradeViewModel.schoolTerm = it }
-                            .padding(16.dp, 8.dp),
-                        color = animateColorAsState(
-                            targetValue = if (isSelected) 100.n1 withNight 0.n1
-                            else 0.n1 withNight 100.n1
-                        ).value,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+                Text(
+                    text = it,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(if (isSelected) 90.a1 else Color.Unspecified)
+                        .clickable { gradeViewModel.schoolTerm = it }
+                        .padding(16.dp, 8.dp),
+                    color = if (isSelected) 0.n1 else Color.Unspecified,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

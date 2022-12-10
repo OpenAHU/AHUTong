@@ -37,7 +37,7 @@ class GradeViewModel : ViewModel() {
 
     init {
         snapshotFlow { grade }
-            .onEach { totalGradePointAverage = it?.totalGradePointAverage ?: "暂无" }
+            .onEach { totalGradePointAverage = it?.totalGradePointAverage?.takeUnless { it == "NaN" } ?: "暂无" }
             .launchIn(viewModelScope)
 
         snapshotFlow { schoolYear to schoolTerm }

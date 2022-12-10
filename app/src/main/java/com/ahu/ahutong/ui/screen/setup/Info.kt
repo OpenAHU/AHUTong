@@ -131,7 +131,7 @@ fun Info(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(arrayOf("1", "2", "3")) {
-                    val isSelected = schoolTerm == it
+                    val isSelected = it == schoolTerm
                     Text(
                         text = it,
                         modifier = Modifier
@@ -140,7 +140,7 @@ fun Info(
                             .clickable { schoolTerm = it }
                             .padding(16.dp, 8.dp),
                         color = if (isSelected) 0.n1 else Color.Unspecified,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
             }
