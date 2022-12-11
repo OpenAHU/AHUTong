@@ -1,11 +1,5 @@
 package com.ahu.ahutong.ui.screen.main.home
 
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -60,15 +56,7 @@ fun TodayCourseList(
             .composed {
                 val offColor = 70.n1 withNight 60.n1
                 val onColor = 50.a1 withNight 90.a1
-                val activatedColor = Color(0xFFFBC02D) withNight Color(0xFFFFECB3)
-                val radius by rememberInfiniteTransition().animateFloat(
-                    initialValue = 8f,
-                    targetValue = 4f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(500, easing = EaseInOut),
-                        repeatMode = RepeatMode.Reverse
-                    )
-                )
+                val activatedColor = 90.a1
                 drawBehind {
                     drawLine(
                         color = offColor,
@@ -117,13 +105,14 @@ fun TodayCourseList(
                     val currentCourseRange =
                         ScheduleViewModel.getCourseTimeRangeInMinutes(todayCourses[currentCourseIndex])
                     if (currentMinutes in currentCourseRange) {
-                        drawCircle(
+                        drawRoundRect(
                             color = activatedColor,
-                            radius = radius.dp.toPx(),
-                            center = Offset(
-                                4.dp.toPx(),
-                                40.dp.toPx() * currentCourseIndex + 12.dp.toPx()
-                            )
+                            topLeft = Offset(
+                                -4.dp.toPx(),
+                                40.dp.toPx() * currentCourseIndex - 12.dp.toPx()
+                            ),
+                            size = Size(size.width + 16.dp.toPx(), 48.dp.toPx()),
+                            cornerRadius = CornerRadius(24.dp.toPx())
                         )
                     }
                 }
@@ -131,6 +120,7 @@ fun TodayCourseList(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         todayCourses.forEach { course ->
+            val isOngoing = currentMinutes in ScheduleViewModel.getCourseTimeRangeInMinutes(course)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -142,17 +132,16 @@ fun TodayCourseList(
                 Text(
                     text = "${course.startTime} - ${course.startTime + course.length - 1}",
                     modifier = Modifier.width(48.dp),
-                    color = 50.n1 withNight 80.n1,
-                    fontWeight = if (currentMinutes in ScheduleViewModel.getCourseTimeRangeInMinutes(course)) FontWeight.Bold
-                    else FontWeight.Normal,
+                    color = if (isOngoing) 20.n1 else 50.n1 withNight 80.n1,
+                    fontWeight = if (isOngoing) FontWeight.Bold else null,
                     maxLines = 1,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
                     text = course.name,
                     modifier = Modifier.weight(1f),
-                    fontWeight = if (currentMinutes in ScheduleViewModel.getCourseTimeRangeInMinutes(course)) FontWeight.Bold
-                    else FontWeight.Normal,
+                    color = if (isOngoing) 0.n1 else Color.Unspecified,
+                    fontWeight = if (isOngoing) FontWeight.Bold else null,
                     maxLines = 1,
                     style = MaterialTheme.typography.bodyLarge
                 )
@@ -161,9 +150,8 @@ fun TodayCourseList(
                         .replace("博学", "博")
                         .replace("楼", "")
                         .replace("育场", ""),
-                    color = 50.n1 withNight 80.n1,
-                    fontWeight = if (currentMinutes in ScheduleViewModel.getCourseTimeRangeInMinutes(course)) FontWeight.Bold
-                    else FontWeight.Normal,
+                    color = if (isOngoing) 20.n1 else 50.n1 withNight 80.n1,
+                    fontWeight = if (isOngoing) FontWeight.Bold else null,
                     textAlign = TextAlign.End,
                     maxLines = 1,
                     style = MaterialTheme.typography.bodyLarge

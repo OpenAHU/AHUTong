@@ -76,33 +76,28 @@ class ScheduleAppWidget : GlanceAppWidget() {
             }
             .sortedBy { it.startTime }
 
-        // TODO: go to schedule screen directly & don't launch multiple activities
-        val baseModifier = GlanceModifier.clickable(
-            actionStartActivity(Intent(context, MainActivity::class.java))
-        )
-
         // TODO: not log in
         Box(
-            modifier = baseModifier
+            modifier = GlanceModifier
                 .fillMaxSize()
                 .cornerRadius(32.dp)
                 .background(R.color.material_dynamic_primary95 withNight R.color.material_dynamic_neutral20),
             contentAlignment = Alignment.Center
         ) {
-            Column(modifier = baseModifier.fillMaxSize()) {
+            Column(modifier = GlanceModifier.fillMaxSize()) {
                 Row(
-                    modifier = baseModifier.padding(16.dp),
+                    modifier = GlanceModifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "课表",
-                        modifier = baseModifier,
                         style = TextStyle(
                             color = ColorProvider(R.color.material_dynamic_neutral20 withNight R.color.material_dynamic_neutral90),
-                            fontSize = 20.sp
-                        )
+                            fontSize = 18.sp
+                        ),
+                        maxLines = 1
                     )
-                    Spacer(modifier = baseModifier.width(8.dp))
+                    Spacer(modifier = GlanceModifier.width(8.dp))
                     Image(
                         provider = ImageProvider(R.drawable.baseline_refresh_24),
                         contentDescription = null,
@@ -111,58 +106,58 @@ class ScheduleAppWidget : GlanceAppWidget() {
                         )
                     )
                     Text(
-                        text = SimpleDateFormat("MM月dd日", Locale.CHINA)
-                            .format(Calendar.getInstance(Locale.CHINA).time),
-                        modifier = baseModifier.fillMaxWidth(),
+                        text = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(Date()),
+                        modifier = GlanceModifier.fillMaxWidth(),
                         style = TextStyle(
                             color = ColorProvider(R.color.material_dynamic_neutral50 withNight R.color.material_dynamic_neutral70),
                             fontSize = 16.sp,
                             textAlign = TextAlign.End
-                        )
+                        ),
+                        maxLines = 1
                     )
                 }
                 if (todayCourses.isNotEmpty()) {
-                    LazyColumn(modifier = baseModifier.fillMaxSize()) {
+                    LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
                         items(todayCourses) { course ->
                             Column(
-                                modifier = baseModifier
+                                modifier = GlanceModifier
                                     .wrapContentHeight()
-                                    .padding(16.dp, 4.dp)
+                                    .padding(12.dp, 4.dp)
                             ) {
                                 Column(
-                                    modifier = baseModifier
+                                    modifier = GlanceModifier
                                         .fillMaxWidth()
                                         .cornerRadius(24.dp)
                                         .background(R.color.material_dynamic_neutral99)
-                                        .padding(16.dp, 12.dp)
+                                        .padding(8.dp)
                                 ) {
                                     Text(
                                         text = course.name,
-                                        modifier = baseModifier,
                                         style = TextStyle(
                                             color = ColorProvider(R.color.material_dynamic_neutral20),
-                                            fontSize = 18.sp
-                                        )
+                                            fontSize = 16.sp
+                                        ),
+                                        maxLines = 1
                                     )
-                                    Spacer(modifier = baseModifier.height(4.dp))
+                                    Spacer(modifier = GlanceModifier.height(8.dp))
                                     Row {
                                         Text(
                                             text = "${course.startTime} - ${course.startTime + course.length - 1}",
-                                            modifier = baseModifier,
                                             style = TextStyle(
                                                 color = ColorProvider(R.color.material_dynamic_neutral40),
-                                                fontSize = 16.sp
-                                            )
+                                                fontSize = 14.sp
+                                            ),
+                                            maxLines = 1
                                         )
                                         Text(
                                             text = course.location
                                                 .replace("博学", "博")
                                                 .replace("楼", "")
                                                 .replace("育场", ""),
-                                            modifier = baseModifier.fillMaxWidth(),
+                                            modifier = GlanceModifier.fillMaxWidth(),
                                             style = TextStyle(
                                                 color = ColorProvider(R.color.material_dynamic_neutral40),
-                                                fontSize = 16.sp,
+                                                fontSize = 14.sp,
                                                 textAlign = TextAlign.End
                                             ),
                                             maxLines = 1
@@ -172,7 +167,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
                             }
                         }
                         item {
-                            Spacer(modifier = baseModifier.height(16.dp))
+                            Spacer(modifier = GlanceModifier.height(16.dp))
                         }
                     }
                 }
@@ -180,13 +175,20 @@ class ScheduleAppWidget : GlanceAppWidget() {
             if (todayCourses.isEmpty()) {
                 Text(
                     text = "今日无课",
-                    modifier = baseModifier.padding(16.dp),
+                    modifier = GlanceModifier.padding(16.dp),
                     style = TextStyle(
                         color = ColorProvider(R.color.material_dynamic_neutral50 withNight R.color.material_dynamic_neutral70),
                         fontSize = 18.sp
                     )
                 )
             }
+            Box(
+                modifier = GlanceModifier
+                    .fillMaxSize()
+                    .clickable(
+                        actionStartActivity(Intent(context, MainActivity::class.java))
+                    )
+            ) {}
         }
     }
 }
