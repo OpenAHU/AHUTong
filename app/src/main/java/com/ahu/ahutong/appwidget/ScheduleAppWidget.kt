@@ -81,7 +81,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .cornerRadius(32.dp)
-                .background(R.color.material_dynamic_primary95 withNight R.color.material_dynamic_neutral20),
+                .background(R.color.material_dynamic_primary95 withNight R.color.material_dynamic_neutral10),
             contentAlignment = Alignment.Center
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -128,13 +128,13 @@ class ScheduleAppWidget : GlanceAppWidget() {
                                     modifier = GlanceModifier
                                         .fillMaxWidth()
                                         .cornerRadius(24.dp)
-                                        .background(R.color.material_dynamic_neutral99)
+                                        .background(R.color.material_dynamic_neutral99 withNight R.color.material_dynamic_neutral30)
                                         .padding(8.dp)
                                 ) {
                                     Text(
                                         text = course.name,
                                         style = TextStyle(
-                                            color = ColorProvider(R.color.material_dynamic_neutral20),
+                                            color = ColorProvider(R.color.material_dynamic_neutral20 withNight R.color.material_dynamic_neutral99),
                                             fontSize = 16.sp
                                         ),
                                         maxLines = 1
@@ -144,7 +144,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
                                         Text(
                                             text = "${course.startTime} - ${course.startTime + course.length - 1}",
                                             style = TextStyle(
-                                                color = ColorProvider(R.color.material_dynamic_neutral40),
+                                                color = ColorProvider(R.color.material_dynamic_neutral40 withNight R.color.material_dynamic_neutral90),
                                                 fontSize = 14.sp
                                             ),
                                             maxLines = 1
@@ -156,7 +156,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
                                                 .replace("育场", ""),
                                             modifier = GlanceModifier.fillMaxWidth(),
                                             style = TextStyle(
-                                                color = ColorProvider(R.color.material_dynamic_neutral40),
+                                                color = ColorProvider(R.color.material_dynamic_neutral40 withNight R.color.material_dynamic_neutral90),
                                                 fontSize = 14.sp,
                                                 textAlign = TextAlign.End
                                             ),
