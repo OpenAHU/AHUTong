@@ -108,10 +108,10 @@ fun TodayCourseList(
                         drawRoundRect(
                             color = activatedColor,
                             topLeft = Offset(
-                                -4.dp.toPx(),
+                                0f,
                                 40.dp.toPx() * currentCourseIndex - 12.dp.toPx()
                             ),
-                            size = Size(size.width + 16.dp.toPx(), 48.dp.toPx()),
+                            size = Size(size.width + 8.dp.toPx(), 48.dp.toPx()),
                             cornerRadius = CornerRadius(24.dp.toPx())
                         )
                     }

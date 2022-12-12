@@ -76,12 +76,15 @@ class ScheduleAppWidget : GlanceAppWidget() {
             }
             .sortedBy { it.startTime }
 
-        // TODO: not log in
+        // TODO: not log in tip, clickable official bug
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .cornerRadius(32.dp)
-                .background(R.color.material_dynamic_primary95 withNight R.color.material_dynamic_neutral10),
+                .background(R.color.material_dynamic_primary95 withNight R.color.material_dynamic_neutral10)
+                .clickable(
+                    actionStartActivity(Intent(context, MainActivity::class.java))
+                ),
             contentAlignment = Alignment.Center
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -91,6 +94,9 @@ class ScheduleAppWidget : GlanceAppWidget() {
                 ) {
                     Text(
                         text = "课表",
+                        modifier = GlanceModifier.clickable(
+                            actionStartActivity(Intent(context, MainActivity::class.java))
+                        ),
                         style = TextStyle(
                             color = ColorProvider(R.color.material_dynamic_neutral20 withNight R.color.material_dynamic_neutral90),
                             fontSize = 18.sp
@@ -182,13 +188,6 @@ class ScheduleAppWidget : GlanceAppWidget() {
                     )
                 )
             }
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .clickable(
-                        actionStartActivity(Intent(context, MainActivity::class.java))
-                    )
-            ) {}
         }
     }
 }
