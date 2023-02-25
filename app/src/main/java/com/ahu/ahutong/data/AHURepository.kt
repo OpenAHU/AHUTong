@@ -114,22 +114,23 @@ object AHURepository {
                     if (body.toString().contains("暂无您的查询信息")) {
                         Result.success(arrayListOf())
                     } else {
-                        val bodyLines = body!!.split(System.lineSeparator()).stream()
+                        val bodyLines = body!!.replace("<br/?>".toRegex(), "<br>${System.lineSeparator()}")
+                            .split(System.lineSeparator()).stream()
                             .filter { it.contains("<br>") }.iterator()
                         val exams = mutableListOf<Exam>()
                         while (bodyLines.hasNext()) {
-                            var theme = bodyLines.next()
-                            if (theme.contains("年")) {
+                            var informationLine = bodyLines.next()
+                            if (informationLine.contains("年")) {
                                 val current = Exam()
-                                val split1 = theme.split("/").toTypedArray()
-                                current.time = split1[0].substring(1 + split1[0].indexOf(":"))
-                                current.course = split1[1]
-                                theme = bodyLines.next()
-                                if (theme.contains("座")) {
-                                    val split2 = theme.split("/").toTypedArray()
+                                val split1 = informationLine.split("/").toTypedArray()
+                                current.time = split1[0].substring(1 + split1[0].indexOf(":")).replace("<br/?>".toRegex(), "")
+                                current.course = split1[1].replace("<br/?>".toRegex(), "")
+                                informationLine = bodyLines.next()
+                                if (informationLine.contains("座")) {
+                                    val split2 = informationLine.split("/").toTypedArray()
                                     current.seatNum =
-                                        split2[1].substring(1 + split2[1].indexOf("："))
-                                    current.location = split2[2].replace(studentName, "")
+                                        split2[1].substring(1 + split2[1].indexOf("：")).replace("<br/?>".toRegex(), "")
+                                    current.location = split2[2].replace(studentName, "").replace("<br/?>".toRegex(), "")
                                     exams.add(current)
                                 }
                             }
