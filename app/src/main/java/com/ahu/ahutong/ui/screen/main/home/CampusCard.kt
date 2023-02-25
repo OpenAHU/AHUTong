@@ -70,7 +70,9 @@ fun RowScope.CampusCard(
                             append("¥ $balance")
                         }
                         withStyle(
-                            MaterialTheme.typography.titleSmall.toSpanStyle().copy(color = 50.n1 withNight 80.n1)
+                            MaterialTheme.typography.titleSmall.toSpanStyle().copy(
+                                color = 50.n1 withNight 80.n1
+                            )
                         ) {
                             append(" + ¥ $transitionBalance")
                         }
@@ -92,7 +94,9 @@ fun RowScope.CampusCard(
                         context.startActivity(
                             Intent(
                                 Intent.ACTION_VIEW,
-                                Uri.parse("alipays://platformapi/startapp?appId=2019090967125695&page=pages%2Findex%2Findex&enbsv=0.3.2106171038.6&chInfo=ch_share__chsub_CopyLink")
+                                Uri.parse(
+                                    "alipays://platformapi/startapp?appId=2019090967125695&page=pages%2Findex%2Findex&enbsv=0.3.2106171038.6&chInfo=ch_share__chsub_CopyLink"
+                                )
                             ).apply {
                                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                             }

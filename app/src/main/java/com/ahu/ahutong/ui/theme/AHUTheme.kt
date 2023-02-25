@@ -18,7 +18,9 @@ import com.kyant.monet.toSrgb
 fun AHUTheme(content: @Composable () -> Unit) {
     val keyColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         colorResource(id = android.R.color.system_accent1_500)
-    } else Color(0xFF007FAC)
+    } else {
+        Color(0xFF007FAC)
+    }
     MaterialTheme {
         CompositionLocalProvider(
             LocalTonalPalettes provides keyColor.toSrgb().toColor().toTonalPalettes(),

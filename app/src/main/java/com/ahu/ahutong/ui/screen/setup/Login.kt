@@ -115,8 +115,11 @@ fun Login(
                     .align(Alignment.CenterHorizontally)
             ) {
                 Image(
-                    painter = if (focusIndex == 0) painterResource(id = R.mipmap.emoji_username)
-                    else painterResource(id = R.mipmap.emoji_password),
+                    painter = if (focusIndex == 0) {
+                        painterResource(id = R.mipmap.emoji_username)
+                    } else {
+                        painterResource(id = R.mipmap.emoji_password)
+                    },
                     contentDescription = null
                 )
                 androidx.compose.animation.AnimatedVisibility(
@@ -222,8 +225,11 @@ fun Login(
                     )
                 }),
                 singleLine = true,
-                visualTransformation = if (passwordVisible) VisualTransformation.None
-                else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
                 cursorBrush = SolidColor(LocalContentColor.current)
             ) {
                 Box(
@@ -246,8 +252,11 @@ fun Login(
                         modifier = Modifier.align(Alignment.CenterEnd)
                     ) {
                         Icon(
-                            imageVector = if (passwordVisible) Icons.Default.Visibility
-                            else Icons.Default.VisibilityOff,
+                            imageVector = if (passwordVisible) {
+                                Icons.Default.Visibility
+                            } else {
+                                Icons.Default.VisibilityOff
+                            },
                             contentDescription = null
                         )
                     }

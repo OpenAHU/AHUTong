@@ -11,6 +11,8 @@ import androidx.core.widget.NestedScrollView;
 
 
 public class AHUScrollView extends NestedScrollView {
+    private int lastScrollY = 0;
+
     public AHUScrollView(@NonNull Context context) {
         super(context);
     }
@@ -22,8 +24,6 @@ public class AHUScrollView extends NestedScrollView {
     public AHUScrollView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
-    private int lastScrollY = 0;
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {

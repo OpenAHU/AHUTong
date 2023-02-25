@@ -29,7 +29,8 @@ import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.kyant.monet.a1
 import com.kyant.monet.withNight
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun AtAGlance(
@@ -42,12 +43,17 @@ fun AtAGlance(
     }
     val currentCourseIndex = todayCourses.indexOfFirst {
         val range = ScheduleViewModel.getCourseTimeRangeInMinutes(it)
-        if (currentMinutes in range) true
-        else currentMinutes < range.first
+        if (currentMinutes in range) {
+            true
+        } else {
+            currentMinutes < range.first
+        }
     }.takeIf { it != -1 } ?: todayCourses.lastIndex
     val hasRemainingCourses = if (todayCourses.isNotEmpty()) {
         currentMinutes <= ScheduleViewModel.getCourseTimeRangeInMinutes(todayCourses.last()).last
-    } else false
+    } else {
+        false
+    }
     val date = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(Date())
     Column(
         modifier = Modifier.padding(vertical = 32.dp),
@@ -108,7 +114,9 @@ fun AtAGlance(
                             }
                         }
                         .padding(start = 8.dp)
-                } else Modifier,
+                } else {
+                    Modifier
+                },
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
@@ -128,7 +136,9 @@ fun AtAGlance(
 
                     hasRemainingCourses -> {
                         val duration =
-                            ScheduleViewModel.getCourseTimeRangeInMinutes(todayCourses[currentCourseIndex]).first - currentMinutes
+                            ScheduleViewModel.getCourseTimeRangeInMinutes(
+                                todayCourses[currentCourseIndex]
+                            ).first - currentMinutes
                         "还有 " + when {
                             duration % 60 == 0 -> "${duration / 60}小时整"
                             duration > 60 -> "${duration / 60}小时${duration % 60}分钟"

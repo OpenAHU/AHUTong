@@ -27,8 +27,9 @@ import com.ahu.ahutong.ui.screen.main.home.CampusCard
 import com.ahu.ahutong.ui.screen.main.home.TodayCourseList
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
+import java.util.Calendar
+import java.util.Locale
 import kotlinx.coroutines.delay
-import java.util.*
 
 @Composable
 fun Home(
@@ -43,8 +44,11 @@ fun Home(
         .filter { scheduleConfig?.week in it.startWeek..it.endWeek }
         .filter { it.weekday == (scheduleConfig?.weekDay ?: 1) }
         .filter {
-            if (it.singleDouble == "0") true
-            else currentWeek % 2 == it.startWeek % 2
+            if (it.singleDouble == "0") {
+                true
+            } else {
+                currentWeek % 2 == it.startWeek % 2
+            }
         }
         .sortedBy { it.startTime }
     val calendar = Calendar.getInstance(Locale.CHINA)

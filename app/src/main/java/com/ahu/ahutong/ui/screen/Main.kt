@@ -16,10 +16,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -109,7 +111,9 @@ fun Main(
                         discoveryViewModel.loadActivityBean()
                         scheduleViewModel.loadConfig()
                         scheduleViewModel.refreshSchedule(isRefresh = true)
-                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(ScheduleAppWidgetReceiver::class.java)
+                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+                            ScheduleAppWidgetReceiver::class.java
+                        )
                     }
                 )
             }
@@ -217,15 +221,29 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             .fillMaxWidth()
             .align(Alignment.BottomCenter)
             .background(95.a1 withNight 30.n1)
-            .navigationBarsPadding()
             .height(
                 animateDpAsState(
-                    targetValue = if (visible) 80.dp else 0.dp,
-                    animationSpec = if (visible) spring() else tween(durationMillis = 200, delayMillis = 150)
+                    targetValue = if (visible) {
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 80.dp
+                    } else {
+                        0.dp
+                    },
+                    animationSpec = if (visible) {
+                        spring()
+                    } else {
+                        tween(
+                            durationMillis = 200,
+                            delayMillis = 150
+                        )
+                    }
                 ).value
             )
     ) {
-        Box(modifier = Modifier.weight(1f)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(80.dp)
+        ) {
             this@Row.AnimatedVisibility(
                 visible = 0 in visibilities,
                 enter = fadeIn() + slideInVertically { it },
@@ -252,7 +270,11 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
                 )
             }
         }
-        Box(modifier = Modifier.weight(1f)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(80.dp)
+        ) {
             this@Row.AnimatedVisibility(
                 visible = 1 in visibilities,
                 enter = fadeIn() + slideInVertically { it },
@@ -279,7 +301,11 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
                 )
             }
         }
-        Box(modifier = Modifier.weight(1f)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(80.dp)
+        ) {
             this@Row.AnimatedVisibility(
                 visible = 2 in visibilities,
                 enter = fadeIn() + slideInVertically { it },

@@ -10,11 +10,11 @@ import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.ext.getSchoolYears
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.math.RoundingMode
-import java.text.DecimalFormat
 
 class GradeViewModel : ViewModel() {
     var totalGradePointAverage by mutableStateOf("暂无")
@@ -37,7 +37,11 @@ class GradeViewModel : ViewModel() {
 
     init {
         snapshotFlow { grade }
-            .onEach { totalGradePointAverage = it?.totalGradePointAverage?.takeUnless { it == "NaN" } ?: "暂无" }
+            .onEach {
+                totalGradePointAverage = it?.totalGradePointAverage?.takeUnless {
+                    it == "NaN"
+                } ?: "暂无"
+            }
             .launchIn(viewModelScope)
 
         snapshotFlow { schoolYear to schoolTerm }

@@ -91,31 +91,6 @@ fun Tools(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "新建待办项",
-                modifier = Modifier.padding(24.dp),
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(
-                text = "保存",
-                modifier = Modifier
-                    .padding(16.dp)
-                    .clip(CircleShape)
-                    .background(90.a1)
-                    .clickable {}
-                    .padding(16.dp, 8.dp),
-                color = 0.n1,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .clip(SmoothRoundedCornerShape(32.dp))
-                .background(100.n1 withNight 30.n1),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(
                 text = "添加桌面课表微件",
                 modifier = Modifier.padding(24.dp),
                 style = MaterialTheme.typography.titleLarge
@@ -131,7 +106,11 @@ fun Tools(navController: NavHostController) {
                     .padding(16.dp)
                     .clip(CircleShape)
                     .background(90.a1)
-                    .clickable { GlanceAppWidgetManager(context).requestPinGlanceAppWidget(ScheduleAppWidgetReceiver::class.java) }
+                    .clickable {
+                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+                            ScheduleAppWidgetReceiver::class.java
+                        )
+                    }
                     .padding(16.dp, 8.dp),
                 color = 0.n1,
                 style = MaterialTheme.typography.titleMedium

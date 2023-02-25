@@ -54,69 +54,72 @@ class SmoothRoundedCornerShape(
         bottomEnd: Float,
         bottomStart: Float,
         layoutDirection: LayoutDirection
-    ) = if (topStart + topEnd + bottomEnd + bottomStart == 0f) Outline.Rectangle(size.toRect())
-    else Outline.Generic(
-        Path().apply {
-            val ww = size.width
-            val hh = size.height
+    ) = if (topStart + topEnd + bottomEnd + bottomStart == 0f) {
+        Outline.Rectangle(size.toRect())
+    } else {
+        Outline.Generic(
+            Path().apply {
+                val ww = size.width
+                val hh = size.height
 
-            val (aa1, bb1, cc1, dd1, ee1, ff1, gg1) = calcCoordinates(topStart)
-            val (aa2, bb2, cc2, dd2, ee2, ff2, gg2) = calcCoordinates(bottomStart)
-            val (aa3, bb3, cc3, dd3, ee3, ff3, gg3) = calcCoordinates(bottomEnd)
-            val (aa4, bb4, cc4, dd4, ee4, ff4, gg4) = calcCoordinates(topEnd)
+                val (aa1, bb1, cc1, dd1, ee1, ff1, gg1) = calcCoordinates(topStart)
+                val (aa2, bb2, cc2, dd2, ee2, ff2, gg2) = calcCoordinates(bottomStart)
+                val (aa3, bb3, cc3, dd3, ee3, ff3, gg3) = calcCoordinates(bottomEnd)
+                val (aa4, bb4, cc4, dd4, ee4, ff4, gg4) = calcCoordinates(topEnd)
 
-            // top left corner
-            moveTo(aa1, 0f)
-            if (topStart != 0f) {
-                cubicTo(bb1, 0f, cc1, 0f, dd1, ee1)
-                if (rndPrc != 1f) {
-                    cubicTo(gg1, ff1, ff1, gg1, ee1, dd1) // circle part
+                // top left corner
+                moveTo(aa1, 0f)
+                if (topStart != 0f) {
+                    cubicTo(bb1, 0f, cc1, 0f, dd1, ee1)
+                    if (rndPrc != 1f) {
+                        cubicTo(gg1, ff1, ff1, gg1, ee1, dd1) // circle part
+                    }
+                    cubicTo(0f, cc1, 0f, bb1, 0f, aa1)
                 }
-                cubicTo(0f, cc1, 0f, bb1, 0f, aa1)
-            }
 
-            // left line
-            lineTo(0f, hh - aa2)
+                // left line
+                lineTo(0f, hh - aa2)
 
-            // bottom left corner
-            if (bottomStart != 0f) {
-                cubicTo(0f, hh - bb2, 0f, hh - cc2, ee2, hh - dd2)
-                if (rndPrc != 1f) {
-                    cubicTo(ff2, hh - gg2, gg2, hh - ff2, dd2, hh - ee2) // circle part
+                // bottom left corner
+                if (bottomStart != 0f) {
+                    cubicTo(0f, hh - bb2, 0f, hh - cc2, ee2, hh - dd2)
+                    if (rndPrc != 1f) {
+                        cubicTo(ff2, hh - gg2, gg2, hh - ff2, dd2, hh - ee2) // circle part
+                    }
+                    cubicTo(cc2, hh, bb2, hh, aa2, hh)
                 }
-                cubicTo(cc2, hh, bb2, hh, aa2, hh)
-            }
 
-            // bottom line
-            lineTo(ww - aa3, hh)
+                // bottom line
+                lineTo(ww - aa3, hh)
 
-            // bottom right corner
-            if (bottomEnd != 0f) {
-                cubicTo(ww - bb3, hh, ww - cc3, hh, ww - dd3, hh - ee3)
-                if (rndPrc != 1f) {
-                    cubicTo(ww - gg3, hh - ff3, ww - ff3, hh - gg3, ww - ee3, hh - dd3) // circle part
+                // bottom right corner
+                if (bottomEnd != 0f) {
+                    cubicTo(ww - bb3, hh, ww - cc3, hh, ww - dd3, hh - ee3)
+                    if (rndPrc != 1f) {
+                        cubicTo(ww - gg3, hh - ff3, ww - ff3, hh - gg3, ww - ee3, hh - dd3) // circle part
+                    }
+                    cubicTo(ww, hh - cc3, ww, hh - bb3, ww, hh - aa3)
                 }
-                cubicTo(ww, hh - cc3, ww, hh - bb3, ww, hh - aa3)
-            }
 
-            // right line
-            lineTo(ww, aa4)
+                // right line
+                lineTo(ww, aa4)
 
-            // top right corner
-            if (topEnd != 0f) {
-                cubicTo(ww, bb4, ww, cc4, ww - ee4, dd4)
-                if (rndPrc != 1f) {
-                    cubicTo(ww - ff4, gg4, ww - gg4, ff4, ww - dd4, ee4) // circle part
+                // top right corner
+                if (topEnd != 0f) {
+                    cubicTo(ww, bb4, ww, cc4, ww - ee4, dd4)
+                    if (rndPrc != 1f) {
+                        cubicTo(ww - ff4, gg4, ww - gg4, ff4, ww - dd4, ee4) // circle part
+                    }
+                    cubicTo(ww - cc4, 0f, ww - bb4, 0f, ww - aa4, 0f)
                 }
-                cubicTo(ww - cc4, 0f, ww - bb4, 0f, ww - aa4, 0f)
+
+                // top line
+                lineTo(aa1, 0f)
+
+                close()
             }
-
-            // top line
-            lineTo(aa1, 0f)
-
-            close()
-        }
-    )
+        )
+    }
 
     private fun calcCoordinates(rad: Float): FloatArray {
         val x = rndPrc * rad * 2f / 3f

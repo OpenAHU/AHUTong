@@ -252,7 +252,9 @@ private fun DialDialog(
                         modifier = Modifier
                             .weight(1f)
                             .clickable {
-                                context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel}")))
+                                context.startActivity(
+                                    Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel}"))
+                                )
                                 onDismiss()
                             }
                             .padding(24.dp, 16.dp),
@@ -269,7 +271,9 @@ private fun DialDialog(
                         modifier = Modifier
                             .weight(1f)
                             .clickable {
-                                context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel2}")))
+                                context.startActivity(
+                                    Intent(Intent.ACTION_DIAL, Uri.parse("tel:0551-${tel.tel2}"))
+                                )
                                 onDismiss()
                             }
                             .padding(24.dp, 16.dp),

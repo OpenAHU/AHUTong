@@ -58,9 +58,10 @@ import com.kyant.monet.n1
 import com.kyant.monet.toColor
 import com.kyant.monet.toSrgb
 import com.kyant.monet.withNight
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
+import kotlinx.coroutines.launch
 
 @Composable
 fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
@@ -68,7 +69,9 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
     val currentWeekday = scheduleConfig?.weekDay ?: 1
     var currentWeek by rememberSaveable { mutableStateOf(scheduleConfig?.week ?: 1) }
-    val state = rememberLazyListState(initialFirstVisibleItemIndex = (currentWeek - 3).coerceAtLeast(0))
+    val state = rememberLazyListState(
+        initialFirstVisibleItemIndex = (currentWeek - 3).coerceAtLeast(0)
+    )
     val schedule = scheduleViewModel.schedule.observeAsState().value?.getOrNull() ?: emptyList()
     val baseColor = 50.a1.toSrgb().toHct()
     val courseColors = run {
@@ -80,8 +83,11 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
     val currentWeekCourses = schedule
         .filter { currentWeek in it.startWeek..it.endWeek }
         .filter {
-            if (it.singleDouble == "0") true
-            else currentWeek % 2 == it.startWeek % 2
+            if (it.singleDouble == "0") {
+                true
+            } else {
+                currentWeek % 2 == it.startWeek % 2
+            }
         }
     var detailedCourse by rememberSaveable { mutableStateOf<Course?>(null) }
     Column(
@@ -90,7 +96,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
             .verticalScroll(rememberScrollState())
             .systemBarsPadding()
             .padding(bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier.padding(end = 8.dp),
@@ -108,8 +114,11 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     val isSelected = week == currentWeek
                     CompositionLocalProvider(
                         LocalIndication provides rememberRipple(
-                            color = if (isSelected) 100.n1 withNight 0.n1
-                            else 0.n1 withNight 100.n1
+                            color = if (isSelected) {
+                                100.n1 withNight 0.n1
+                            } else {
+                                0.n1 withNight 100.n1
+                            }
                         )
                     ) {
                         Text(
@@ -118,15 +127,21 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                                 .clip(CircleShape)
                                 .background(
                                     animateColorAsState(
-                                        targetValue = if (isSelected) 40.a1 withNight 90.a1
-                                        else Color.Transparent
+                                        targetValue = if (isSelected) {
+                                            40.a1 withNight 90.a1
+                                        } else {
+                                            Color.Transparent
+                                        }
                                     ).value
                                 )
                                 .clickable { currentWeek = week }
                                 .padding(16.dp, 8.dp),
                             color = animateColorAsState(
-                                targetValue = if (isSelected) 100.n1 withNight 0.n1
-                                else 0.n1 withNight 100.n1
+                                targetValue = if (isSelected) {
+                                    100.n1 withNight 0.n1
+                                } else {
+                                    0.n1 withNight 100.n1
+                                }
                             ).value,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleMedium
@@ -187,7 +202,9 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     modifier = with(CourseCardSpec) {
                         Modifier
                             .size(cellWidth, mainRowHeight)
-                            .offset(x = mainColumnWidth + (cellWidth + cellSpacing) * index + cellSpacing)
+                            .offset(
+                                x = mainColumnWidth + (cellWidth + cellSpacing) * index + cellSpacing
+                            )
                             .clip(SmoothRoundedCornerShape(8.dp))
                             .background(if (isCurrentWeekday) 90.a1 else Color.Unspecified)
                     },
@@ -217,7 +234,9 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
                     modifier = with(CourseCardSpec) {
                         Modifier
                             .size(mainColumnWidth, cellHeight)
-                            .offset(y = mainRowHeight + (cellHeight + cellSpacing) * (index - 1) + cellSpacing)
+                            .offset(
+                                y = mainRowHeight + (cellHeight + cellSpacing) * (index - 1) + cellSpacing
+                            )
                             .clip(SmoothRoundedCornerShape(8.dp))
                     },
                     verticalArrangement = Arrangement.Center,
