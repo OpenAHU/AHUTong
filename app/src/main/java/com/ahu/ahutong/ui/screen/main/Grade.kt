@@ -15,6 +15,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,7 +61,9 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Row(
-            modifier = Modifier.padding(24.dp, 32.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp, 32.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -65,6 +71,19 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                 text = stringResource(id = R.string.grade),
                 style = MaterialTheme.typography.headlineMedium
             )
+            // actions
+            Row(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(100.n1 withNight 30.n1)
+            ) {
+                IconButton(onClick = { gradeViewModel.getGarde(isRefresh = true) }) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null
+                    )
+                }
+            }
         }
         LazyRow(
             modifier = Modifier

@@ -1,5 +1,7 @@
 package com.ahu.ahutong.data.model;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
