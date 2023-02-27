@@ -289,7 +289,7 @@ fun Settings(
             SettingItem(
                 label = stringResource(id = R.string.check_update),
                 icon = Icons.Outlined.Update,
-                onClick = { aboutViewModel.checkForUpdates(context) }
+                onClick = { aboutViewModel.checkForUpdates() }
             )
         }
     }

@@ -1,14 +1,10 @@
 package com.ahu.ahutong.ui.state
 
-import android.content.Context
-import android.widget.Toast
-import androidx.activity.ComponentActivity
+
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arch.sink.utils.Utils
-import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.model.AppVersion
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +28,7 @@ class AboutViewModel : ViewModel() {
     val newVersionDialogState = mutableStateOf<AppVersion?>(null)
     val tipState = mutableStateOf<String?>(null)
 
-    fun checkForUpdates(context: Context) {
+    fun checkForUpdates() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
@@ -41,8 +37,7 @@ class AboutViewModel : ViewModel() {
                         tipState.value = "检查更新失败：${response.msg}"
                         return@withContext
                     }
-                    val localVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName
-                    if (response.data.version == localVersion) {
+                    if (response.data.version == versionName) {
                         tipState.value = "当前已是最新版本！"
                         return@withContext
                     }
