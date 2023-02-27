@@ -26,14 +26,9 @@ import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Login
 import androidx.compose.material.icons.outlined.PeopleOutline
 import androidx.compose.material.icons.outlined.Update
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +48,7 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -66,6 +62,42 @@ fun Settings(
     val context = LocalContext.current as ComponentActivity
     var isClearCacheDialogShown by rememberSaveable { mutableStateOf(false) }
     var isUpdateLogDialogShown by rememberSaveable { mutableStateOf(false) }
+    val tip by remember { aboutViewModel.tipState }
+    val newVersionDialog by remember { aboutViewModel.newVersionDialogState }
+    LaunchedEffect(tip) {
+        tip?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            aboutViewModel.tipState.value = null;
+        }
+    }
+    newVersionDialog?.let {
+        AlertDialog(
+            onDismissRequest = { aboutViewModel.newVersionDialogState.value = null },
+            title = { Text("更新") },
+            text = { Text("发现新版本！\n新版特性：\n ${it.message.replace("\\n", "\n")}") },
+            confirmButton = {
+                TextButton(onClick = {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW).apply {
+                            data = Uri.parse(it.url)
+                        }
+                    )
+                    aboutViewModel.newVersionDialogState.value = null
+                }) {
+                    Text("前往下载")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    aboutViewModel.newVersionDialogState.value = null
+                }) {
+                    Text("取消")
+                }
+            }
+        )
+    }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -284,7 +316,9 @@ fun Settings(
                         .clickable {
                             mainViewModel.logout()
                             AHUCache.clearAll()
-                            Toast.makeText(context, "已清除所有数据", Toast.LENGTH_SHORT).show()
+                            Toast
+                                .makeText(context, "已清除所有数据", Toast.LENGTH_SHORT)
+                                .show()
                         }
                         .padding(16.dp, 8.dp),
                     style = MaterialTheme.typography.titleMedium

@@ -1,7 +1,9 @@
 package com.ahu.ahutong.ui.state
 
+import android.content.Context
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,57 +29,26 @@ class AboutViewModel : ViewModel() {
         packageInfo.versionName
     }
 
-    val latestVersions: MutableLiveData<Result<AHUResponse<AppVersion>>> = MutableLiveData()
+    val newVersionDialogState = mutableStateOf<AppVersion?>(null)
+    val tipState = mutableStateOf<String?>(null)
 
-    /**
-     * App 更新
-     * @return Job
-     */
-    fun getAppLatestVersion() = viewModelScope.launch {
-        withContext(Dispatchers.IO) {
-            latestVersions.value = try {
-                Result.success(AHUService.API.getLatestVersion())
-            } catch (e: Exception) {
-                Result.failure(Throwable("网络连接异常，获取最新版本失败！"))
-            }
-        }
-    }
-
-    // TODO: fix crash
-    fun checkForUpdates(context: ComponentActivity) {
+    fun checkForUpdates(context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                latestVersions.value = try {
-                    val localVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName
-                    // 主动检查，要提示
-                    latestVersions.value?.onSuccess {
-                        if (!it.isSuccessful) {
-                            Toast.makeText(context, "检查更新失败：${it.msg}", Toast.LENGTH_SHORT).show()
-                            return@onSuccess
-                        }
-                        if (it.data.version != localVersion) {
-                            // TODO: use Compose
-                            /*MaterialAlertDialogBuilder(context).apply {
-                                setTitle("更新")
-                                setMessage("发现新版本！\n新版特性：\n ${it.data.message}")
-                                setPositiveButton("前往下载") { _, _ ->
-                                    context.startActivity(
-                                        Intent(Intent.ACTION_VIEW).apply {
-                                            data = Uri.parse(it.data.url)
-                                        }
-                                    )
-                                }
-                                setNegativeButton("取消", null)
-                            }.show()*/
-                            Toast.makeText(context, "当前已是最新版本！", Toast.LENGTH_SHORT).show()
-                            return@onSuccess
-                        }
-                    }?.onFailure {
-                        Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                try {
+                    val response = AHUService.API.getLatestVersion()
+                    if (!response.isSuccessful) {
+                        tipState.value = "检查更新失败：${response.msg}"
+                        return@withContext
                     }
-                    Result.success(AHUService.API.getLatestVersion())
+                    val localVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                    if (response.data.version == localVersion) {
+                        tipState.value = "当前已是最新版本！"
+                        return@withContext
+                    }
+                    newVersionDialogState.value = response.data
                 } catch (e: Exception) {
-                    Result.failure(Throwable("网络连接异常，获取最新版本失败！"))
+                    tipState.value = "检查更新失败：${e.message}"
                 }
             }
         }
