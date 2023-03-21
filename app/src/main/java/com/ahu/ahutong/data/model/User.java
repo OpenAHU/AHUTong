@@ -6,9 +6,18 @@ import com.google.gson.annotations.SerializedName;
 
 public class User {
 
-
     @SerializedName("name")
     private String name;
+    @SerializedName("xh")
+    private String xh;
+
+    public User() {
+
+    }
+
+    public User(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -18,10 +27,15 @@ public class User {
         this.name = name;
     }
 
+    public String getXh() {
+        return xh;
+    }
+
+    public void setXh(String xh) {
+        this.xh = xh;
+    }
 
     public enum UserType {
-        //使用教务系统登录的
-        AHU_Teach("1"),
         //使用智慧安大登录的
         AHU_Wisdom("2"),
         // 爬虫

@@ -9,7 +9,9 @@
     <string name="mine_tv_recommend">推荐给好友</string>
     <string name="mine_tv_feedback">意见反馈</string>
     <string name="mine_tv_about_us">关于我们</string>
-    <string name="mine_tv_developer">开发者列表</string>
+    <string name="contributors">贡献名单</string>
+    <string name="mine_tv_developer">开发者</string>
+    <string name="mine_tv_business">商务合作</string>
     <string name="tools_logo">tools logo</string>
     <string name="college">院系风采</string>
     <string name="edu">教务通知</string>
@@ -26,7 +28,8 @@
     <string name="license">开源协议</string>
     <string name="login">认证</string>
     <string name="hint_userid">请输入您的学号</string>
-    <string name="hint_password">请输入您的密码</string>
+    <string name="hint_wisdom_password">请输入您的智慧安大密码</string>
+    <string name="hint_teach_password">请输入您的教务系统密码</string>
     <string name="more">更多</string>
     <string name="library">图书馆</string>
     <string name="emptyRoom">空教室</string>
@@ -42,7 +45,7 @@
     <string name="img">这是一个图</string>
     <string name="require">查询</string>
     <string name="tip_empty_room">仅能获取当日数据</string>
-    <string name="empty_exam">当前没有考试哦！</string>
+    <string name="empty_exam">当前没有考试信息</string>
     <string name="schoolYear">学年：</string>
     <string name="term">学期：</string>
     <string name="term_grade">本学期绩点</string>
@@ -82,7 +85,14 @@
     <string name="discovery_course">今日课表</string>
     <string name="discovery_activity">校园信息</string>
     <string name="card_money">校园卡余额</string>
-    <string name="bathroom_time">10:30 - 21:00</string>
+    <string name="bathroom_time">10:30 – 21:00</string>
     <string name="recharge">充值</string>
     <string name="view_flow">查看流水</string>
+
+    <string name="log_in">登录</string>
+    <string name="logging_in">登录中</string>
+    <string name="fill_in_info">完善信息</string>
+    <string name="school_year">学年</string>
+    <string name="school_term">学期</string>
+    <string name="current_week">当前周</string>
 </resources>

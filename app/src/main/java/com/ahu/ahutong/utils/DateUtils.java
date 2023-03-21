@@ -21,6 +21,7 @@ public class DateUtils {
 
     /**
      * 返回当前时间
+     *
      * @return 示例 2021-08-26
      */
     @SuppressLint("SimpleDateFormat")
@@ -29,6 +30,7 @@ public class DateUtils {
         Date date = new Date(System.currentTimeMillis());
         return formatter.format(date);
     }
+
 
 }
     

@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.ahu.ahutong">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission
         android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <queries>
         <!-- 指定tim包名 -->
@@ -22,13 +21,14 @@
 
     <application
         android:name=".AHUApplication"
-        android:allowBackup="false"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:networkSecurityConfig="@xml/network_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AHUTong">
+        android:theme="@style/Theme.AHUTong"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -40,21 +40,66 @@
         </activity>
 
         <receiver
-            android:name=".widget.ClassWidget"
-            android:exported="true"
-            android:label="@string/app_name">
+            android:name=".appwidget.ScheduleAppWidgetReceiver"
+            android:enabled="@bool/glance_appwidget_available"
+            android:exported="false"
+            android:label="课表">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/app_widget_info" />
+            <meta-data
+                android:name="miuiWidget"
+                android:value="true" />
+            <meta-data
+                android:name="miuiWidgetTransitionAnimation"
+                android:value="false" />
+            <meta-data
+                android:name="miuiWidgetRefresh"
+                android:value="exposure" />
+            <meta-data
+                android:name="miuiWidgetRefreshMinInterval"
+                android:value="20000" />
+        </receiver>
+
+        <!-- miui13 需要 -->
+        <meta-data
+            android:name="miuiWidgetVersion"
+            android:value="1" />
+
+        <!-- old widget -->
+        <receiver
+            android:name="com.ahu.ahutong.widget.ClassWidget"
+            android:enabled="true"
+            android:label="@string/app_name"
+            android:process=":widgetProvider"
+            android:exported="false">
+
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
+            <meta-data
+                android:name="miuiWidget"
+                android:value="true" />
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_provider" />
         </receiver>
 
         <service
-            android:name=".widget.WidgetListService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
+            android:name="com.ahu.ahutong.widget.WidgetListService"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":widgetProvider" />
+        <!-- miui13需要-->
+        <meta-data
+            android:name="miuiWidgetVersion"
+            android:value="1" />
     </application>
 
 </manifest>

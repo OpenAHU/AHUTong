@@ -3,7 +3,6 @@ package com.ahu.ahutong.data.dao
 import arch.sink.utils.Utils
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.ext.fromJson
-import com.ahu.ahutong.ui.widget.schedule.bean.ScheduleTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
@@ -62,19 +61,19 @@ object AHUCache {
     }
 
     /**
-     * 保存密码
+     * 保存智慧安大密码
      * @param password String
      */
-    fun saveCurrentPassword(password: String) {
-        kv.encode("password", password)
+    fun saveWisdomPassword(password: String) {
+        kv.encode("password_wisdom", password)
     }
 
     /**
-     * 获取密码
+     * 获取智慧安大密码
      * @return String?
      */
-    fun getCurrentUserPassword(): String? {
-        return kv.decodeString("password")
+    fun getWisdomPassword(): String? {
+        return kv.decodeString("password_wisdom")
     }
 
     /**
@@ -85,7 +84,7 @@ object AHUCache {
      */
     fun saveSchedule(schoolYear: String, schoolTerm: String, schdule: List<Course>) {
         val data = Gson().toJson(schdule)
-        kv.putString("${schoolYear}-${schoolTerm}.schedule", data)
+        kv.putString("$schoolYear-$schoolTerm.schedule", data)
     }
 
     /**
@@ -95,25 +94,7 @@ object AHUCache {
      * @return List<Course>
      */
     fun getSchedule(schoolYear: String, schoolTerm: String): List<Course>? {
-        val data = kv.getString("${schoolYear}-${schoolTerm}.schedule", "") ?: ""
-        return data.fromJson(object : TypeToken<List<Course>>() {}.type)
-    }
-
-    /**
-     * 保存新闻
-     * @param news List<News>
-     */
-    fun saveNews(news: List<News>) {
-        val data = Gson().toJson(news)
-        kv.encode("news", data)
-    }
-
-    /**
-     * 获取新闻
-     * @return List<News>
-     */
-    fun getNews(): List<News>? {
-        val data = kv.decodeString("news") ?: ""
+        val data = kv.getString("$schoolYear-$schoolTerm.schedule", "") ?: ""
         return data.fromJson(object : TypeToken<List<Course>>() {}.type)
     }
 
@@ -153,7 +134,6 @@ object AHUCache {
         return data.fromJson(object : TypeToken<List<Exam>>() {}.type)
     }
 
-
     /**
      * 获取开学时间
      * @param schoolYear String yyyy-yyyy
@@ -161,7 +141,7 @@ object AHUCache {
      * @return String? yyyy-MM-dd
      */
     fun getSchoolTermStartTime(schoolYear: String, schoolTerm: String): String? {
-        return kv.decodeString("startTime-${schoolYear}-${schoolTerm}")
+        return kv.decodeString("startTime-$schoolYear-$schoolTerm")
     }
 
     /**
@@ -171,7 +151,7 @@ object AHUCache {
      * @param startTime String yyyy-MM-dd
      */
     fun saveSchoolTermStartTime(schoolYear: String, schoolTerm: String, startTime: String) {
-        kv.encode("startTime-${schoolYear}-${schoolTerm}", startTime)
+        kv.encode("startTime-$schoolYear-$schoolTerm", startTime)
     }
 
     /**
@@ -181,7 +161,6 @@ object AHUCache {
     fun getSchoolYear(): String? {
         return kv.decodeString("defaultSchoolYear")
     }
-
 
     /**
      * 保存默认的学年
@@ -224,53 +203,36 @@ object AHUCache {
     }
 
     /**
-     * 获取登录类型
-     * @return User.UserType
-     */
-    fun getLoginType(): User.UserType {
-        val type = kv.getString("usertype", "0") ?: "0"
-        return when (type) {
-            "1" -> User.UserType.AHU_Wisdom
-            "2" -> User.UserType.AHU_Teach
-            else -> User.UserType.AHU_LOCAL
-        }
-    }
-
-    /**
-     * 保存登录类型
-     * @param type UserType
-     */
-    fun saveLoginType(type: User.UserType) {
-        kv.putString("usertype", type.toString())
-    }
-
-    /**
-     * 保存ScheduleTheme
+     * 保存List<Banner>
      * @param theme ScheduleTheme
      */
-    fun saveScheduleTheme(theme: ScheduleTheme) {
-        val config = theme.toConfig()
-        kv.putString("schedule_theme", config)
+    fun saveBanner(banners: List<Banner>) {
+        val json = Gson().toJson(banners)
+        kv.putString("list_banner", json)
     }
 
     /**
-     * 获取ScheduleTheme
-     * @return ScheduleTheme?
+     * 获取List<Banner>
+     * @return List<Banner>?
      */
-    fun getScheduleTheme(): ScheduleTheme? {
-        val config = kv.getString("schedule_theme", "")
+    fun getBanner(): List<Banner>? {
+        val config = kv.getString("list_banner", "")
         if (!config.isNullOrEmpty()) {
-            return ScheduleTheme(config)
+            return Gson().fromJson(config, object : TypeToken<List<Banner>>() {}.type)
         }
         return null
     }
 
-    fun getVersionHistory(): String {
-        return kv.getString("version", "") ?: ""
+    fun isShowWidgetTip(): Boolean {
+        return kv.getBoolean("is_show_widget_dialog", true)
     }
 
-    fun saveVersionHistory(version: String) {
-        kv.putString("version", version)
+    fun ignoreWidgetTip() {
+        kv.putBoolean("is_show_widget_dialog", false)
     }
 
+    fun logout() {
+        clearCurrentUser()
+        saveWisdomPassword("")
+    }
 }

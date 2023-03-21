@@ -1,5 +1,9 @@
 package com.ahu.ahutong.data.model;
 
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -61,6 +65,17 @@ public class Grade implements Serializable {
         this.termGradeList = termGradeList;
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return "Grade{" +
+                "totalGradePoint='" + totalGradePoint + '\'' +
+                ", totalCredit='" + totalCredit + '\'' +
+                ", totalGradePointAverage='" + totalGradePointAverage + '\'' +
+                ", termGradeList=" + termGradeList +
+                '}';
+    }
+
     public static class TermGradeListBean implements Serializable {
         /**
          * schoolYear : 学年
@@ -73,7 +88,7 @@ public class Grade implements Serializable {
 
         @SerializedName("schoolYear")
         private String schoolYear;
-        @SerializedName("term")
+        @SerializedName("schoolTerm")
         private String term;
         @SerializedName("termGradePoint")
         private String termGradePoint;
@@ -81,7 +96,7 @@ public class Grade implements Serializable {
         private String termTotalCredit;
         @SerializedName("termGradePointAverage")
         private String termGradePointAverage;
-        @SerializedName("gradeList")
+        @SerializedName("termGradeList")
         private List<GradeListBean> gradeList;
 
         public String getSchoolYear() {
@@ -132,6 +147,19 @@ public class Grade implements Serializable {
             this.gradeList = gradeList;
         }
 
+        @NonNull
+        @Override
+        public String toString() {
+            return "TermGradeListBean{" +
+                    "schoolYear='" + schoolYear + '\'' +
+                    ", term='" + term + '\'' +
+                    ", termGradePoint='" + termGradePoint + '\'' +
+                    ", termTotalCredit='" + termTotalCredit + '\'' +
+                    ", termGradePointAverage='" + termGradePointAverage + '\'' +
+                    ", gradeList=" + gradeList +
+                    '}';
+        }
+
         public static class GradeListBean implements Serializable {
             /**
              * courseNum : 课程代号
@@ -139,7 +167,7 @@ public class Grade implements Serializable {
              * credit : 学分
              * gradePoint : 绩点
              * grade : 成绩
-             * course_nature : 课程类型
+             * courseType : 课程类型
              */
             @SerializedName("courseNum")
             private String courseNum;
@@ -151,7 +179,7 @@ public class Grade implements Serializable {
             private String gradePoint;
             @SerializedName("grade")
             private String grade;
-            @SerializedName("courseNature")
+            @SerializedName("courseType")
             private String courseNature;
 
             public String getCourseNum() {
@@ -202,6 +230,7 @@ public class Grade implements Serializable {
                 this.courseNature = courseNature;
             }
 
+            @NonNull
             @Override
             public String toString() {
                 return "GradeListBean{" +
@@ -214,27 +243,5 @@ public class Grade implements Serializable {
                         '}';
             }
         }
-
-        @Override
-        public String toString() {
-            return "TermGradeListBean{" +
-                    "schoolYear='" + schoolYear + '\'' +
-                    ", term='" + term + '\'' +
-                    ", termGradePoint='" + termGradePoint + '\'' +
-                    ", termTotalCredit='" + termTotalCredit + '\'' +
-                    ", termGradePointAverage='" + termGradePointAverage + '\'' +
-                    ", gradeList=" + gradeList +
-                    '}';
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "Grade{" +
-                "totalGradePoint='" + totalGradePoint + '\'' +
-                ", totalCredit='" + totalCredit + '\'' +
-                ", totalGradePointAverage='" + totalGradePointAverage + '\'' +
-                ", termGradeList=" + termGradeList +
-                '}';
     }
 }

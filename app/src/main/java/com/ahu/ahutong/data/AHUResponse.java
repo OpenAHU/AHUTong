@@ -1,5 +1,7 @@
 package com.ahu.ahutong.data;
 
+import androidx.annotation.NonNull;
+
 /**
  * @Author: Sink
  * @Date: 2021/7/31-下午8:40
@@ -34,10 +36,11 @@ public class AHUResponse<T> {
         this.code = code;
     }
 
-    public boolean isSuccessful(){
+    public boolean isSuccessful() {
         return code == 0;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "AHUResponse{" +

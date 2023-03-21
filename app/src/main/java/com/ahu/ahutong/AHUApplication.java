@@ -1,18 +1,10 @@
 package com.ahu.ahutong;
 
-import android.content.pm.PackageManager;
-
-import com.google.gson.Gson;
-import com.sink.library.log.SinkLogConfig;
-import com.sink.library.log.SinkLogManager;
-import com.sink.library.log.parser.SinkJsonParser;
-import com.sink.library.log.printer.SinkLogConsolePrinter;
-import com.sink.library.update.CookApkUpdate;
+import com.ahu.ahutong.common.SingleLiveEvent;
 import com.tencent.bugly.crashreport.CrashReport;
 
-import org.jetbrains.annotations.NotNull;
-
 import arch.sink.BaseApplication;
+import kotlin.Unit;
 
 /**
  * @Author SinkDev
@@ -20,52 +12,12 @@ import arch.sink.BaseApplication;
  * @Email 468766131@qq.com
  */
 public class AHUApplication extends BaseApplication {
-    public static int width, height;
+    public static SingleLiveEvent<Unit> sessionUpdated = new SingleLiveEvent<>();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        width = getResources().getDisplayMetrics().widthPixels;
-        height = getResources().getDisplayMetrics().heightPixels;
-        //SinkLog
-        SinkLogManager.init(new SinkLogConfig() {
-            @NotNull
-            @Override
-            public String getGlobalTag() {
-                return "AHUTong";
-            }
-
-            @Override
-            public boolean enable() {
-                return true;
-            }
-
-            @Override
-            public int stackTraceDepth() {
-                return 5;
-            }
-
-            @Override
-            public boolean includeThread() {
-                return true;
-            }
-
-            @Override
-            public @NotNull SinkJsonParser getJsonParser() {
-                return obj -> new Gson().toJson(obj);
-            }
-        }, new SinkLogConsolePrinter());
-
-        //禁止获取手机ID信息
-        CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(this);
-        strategy.setDeviceID("fake-id");
-        CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG, strategy);
-        //初始化更新
-        try {
-            CookApkUpdate.init(this);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
+        CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG);
     }
 
 }

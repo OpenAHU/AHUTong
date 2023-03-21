@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
-import android.widget.Toast;
 
 import com.ahu.ahutong.R;
 import com.ahu.ahutong.data.dao.AHUCache;
@@ -73,17 +72,15 @@ public class WidgetListService extends RemoteViewsService {
             String term = AHUCache.INSTANCE.getSchoolTerm();
 
             if (year == null || term == null) {
-                Toast.makeText(context, "请填写当前时间后再试", Toast.LENGTH_SHORT).show();
                 return;
             }
             String time = AHUCache.INSTANCE.getSchoolTermStartTime(year, term);
             if (time == null) {
-                Toast.makeText(context, "请填写当前时间后再试", Toast.LENGTH_SHORT).show();
                 return;
             }
             List<Course> courses = AHUCache.INSTANCE.getSchedule(year, term);
             //根据开学时间， 获取当前周数
-            Date date = null;
+            Date date;
             try {
                 date = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
                         .parse(time);
@@ -118,7 +115,7 @@ public class WidgetListService extends RemoteViewsService {
         }
 
         @SafeVarargs
-        private final void addToData(List<Course>... lists) {
+        private void addToData(List<Course>... lists) {
             String[] times = {"上午", "下午", "晚上"};
             for (int i = 0; i < lists.length; i++) {
                 List<Course> list = lists[i];
@@ -150,15 +147,14 @@ public class WidgetListService extends RemoteViewsService {
             return mData == null ? 0 : mData.size();
         }
 
-
         @Override
         public RemoteViews getViewAt(int position) {
-            RemoteViews back = null;
+            RemoteViews back;
             Object bean = mData.get(position);
-            if (bean instanceof String) {//如果是头，即 上午 下午 晚上
+            if (bean instanceof String) { //如果是头，即 上午 下午 晚上
                 back = new RemoteViews(context.getPackageName(), R.layout.item_widget_head);
                 back.setTextViewText(R.id.widget_head, (String) bean);
-            } else if (bean instanceof Boolean) {//如果是空闲状态
+            } else if (bean == null || bean instanceof Boolean) {//如果是空闲状态
                 back = new RemoteViews(context.getPackageName(), R.layout.item_widget_content);
                 back.setTextViewText(R.id.widget_name, "空闲");
                 back.setTextViewText(R.id.widget_time, "无课程");
@@ -194,6 +190,12 @@ public class WidgetListService extends RemoteViewsService {
                     back.setTextColor(R.id.widget_name, blackColor);
                     back.setTextColor(R.id.widget_time, paleColor);
                 }
+            } else {
+                back = new RemoteViews(context.getPackageName(), R.layout.item_widget_content);
+                back.setTextViewText(R.id.widget_name, "空闲");
+                back.setTextViewText(R.id.widget_time, "无课程");
+                back.setViewVisibility(R.id.widget_state, View.GONE);
+                back.setImageViewBitmap(R.id.widget_tag, grayBitmap);
             }
             return back;
         }

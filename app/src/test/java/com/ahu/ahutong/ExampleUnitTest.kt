@@ -1,9 +1,6 @@
 package com.ahu.ahutong
 
-import com.ahu.ahutong.data.model.User
 import org.junit.Test
-
-import org.junit.Assert.*
 import java.util.*
 
 /**
