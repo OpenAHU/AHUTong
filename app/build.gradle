@@ -24,22 +24,14 @@ android {
         versionName "1.0.0-beta6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-    //multiDex的一些相关配置，这样配置可以让你的编译速度更快
-//    dexOptions {
-//        //不对Lib做preDex
-//        preDexLibraries = false
-//        //优化编译效率
-//        incremental true
-//        javaMaxHeapSize "8g"     //增加java堆内存大小
-//    }
 
     signingConfigs {
-//        debug {
-//            storeFile file("./ahu.jks")
-//            storePassword "SinkDev"
-//            keyAlias "key0"
-//            keyPassword "SinkDev"
-//        }
+        debug {
+            storeFile file("./ahu.jks")
+            storePassword "SinkDev"
+            keyAlias "key0"
+            keyPassword "SinkDev"
+        }
 
         release {
             storeFile file("./ahu.jks")
@@ -51,9 +43,6 @@ android {
 
     buildTypes {
         release {
-//            jniDebuggable false  //关闭jni调试
-//            debuggable false  //是否支持调试
-//            zipAlignEnabled true  //是否支持zip
             shrinkResources true  // 移除无用的resource文件
             minifyEnabled true //是否对代码进行混淆，true表示混淆
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -99,7 +88,6 @@ dependencies {
     def coilVersion = "2.2.2"
     def accompanistVersion = '0.28.0'
     implementation project(path: ':arch')
-    implementation project(path: ':simonlibrary')
 
     def composeBom = platform("androidx.compose:compose-bom:2022.12.00")
     implementation composeBom
@@ -114,7 +102,7 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation 'com.google.code.gson:gson:2.8.9'
-    implementation "org.jsoup:jsoup:1.14.2"
+    implementation "org.jsoup:jsoup:1.15.4"
 
     // compose
     implementation "androidx.compose.runtime:runtime-livedata"

@@ -7,5 +7,5 @@
 .externalNativeBuild
 .cxx
 local.properties
-ahu.jks
+app/ahu.jks
 .idea
