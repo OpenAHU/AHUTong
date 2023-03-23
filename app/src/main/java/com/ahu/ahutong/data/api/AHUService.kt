@@ -84,7 +84,8 @@ interface AHUService {
     suspend fun addAppAccess(): Unit
 
     companion object {
-        private const val BASE_URL = "https://ahuer.cn"
+//        private const val BASE_URL = "https://ahuer.cn"
+        private const val BASE_URL = "http://10.0.2.2:8080"
 
         // Cookie 本地存储
         private val cookieJar =

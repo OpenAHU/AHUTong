@@ -30,42 +30,50 @@ class GradeViewModel : ViewModel() {
 
     companion object {
         val schoolYears by lazy {
-            (AHUCache.getCurrentUser() ?: throw IllegalStateException("未登录，无法打开成绩界面！")).getSchoolYears()
+            (AHUCache.getCurrentUser()
+                ?: throw IllegalStateException("未登录，无法打开成绩界面！")).getSchoolYears()
         }
         val terms = mutableMapOf("1" to "0", "2" to "1")
     }
 
     init {
         snapshotFlow { grade }
-            .onEach {
-                totalGradePointAverage = it?.totalGradePointAverage?.takeUnless {
-                    it == "NaN"
-                } ?: "暂无"
+            .onEach { grade1 ->
+                totalGradePointAverage = grade1?.totalGradePointAverage ?: "暂无"
+                grade1?.let {
+                    calGPA(schoolYear!!, schoolTerm!!, it)
+                }
             }
             .launchIn(viewModelScope)
 
         snapshotFlow { schoolYear to schoolTerm }
             .onEach { (schoolYear, schoolTerm) ->
-                var yearGrade = 0f
-                var termTotal = 0f
-                termGradePointAverage = "暂无"
-                yearGradePointAverage = "暂无"
-                for (termGrade in grade?.termGradeList ?: emptyList()) {
-                    if (termGrade.schoolYear == schoolYear) {
-                        yearGrade += (termGrade.termGradePointAverage.toFloat() * termGrade.termGradePoint.toFloat())
-                        termTotal += termGrade.termGradePoint.toFloat()
-                        if (termGrade.term == schoolTerm) {
-                            termGradePointAverage = termGrade.termGradePointAverage
-                        }
-                    }
-                }
-                if (termTotal != 0f) {
-                    val gradePointAverage = yearGrade / termTotal
-                    val df = DecimalFormat("#.##")
-                    df.roundingMode = RoundingMode.HALF_UP
-                    yearGradePointAverage = df.format(gradePointAverage)
+                grade?.let {
+                    calGPA(schoolYear!!, schoolTerm!!, it)
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun calGPA(schoolYear: String, schoolTerm: String, grade: Grade) {
+        var yearGrade = 0f
+        var termTotal = 0f
+        termGradePointAverage = "暂无"
+        yearGradePointAverage = "暂无"
+        for (termGrade in grade.termGradeList ?: emptyList()) {
+            if (termGrade.schoolYear == schoolYear) {
+                yearGrade += (termGrade.termGradePointAverage.toFloat() * termGrade.termGradePoint.toFloat())
+                termTotal += termGrade.termGradePoint.toFloat()
+                if (termGrade.term == schoolTerm) {
+                    termGradePointAverage = termGrade.termGradePointAverage
+                }
+            }
+        }
+        if (termTotal != 0f) {
+            val gradePointAverage = yearGrade / termTotal
+            val df = DecimalFormat("#.##")
+            df.roundingMode = RoundingMode.HALF_UP
+            yearGradePointAverage = df.format(gradePointAverage)
+        }
     }
 }

@@ -49,7 +49,7 @@ public class AHUCookieJar implements ClearableCookieJar {
 
     @NonNull
     @Override
-    synchronized public List<Cookie> loadForRequest(HttpUrl url) {
+    synchronized public List<Cookie> loadForRequest(@NonNull HttpUrl url) {
         Log.i(TAG, "loadForRequest: " + url);
         List<Cookie> cookiesToRemove = new ArrayList<>();
         List<Cookie> validCookies = new ArrayList<>();
@@ -67,18 +67,17 @@ public class AHUCookieJar implements ClearableCookieJar {
         }
 
         persistor.removeAll(cookiesToRemove);
-
+        Log.i(TAG, "validCookies: " + validCookies);
         return validCookies;
     }
 
     private static boolean isCookieExpired(Cookie cookie) {
-        Log.i(TAG, "isCookieExpired: ");
         return cookie.expiresAt() < System.currentTimeMillis();
     }
 
     @Override
     synchronized public void clearSession() {
-        Log.i(TAG, "clearSession: ");
+        Log.i(TAG, "clearSession");
         cache.clear();
         cache.addAll(persistor.loadAll());
     }

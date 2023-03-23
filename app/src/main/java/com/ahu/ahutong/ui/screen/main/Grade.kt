@@ -46,12 +46,14 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
             gradeViewModel.getGarde()
         }
     }
-    val grade = gradeViewModel.grade
     val schoolYears = GradeViewModel.schoolYears
     val schoolTerms = GradeViewModel.terms.keys.toTypedArray()
-    val gradeData = grade?.termGradeList?.find {
-        it.schoolYear == gradeViewModel.schoolYear && it.term == gradeViewModel.schoolTerm
+    val gradeData = gradeViewModel.grade?.let {
+        it.termGradeList?.find {
+            it.schoolYear == gradeViewModel.schoolYear && it.term == gradeViewModel.schoolTerm
+        }
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
