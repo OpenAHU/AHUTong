@@ -8,4 +8,5 @@
 .cxx
 local.properties
 app/ahu.jks
+app/map.txt
 .idea
