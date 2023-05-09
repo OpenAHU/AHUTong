@@ -7,6 +7,7 @@ import com.ahu.ahutong.data.model.*
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import okhttp3.Cache
+import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -84,8 +85,8 @@ interface AHUService {
     suspend fun addAppAccess(): Unit
 
     companion object {
-//        private const val BASE_URL = "https://ahuer.cn"
-        private const val BASE_URL = "http://10.0.2.2:8080"
+        private const val BASE_URL = "https://ahuer.cn"
+//        private const val BASE_URL = "http://10.0.2.2:8080"
 
         // Cookie 本地存储
         private val cookieJar =
@@ -97,6 +98,7 @@ interface AHUService {
                 level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
                 else HttpLoggingInterceptor.Level.NONE
             }
+
             val client = OkHttpClient.Builder()
                 .addInterceptor(logger)
                 .readTimeout(5, TimeUnit.SECONDS)
@@ -105,6 +107,7 @@ interface AHUService {
                 .cache(Cache(File(Utils.getApp().cacheDir, "app_cache"), Long.MAX_VALUE))
                 .retryOnConnectionFailure(true)
                 .cookieJar(cookieJar) // 设置CookieJar
+
             // 创建API
             Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
