@@ -33,8 +33,10 @@ fun Setup(
     val navController = rememberAnimatedNavController()
     // 用户从老版本升级到 1.0.0-beta6 或更新版本时清空缓存
     LaunchedEffect(Unit) {
-        if (aboutViewModel.versionName < "1.0.0-beta6") {
-            AHUCache.clearAll()
+        aboutViewModel.versionName?.let {
+            if (it < "1.0.0-beta6") {
+                AHUCache.clearAll()
+            }
         }
     }
     AnimatedNavHost(

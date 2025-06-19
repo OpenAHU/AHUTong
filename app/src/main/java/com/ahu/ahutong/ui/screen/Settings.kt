@@ -141,7 +141,7 @@ fun Settings(
                         style = MaterialTheme.typography.headlineMedium
                     )
                     Text(
-                        text = aboutViewModel.versionName,
+                        text = aboutViewModel.versionName!!,
                         style = MaterialTheme.typography.titleMedium
                     )
                 }

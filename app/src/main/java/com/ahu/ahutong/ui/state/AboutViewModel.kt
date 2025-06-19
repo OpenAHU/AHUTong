@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
  * @Email: 468766131@qq.com
  */
 class AboutViewModel : ViewModel() {
-    val versionName: String by lazy {
+    val versionName: String? by lazy {
         val packageInfo = Utils.getApp().packageManager.getPackageInfo(
             Utils.getApp().packageName,
             0

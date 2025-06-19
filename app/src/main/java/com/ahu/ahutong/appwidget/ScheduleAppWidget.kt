@@ -42,6 +42,7 @@ import androidx.glance.unit.ColorProvider
 import arch.sink.utils.TimeUtils
 import com.ahu.ahutong.MainActivity
 import com.ahu.ahutong.R
+
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Course
 import java.text.SimpleDateFormat
@@ -81,7 +82,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .cornerRadius(32.dp)
-                .background(R.color.material_dynamic_primary95 withNight R.color.material_dynamic_neutral10)
+                .background(com.google.android.material.R.color.material_dynamic_primary90 withNight com.google.android.material.R.color.material_dynamic_neutral10)
                 .clickable(
                     actionStartActivity(Intent(context, MainActivity::class.java))
                 ),
@@ -98,7 +99,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
                             actionStartActivity(Intent(context, MainActivity::class.java))
                         ),
                         style = TextStyle(
-                            color = ColorProvider(R.color.material_dynamic_neutral20 withNight R.color.material_dynamic_neutral90),
+                            color = ColorProvider(com.google.android.material.R.color.material_dynamic_neutral20 withNight com.google.android.material.R.color.material_dynamic_neutral90),
                             fontSize = 18.sp
                         ),
                         maxLines = 1
@@ -115,7 +116,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
                         text = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(Date()),
                         modifier = GlanceModifier.fillMaxWidth(),
                         style = TextStyle(
-                            color = ColorProvider(R.color.material_dynamic_neutral50 withNight R.color.material_dynamic_neutral70),
+                            color = ColorProvider(com.google.android.material.R.color.material_dynamic_neutral50 withNight com.google.android.material.R.color.material_dynamic_neutral70),
                             fontSize = 16.sp,
                             textAlign = TextAlign.End
                         ),
@@ -134,13 +135,13 @@ class ScheduleAppWidget : GlanceAppWidget() {
                                     modifier = GlanceModifier
                                         .fillMaxWidth()
                                         .cornerRadius(24.dp)
-                                        .background(R.color.material_dynamic_neutral99 withNight R.color.material_dynamic_neutral30)
+                                        .background(com.google.android.material.R.color.material_dynamic_neutral99 withNight com.google.android.material.R.color.material_dynamic_neutral30)
                                         .padding(8.dp)
                                 ) {
                                     Text(
                                         text = course.name,
                                         style = TextStyle(
-                                            color = ColorProvider(R.color.material_dynamic_neutral20 withNight R.color.material_dynamic_neutral99),
+                                            color = ColorProvider(com.google.android.material.R.color.material_dynamic_neutral20 withNight com.google.android.material.R.color.material_dynamic_neutral99),
                                             fontSize = 16.sp
                                         ),
                                         maxLines = 1
@@ -150,7 +151,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
                                         Text(
                                             text = "${course.startTime} - ${course.startTime + course.length - 1}",
                                             style = TextStyle(
-                                                color = ColorProvider(R.color.material_dynamic_neutral40 withNight R.color.material_dynamic_neutral90),
+                                                color = ColorProvider(com.google.android.material.R.color.material_dynamic_neutral40 withNight com.google.android.material.R.color.material_dynamic_neutral90),
                                                 fontSize = 14.sp
                                             ),
                                             maxLines = 1
@@ -162,7 +163,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
                                                 .replace("育场", ""),
                                             modifier = GlanceModifier.fillMaxWidth(),
                                             style = TextStyle(
-                                                color = ColorProvider(R.color.material_dynamic_neutral40 withNight R.color.material_dynamic_neutral90),
+                                                color = ColorProvider(com.google.android.material.R.color.material_dynamic_neutral40 withNight com.google.android.material.R.color.material_dynamic_neutral90),
                                                 fontSize = 14.sp,
                                                 textAlign = TextAlign.End
                                             ),
@@ -183,7 +184,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
                     text = "今日无课",
                     modifier = GlanceModifier.padding(16.dp),
                     style = TextStyle(
-                        color = ColorProvider(R.color.material_dynamic_neutral50 withNight R.color.material_dynamic_neutral70),
+                        color = ColorProvider(com.google.android.material.R.color.material_dynamic_neutral50 withNight com.google.android.material.R.color.material_dynamic_neutral70),
                         fontSize = 18.sp
                     )
                 )
