@@ -29,6 +29,10 @@ class ReptileDataSource(user: ReptileUser) : BaseDataSource {
         return checkLoginStatus() ?: WebViewReptile.getSchedule(schoolYear, schoolTerm)
     }
 
+    override suspend fun getSchedule(): AHUResponse<List<Course>> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getGrade(): AHUResponse<Grade> {
         return checkLoginStatus() ?: WebViewReptile.getGrade()
     }

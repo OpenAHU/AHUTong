@@ -19,6 +19,11 @@ public class User {
         this.name = name;
     }
 
+    public User(String name,String xh){
+        this.name = name;
+        this.xh = xh;
+    }
+
     public String getName() {
         return name;
     }

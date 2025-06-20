@@ -20,6 +20,10 @@ class APIDataSource : BaseDataSource {
         return AHUService.API.getSchedule(schoolYear, schoolTerm)
     }
 
+    override suspend fun getSchedule(): AHUResponse<List<Course>> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getGrade(): AHUResponse<Grade> {
         return AHUService.API.getGrade()
     }

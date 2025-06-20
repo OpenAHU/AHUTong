@@ -48,8 +48,9 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
+//import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.screen.main.Exam
 import com.ahu.ahutong.ui.screen.main.Grade
 import com.ahu.ahutong.ui.screen.main.Home
@@ -67,7 +68,6 @@ import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.utils.animatedComposable
-import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -87,7 +87,7 @@ fun Main(
 ) {
     val context = LocalContext.current
     Box {
-        AnimatedNavHost(
+        NavHost(
             navController = navController,
             startDestination = "home",
             modifier = Modifier
@@ -111,9 +111,9 @@ fun Main(
                         discoveryViewModel.loadActivityBean()
                         scheduleViewModel.loadConfig()
                         scheduleViewModel.refreshSchedule(isRefresh = true)
-                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
-                            ScheduleAppWidgetReceiver::class.java
-                        )
+//                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+//                            ScheduleAppWidgetReceiver::class.java
+//                        )
                     }
                 )
             }
@@ -211,7 +211,8 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             }
         } else {
             repeat(visibilities.size) {
-                visibilities.removeLast()
+//                visibilities.removeLast()
+                visibilities.removeAt(visibilities.size-1)
                 delay(50)
             }
         }

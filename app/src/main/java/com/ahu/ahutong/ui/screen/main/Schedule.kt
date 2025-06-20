@@ -81,14 +81,8 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
         }.toMap()
     }
     val currentWeekCourses = schedule
-        .filter { currentWeek in it.startWeek..it.endWeek }
-        .filter {
-            if (it.singleDouble == "0") {
-                true
-            } else {
-                currentWeek % 2 == it.startWeek % 2
-            }
-        }
+        .filter { currentWeek in it.weekIndexes }
+
     var detailedCourse by rememberSaveable { mutableStateOf<Course?>(null) }
     Column(
         modifier = Modifier
@@ -187,7 +181,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = viewModel()) {
             modifier = with(CourseCardSpec) {
                 Modifier
                     .fillMaxWidth()
-                    .height(mainRowHeight + (cellHeight + cellSpacing) * 11 + 24.dp)
+                    .height(mainRowHeight + (cellHeight + cellSpacing) * 13 + 24.dp)
                     .clip(SmoothRoundedCornerShape(32.dp))
                     .background(99.n1 withNight 20.n1)
                     .padding(top = 8.dp)

@@ -21,6 +21,11 @@ interface BaseDataSource {
      */
     suspend fun getSchedule(schoolYear: String, schoolTerm: String): AHUResponse<List<Course>>
 
+    /**
+     * getSchedule (auto get schedule of this semester)
+     */
+    suspend fun getSchedule() : AHUResponse<List<Course>>
+
     suspend fun getGrade(): AHUResponse<Grade>
 
     suspend fun getCardMoney(): AHUResponse<Card>

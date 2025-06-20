@@ -62,6 +62,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.ui.state.LoginState
 import com.ahu.ahutong.ui.state.LoginViewModel
 import com.kyant.monet.n1
@@ -286,10 +287,14 @@ private fun logIn(
         loginViewModel.state = LoginState.Failed
         loginViewModel.failureMessage = "请将信息填写完整"
     } else {
-        loginViewModel.loginWithServer(
-            userID = userID,
-            wisdomPassword = password
-        )
+//        loginViewModel.loginWithServer(
+//            userID = userID,
+//            wisdomPassword = password
+//        )
+
+
+        loginViewModel.loginWithCrawler(userID = userID,password = password)
+
     }
 }
 

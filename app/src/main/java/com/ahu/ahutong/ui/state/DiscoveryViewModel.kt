@@ -39,13 +39,15 @@ class DiscoveryViewModel : ViewModel() {
 
     fun loadActivityBean() {
         viewModelScope.launch {
+
+            AHURepository.getCardMoney().onSuccess {
+                balance = it.balance
+//                transitionBalance = it.transitionBalance
+            }
+
             AHURepository.getBathRooms().onSuccess {
                 it.stream().forEach {
                     bathroom += it.bathroom to it.openStatus
-                }
-                AHURepository.getCardMoney().onSuccess {
-                    balance = it.balance
-                    transitionBalance = it.transitionBalance
                 }
             }
         }

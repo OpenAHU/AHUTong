@@ -69,13 +69,13 @@ fun RowScope.CampusCard(
                         ) {
                             append("¥ $balance")
                         }
-                        withStyle(
-                            MaterialTheme.typography.titleSmall.toSpanStyle().copy(
-                                color = 50.n1 withNight 80.n1
-                            )
-                        ) {
-                            append(" + ¥ $transitionBalance")
-                        }
+//                        withStyle(
+//                            MaterialTheme.typography.titleSmall.toSpanStyle().copy(
+//                                color = 50.n1 withNight 80.n1
+//                            )
+//                        ) {
+//                            append(" + ¥ $transitionBalance")
+//                        }
                     }
                 )
             }

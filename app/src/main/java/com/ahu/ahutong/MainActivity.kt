@@ -16,7 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
-import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
+import androidx.navigation.compose.rememberNavController
+//import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.Main
 import com.ahu.ahutong.ui.state.AboutViewModel
@@ -26,7 +27,6 @@ import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.ui.theme.AHUTheme
 import com.ahu.ahutong.widget.ClassWidget
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -43,19 +43,19 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
         // 日活统计接口
-        mainViewModel.addAppAccess()
+//        mainViewModel.addAppAccess()
 
-        init()
+//        init()
 
-        loginViewModel.serverLoginResult.observe(this) { result ->
-            result.onSuccess {
-                init(refreshSchedule = true)
-            }
-        }
+//        loginViewModel.serverLoginResult.observe(this) { result ->
+//            result.onSuccess {
+//                init(refreshSchedule = true)
+//            }
+//        }
 
         setContent {
             AHUTheme {
-                val navController = rememberAnimatedNavController()
+                val navController = rememberNavController()
                 var isReLoginDialogShown by rememberSaveable { mutableStateOf(false) }
                 Main(
                     navController = navController,
@@ -95,8 +95,8 @@ class MainActivity : ComponentActivity() {
         val componentName = ComponentName(this, ClassWidget::class.java)
         val appWidgetIds = manager.getAppWidgetIds(componentName)
         manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
-        mainViewModel.viewModelScope.launch {
-            ScheduleAppWidgetReceiver().glanceAppWidget.updateAll(this@MainActivity)
-        }
+//        mainViewModel.viewModelScope.launch {
+//            ScheduleAppWidgetReceiver().glanceAppWidget.updateAll(this@MainActivity)
+//        }
     }
 }

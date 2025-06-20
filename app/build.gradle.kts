@@ -118,11 +118,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.accompanist.flowlayout)
-    implementation(libs.accompanist.navigation.animation)
     implementation(libs.coil.compose)
     implementation(libs.monet)
 
-    implementation(libs.kotlin.bom)
+    implementation(platform(libs.kotlin.bom))
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.androidx.core.ktx)
