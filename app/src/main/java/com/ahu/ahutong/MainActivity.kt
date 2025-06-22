@@ -7,6 +7,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.LaunchedEffect
@@ -46,9 +47,9 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
+//        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        enableEdgeToEdge()
         // 日活统计接口
 //        mainViewModel.addAppAccess()
 
@@ -95,16 +96,21 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun init(refreshSchedule: Boolean = false) {
-        discoveryViewModel.loadActivityBean()
-        scheduleViewModel.loadConfig()
-        scheduleViewModel.refreshSchedule(isRefresh = refreshSchedule)
-        // 更新小部件数据
-        val manager = AppWidgetManager.getInstance(this)
-        val componentName = ComponentName(this, ClassWidget::class.java)
-        val appWidgetIds = manager.getAppWidgetIds(componentName)
-        manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
+
+        if(AHUCache.isLogin()){
+            discoveryViewModel.loadActivityBean()
+            scheduleViewModel.loadConfig()
+            scheduleViewModel.refreshSchedule(isRefresh = refreshSchedule)
+            // 更新小部件数据
+            val manager = AppWidgetManager.getInstance(this)
+            val componentName = ComponentName(this, ClassWidget::class.java)
+            val appWidgetIds = manager.getAppWidgetIds(componentName)
+            manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
 //        mainViewModel.viewModelScope.launch {
 //            ScheduleAppWidgetReceiver().glanceAppWidget.updateAll(this@MainActivity)
 //        }
+        }
+
+
     }
 }

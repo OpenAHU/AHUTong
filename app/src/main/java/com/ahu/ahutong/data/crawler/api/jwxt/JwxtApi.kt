@@ -45,6 +45,10 @@ interface JwxtApi {
     @GET("/student/home/get-current-teach-week")
     suspend fun getCurrentTeachWeek(): CurrentTeachWeek
 
+    @GET("/student/for-std/exam-arrange/info/96223")
+    suspend fun getExamInfo():Response<ResponseBody>
+
+
     @FormUrlEncoded
     @POST
     suspend fun login(
@@ -73,7 +77,9 @@ interface JwxtApi {
             .followRedirects(true)
             .followSslRedirects(true)
             .addInterceptor(loggingInterceptor)
-
+            .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
             .build()
 
 

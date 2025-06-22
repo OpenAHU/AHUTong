@@ -62,8 +62,6 @@ class ScheduleViewModel : ViewModel() {
                 return@launch
             }
 
-
-
             val result = AHURepository.getSchedule()
             schedule.value = result
         }

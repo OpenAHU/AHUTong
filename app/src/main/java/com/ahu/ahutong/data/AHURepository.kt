@@ -2,30 +2,29 @@ package com.ahu.ahutong.data
 
 import arch.sink.utils.Utils
 import com.ahu.ahutong.data.api.AHUService
-import com.ahu.ahutong.data.api.APIDataSource
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.CrawlerDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.crawler.configs.Constants
+import com.ahu.ahutong.data.crawler.model.jwxt.ExamInfo
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.data.reptile.utils.DES
-import com.ahu.ahutong.data.reptile.utils.JsoupProxy
-import com.ahu.ahutong.ext.await
-import com.ahu.ahutong.ext.awaitString
 import com.ahu.ahutong.ext.isTerm
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.jsoup.Jsoup
-import java.util.concurrent.TimeUnit
+import java.util.regex.Matcher
+import kotlin.coroutines.CoroutineContext.Element
+
 
 /**
  * @Author: SinkDev
@@ -72,27 +71,27 @@ object AHURepository {
     /**
      * 通过semesterId获取课程表
      */
-    suspend fun getSchedule(isRefresh: Boolean = false)=withContext(Dispatchers.IO){
+    suspend fun getSchedule(isRefresh: Boolean = false) = withContext(Dispatchers.IO) {
 
-        if(!isRefresh){
+        if (!isRefresh) {
             //本地优先
         }
 
-        try{
+        try {
             val response = dataSource.getSchedule()
 
-            if(response.isSuccessful){
+            if (response.isSuccessful) {
                 Result.success(response.data)
-            }else{
+
+            } else {
                 Result.failure(Throwable(response.msg))
             }
-        }catch (e: Throwable){
+        } catch (e: Throwable) {
             Result.failure(e)
         }
 
 
     }
-
 
 
     /**
@@ -138,52 +137,73 @@ object AHURepository {
                 }
             }
             try {
-                val client = OkHttpClient.Builder()
-                    .readTimeout(5, TimeUnit.SECONDS)
-                    .writeTimeout(5, TimeUnit.SECONDS)
-                    .connectTimeout(15, TimeUnit.SECONDS)
-                    .retryOnConnectionFailure(true)
-                    .build()
-                val request = Request.Builder()
-                    .url("http://kskw.ahu.edu.cn/bkcx.asp?xh=$studentID")
-                    .build()
-                val response = client.newCall(request).await()
-                if (response.isSuccessful) {
-                    val body = response.body?.awaitString()
-                    if (body.toString().contains("暂无您的查询信息")) {
-                        Result.success(arrayListOf())
-                    } else {
-                        val bodyLines =
-                            body!!.replace("<br/?>".toRegex(), "<br>${System.lineSeparator()}")
-                                .split(System.lineSeparator()).stream()
-                                .filter { it.contains("<br>") }.iterator()
-                        val exams = mutableListOf<Exam>()
-                        while (bodyLines.hasNext()) {
-                            var informationLine = bodyLines.next()
-                            if (informationLine.contains("年")) {
-                                val current = Exam()
-                                val split1 = informationLine.split("/").toTypedArray()
-                                current.time = split1[0].substring(1 + split1[0].indexOf(":"))
-                                    .replace("<br/?>".toRegex(), "")
-                                current.course = split1[1].replace("<br/?>".toRegex(), "")
-                                informationLine = bodyLines.next()
-                                if (informationLine.contains("座")) {
-                                    val split2 = informationLine.split("/").toTypedArray()
-                                    current.seatNum =
-                                        split2[1].substring(1 + split2[1].indexOf("："))
-                                            .replace("<br/?>".toRegex(), "")
-                                    current.location = split2[2].replace(studentName, "")
-                                        .replace("<br/?>".toRegex(), "")
-                                    exams.add(current)
-                                }
-                            }
+                val response = JwxtApi.API.getExamInfo()
+                val doc = Jsoup.parse(response.body()!!.string())
+//                val infos: Elements? = doc.select("tr.unfinished, tr.finished");
+                val exams = mutableListOf<Exam>()
+//                if (infos != null) {
+//                    for (row in infos) {
+//                        val time: String? = row.selectFirst("div.time")!!.text()
+//                        val spans: Elements = row.select("td").get(0).select("span")
+//                        val campus = spans.get(0).text()
+//                        val building = spans.get(1).text()
+//                        val room = spans.get(2).text()
+//                        val seat = spans.get(3).text()
+//
+//                        val course: String? = row.select("td").get(1).selectFirst("span")!!.text()
+//
+//                        val examType: String? =
+//                            row.select("td").get(1).selectFirst("span.tag-span")!!.text()
+//
+//
+//                        val exam = Exam()
+//                        exam.course = course
+//                        exam.location = "$campus-$room"
+//                        exam.seatNum = seat
+//                        exam.time = time
+//
+//                        exams.add(exam)
+//                    }
+//                }
+
+                val scripts = doc.select("script")
+
+                val regex = Regex("""studentExamInfoVms\s*=\s*(\[.*?]);""", RegexOption.DOT_MATCHES_ALL)
+                val gson = Gson()
+
+                var foundList: ExamInfo? = null
+
+                for (script in scripts) {
+                    val data = script.data()
+                    val match = regex.find(data)
+                    if (match != null) {
+                        val rawJson = match.groups[1]?.value ?: continue
+                        val fixedJson = rawJson.replace("'", "\"")
+                        try {
+                            foundList = gson.fromJson(fixedJson, ExamInfo::class.java)
+                            break
+                        } catch (e: Exception) {
+                            println("解析JSON失败: ${e.message}")
                         }
-                        AHUCache.saveExamInfo(exams)
-                        Result.success(exams)
+                    }
+                }
+
+                if (foundList != null) {
+                    foundList.forEach {
+                        val exam = Exam()
+                        exam.course = "${it.course.nameZh}(${it.examType.nameZh})"
+                        exam.time = it.examTime
+                        exam.seatNum = it.seatNo.toString()
+                        exam.location = "${it.requiredCampus.nameZh}-${it.room}"
+                        exam.finished = it.finished
+                        exams.add(exam)
                     }
                 } else {
-                    Result.failure(Throwable("请求错误，代码 ${response.code}"))
+                    println("未找到 studentExamInfoVms 数据")
                 }
+
+                Result.success(exams.toList())
+
             } catch (e: Exception) {
                 Result.failure(Throwable("请求错误 $e"))
             }
@@ -243,84 +263,85 @@ object AHURepository {
      * 爬虫登录
      */
 
-    suspend fun loginWithCrawler(username: String, password: String): AHUResponse<User> = withContext(Dispatchers.IO) {
-        val result = AHUResponse<User>()
-        try {
+    suspend fun loginWithCrawler(username: String, password: String): AHUResponse<User> =
+        withContext(Dispatchers.IO) {
+            val result = AHUResponse<User>()
+            try {
 
-            val captchaBytes = AdwmhApi.API.getAuthCode().bytes()
-            val captchaPart = MultipartBody.Part.createFormData(
-                "captcha", "img.jpg",
-                captchaBytes.toRequestBody("image/jpg".toMediaType())
-            )
-            val captcha = AdwmhApi.API
-                .getCaptchaResult("http://120.26.208.230:8000/captcha", captchaPart)
-                .result
-
-            val info = try {
-                AdwmhApi.API.loginWithCaptcha(
-                    username,
-                    password,
-                    0,
-                    captcha
+                val captchaBytes = AdwmhApi.API.getAuthCode().bytes()
+                val captchaPart = MultipartBody.Part.createFormData(
+                    "captcha", "img.jpg",
+                    captchaBytes.toRequestBody("image/jpg".toMediaType())
                 )
-            } catch (e: Exception) {
-                result.code = -1
-                result.msg = e.toString()
-                return@withContext result
-            }
-            if (info.code != 10000) {
-                result.code = -1
-                result.msg = "登录失败：(${info.msg})"
-                return@withContext result
-            }
+                val captcha = AdwmhApi.API
+                    .getCaptchaResult("http://120.26.208.230:8000/captcha", captchaPart)
+                    .result
 
-            val loginPage = JwxtApi.API.fetchLoginInfo()
-
-            val document = Jsoup.parse(loginPage.body()!!.string())
-            val lt = document.selectFirst("input[name=lt]")?.attr("value")
-
-            if (lt == null) {
-                if (loginPage.raw().request.url.toString().endsWith(Constants.JWXT_HOME)){
-                    result.code = 0
-                    result.data = User(info.`object`.user.userName,info.`object`.user.idNumber)
-                    return@withContext result
-                }else{
+                val info = try {
+                    AdwmhApi.API.loginWithCaptcha(
+                        username,
+                        password,
+                        0,
+                        captcha
+                    )
+                } catch (e: Exception) {
                     result.code = -1
-                    result.msg = "登陆失败：获取登录页数据错误"
+                    result.msg = e.toString()
                     return@withContext result
                 }
+                if (info.code != 10000) {
+                    result.code = -1
+                    result.msg = "登录失败：(${info.msg})"
+                    return@withContext result
+                }
+
+                val loginPage = JwxtApi.API.fetchLoginInfo()
+
+                val document = Jsoup.parse(loginPage.body()!!.string())
+                val lt = document.selectFirst("input[name=lt]")?.attr("value")
+
+                if (lt == null) {
+                    if (loginPage.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
+                        result.code = 0
+                        result.data = User(info.`object`.user.userName, info.`object`.user.idNumber)
+                        return@withContext result
+                    } else {
+                        result.code = -1
+                        result.msg = "登陆失败：获取登录页数据错误"
+                        return@withContext result
+                    }
+                }
+
+
+                val jsession = SharedPrefsCookiePersistor(Utils.getApp()).loadAll()
+                    .firstOrNull {
+                        it.name == "JSESSIONID"
+                    }?.value ?: return@withContext result
+
+                val jwxtLoginUrl = "https://one.ahu.edu.cn/cas/login;jsessionid=$jsession" +
+                        "?service=https%3A%2F%2Fjw.ahu.edu.cn%2Fstudent%2Fsso%2Flogin"
+
+                val jwxtResponse = JwxtApi.API.login(
+                    jwxtLoginUrl,
+                    DES().strEnc(username + password + lt, "1", "2", "3"),
+                    username.length,
+                    password.length,
+                    lt.toString()
+                )
+                if (jwxtResponse.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
+                    result.code = 0
+                    result.data = User(info.`object`.user.userName, info.`object`.user.idNumber)
+                    return@withContext result
+                }
+
+
+                result.msg = "登录失败: 未知原因"
+                result.code = -1
+                result
+            } catch (e: Throwable) {
+                result.msg = "登录失败：${e.toString()}"
+                result.code = -1
+                result
             }
-
-
-            val jsession = SharedPrefsCookiePersistor(Utils.getApp()).loadAll()
-                .firstOrNull {
-                    it.name == "JSESSIONID"
-                }?.value ?: return@withContext result
-
-            val jwxtLoginUrl = "https://one.ahu.edu.cn/cas/login;jsessionid=$jsession" +
-                    "?service=https%3A%2F%2Fjw.ahu.edu.cn%2Fstudent%2Fsso%2Flogin"
-
-            val jwxtResponse = JwxtApi.API.login(
-                jwxtLoginUrl,
-                DES().strEnc(username+password+lt,"1","2","3"),
-                username.length,
-                password.length,
-                lt.toString()
-            )
-            if(jwxtResponse.raw().request.url.toString().endsWith(Constants.JWXT_HOME)){
-                result.code = 0
-                result.data = User(info.`object`.user.userName,info.`object`.user.idNumber)
-                return@withContext result
-            }
-
-
-            result.msg = "登录失败: 未知原因"
-            result.code = -1
-            result
-        }catch (e : Throwable){
-            result.msg = "登录失败：${e.toString()}"
-            result.code = -1
-            result
         }
-    }
 }
