@@ -7,6 +7,7 @@ import com.ahu.ahutong.data.crawler.CrawlerDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.crawler.configs.Constants
+import com.ahu.ahutong.data.crawler.model.adwnh.Info
 import com.ahu.ahutong.data.crawler.model.jwxt.ExamInfo
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Exam
@@ -267,73 +268,80 @@ object AHURepository {
         withContext(Dispatchers.IO) {
             val result = AHUResponse<User>()
             try {
+                var failedTimes = 0
+                var info: Info? = null
 
-                val captchaBytes = AdwmhApi.API.getAuthCode().bytes()
-                val captchaPart = MultipartBody.Part.createFormData(
-                    "captcha", "img.jpg",
-                    captchaBytes.toRequestBody("image/jpg".toMediaType())
-                )
-                val captcha = AdwmhApi.API
-                    .getCaptchaResult("http://120.26.208.230:8000/captcha", captchaPart)
-                    .result
+                while (failedTimes < 5) {
+                    try {
+                        val captchaBytes = AdwmhApi.API.getAuthCode().bytes()
+                        val captchaPart = MultipartBody.Part.createFormData(
+                            "captcha", "img.jpg",
+                            captchaBytes.toRequestBody("image/jpg".toMediaType())
+                        )
 
-                val info = try {
-                    AdwmhApi.API.loginWithCaptcha(
-                        username,
-                        password,
-                        0,
-                        captcha
+                        val captcha = AdwmhApi.API
+                            .getCaptchaResult("http://120.26.208.230:8000/captcha", captchaPart)
+                            .result
+
+                        info = AdwmhApi.API.loginWithCaptcha(
+                            username,
+                            password,
+                            0,
+                            captcha
+                        )
+
+                        if (info.code == 10000) {
+                            break
+                        }
+                    } catch (e: Exception) {
+                        result.code = -1
+                        result.msg = e.toString()
+                        return@withContext result
+                    }
+
+                    failedTimes++
+                }
+
+                info?.let{
+                    val loginPage = JwxtApi.API.fetchLoginInfo()
+
+                    val document = Jsoup.parse(loginPage.body()!!.string())
+                    val lt = document.selectFirst("input[name=lt]")?.attr("value")
+
+                    if (lt == null) {
+                        if (loginPage.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
+                            result.code = 0
+                            result.data = User(info.`object`.user.userName, info.`object`.user.idNumber)
+                            return@withContext result
+                        } else {
+                            result.code = -1
+                            result.msg = "登陆失败：获取登录页数据错误"
+                            return@withContext result
+                        }
+                    }
+
+
+                    val jsession = SharedPrefsCookiePersistor(Utils.getApp()).loadAll()
+                        .firstOrNull {
+                            it.name == "JSESSIONID"
+                        }?.value ?: return@withContext result
+
+                    val jwxtLoginUrl = "https://one.ahu.edu.cn/cas/login;jsessionid=$jsession" +
+                            "?service=https%3A%2F%2Fjw.ahu.edu.cn%2Fstudent%2Fsso%2Flogin"
+
+                    val jwxtResponse = JwxtApi.API.login(
+                        jwxtLoginUrl,
+                        DES().strEnc(username + password + lt, "1", "2", "3"),
+                        username.length,
+                        password.length,
+                        lt.toString()
                     )
-                } catch (e: Exception) {
-                    result.code = -1
-                    result.msg = e.toString()
-                    return@withContext result
-                }
-                if (info.code != 10000) {
-                    result.code = -1
-                    result.msg = "登录失败：(${info.msg})"
-                    return@withContext result
-                }
-
-                val loginPage = JwxtApi.API.fetchLoginInfo()
-
-                val document = Jsoup.parse(loginPage.body()!!.string())
-                val lt = document.selectFirst("input[name=lt]")?.attr("value")
-
-                if (lt == null) {
-                    if (loginPage.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
+                    if (jwxtResponse.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
                         result.code = 0
                         result.data = User(info.`object`.user.userName, info.`object`.user.idNumber)
                         return@withContext result
-                    } else {
-                        result.code = -1
-                        result.msg = "登陆失败：获取登录页数据错误"
-                        return@withContext result
                     }
                 }
-
-
-                val jsession = SharedPrefsCookiePersistor(Utils.getApp()).loadAll()
-                    .firstOrNull {
-                        it.name == "JSESSIONID"
-                    }?.value ?: return@withContext result
-
-                val jwxtLoginUrl = "https://one.ahu.edu.cn/cas/login;jsessionid=$jsession" +
-                        "?service=https%3A%2F%2Fjw.ahu.edu.cn%2Fstudent%2Fsso%2Flogin"
-
-                val jwxtResponse = JwxtApi.API.login(
-                    jwxtLoginUrl,
-                    DES().strEnc(username + password + lt, "1", "2", "3"),
-                    username.length,
-                    password.length,
-                    lt.toString()
-                )
-                if (jwxtResponse.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
-                    result.code = 0
-                    result.data = User(info.`object`.user.userName, info.`object`.user.idNumber)
-                    return@withContext result
-                }
-
 
                 result.msg = "登录失败: 未知原因"
                 result.code = -1
