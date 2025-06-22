@@ -6,6 +6,7 @@ import com.ahu.ahutong.data.crawler.model.adwnh.Balance
 import com.ahu.ahutong.data.crawler.model.adwnh.Captcha
 import com.ahu.ahutong.data.crawler.model.adwnh.Info
 import com.ahu.ahutong.data.crawler.net.AutoLoginInterceptor
+import com.ahu.ahutong.data.crawler.net.TokenAuthenticator
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import okhttp3.MultipartBody
@@ -71,7 +72,8 @@ interface AdwmhApi {
 
         val okHttpClient = OkHttpClient
             .Builder()
-            .addInterceptor(AutoLoginInterceptor())
+            .addNetworkInterceptor(AutoLoginInterceptor())
+            .authenticator(TokenAuthenticator())
             .followRedirects(true)
             .followSslRedirects(true)
             .cookieJar(cookieJar)

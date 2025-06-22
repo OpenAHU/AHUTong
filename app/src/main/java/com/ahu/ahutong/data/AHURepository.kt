@@ -270,7 +270,7 @@ object AHURepository {
             }
             if (info.code != 10000) {
                 result.code = -1
-                result.msg = "登录失败：账号或密码错误 (${info.code})"
+                result.msg = "登录失败：(${info.msg})"
                 return@withContext result
             }
 
@@ -309,7 +309,7 @@ object AHURepository {
             )
             if(jwxtResponse.raw().request.url.toString().endsWith(Constants.JWXT_HOME)){
                 result.code = 0
-                result.data = User(info.`object`.user.idNumber,info.`object`.user.userName)
+                result.data = User(info.`object`.user.userName,info.`object`.user.idNumber)
                 return@withContext result
             }
 

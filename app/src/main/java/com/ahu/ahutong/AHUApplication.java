@@ -5,6 +5,7 @@ import com.tencent.bugly.crashreport.CrashReport;
 
 import arch.sink.BaseApplication;
 import kotlin.Unit;
+import kotlinx.coroutines.sync.Mutex;
 
 /**
  * @Author SinkDev
@@ -13,6 +14,9 @@ import kotlin.Unit;
  */
 public class AHUApplication extends BaseApplication {
     public static SingleLiveEvent<Unit> sessionUpdated = new SingleLiveEvent<>();
+
+    public volatile static Boolean sessionExpired = true;
+    public volatile static Object reLoginMutex = new Object();
 
     @Override
     public void onCreate() {

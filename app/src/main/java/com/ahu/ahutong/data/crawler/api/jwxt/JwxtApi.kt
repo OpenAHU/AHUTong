@@ -7,6 +7,7 @@ import com.ahu.ahutong.data.crawler.model.jwxt.CourseTable
 import com.ahu.ahutong.data.crawler.model.jwxt.CurrentSemester
 import com.ahu.ahutong.data.crawler.model.jwxt.CurrentTeachWeek
 import com.ahu.ahutong.data.crawler.net.AutoLoginInterceptor
+import com.ahu.ahutong.data.crawler.net.TokenAuthenticator
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import okhttp3.OkHttpClient
@@ -67,7 +68,8 @@ interface JwxtApi {
 
         val okHttpClient = OkHttpClient.Builder()
             .cookieJar(cookieJar)
-            .addInterceptor(AutoLoginInterceptor())
+            .addNetworkInterceptor(AutoLoginInterceptor())
+            .authenticator(TokenAuthenticator())
             .followRedirects(true)
             .followSslRedirects(true)
             .addInterceptor(loggingInterceptor)

@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -17,6 +18,8 @@ import androidx.core.view.WindowCompat
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.rememberNavController
+import arch.sink.utils.Utils
+import com.ahu.ahutong.data.api.AHUCookieJar
 //import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.Main
@@ -27,6 +30,8 @@ import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.ui.theme.AHUTheme
 import com.ahu.ahutong.widget.ClassWidget
+import com.franmontiel.persistentcookiejar.cache.SetCookieCache
+import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -45,7 +50,8 @@ class MainActivity : ComponentActivity() {
         // 日活统计接口
 //        mainViewModel.addAppAccess()
 
-//        init()
+
+        init()
 
 //        loginViewModel.serverLoginResult.observe(this) { result ->
 //            result.onSuccess {
