@@ -47,6 +47,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -72,6 +73,7 @@ import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.selects.select
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -212,7 +214,7 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
         } else {
             repeat(visibilities.size) {
 //                visibilities.removeLast()
-                visibilities.removeAt(visibilities.size-1)
+                visibilities.removeAt(visibilities.size - 1)
                 delay(50)
             }
         }
@@ -225,7 +227,8 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             .height(
                 animateDpAsState(
                     targetValue = if (visible) {
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 80.dp
+                        WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding() + 80.dp
                     } else {
                         0.dp
                     },
@@ -252,7 +255,7 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             ) {
                 this@Row.NavigationBarItem(
                     selected = currentRoute == "home",
-                    onClick = { navController.navigate("home") },
+                    onClick = { navController.navigatePreservingHome("home") },
                     icon = {
                         Icon(
                             imageVector = Icons.Outlined.Home,
@@ -283,7 +286,10 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             ) {
                 this@Row.NavigationBarItem(
                     selected = currentRoute == "schedule",
-                    onClick = { navController.navigate("schedule") },
+                    onClick = {
+                        navController.navigatePreservingHome("schedule")
+                    },
+
                     icon = {
                         Icon(
                             imageVector = Icons.Outlined.TableChart,
@@ -314,7 +320,9 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             ) {
                 this@Row.NavigationBarItem(
                     selected = currentRoute == "tools",
-                    onClick = { navController.navigate("tools") },
+                    onClick = {
+                        navController.navigatePreservingHome("tools")
+                              },
                     icon = {
                         Icon(
                             imageVector = Icons.Outlined.Build,
@@ -333,5 +341,18 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
                 )
             }
         }
+    }
+}
+fun NavController.navigatePreservingHome(route: String) {
+    val currentRoute = this.currentBackStackEntry?.destination?.route
+    if (currentRoute == route) return
+
+    val homeRoute = this.graph.startDestinationRoute.toString()
+
+    this.navigate(route) {
+        popUpTo(homeRoute) {
+            inclusive = false
+        }
+        launchSingleTop = true
     }
 }
