@@ -5,6 +5,7 @@ import com.ahu.ahutong.data.api.AHUCookieJar
 import com.ahu.ahutong.data.crawler.model.adwnh.Balance
 import com.ahu.ahutong.data.crawler.model.adwnh.Captcha
 import com.ahu.ahutong.data.crawler.model.adwnh.Info
+import com.ahu.ahutong.data.crawler.model.adwnh.QRcode
 import com.ahu.ahutong.data.crawler.net.AutoLoginInterceptor
 import com.ahu.ahutong.data.crawler.net.TokenAuthenticator
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
@@ -42,10 +43,10 @@ interface AdwmhApi {
 
     @GET("/xzxcard/yue")
     suspend fun getBalance(): Balance
-//
-//
-//    @GET("/xzxcard/qrcode")
-//    suspend fun getQrcode(): QRcode
+
+
+    @GET("/xzxcard/qrcode")
+    suspend fun getQrcode(): QRcode
 
     @POST
     @Multipart

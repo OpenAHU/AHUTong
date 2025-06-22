@@ -32,8 +32,10 @@ import com.ahu.ahutong.ui.theme.AHUTheme
 import com.ahu.ahutong.widget.ClassWidget
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()

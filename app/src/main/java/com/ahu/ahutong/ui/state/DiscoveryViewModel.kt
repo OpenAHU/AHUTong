@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.state
 
+import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -12,21 +13,31 @@ import androidx.lifecycle.viewModelScope
 import arch.sink.utils.TimeUtils
 import arch.sink.utils.Utils
 import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Banner
 import com.ahu.ahutong.data.model.Course
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * @Author Simon
  * @Date 2021/8/3-22:12
  * @Email 330771794@qq.com
  */
-class DiscoveryViewModel : ViewModel() {
+
+
+@HiltViewModel
+class DiscoveryViewModel @Inject constructor(): ViewModel() {
     val bathroom = mutableStateMapOf<String, String>()
     var balance by mutableStateOf(0.0)
     var transitionBalance by mutableStateOf(0.0)
@@ -36,6 +47,8 @@ class DiscoveryViewModel : ViewModel() {
     val bannerData: MutableLiveData<List<Banner>> by lazy {
         MutableLiveData<List<Banner>>()
     }
+
+    var qrcode = MutableStateFlow<Bitmap?>(null)
 
     fun loadActivityBean() {
         viewModelScope.launch {
@@ -88,4 +101,20 @@ class DiscoveryViewModel : ViewModel() {
             it.startTime
         }
     }
+
+    fun loadQrCode(){
+        viewModelScope.launch {
+            val response = AdwmhApi.API.getQrcode()
+
+            if(response.code == 0){
+
+            }
+
+            val encoder = BarcodeEncoder()
+            qrcode.value = encoder.encodeBitmap(response.`object`, BarcodeFormat.QR_CODE, 400, 400)
+
+        }
+
+    }
+
 }

@@ -86,8 +86,7 @@ fun Home(
         SlideInContent(visible = 1 in discoveryViewModel.visibilities) {
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 CampusCard(
                     balance = discoveryViewModel.balance,
