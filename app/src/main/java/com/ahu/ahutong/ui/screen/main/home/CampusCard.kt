@@ -1,6 +1,7 @@
 package com.ahu.ahutong.ui.screen.main.home
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -33,6 +34,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +53,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.kyant.monet.n1
@@ -62,8 +65,6 @@ fun RowScope.CampusCard(
     balance: Double,
     transitionBalance: Double
 ) {
-
-    val discoveryViewModel: DiscoveryViewModel = hiltViewModel()
     var isQrcode by remember { mutableStateOf(false) }
 
     Box(
@@ -105,7 +106,6 @@ fun RowScope.CampusCard(
                     balance = balance,
                     transitionBalance = transitionBalance,
                     onClick = {
-                        discoveryViewModel.loadQrCode()
                         isQrcode = true
                     }
                 )
@@ -220,12 +220,14 @@ private fun CardView(balance: Double, transitionBalance: Double, onClick: () -> 
 
 @Composable
 private fun QRcodeView(balance: Double, onBack: () -> Unit) {
-
-
-
     val discoveryViewModel: DiscoveryViewModel = hiltViewModel()
     val qrcodeBitmap by discoveryViewModel.qrcode.collectAsState()
 
+    if (AHUCache.isLogin()) {
+        LaunchedEffect(Unit) {
+            discoveryViewModel.loadQrCode()
+        }
+    }
     Column(
         modifier = Modifier
             .clip(SmoothRoundedCornerShape(24.dp))
@@ -237,10 +239,15 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
         Spacer(Modifier.height(16.dp))
 
         qrcodeBitmap?.let {
-            Box(modifier = Modifier.clickable{
-                discoveryViewModel.loadQrCode()
-            }){
-                Image(bitmap = it.asImageBitmap(),
+            Box(
+                modifier = Modifier
+                    .clickable {
+                        discoveryViewModel.loadQrCode()
+                    }
+                    .clip(SmoothRoundedCornerShape(8.dp))
+            ) {
+                Image(
+                    bitmap = it.asImageBitmap(),
                     contentDescription = "QR Code",
                     modifier = Modifier
                         .size(200.dp)
@@ -248,14 +255,14 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
 
                     )
             }
-        }?: CircularProgressIndicator()
+        } ?: CircularProgressIndicator()
 
 
         Spacer(Modifier.height(24.dp))
 
-        Box(modifier = Modifier.clickable{
+        Box(modifier = Modifier.clickable {
             onBack()
-        }){
+        }) {
             Text("返回")
         }
 
