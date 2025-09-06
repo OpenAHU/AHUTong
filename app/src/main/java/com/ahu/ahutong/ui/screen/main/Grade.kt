@@ -95,7 +95,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
             contentPadding = PaddingValues(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(schoolYears) {
+            items(schoolYears.toList()) {
                 val isSelected = it == gradeViewModel.schoolYear
                 Text(
                     text = it,
@@ -120,7 +120,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
             contentPadding = PaddingValues(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(arrayOf("1", "2", "3")) {
+            items(arrayOf("1", "2")) {
                 val isSelected = it == gradeViewModel.schoolTerm
                 Text(
                     text = it,
@@ -212,7 +212,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            text = "${it.courseNature} (${it.courseNum})",
+                            text = "${it.courseNature?:""} (${it.courseNum})",
                             color = 50.n1 withNight 80.n1,
                             style = MaterialTheme.typography.bodyMedium
                         )

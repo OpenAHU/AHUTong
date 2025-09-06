@@ -39,6 +39,8 @@ import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.ExamViewModel
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun Exam(
@@ -53,7 +55,8 @@ fun Exam(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .systemBarsPadding(),
+            .systemBarsPadding()
+            .padding(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(
@@ -67,7 +70,7 @@ fun Exam(
             if (!exam.isNullOrEmpty()) {
                 Column(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
+                        .padding(16.dp)
                         .clip(SmoothRoundedCornerShape(32.dp)),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
@@ -92,7 +95,20 @@ fun Exam(
                                 )
 
                                 Spacer(modifier = Modifier.width(8.dp))
-                                val cardColor = if (it.finished) Color.Gray else Color(0xFF4CAF50)
+
+
+                                val isFinished = calcTime(it.time)  //-1：错误  1：未考试 2：考试结束 3：考试中
+
+
+                                var cardColor = if (it.finished) Color.Gray else Color(0xFF4CAF50)
+
+                                cardColor = when(isFinished){
+                                    1->Color(0xFF4CAF50)
+                                    2->Color.Gray
+                                    3->Color(0xFFFFC107)
+                                    else -> {Color.Red}
+                                }
+
 
                                 Box(
                                     modifier = Modifier
@@ -101,7 +117,12 @@ fun Exam(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = if (it.finished) "考试结束" else "考试未结束",
+                                        text = when(isFinished){
+                                            1->"考试未开始"
+                                            2->"考试已结束"
+                                            3->"考试进行中"
+                                            else -> {"时间解析错误"}
+                                        },
                                         color = Color.White,
                                         fontSize = 12.sp
                                     )
@@ -146,5 +167,34 @@ fun Exam(
 
 
 
+    }
+}
+
+
+fun calcTime(time:String):Int{
+    val now = LocalDateTime.now()
+    val parts = time.split(" ")
+    if (parts.size != 2 || !parts[1].contains("~")) {
+        return -1;
+    }
+
+    val datePart = parts[0]                   // "2025-06-23"
+    val timeParts = parts[1].split("~")       // ["10:20", "12:20"]
+
+    if (timeParts.size != 2) {
+        return -1
+    }
+
+    val startDateTimeStr = "${datePart} ${timeParts[0]}"
+    val endDateTimeStr = "${datePart} ${timeParts[1]}"
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    val startTime = LocalDateTime.parse(startDateTimeStr, formatter)
+    val endTime = LocalDateTime.parse(endDateTimeStr, formatter)
+
+    when {
+        now.isBefore(startTime) -> return 1
+        now.isAfter(endTime) -> return 2
+        else -> return 3
     }
 }

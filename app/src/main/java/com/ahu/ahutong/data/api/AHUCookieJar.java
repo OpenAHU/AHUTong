@@ -87,4 +87,48 @@ public class AHUCookieJar implements ClearableCookieJar {
         cache.clear();
         persistor.clear();
     }
+
+
+    public void logAllCookies() {
+        Log.i(TAG, "=== 当前 CookieJar 中的所有 cookie ===");
+        for (Cookie cookie : cache) {
+            Log.i(TAG, String.format(
+                    "name=%s; value=%s; domain=%s; path=%s; secure=%b; httponly=%b; expiresAt=%s",
+                    cookie.name(),
+                    cookie.value(),
+                    cookie.domain(),
+                    cookie.path(),
+                    cookie.secure(),
+                    cookie.httpOnly(),
+                    new java.util.Date(cookie.expiresAt()).toString()
+            ));
+        }
+        Log.i(TAG, "=== End of Cookie list ===");
+    }
+
+
+    public void clearCookiesForUrl(@NonNull String url) {
+
+        HttpUrl urlToDelete = HttpUrl.get(url);
+
+        Log.i(TAG, "clearCookiesForUrl: " + url);
+        List<Cookie> cookiesToRemove = new ArrayList<>();
+
+        synchronized (this) {
+            for (Iterator<Cookie> it = cache.iterator(); it.hasNext(); ) {
+                Cookie cookie = it.next();
+
+                if (cookie.matches(urlToDelete)) {
+                    cookiesToRemove.add(cookie);
+                    it.remove();
+                    Log.i(TAG, "Removed cookie: " + cookie);
+                }
+            }
+
+            // 同步更新持久化
+            if (!cookiesToRemove.isEmpty()) {
+                persistor.removeAll(cookiesToRemove);
+            }
+        }
+    }
 }

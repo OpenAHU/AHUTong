@@ -1,5 +1,8 @@
 package com.ahu.ahutong.ui.state
 
+import android.graphics.Color
+import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,13 +11,19 @@ import com.ahu.ahutong.common.SingleLiveEvent
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.dao.PreferencesManager
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.ScheduleConfigBean
+import com.ahu.ahutong.ext.GlobalCoroutineExceptionHandler
+import com.ahu.ahutong.ext.launchSafe
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -25,7 +34,8 @@ import java.time.ZoneId
  * @Date 2021/7/27-19:16
  * @Email 468766131@qq.com
  */
-class ScheduleViewModel : ViewModel() {
+class ScheduleViewModel () : ViewModel() {
+    val TAG = "ScheduleViewModel"
     val schedule = MutableLiveData<Result<List<Course>>>()
 
     val showSelectTimeDialog = SingleLiveEvent<Boolean>()
@@ -45,6 +55,7 @@ class ScheduleViewModel : ViewModel() {
         scheduleConfig.value = configBean
     }
 
+
     /**
      * 刷新课表
      * @param schoolYear String
@@ -56,19 +67,22 @@ class ScheduleViewModel : ViewModel() {
         schoolTerm: String = this.schoolTerm,
         isRefresh: Boolean = false
     ) {
-        viewModelScope.launch(Dispatchers.Main) {
-            if (!AHUCache.isLogin()) {
-                schedule.value = Result.failure(Throwable("请先登录！"))
-                return@launch
+        viewModelScope.launchSafe {
+            withContext(Dispatchers.Main){
+                if (!AHUCache.isLogin()) {
+                    schedule.value = Result.failure(Throwable("请先登录！"))
+                    return@withContext
+                }
+
+                val result = AHURepository.getSchedule(isRefresh = false)
+                schedule.value = result
             }
 
-            val result = AHURepository.getSchedule()
-            schedule.value = result
         }
     }
 
     fun loadConfig() {
-        viewModelScope.launch {
+        viewModelScope.launchSafe {
             withContext(Dispatchers.IO) {
 //                var time = AHUCache.getSchoolTermStartTime(schoolYear, schoolTerm)
 //                if (time == null) {
@@ -87,6 +101,8 @@ class ScheduleViewModel : ViewModel() {
                 // 当前周数
 
                 val scheduleConfigResult = JwxtApi.API.getCurrentTeachWeek()
+
+                AHUCache.saveSchoolTerm(scheduleConfigResult.currentSemester)
 
                 scheduleConfigBean.week = scheduleConfigResult.weekIndex
                 // 当前周几

@@ -52,20 +52,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.dao.PreferencesManager
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun RowScope.CampusCard(
     balance: Double,
-    transitionBalance: Double
+    transitionBalance: Double,
+    navController: NavController
 ) {
-    var isQrcode by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context = context) }
+
+    val pref by preferencesManager.showQRCode.collectAsState(initial = false)
+
+    var isQrcode by remember { mutableStateOf(pref) }
+
+    LaunchedEffect(pref) {
+        isQrcode = pref
+    }
+
 
     Box(
         modifier = Modifier
@@ -107,7 +122,8 @@ fun RowScope.CampusCard(
                     transitionBalance = transitionBalance,
                     onClick = {
                         isQrcode = true
-                    }
+                    },
+                    navController
                 )
             } else {
                 QRcodeView(
@@ -125,7 +141,12 @@ fun RowScope.CampusCard(
 
 
 @Composable
-private fun CardView(balance: Double, transitionBalance: Double, onClick: () -> Unit) {
+private fun CardView(
+    balance: Double,
+    transitionBalance: Double,
+    onClick: () -> Unit,
+    navController: NavController
+) {
     val context = LocalContext.current
 
 
@@ -202,7 +223,7 @@ private fun CardView(balance: Double, transitionBalance: Double, onClick: () -> 
 //                        Toast.makeText(context, "请安装支付宝", Toast.LENGTH_SHORT).show()
 //                    }
 
-                    Toast.makeText(context, "正在修复中...", Toast.LENGTH_SHORT).show()
+                    navController.navigate("card_balance_deposit")
 
                 }
                 .padding(16.dp),
@@ -222,6 +243,7 @@ private fun CardView(balance: Double, transitionBalance: Double, onClick: () -> 
 private fun QRcodeView(balance: Double, onBack: () -> Unit) {
     val discoveryViewModel: DiscoveryViewModel = hiltViewModel()
     val qrcodeBitmap by discoveryViewModel.qrcode.collectAsState()
+    val finished by discoveryViewModel.state.collectAsState()
 
     if (AHUCache.isLogin()) {
         LaunchedEffect(Unit) {
@@ -238,24 +260,30 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
         Text("¥ $balance")
         Spacer(Modifier.height(16.dp))
 
-        qrcodeBitmap?.let {
-            Box(
-                modifier = Modifier
-                    .clickable {
-                        discoveryViewModel.loadQrCode()
-                    }
-                    .clip(SmoothRoundedCornerShape(8.dp))
-            ) {
-                Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = "QR Code",
+        if (finished) {
+            qrcodeBitmap?.let {
+                Box(
                     modifier = Modifier
-                        .size(200.dp)
-                        .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
+                        .clickable {
+                            discoveryViewModel.loadQrCode()
+                        }
+                        .clip(SmoothRoundedCornerShape(8.dp))
+                ) {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "QR Code",
+                        modifier = Modifier
+                            .size(200.dp)
+                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
+                        )
+                }
+            } ?: Text(
+                text = "加载失败"
+            )
 
-                    )
-            }
-        } ?: CircularProgressIndicator()
+        } else {
+            CircularProgressIndicator()
+        }
 
 
         Spacer(Modifier.height(24.dp))
@@ -265,7 +293,5 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
         }) {
             Text("返回")
         }
-
-
     }
 }

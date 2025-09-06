@@ -10,7 +10,7 @@ fun User.getSchoolYears(): Array<String> {
     val calendar = Calendar.getInstance()
     // 获取截至年份
     val thisYear = calendar.get(Calendar.YEAR) +
-        if (calendar.get(Calendar.MONTH) < Calendar.AUGUST) -1 else 0
+        if (calendar.get(Calendar.MONTH) < Calendar.SEPTEMBER) -1 else 0
     return (thisYear downTo startYear).toList()
         .map { "$it-${it + 1}" }
         .toTypedArray()

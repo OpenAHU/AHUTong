@@ -1,15 +1,20 @@
 package com.ahu.ahutong.data.crawler.api.adwmh
 
+import android.content.Context
 import arch.sink.utils.Utils
 import com.ahu.ahutong.data.api.AHUCookieJar
+import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
+import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.model.adwnh.Balance
 import com.ahu.ahutong.data.crawler.model.adwnh.Captcha
 import com.ahu.ahutong.data.crawler.model.adwnh.Info
 import com.ahu.ahutong.data.crawler.model.adwnh.QRcode
 import com.ahu.ahutong.data.crawler.net.AutoLoginInterceptor
 import com.ahu.ahutong.data.crawler.net.TokenAuthenticator
+import com.ahu.ahutong.data.dao.AHUCache
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import okhttp3.Interceptor
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -59,8 +64,7 @@ interface AdwmhApi {
             level = HttpLoggingInterceptor.Level.HEADERS
         }
 
-        private val cookieJar =
-            AHUCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(Utils.getApp()))
+        private val cookieJar = CookieManager.cookieJar
 //        val cookieJar = PersistentCookieJar(
 //            SetCookieCache(),
 //            SharedPrefsCookiePersistor(MyApp.instance.applicationContext)
@@ -78,7 +82,7 @@ interface AdwmhApi {
             .followRedirects(true)
             .followSslRedirects(true)
             .cookieJar(cookieJar)
-            .addInterceptor(loggingInterceptor)
+            .addNetworkInterceptor(loggingInterceptor)
             .build()
 
         val API = Retrofit.Builder()

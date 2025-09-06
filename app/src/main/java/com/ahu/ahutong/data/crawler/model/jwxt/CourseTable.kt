@@ -10,7 +10,7 @@ data class StudentTableVm(
     val arrangedLessonSearchVms: List<ArrangedLessonSearchVm>,
     val code: String,
     val courseTablePrintConfigs: List<CourseTablePrintConfig>,
-    val credits: Int,
+    val credits: Float,
     val department: String,
     val grade: String,
     val id: Int,
@@ -33,7 +33,7 @@ data class Activity(
     val courseCode: String,
     val courseName: String,
     val courseType: CourseType,
-    val credits: Int,
+    val credits: Float,
     val endTime: String,
     val endUnit: Int,
     val endUnitName: Int,
@@ -45,7 +45,7 @@ data class Activity(
     val lessonRemark: Any,
     val limitCount: Int,
     val periodInfo: PeriodInfo,
-    val room: String,
+    val room: String?,
     val semesterId: Any,
     val startTime: String,
     val startUnit: Int,
@@ -232,7 +232,7 @@ data class Course(
     val courseSpec: Any,
     val courseTaxon: CourseTaxon,
     val courseType: CourseType,
-    val credits: Int,
+    val credits: Float,
     val defaultExamMode: Any,
     val defaultOpenDepart: Any,
     val defaultOpenMajor: Any,
@@ -517,7 +517,7 @@ data class RoomSeatText(
 )
 
 data class Person(
-    val eleSignature: String,
+//    val eleSignature: String,
     val id: Int,
     val nameEn: String,
     val nameZh: String

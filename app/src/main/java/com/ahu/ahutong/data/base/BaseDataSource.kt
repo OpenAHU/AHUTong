@@ -1,10 +1,16 @@
 package com.ahu.ahutong.data.base
 
 import com.ahu.ahutong.data.AHUResponse
+import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
+import com.ahu.ahutong.data.crawler.model.ycard.Request
 import com.ahu.ahutong.data.model.BathRoom
+import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Grade
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
+import retrofit2.Response
 
 /**
  * @Author: Sink
@@ -31,4 +37,26 @@ interface BaseDataSource {
     suspend fun getCardMoney(): AHUResponse<Card>
 
     suspend fun getBathRooms(): AHUResponse<List<BathRoom>>
+
+
+    /**
+     * get account info by tel and bathroom
+     */
+    suspend fun getBathroomTelInfo(bathroom:String,tel: String): AHUResponse<BathroomTelInfo>
+
+
+    /**
+     * get card info for charge
+     */
+    suspend fun getCardInfo(): AHUResponse<CardInfo>
+
+
+    /**
+     * gets third-party order data before executing payment
+     */
+
+    suspend fun getOrderThirdData(request : Request): AHUResponse<Response<ResponseBody>>
+
+    suspend fun pay(request : Request): AHUResponse<Response<ResponseBody>>
+
 }

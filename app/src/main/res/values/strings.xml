@@ -24,7 +24,7 @@
     <string name="setting_change_theme">更换主题</string>
     <string name="setting_diy_theme">自定义主题</string>
     <string name="setting_show_all">显示非本周课程</string>
-    <string name="setting_clear">清除缓存</string>
+    <string name="setting_clear">清除数据</string>
     <string name="license">开源协议</string>
     <string name="login">认证</string>
     <string name="hint_userid">请输入您的学号</string>
@@ -95,4 +95,6 @@
     <string name="school_year">学年</string>
     <string name="school_term">学期</string>
     <string name="current_week">当前周</string>
+
+    <string name="preferences">偏好设置</string>
 </resources>

@@ -65,7 +65,26 @@ class LicenseViewModel : ViewModel() {
                 "Fran Montiel ",
                 "https://github.com/franmontiel/PersistentCookieJar",
                 "Apache Software License 2.0"
+            ),
+            License(
+                "Accompanist",
+                "Google",
+                "https://github.com/google/accompanist",
+                "Apache Software License 2.0"
+            ),
+            License(
+                "ZXing Android Embedded",
+                "JourneyApps",
+                "https://github.com/journeyapps/zxing-android-embedded",
+                "Apache Software License 2.0"
+            ),
+            License(
+                "Monet",
+                "Kyant0",
+                "https://github.com/Kyant0/Monet",
+                "Apache Software License 2.0"
             )
+
         )
     }
 }

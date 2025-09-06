@@ -75,9 +75,9 @@
         <receiver
             android:name="com.ahu.ahutong.widget.ClassWidget"
             android:enabled="true"
+            android:exported="false"
             android:label="@string/app_name"
-            android:process=":widgetProvider"
-            android:exported="false">
+            android:process=":widgetProvider">
 
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

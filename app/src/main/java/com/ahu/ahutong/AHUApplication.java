@@ -1,5 +1,7 @@
 package com.ahu.ahutong;
 
+import android.widget.Toast;
+
 import com.ahu.ahutong.common.SingleLiveEvent;
 import com.tencent.bugly.crashreport.CrashReport;
 
@@ -24,7 +26,7 @@ public class AHUApplication extends BaseApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        //CrashReport.initCrashReport(this, "24521a5b56", BuildConfig.DEBUG);
+        CrashReport.initCrashReport(this, "2c2ccadcad", true);
     }
 
 }

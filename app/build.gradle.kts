@@ -1,4 +1,4 @@
-plugins{
+plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
@@ -9,8 +9,8 @@ plugins{
 
 
 android {
-    namespace  = "com.ahu.ahutong"
-    compileSdk = 35
+    namespace = "com.ahu.ahutong"
+    compileSdk = 36
 
 
 //    lint {
@@ -28,6 +28,14 @@ android {
         versionCode = 1
         versionName = "1.0.0-beta6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters.add("armeabi-v7a")
+            abiFilters.add("arm64-v8a")
+            abiFilters.add("x86")
+            abiFilters.add("x86_64")
+        }
+
     }
 
 //    signingConfigs {
@@ -66,7 +74,8 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
-            )}
+            )
+        }
     }
 //    packagingOptions {
 //        resources {
@@ -86,6 +95,7 @@ android {
         dataBinding = true
         viewBinding = true
         compose = true
+        buildConfig = true
     }
     kapt.includeCompileClasspath = false
 
@@ -97,6 +107,7 @@ android {
 dependencies {
 
     implementation(project(":arch"))
+    implementation(libs.ads.mobile.sdk)
 
     val composeBom = platform("androidx.compose:compose-bom:2022.12.00")
     implementation(composeBom)
@@ -137,4 +148,6 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
+
+    implementation(libs.crashreport)
 }

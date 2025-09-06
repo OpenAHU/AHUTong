@@ -50,15 +50,15 @@ fun Setup(
         animatedComposable("splash") {
             Splash()
         }
-        animatedComposable("login") {
-            Login(
-                loginViewModel = loginViewModel,
-                onLoggedIn = {
-//                    navController.navigate("info")
-                    onSetup()
-                }
-            )
-        }
+//        animatedComposable("login") {
+//            Login(
+//                loginViewModel = loginViewModel,
+//                onLoggedIn = {
+////                    navController.navigate("info")
+//                    onSetup()
+//                }
+//            )
+//        }
         animatedComposable("info") {
             Info(
                 scheduleViewModel = scheduleViewModel,

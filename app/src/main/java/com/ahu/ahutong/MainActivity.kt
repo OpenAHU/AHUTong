@@ -30,11 +30,13 @@ import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.ui.theme.AHUTheme
+import com.ahu.ahutong.utils.animatedComposable
 import com.ahu.ahutong.widget.ClassWidget
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlin.concurrent.thread
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -47,20 +49,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
-//        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
         enableEdgeToEdge()
-        // 日活统计接口
-//        mainViewModel.addAppAccess()
-
-
         init()
-
-//        loginViewModel.serverLoginResult.observe(this) { result ->
-//            result.onSuccess {
-//                init(refreshSchedule = true)
-//            }
-//        }
 
         setContent {
             AHUTheme {
@@ -75,11 +65,8 @@ class MainActivity : ComponentActivity() {
                     isReLoginShown = isReLoginDialogShown,
                     onReLoginDismiss = { isReLoginDialogShown = false }
                 )
-                LaunchedEffect(Unit) {
-                    if (!AHUCache.isLogin()) {
-                        navController.navigate("setup")
-                    }
-                }
+
+
                 LaunchedEffect(Unit) {
                     AHUApplication.sessionUpdated.observe(this@MainActivity) {
                         // 防止多次的弹出
@@ -96,11 +83,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun init(refreshSchedule: Boolean = false) {
-
-        if(AHUCache.isLogin()){
+        if (AHUCache.isLogin()) {
             discoveryViewModel.loadActivityBean()
             scheduleViewModel.loadConfig()
-            scheduleViewModel.refreshSchedule(isRefresh = refreshSchedule)
+            scheduleViewModel.refreshSchedule(isRefresh = true)
             // 更新小部件数据
             val manager = AppWidgetManager.getInstance(this)
             val componentName = ComponentName(this, ClassWidget::class.java)

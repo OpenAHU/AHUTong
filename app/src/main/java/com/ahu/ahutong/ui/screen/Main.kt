@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.screen
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
@@ -51,6 +52,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.ahu.ahutong.BuildConfig
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.ui.screen.main.BathroomDeposit
+import com.ahu.ahutong.ui.screen.main.CardBalanceDeposit
 //import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.screen.main.Exam
 import com.ahu.ahutong.ui.screen.main.Grade
@@ -59,7 +64,9 @@ import com.ahu.ahutong.ui.screen.main.PhoneBook
 import com.ahu.ahutong.ui.screen.main.Schedule
 import com.ahu.ahutong.ui.screen.main.Tools
 import com.ahu.ahutong.ui.screen.settings.Contributors
+import com.ahu.ahutong.ui.screen.settings.Debug
 import com.ahu.ahutong.ui.screen.settings.License
+import com.ahu.ahutong.ui.screen.settings.Preferences
 import com.ahu.ahutong.ui.screen.setup.Info
 import com.ahu.ahutong.ui.screen.setup.Login
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
@@ -91,7 +98,7 @@ fun Main(
     Box {
         NavHost(
             navController = navController,
-            startDestination = "home",
+            startDestination = "splash",
             modifier = Modifier
                 .fillMaxSize()
                 .background(96.n1 withNight 10.n1)
@@ -122,7 +129,14 @@ fun Main(
             animatedComposable("login") {
                 Login(
                     loginViewModel = loginViewModel,
-                    onLoggedIn = { navController.popBackStack() }
+                    onLoggedIn = {
+                        navController.navigate("home"){
+                            popUpTo("login") { inclusive = true }
+                        }
+                        discoveryViewModel.loadActivityBean()
+                        scheduleViewModel.loadConfig()
+                        scheduleViewModel.refreshSchedule(isRefresh = true)
+                    }
                 )
             }
             animatedComposable("info") {
@@ -159,6 +173,28 @@ fun Main(
             animatedComposable("settings__contributors") {
                 Contributors()
             }
+
+            animatedComposable("card_balance_deposit") {
+                CardBalanceDeposit()
+            }
+
+            animatedComposable("preferences"){
+                Preferences()
+            }
+
+            animatedComposable("bathroom_deposit"){
+                BathroomDeposit()
+            }
+
+            animatedComposable("debug"){
+                Debug()
+            }
+
+            animatedComposable("splash"){
+                Splash(navController)
+            }
+
+
         }
         BottomNavBar(navController = navController)
     }
@@ -347,7 +383,9 @@ fun NavController.navigatePreservingHome(route: String) {
     val currentRoute = this.currentBackStackEntry?.destination?.route
     if (currentRoute == route) return
 
-    val homeRoute = this.graph.startDestinationRoute.toString()
+    val homeRoute = "home"
+
+    Log.e("TAG", "navigatePreservingHome: $homeRoute", )
 
     this.navigate(route) {
         popUpTo(homeRoute) {
