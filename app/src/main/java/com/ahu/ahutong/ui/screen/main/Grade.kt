@@ -79,7 +79,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                     .clip(CircleShape)
                     .background(100.n1 withNight 30.n1)
             ) {
-                IconButton(onClick = { gradeViewModel.getGarde(isRefresh = true) }) {
+                IconButton(onClick = { gradeViewModel.getGarde(isRefresh = false) }) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = null

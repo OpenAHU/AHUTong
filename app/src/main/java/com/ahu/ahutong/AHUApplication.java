@@ -26,7 +26,7 @@ public class AHUApplication extends BaseApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        CrashReport.initCrashReport(this, "2c2ccadcad", true);
+        CrashReport.initCrashReport(this, "2c2ccadcad", BuildConfig.DEBUG);
     }
 
 }

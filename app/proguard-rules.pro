@@ -64,10 +64,15 @@
 }
 -keep class org.jsoup.Connection{*;}
 -keep class com.ahu.ahutong.ui.widget.schedule.bean.**{*;}
--keep class androidx.swiperefreshlayout.widget.SwipeRefreshLayout{*;}
 -keepclassmembers class com.ahu.ahutong.data.model.* {
     private *;
 }
+
+-keepclassmembers class com.ahu.ahutong.data.crawler.model.** {
+     *;
+}
+
+
 -renamesourcefileattribute AHUTong
 #开启深度重载
 # -overloadaggressively
@@ -85,3 +90,12 @@
       public *** println(...);
       public *** print(...);
   }
+
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int i(...);
+    public static int d(...);
+    public static int w(...);
+    public static int e(...);
+    public static int wtf(...);
+}

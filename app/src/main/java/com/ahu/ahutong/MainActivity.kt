@@ -3,6 +3,7 @@ package com.ahu.ahutong
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity

@@ -13,12 +13,12 @@ android {
     compileSdk = 36
 
 
-//    lint {
-//        //即使报错也不会停止打包
-//        abortOnError false
-//        //打包release版本的时候是否进行检测
-//        checkReleaseBuilds false
-//    }
+    lint {
+        //即使报错也不会停止打包
+        abortOnError = false
+        //打包release版本的时候是否进行检测
+        checkReleaseBuilds = false
+    }
     //关闭PNG合法性检查
     // aaptOptions.useNewCruncher = false
     defaultConfig {
@@ -38,26 +38,10 @@ android {
 
     }
 
-//    signingConfigs {
-//        debug {
-//            storeFile file("./ahu.jks")
-//            storePassword "SinkDev"
-//            keyAlias "key0"
-//            keyPassword "SinkDev"
-//        }
-//
-//        release {
-//            storeFile file("./ahu.jks")
-//            storePassword "SinkDev"
-//            keyAlias "key0"
-//            keyPassword "SinkDev"
-//        }
-//    }
-
     buildTypes {
         release {
-            isShrinkResources = false  // 移除无用的resource文件
-            isMinifyEnabled = false //是否对代码进行混淆，true表示混淆
+            isShrinkResources = true  // 移除无用的resource文件
+            isMinifyEnabled = true //是否对代码进行混淆，true表示混淆
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
