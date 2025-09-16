@@ -44,6 +44,11 @@
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
 -keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+-keep class com.ahu.ahutong.data.model.** { *; }
+-keep class com.ahu.ahutong.ui.screen.main.ElectricityDepositKt { *; }
+-keep class com.ahu.ahutong.ui.screen.main.home.ElectricityPaymentKt { *; }
+-keep class com.ahu.ahutong.data.dao.AHUCache { *; }
+-keep class com.ahu.ahutong.ui.state.** { *; }
 
 -keepclassmembers class kotlinx.coroutines.** {
     volatile <fields>;

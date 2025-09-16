@@ -56,7 +56,7 @@ fun AtAGlance(
     }
     val date = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(Date())
     Column(
-        modifier = Modifier.padding(vertical = 32.dp),
+        modifier = Modifier.padding(vertical = 0.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         Row(

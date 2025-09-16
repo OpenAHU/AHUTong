@@ -38,6 +38,15 @@ android {
 
     }
 
+    defaultConfig {
+        applicationId = "com.ahu.ahutong"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 1
+        versionName = "2.0.0-beta1"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
     buildTypes {
         release {
             isShrinkResources = true  // 移除无用的resource文件
@@ -50,7 +59,7 @@ android {
             ndk {
                 abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
             }
-//            signingConfig = signingConfigs.getByName("release")
+//            signingConfig = signingConfigs.getByName("my_custom_debug_sign")
         }
         debug {
             isMinifyEnabled = false
@@ -59,6 +68,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+//            signingConfig = signingConfigs.getByName("my_custom_debug_sign")
         }
     }
 //    packagingOptions {
