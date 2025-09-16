@@ -38,6 +38,15 @@ android {
 
     }
 
+    defaultConfig {
+        applicationId = "com.ahu.ahutong"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0.0-beta6"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
     buildTypes {
         release {
             isShrinkResources = true  // 移除无用的resource文件
@@ -59,6 +68,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+//            signingConfig = signingConfigs.getByName("my_custom_debug_sign")
         }
     }
 //    packagingOptions {

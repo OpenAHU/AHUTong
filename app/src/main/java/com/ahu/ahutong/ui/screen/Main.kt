@@ -56,6 +56,7 @@ import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.main.BathroomDeposit
 import com.ahu.ahutong.ui.screen.main.CardBalanceDeposit
+import com.ahu.ahutong.ui.screen.main.ElectricityDeposit
 //import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.screen.main.Exam
 import com.ahu.ahutong.ui.screen.main.Grade
@@ -172,6 +173,10 @@ fun Main(
             }
             animatedComposable("settings__contributors") {
                 Contributors()
+            }
+
+            animatedComposable("electricity_pay"){
+                ElectricityDeposit()
             }
 
             animatedComposable("card_balance_deposit") {

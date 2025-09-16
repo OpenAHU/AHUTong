@@ -167,13 +167,14 @@ private fun CardView(
                 },
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(16.dp)
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+                modifier = Modifier.padding(20.dp)
             ) {
                 Text(
                     text = stringResource(id = R.string.card_money),
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(vertical = 5.dp)
                 )
                 AnimatedContent(targetState = balance to transitionBalance) { (balance, transitionBalance) ->
                     Text(

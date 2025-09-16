@@ -278,4 +278,49 @@ object AHUCache {
         kv.putBoolean("agreementAccepted",true)
     }
 
+    /**
+     * 获取房间选择信息
+     * @return RoomSelectionInfo?
+     */
+    fun getRoomSelection(): RoomSelectionInfo? {
+        val data = kv.decodeString("room_selection_info") ?: ""
+        return data.fromJson(RoomSelectionInfo::class.java)
+    }
+
+    /**
+     * 保存电费累计充值信息
+     * @param info ElectricityChargeInfo
+     */
+    fun saveElectricityChargeInfo(info: ElectricityChargeInfo) {
+        val data = Gson().toJson(info)
+        kv.encode("electricity_charge_acl", data)
+    }
+
+    /**
+     * 获取电费累计充值信息
+     * @return ElectricityChargeInfo?
+     */
+    fun getElectricityChargeInfo(): ElectricityChargeInfo? {
+        val data = kv.decodeString("electricity_charge_acl") ?: ""
+        if (data.isEmpty()) {
+            return null
+        }
+        return data.fromJson(ElectricityChargeInfo::class.java)
+    }
+
+    /**
+     * 清除电费累计充值信息
+     */
+    fun clearElectricityChargeInfo() {
+        kv.removeValueForKey("electricity_charge_acl")
+    }
+
+    /**
+     * 保存房间选择信息
+     * @param info RoomSelectionInfo
+     */
+    fun saveRoomSelection(info: RoomSelectionInfo) {
+        val data = Gson().toJson(info)
+        kv.encode("room_selection_info", data)
+    }
 }

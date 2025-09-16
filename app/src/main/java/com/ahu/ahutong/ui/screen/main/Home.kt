@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 import com.ahu.ahutong.ui.screen.main.home.AtAGlance
 import com.ahu.ahutong.ui.screen.main.home.BathroomOpening
 import com.ahu.ahutong.ui.screen.main.home.CampusCard
+import com.ahu.ahutong.ui.screen.main.home.ElectricityCard
 import com.ahu.ahutong.ui.screen.main.home.TodayCourseList
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
@@ -103,13 +104,10 @@ fun Home(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         BathroomOpening(navController = navController, discoveryViewModel = discoveryViewModel)
+                        ElectricityCard(navController = navController, discoveryViewModel = discoveryViewModel)
                     }
-
-
                 }
             }
-
-
         }
     }
 }
