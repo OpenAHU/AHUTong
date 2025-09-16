@@ -365,7 +365,7 @@ fun ElectricityDeposit(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(text = "信息", style = MaterialTheme.typography.titleMedium)
-                Text(text = roomInfo ?: "")
+                Text(text = roomInfo?.replace("，", "\n") ?: "")
             }
         }
 

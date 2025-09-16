@@ -160,6 +160,7 @@ class ElectricityDepositViewModel: ViewModel() {
         _selectedCampus.value = null
         val lastSelection = AHUCache.getRoomSelection()
         if (lastSelection != null) {
+            Log.d("ElectricityDepositViewModel", "选择从缓存恢复")
             loadAndRestoreSelection(lastSelection)
         } else {
             fetchCampuses()

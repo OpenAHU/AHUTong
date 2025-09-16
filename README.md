@@ -18,10 +18,10 @@
     <img src="pic/exam_page.png" alt="考试查询" width="32%">
 </div>
 
-现界面如下（2025.9）：
+更新了部分内容（2025.9）：
 
 <div>
     <img src="pic/home_page_2025.png" alt="新主页" width="32%">
-    <img src="pic/settings.png" alt="偏好设置" width="32%">
+    <img src="pic/bathroom_charge.png" alt="浴室缴费" width="32%">
     <img src="pic/electricity_charge.png" alt="电控缴费" width="32%">
 </div>
