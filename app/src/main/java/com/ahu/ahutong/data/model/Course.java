@@ -3,6 +3,7 @@ package com.ahu.ahutong.data.model;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Author SinkDev
@@ -43,10 +44,17 @@ public class Course implements Serializable {
     private String length;
     @SerializedName("startTime")
     private String startTime;
+
+
     @SerializedName("singleDouble")
+    @Deprecated
     private String singleDouble;
     @SerializedName("courseId")
     private String courseId;
+
+
+    @SerializedName("weekIndexes")
+    private List<Integer> weekIndexes;
 
     public Integer getWeekday() {
         return weekday == null || weekday.isEmpty() ? 0 : Integer.parseInt(weekday);
@@ -136,6 +144,14 @@ public class Course implements Serializable {
         this.courseId = courseId;
     }
 
+    public List<Integer> getWeekIndexes() {
+        return weekIndexes;
+    }
+
+    public void setWeekIndexes(List<Integer> weekIndexes) {
+        this.weekIndexes = weekIndexes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -160,7 +176,9 @@ public class Course implements Serializable {
             return false;
         if (singleDouble != null ? !singleDouble.equals(course.singleDouble) : course.singleDouble != null)
             return false;
-        return courseId != null ? courseId.equals(course.courseId) : course.courseId == null;
+        if (courseId != null ? !courseId.equals(course.courseId) : course.courseId != null)
+            return false;
+        return weekIndexes != null ? weekIndexes.equals(course.weekIndexes) : course.weekIndexes != null;
     }
 
     @Override
@@ -176,6 +194,7 @@ public class Course implements Serializable {
         result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
         result = 31 * result + (singleDouble != null ? singleDouble.hashCode() : 0);
         result = 31 * result + (courseId != null ? courseId.hashCode() : 0);
+        result = 31 * result + (weekIndexes != null ? weekIndexes.hashCode() : 0);
         return result;
     }
 }

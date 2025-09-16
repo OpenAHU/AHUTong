@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.screen
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
@@ -47,9 +48,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
+import com.ahu.ahutong.BuildConfig
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.ui.screen.main.BathroomDeposit
+import com.ahu.ahutong.ui.screen.main.CardBalanceDeposit
+//import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.screen.main.Exam
 import com.ahu.ahutong.ui.screen.main.Grade
 import com.ahu.ahutong.ui.screen.main.Home
@@ -57,7 +64,9 @@ import com.ahu.ahutong.ui.screen.main.PhoneBook
 import com.ahu.ahutong.ui.screen.main.Schedule
 import com.ahu.ahutong.ui.screen.main.Tools
 import com.ahu.ahutong.ui.screen.settings.Contributors
+import com.ahu.ahutong.ui.screen.settings.Debug
 import com.ahu.ahutong.ui.screen.settings.License
+import com.ahu.ahutong.ui.screen.settings.Preferences
 import com.ahu.ahutong.ui.screen.setup.Info
 import com.ahu.ahutong.ui.screen.setup.Login
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
@@ -67,11 +76,11 @@ import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.utils.animatedComposable
-import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.selects.select
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -87,9 +96,9 @@ fun Main(
 ) {
     val context = LocalContext.current
     Box {
-        AnimatedNavHost(
+        NavHost(
             navController = navController,
-            startDestination = "home",
+            startDestination = "splash",
             modifier = Modifier
                 .fillMaxSize()
                 .background(96.n1 withNight 10.n1)
@@ -111,16 +120,23 @@ fun Main(
                         discoveryViewModel.loadActivityBean()
                         scheduleViewModel.loadConfig()
                         scheduleViewModel.refreshSchedule(isRefresh = true)
-                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
-                            ScheduleAppWidgetReceiver::class.java
-                        )
+//                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+//                            ScheduleAppWidgetReceiver::class.java
+//                        )
                     }
                 )
             }
             animatedComposable("login") {
                 Login(
                     loginViewModel = loginViewModel,
-                    onLoggedIn = { navController.popBackStack() }
+                    onLoggedIn = {
+                        navController.navigate("home"){
+                            popUpTo("login") { inclusive = true }
+                        }
+                        discoveryViewModel.loadActivityBean()
+                        scheduleViewModel.loadConfig()
+                        scheduleViewModel.refreshSchedule(isRefresh = true)
+                    }
                 )
             }
             animatedComposable("info") {
@@ -157,6 +173,28 @@ fun Main(
             animatedComposable("settings__contributors") {
                 Contributors()
             }
+
+            animatedComposable("card_balance_deposit") {
+                CardBalanceDeposit()
+            }
+
+            animatedComposable("preferences"){
+                Preferences()
+            }
+
+            animatedComposable("bathroom_deposit"){
+                BathroomDeposit()
+            }
+
+            animatedComposable("debug"){
+                Debug()
+            }
+
+            animatedComposable("splash"){
+                Splash(navController)
+            }
+
+
         }
         BottomNavBar(navController = navController)
     }
@@ -211,7 +249,8 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             }
         } else {
             repeat(visibilities.size) {
-                visibilities.removeLast()
+//                visibilities.removeLast()
+                visibilities.removeAt(visibilities.size - 1)
                 delay(50)
             }
         }
@@ -224,7 +263,8 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             .height(
                 animateDpAsState(
                     targetValue = if (visible) {
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 80.dp
+                        WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding() + 80.dp
                     } else {
                         0.dp
                     },
@@ -251,7 +291,7 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             ) {
                 this@Row.NavigationBarItem(
                     selected = currentRoute == "home",
-                    onClick = { navController.navigate("home") },
+                    onClick = { navController.navigatePreservingHome("home") },
                     icon = {
                         Icon(
                             imageVector = Icons.Outlined.Home,
@@ -282,7 +322,10 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             ) {
                 this@Row.NavigationBarItem(
                     selected = currentRoute == "schedule",
-                    onClick = { navController.navigate("schedule") },
+                    onClick = {
+                        navController.navigatePreservingHome("schedule")
+                    },
+
                     icon = {
                         Icon(
                             imageVector = Icons.Outlined.TableChart,
@@ -313,7 +356,9 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
             ) {
                 this@Row.NavigationBarItem(
                     selected = currentRoute == "tools",
-                    onClick = { navController.navigate("tools") },
+                    onClick = {
+                        navController.navigatePreservingHome("tools")
+                              },
                     icon = {
                         Icon(
                             imageVector = Icons.Outlined.Build,
@@ -332,5 +377,20 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
                 )
             }
         }
+    }
+}
+fun NavController.navigatePreservingHome(route: String) {
+    val currentRoute = this.currentBackStackEntry?.destination?.route
+    if (currentRoute == route) return
+
+    val homeRoute = "home"
+
+    Log.e("TAG", "navigatePreservingHome: $homeRoute", )
+
+    this.navigate(route) {
+        popUpTo(homeRoute) {
+            inclusive = false
+        }
+        launchSingleTop = true
     }
 }

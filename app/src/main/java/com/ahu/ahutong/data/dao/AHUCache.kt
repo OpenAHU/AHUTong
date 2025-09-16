@@ -6,7 +6,6 @@ import com.ahu.ahutong.ext.fromJson
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
-
 /**
  * @Author SinkDev
  * @Date 2021/7/27-16:49
@@ -82,9 +81,14 @@ object AHUCache {
      * @param schoolTerm String
      * @param schdule List<Course>
      */
-    fun saveSchedule(schoolYear: String, schoolTerm: String, schdule: List<Course>) {
-        val data = Gson().toJson(schdule)
+    fun saveSchedule(schoolYear: String, schoolTerm: String, schedule: List<Course>) {
+        val data = Gson().toJson(schedule)
         kv.putString("$schoolYear-$schoolTerm.schedule", data)
+    }
+
+    fun saveSchedule(schoolTerm: String,schedule: List<Course>) {
+        val data = Gson().toJson(schedule)
+        kv.putString("$schoolTerm.schedule", data) // 2025-2026-1
     }
 
     /**
@@ -95,6 +99,11 @@ object AHUCache {
      */
     fun getSchedule(schoolYear: String, schoolTerm: String): List<Course>? {
         val data = kv.getString("$schoolYear-$schoolTerm.schedule", "") ?: ""
+        return data.fromJson(object : TypeToken<List<Course>>() {}.type)
+    }
+
+    fun getSchedule(schoolTerm: String): List<Course>? {
+        val data = kv.getString("$schoolTerm.schedule", "") ?: ""
         return data.fromJson(object : TypeToken<List<Course>>() {}.type)
     }
 
@@ -211,6 +220,7 @@ object AHUCache {
         kv.putString("list_banner", json)
     }
 
+
     /**
      * 获取List<Banner>
      * @return List<Banner>?
@@ -235,4 +245,37 @@ object AHUCache {
         clearCurrentUser()
         saveWisdomPassword("")
     }
+
+
+    fun savePhone(phone:String){
+        kv.putString("phone",phone)
+    }
+
+    fun getPhone() : String?{
+        return kv.getString("phone",null)
+    }
+
+
+    fun setJwxtStudentId(id: String){
+        kv.putString("jwxt_stu_id",id)
+    }
+
+    fun getJwxtStudentId() : String?{
+        return kv.getString("jwxt_stu_id",null)
+    }
+
+
+    fun saveString(key: String ,value : String){
+        kv.putString("key",value)
+    }
+
+
+    fun isAgreementAccepted(): Boolean{
+        return kv.getBoolean("agreementAccepted",false)
+    }
+
+    fun setAgreementAccepted(){
+        kv.putBoolean("agreementAccepted",true)
+    }
+
 }

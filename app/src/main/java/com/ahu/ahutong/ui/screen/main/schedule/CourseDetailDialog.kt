@@ -34,6 +34,18 @@ fun CourseDetailDialog(
     course: Course,
     onDismiss: () -> Unit
 ) {
+
+   val courses = course.weekIndexes.last() - course.weekIndexes.first()
+
+    val numToChinese = mapOf(
+        1 to "一",
+        2 to "二",
+        3 to "三",
+        4 to "四",
+        5 to "五",
+        6 to "六",
+        7 to "七"
+    )
     Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
@@ -49,13 +61,14 @@ fun CourseDetailDialog(
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Text(
-                    text = "第 ${course.startWeek}-${course.endWeek} 周${
+                    text = "第${
                         when {
-                            course.singleDouble == "0" -> ""
-                            course.startWeek % 2 == 1 -> "（单周）"
-                            else -> "（双周）"
+                            courses  == course.weekIndexes.size - 1 -> "${course.weekIndexes.first()} - ${course.weekIndexes.last()} "   //[1,2,3,4,5,6]
+                            courses == (course.weekIndexes.size - 1) * 2 && course.weekIndexes.first()%2==0 -> "${course.weekIndexes.first()} - ${course.weekIndexes.last()} (双周)"    // [1,3,5,7]  [5,7,9,11,13] 
+                            courses == (course.weekIndexes.size - 1) * 2 && course.weekIndexes.first()%2==0 -> "${course.weekIndexes.first()} - ${course.weekIndexes.last()} (单周)"    // [2,4,6,8]
+                            else -> course.weekIndexes.toString()  //[1,2,3,5,6,7,11]
                         }
-                    }的周 ${course.weekday}，第 ${course.startTime}-${course.startTime + course.length - 1} 节课",
+                    }周的周${numToChinese[course.weekday]}，第 ${course.startTime}-${course.startTime + course.length - 1} 节课",
                     style = MaterialTheme.typography.titleMedium
                 )
             }

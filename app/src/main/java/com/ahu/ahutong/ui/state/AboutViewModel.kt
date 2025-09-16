@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import arch.sink.utils.Utils
 import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.model.AppVersion
+import com.ahu.ahutong.ext.launchSafe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -17,7 +18,7 @@ import kotlinx.coroutines.withContext
  * @Email: 468766131@qq.com
  */
 class AboutViewModel : ViewModel() {
-    val versionName: String by lazy {
+    val versionName: String? by lazy {
         val packageInfo = Utils.getApp().packageManager.getPackageInfo(
             Utils.getApp().packageName,
             0
@@ -29,7 +30,7 @@ class AboutViewModel : ViewModel() {
     val tipState = mutableStateOf<String?>(null)
 
     fun checkForUpdates() {
-        viewModelScope.launch {
+        viewModelScope.launchSafe {
             withContext(Dispatchers.IO) {
                 try {
                     val response = AHUService.API.getLatestVersion()

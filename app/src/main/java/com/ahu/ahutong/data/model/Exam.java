@@ -15,6 +15,7 @@ public class Exam implements Serializable {
      * location : 考试地点
      * time : 考试时间
      * seatNum : 座位号
+     * finished : 考试是否结束
      */
     @SerializedName("course")
     private String course;
@@ -24,6 +25,11 @@ public class Exam implements Serializable {
     private String time;
     @SerializedName("seatNum")
     private String seatNum;
+
+
+
+    @SerializedName("finished")
+    private Boolean finished;
 
     public String getCourse() {
         return course;
@@ -55,5 +61,14 @@ public class Exam implements Serializable {
 
     public void setSeatNum(String seatNum) {
         this.seatNum = seatNum;
+    }
+
+
+    public Boolean getFinished() {
+        return finished;
+    }
+
+    public void setFinished(Boolean finished) {
+        this.finished = finished;
     }
 }

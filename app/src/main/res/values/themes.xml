@@ -6,5 +6,7 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+        <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
+
 </resources>

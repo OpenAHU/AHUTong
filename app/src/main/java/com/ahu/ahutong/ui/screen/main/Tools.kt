@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
-import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
+//import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
@@ -107,9 +107,9 @@ fun Tools(navController: NavHostController) {
                     .clip(CircleShape)
                     .background(90.a1)
                     .clickable {
-                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
-                            ScheduleAppWidgetReceiver::class.java
-                        )
+//                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+//                            ScheduleAppWidgetReceiver::class.java
+//                        )
                     }
                     .padding(16.dp, 8.dp),
                 color = 0.n1,

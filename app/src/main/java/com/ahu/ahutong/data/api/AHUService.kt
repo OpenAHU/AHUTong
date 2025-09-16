@@ -1,7 +1,7 @@
 package com.ahu.ahutong.data.api
 
 import arch.sink.utils.Utils
-import com.ahu.ahutong.BuildConfig
+//import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.model.*
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
@@ -95,7 +95,7 @@ interface AHUService {
         // 创建AHUService对象
         val API: AHUService by lazy {
             val logger = HttpLoggingInterceptor().apply {
-                level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+                level = if (true) HttpLoggingInterceptor.Level.BODY
                 else HttpLoggingInterceptor.Level.NONE
             }
 

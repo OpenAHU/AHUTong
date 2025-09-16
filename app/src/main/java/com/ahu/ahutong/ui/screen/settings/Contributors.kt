@@ -46,7 +46,7 @@ fun Contributors(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .systemBarsPadding()
-            .padding(bottom = 24.dp),
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(
@@ -56,7 +56,7 @@ fun Contributors(
         )
         mapOf(
             developerViewModel.developers to stringResource(id = R.string.mine_tv_developer),
-            businessViewModel.partner to stringResource(id = R.string.mine_tv_business)
+//            businessViewModel.partner to stringResource(id = R.string.mine_tv_business)
         ).forEach { (list, name) ->
             Text(
                 text = name,

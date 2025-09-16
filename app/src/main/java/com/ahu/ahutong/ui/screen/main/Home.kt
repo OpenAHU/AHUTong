@@ -84,17 +84,32 @@ fun Home(
             }
         }
         SlideInContent(visible = 1 in discoveryViewModel.visibilities) {
-            Row(
+            Column(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CampusCard(
-                    balance = discoveryViewModel.balance,
-                    transitionBalance = discoveryViewModel.transitionBalance
-                )
-                BathroomOpening(discoveryViewModel = discoveryViewModel)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            )  {
+
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CampusCard(
+                        balance = discoveryViewModel.balance,
+                        transitionBalance = discoveryViewModel.transitionBalance,
+                        navController
+                    )
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        BathroomOpening(navController = navController, discoveryViewModel = discoveryViewModel)
+                    }
+
+
+                }
             }
+
+
         }
     }
 }
