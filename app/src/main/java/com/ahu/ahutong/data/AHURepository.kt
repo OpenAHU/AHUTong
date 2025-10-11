@@ -308,7 +308,7 @@ object AHURepository {
                     )
 
                     val captcha = AdwmhApi.API
-                        .getCaptchaResult("http://120.26.208.230:8000/captcha", captchaPart)
+                        .getCaptchaResult("http://47.236.115.210:8000/captcha", captchaPart)
                         .result
 
                     info = AdwmhApi.API.loginWithCaptcha(
