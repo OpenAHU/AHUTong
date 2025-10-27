@@ -4,7 +4,6 @@ package com.ahu.ahutong.ui.state
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import arch.sink.utils.Utils
-import com.ahu.ahutong.data.model.AppVersion
 
 /**
  * @Author: SinkDev
@@ -20,7 +19,6 @@ class AboutViewModel : ViewModel() {
         packageInfo.versionName
     }
 
-    val newVersionDialogState = mutableStateOf<AppVersion?>(null)
     val tipState = mutableStateOf<String?>(null)
 
 }

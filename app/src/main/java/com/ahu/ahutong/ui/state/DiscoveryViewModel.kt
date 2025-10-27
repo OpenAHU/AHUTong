@@ -16,7 +16,6 @@ import arch.sink.utils.Utils
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.model.Banner
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ext.launchSafe
 import com.google.zxing.BarcodeFormat
@@ -52,9 +51,6 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
 
     val visibilities = mutableStateListOf<Int>()
 
-    val bannerData: MutableLiveData<List<Banner>> by lazy {
-        MutableLiveData<List<Banner>>()
-    }
 
     var qrcode = MutableStateFlow<Bitmap?>(null)
     var state = MutableStateFlow<Boolean>(false);
@@ -77,15 +73,6 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun loadBanner() {
-        viewModelScope.launch {
-            AHURepository.getBanner()
-                .onSuccess {
-                    bannerData.value = it
-                }.onFailure {
-                }
-        }
-    }
 
     fun loadCourse(): List<Course> {
         val year = AHUCache.getSchoolYear()

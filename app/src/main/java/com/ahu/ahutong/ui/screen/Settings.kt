@@ -70,38 +70,12 @@ fun Settings(
     var isClearCacheDialogShown by rememberSaveable { mutableStateOf(false) }
     var isUpdateLogDialogShown by rememberSaveable { mutableStateOf(false) }
     val tip by remember { aboutViewModel.tipState }
-    val newVersionDialog by remember { aboutViewModel.newVersionDialogState }
+
     LaunchedEffect(tip) {
         tip?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             aboutViewModel.tipState.value = null;
         }
-    }
-    newVersionDialog?.let {
-        AlertDialog(
-            onDismissRequest = { aboutViewModel.newVersionDialogState.value = null },
-            title = { Text("更新") },
-            text = { Text("发现新版本！\n新版特性：\n ${it.message.replace("\\n", "\n")}") },
-            confirmButton = {
-                TextButton(onClick = {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW).apply {
-                            data = Uri.parse(it.url)
-                        }
-                    )
-                    aboutViewModel.newVersionDialogState.value = null
-                }) {
-                    Text("前往下载")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    aboutViewModel.newVersionDialogState.value = null
-                }) {
-                    Text("取消")
-                }
-            }
-        )
     }
 
 

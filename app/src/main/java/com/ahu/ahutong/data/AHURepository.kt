@@ -1,19 +1,13 @@
 package com.ahu.ahutong.data
 
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
-import arch.sink.utils.Utils
-import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.CrawlerDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
-import com.ahu.ahutong.data.crawler.api.ycard.YcardApi
 import com.ahu.ahutong.data.crawler.configs.Constants
 import com.ahu.ahutong.data.crawler.model.adwnh.Info
 import com.ahu.ahutong.data.crawler.model.jwxt.ExamInfo
-import com.ahu.ahutong.data.crawler.model.ycard.BathroomInfo
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.Request
 import com.ahu.ahutong.data.dao.AHUCache
@@ -22,24 +16,16 @@ import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.data.reptile.utils.DES
 import com.ahu.ahutong.ext.isTerm
-import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import org.jsoup.Jsoup
 import retrofit2.Response
-import java.util.regex.Matcher
-import kotlin.coroutines.CoroutineContext.Element
 
 
 /**
@@ -269,25 +255,6 @@ object AHURepository {
         }
     }
 
-    suspend fun getBanner() = withContext(Dispatchers.IO) {
-        try {
-            val response = AHUService.API.getBanner()
-            if (response.isSuccessful) {
-                val data = response.data.filter { it.isLegal }
-                AHUCache.saveBanner(data)
-                Result.success(data)
-            } else {
-                throw IllegalStateException(response.msg)
-            }
-        } catch (e: Exception) {
-            val cache = AHUCache.getBanner()
-            if (cache != null) {
-                Result.success(cache)
-            } else {
-                Result.failure(Throwable(e.message))
-            }
-        }
-    }
 
     /**
      * 爬虫登录

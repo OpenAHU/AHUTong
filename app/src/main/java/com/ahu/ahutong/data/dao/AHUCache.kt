@@ -211,28 +211,6 @@ object AHUCache {
         kv.putBoolean("isShowAllCourse", isCourse)
     }
 
-    /**
-     * 保存List<Banner>
-     * @param theme ScheduleTheme
-     */
-    fun saveBanner(banners: List<Banner>) {
-        val json = Gson().toJson(banners)
-        kv.putString("list_banner", json)
-    }
-
-
-    /**
-     * 获取List<Banner>
-     * @return List<Banner>?
-     */
-    fun getBanner(): List<Banner>? {
-        val config = kv.getString("list_banner", "")
-        if (!config.isNullOrEmpty()) {
-            return Gson().fromJson(config, object : TypeToken<List<Banner>>() {}.type)
-        }
-        return null
-    }
-
     fun isShowWidgetTip(): Boolean {
         return kv.getBoolean("is_show_widget_dialog", true)
     }
