@@ -16,20 +16,6 @@ import kotlinx.coroutines.withContext
  */
 class MainViewModel : ViewModel() {
 
-    /**
-     * 日活统计
-     * @return Job
-     */
-    fun addAppAccess() = viewModelScope.launch {
-        withContext(Dispatchers.IO) {
-            try {
-                AHUService.API.addAppAccess()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
     fun logout() {
         AHUCache.logout()
         CookieManager.getInstance().removeAllCookies(null)

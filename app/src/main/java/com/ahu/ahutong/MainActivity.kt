@@ -1,28 +1,19 @@
 package com.ahu.ahutong
 
+//import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Bundle
-import android.util.Log
-import android.view.WindowManager
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.core.view.WindowCompat
-import androidx.glance.appwidget.updateAll
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.rememberNavController
-import arch.sink.utils.Utils
-import com.ahu.ahutong.data.api.AHUCookieJar
-//import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.Main
 import com.ahu.ahutong.ui.state.AboutViewModel
@@ -31,13 +22,8 @@ import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.ui.theme.AHUTheme
-import com.ahu.ahutong.utils.animatedComposable
 import com.ahu.ahutong.widget.ClassWidget
-import com.franmontiel.persistentcookiejar.cache.SetCookieCache
-import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import kotlin.concurrent.thread
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -66,24 +52,11 @@ class MainActivity : ComponentActivity() {
                     isReLoginShown = isReLoginDialogShown,
                     onReLoginDismiss = { isReLoginDialogShown = false }
                 )
-
-
-                LaunchedEffect(Unit) {
-                    AHUApplication.sessionUpdated.observe(this@MainActivity) {
-                        // 防止多次的弹出
-                        if (AHUCache.isLogin()) {
-                            // 登录过期
-                            mainViewModel.logout()
-                            // 重新登录
-                            isReLoginDialogShown = true
-                        }
-                    }
-                }
             }
         }
     }
 
-    private fun init(refreshSchedule: Boolean = false) {
+    private fun init() {
         if (AHUCache.isLogin()) {
             discoveryViewModel.loadActivityBean()
             scheduleViewModel.loadConfig()
@@ -93,11 +66,6 @@ class MainActivity : ComponentActivity() {
             val componentName = ComponentName(this, ClassWidget::class.java)
             val appWidgetIds = manager.getAppWidgetIds(componentName)
             manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
-//        mainViewModel.viewModelScope.launch {
-//            ScheduleAppWidgetReceiver().glanceAppWidget.updateAll(this@MainActivity)
-//        }
         }
-
-
     }
 }

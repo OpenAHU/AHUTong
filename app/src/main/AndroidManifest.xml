@@ -29,6 +29,7 @@
         android:theme="@style/Theme.AHUTong"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -39,37 +40,6 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".appwidget.ScheduleAppWidgetReceiver"
-            android:enabled="@bool/glance_appwidget_available"
-            android:exported="false"
-            android:label="课表">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="android.intent.action.LOCALE_CHANGED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/app_widget_info" />
-            <meta-data
-                android:name="miuiWidget"
-                android:value="true" />
-            <meta-data
-                android:name="miuiWidgetTransitionAnimation"
-                android:value="false" />
-            <meta-data
-                android:name="miuiWidgetRefresh"
-                android:value="exposure" />
-            <meta-data
-                android:name="miuiWidgetRefreshMinInterval"
-                android:value="20000" />
-        </receiver>
-
-        <!-- miui13 需要 -->
-        <meta-data
-            android:name="miuiWidgetVersion"
-            android:value="1" />
 
         <!-- old widget -->
         <receiver

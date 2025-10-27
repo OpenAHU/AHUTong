@@ -18,7 +18,6 @@ import kotlinx.coroutines.sync.Mutex;
 
 @HiltAndroidApp
 public class AHUApplication extends BaseApplication {
-    public static SingleLiveEvent<Unit> sessionUpdated = new SingleLiveEvent<>();
 
     public volatile static Boolean sessionExpired = true;
     public volatile static Object reLoginMutex = new Object();
