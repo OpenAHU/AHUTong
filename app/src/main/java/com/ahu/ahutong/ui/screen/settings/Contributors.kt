@@ -30,15 +30,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
-import com.ahu.ahutong.ui.state.BusinessViewModel
 import com.ahu.ahutong.ui.state.DeveloperViewModel
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
 fun Contributors(
-    developerViewModel: DeveloperViewModel = viewModel(),
-    businessViewModel: BusinessViewModel = viewModel()
+    developerViewModel: DeveloperViewModel = viewModel()
 ) {
     val context = LocalContext.current
     Column(
@@ -55,8 +53,7 @@ fun Contributors(
             style = MaterialTheme.typography.headlineLarge
         )
         mapOf(
-            developerViewModel.developers to stringResource(id = R.string.mine_tv_developer),
-//            businessViewModel.partner to stringResource(id = R.string.mine_tv_business)
+            developerViewModel.developers to stringResource(id = R.string.mine_tv_developer)
         ).forEach { (list, name) ->
             Text(
                 text = name,

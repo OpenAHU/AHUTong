@@ -17,10 +17,6 @@ class DeveloperViewModel : ViewModel() {
             Developer("王学雷", "Android 客户端 & 美化", "257314409"),
             Developer("徐健灿", "Android 客户端 & 爬虫", "3148336396"),
             Developer("王    钰", "Android 客户端 & 废物", "605606366"),
-            Developer("吴振龙", "爬虫 & 后端", "1298749337"),
-            Developer("徐    海", "后端 & 卷王", "1479356730"),
-            Developer("王岳赣", "后端 & 芭比Q", "1491605298"),
-            Developer("王壮壮", "后端 & 摸鱼", "2539907983")
         )
     }
 }
