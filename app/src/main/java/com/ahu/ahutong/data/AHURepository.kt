@@ -14,8 +14,7 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.User
-import com.ahu.ahutong.data.reptile.utils.DES
-import com.ahu.ahutong.ext.isTerm
+import com.ahu.ahutong.utils.DES
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -38,40 +37,6 @@ object AHURepository {
     val TAG = this::class.java.simpleName
 
     var dataSource: BaseDataSource = CrawlerDataSource()
-
-    /**
-     * 获取课程表 本地优先
-     * @param schoolYear String
-     * @param schoolTerm String
-     * @param isRefresh Boolean 是否直接获取服务器上的
-     * @return Result<List<Course>>
-     */
-    suspend fun getSchedule(schoolYear: String, schoolTerm: String, isRefresh: Boolean = false) =
-        withContext(Dispatchers.IO) {
-            if (!schoolTerm.isTerm()) {
-                throw IllegalArgumentException("schoolTerm must be 1 or 2")
-            }
-            // 本地优先
-            if (!isRefresh) {
-                val localData = AHUCache.getSchedule(schoolYear, schoolTerm).orEmpty()
-                if (localData.isNotEmpty()) {
-                    return@withContext Result.success(localData)
-                }
-            }
-            // 从网络上获取
-            try {
-                val response = dataSource.getSchedule(schoolYear, schoolTerm)
-                if (response.isSuccessful) {
-                    // 缓存
-                    AHUCache.saveSchedule(schoolYear, schoolTerm, response.data)
-                    Result.success(response.data)
-                } else {
-                    Result.failure(Throwable(response.msg))
-                }
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
 
     /**
      * 通过semesterId获取课程表

@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
         if (AHUCache.isLogin()) {
             discoveryViewModel.loadActivityBean()
             scheduleViewModel.loadConfig()
-            scheduleViewModel.refreshSchedule(isRefresh = true)
+            scheduleViewModel.refreshSchedule()
             // 更新小部件数据
             val manager = AppWidgetManager.getInstance(this)
             val componentName = ComponentName(this, ClassWidget::class.java)

@@ -1,14 +1,7 @@
 package com.ahu.ahutong;
 
-import android.widget.Toast;
-
-import com.ahu.ahutong.common.SingleLiveEvent;
-import com.tencent.bugly.crashreport.CrashReport;
-
 import arch.sink.BaseApplication;
 import dagger.hilt.android.HiltAndroidApp;
-import kotlin.Unit;
-import kotlinx.coroutines.sync.Mutex;
 
 /**
  * @Author SinkDev
@@ -25,7 +18,6 @@ public class AHUApplication extends BaseApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        CrashReport.initCrashReport(this, "2c2ccadcad", BuildConfig.DEBUG);
     }
 
 }

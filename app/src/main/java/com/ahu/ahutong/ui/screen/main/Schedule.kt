@@ -176,7 +176,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                         contentDescription = null
                     )
                 }
-                IconButton(onClick = { scheduleViewModel.refreshSchedule(isRefresh = true) }) {
+                IconButton(onClick = { scheduleViewModel.refreshSchedule() }) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = null

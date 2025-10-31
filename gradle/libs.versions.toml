@@ -40,7 +40,6 @@ androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedat
 coil = { module = "io.coil-kt:coil", version.ref = "coilVersion" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofitVersion" }
-crashreport = { module = "com.tencent.bugly:crashreport", version.ref = "crashreport" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidVersion" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompilerVersion" }

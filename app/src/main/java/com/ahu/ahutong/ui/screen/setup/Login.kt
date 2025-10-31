@@ -67,7 +67,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.dao.AHUCache

@@ -1,6 +1,5 @@
 package com.ahu.ahutong.data.crawler.utils
 
-import android.util.Log
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.text.SimpleDateFormat

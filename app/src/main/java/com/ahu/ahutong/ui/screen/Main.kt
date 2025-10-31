@@ -46,17 +46,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.ui.screen.main.BathroomDeposit
 import com.ahu.ahutong.ui.screen.main.CardBalanceDeposit
 import com.ahu.ahutong.ui.screen.main.ElectricityDeposit
-//import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.screen.main.Exam
 import com.ahu.ahutong.ui.screen.main.Grade
 import com.ahu.ahutong.ui.screen.main.Home
@@ -80,7 +77,6 @@ import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.selects.select
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -119,7 +115,7 @@ fun Main(
                         navController.popBackStack()
                         discoveryViewModel.loadActivityBean()
                         scheduleViewModel.loadConfig()
-                        scheduleViewModel.refreshSchedule(isRefresh = true)
+                        scheduleViewModel.refreshSchedule()
 //                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
 //                            ScheduleAppWidgetReceiver::class.java
 //                        )
@@ -135,7 +131,7 @@ fun Main(
                         }
                         discoveryViewModel.loadActivityBean()
                         scheduleViewModel.loadConfig()
-                        scheduleViewModel.refreshSchedule(isRefresh = true)
+                        scheduleViewModel.refreshSchedule()
                     }
                 )
             }

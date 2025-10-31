@@ -108,7 +108,6 @@ dependencies {
     androidTestImplementation(composeBom)
 
     implementation(libs.persistentcookiejar)
-    implementation(libs.crashreport)
     implementation(libs.coil)
     implementation(libs.mmkv.static)
     implementation(libs.logging.interceptor)
@@ -142,6 +141,4 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
-
-    implementation(libs.crashreport)
 }

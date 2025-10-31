@@ -30,9 +30,6 @@ import retrofit2.http.Part
 import retrofit2.http.Url
 
 interface AdwmhApi {
-    @POST("/user/session")
-    suspend fun fetchSession(): ResponseBody
-
     @GET("/remind/authcode")
     suspend fun getAuthCode(): ResponseBody
 
