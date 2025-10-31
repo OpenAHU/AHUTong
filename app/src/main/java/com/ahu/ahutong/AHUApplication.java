@@ -1,9 +1,9 @@
 package com.ahu.ahutong;
 
 import android.app.Application;
-import android.content.Context;
 
 import dagger.hilt.android.HiltAndroidApp;
+
 
 /**
  * @Author SinkDev
@@ -12,15 +12,11 @@ import dagger.hilt.android.HiltAndroidApp;
  */
 
 @HiltAndroidApp
-public class AHUApplication extends Application {
+public class AHUApplication extends Application  {
 
     public volatile static Boolean sessionExpired = true;
     public volatile static Object reLoginMutex = new Object();
 
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-    }
 
     @Override
     public void onCreate() {

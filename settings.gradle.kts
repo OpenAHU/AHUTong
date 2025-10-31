@@ -24,4 +24,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "AHUTong"
 include (":app")
-include (":arch")
