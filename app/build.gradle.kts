@@ -99,8 +99,7 @@ android {
 }
 
 dependencies {
-
-    implementation(project(":arch"))
+    implementation(libs.crashreport)
     implementation(libs.ads.mobile.sdk)
 
     val composeBom = platform("androidx.compose:compose-bom:2022.12.00")
@@ -108,7 +107,6 @@ dependencies {
     androidTestImplementation(composeBom)
 
     implementation(libs.persistentcookiejar)
-    implementation(libs.crashreport)
     implementation(libs.coil)
     implementation(libs.mmkv.static)
     implementation(libs.logging.interceptor)
@@ -142,6 +140,4 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
-
-    implementation(libs.crashreport)
 }

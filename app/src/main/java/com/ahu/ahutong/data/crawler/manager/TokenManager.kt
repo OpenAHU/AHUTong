@@ -1,11 +1,7 @@
 package com.ahu.ahutong.data.crawler.manager
 
-import android.content.Context
 import android.util.Log
-import arch.sink.utils.Utils
-import androidx.core.content.edit
 import com.ahu.ahutong.data.crawler.api.ycard.YcardApi
-import okhttp3.Cookie
 import java.net.URLDecoder
 
 object TokenManager {

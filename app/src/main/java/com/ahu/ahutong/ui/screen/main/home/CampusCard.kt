@@ -1,8 +1,6 @@
 package com.ahu.ahutong.ui.screen.main.home
 
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
@@ -60,7 +58,6 @@ import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -147,7 +144,6 @@ private fun CardView(
     onClick: () -> Unit,
     navController: NavController
 ) {
-    val context = LocalContext.current
 
 
     Row(

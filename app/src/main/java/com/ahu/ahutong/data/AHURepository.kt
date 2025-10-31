@@ -1,45 +1,30 @@
 package com.ahu.ahutong.data
 
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
-import arch.sink.utils.Utils
-import com.ahu.ahutong.data.api.AHUService
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.CrawlerDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
-import com.ahu.ahutong.data.crawler.api.ycard.YcardApi
 import com.ahu.ahutong.data.crawler.configs.Constants
 import com.ahu.ahutong.data.crawler.model.adwnh.Info
 import com.ahu.ahutong.data.crawler.model.jwxt.ExamInfo
-import com.ahu.ahutong.data.crawler.model.ycard.BathroomInfo
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.Request
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.User
-import com.ahu.ahutong.data.reptile.utils.DES
-import com.ahu.ahutong.ext.isTerm
-import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import com.ahu.ahutong.utils.DES
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import org.jsoup.Jsoup
 import retrofit2.Response
-import java.util.regex.Matcher
-import kotlin.coroutines.CoroutineContext.Element
 
 
 /**
@@ -52,40 +37,6 @@ object AHURepository {
     val TAG = this::class.java.simpleName
 
     var dataSource: BaseDataSource = CrawlerDataSource()
-
-    /**
-     * 获取课程表 本地优先
-     * @param schoolYear String
-     * @param schoolTerm String
-     * @param isRefresh Boolean 是否直接获取服务器上的
-     * @return Result<List<Course>>
-     */
-    suspend fun getSchedule(schoolYear: String, schoolTerm: String, isRefresh: Boolean = false) =
-        withContext(Dispatchers.IO) {
-            if (!schoolTerm.isTerm()) {
-                throw IllegalArgumentException("schoolTerm must be 1 or 2")
-            }
-            // 本地优先
-            if (!isRefresh) {
-                val localData = AHUCache.getSchedule(schoolYear, schoolTerm).orEmpty()
-                if (localData.isNotEmpty()) {
-                    return@withContext Result.success(localData)
-                }
-            }
-            // 从网络上获取
-            try {
-                val response = dataSource.getSchedule(schoolYear, schoolTerm)
-                if (response.isSuccessful) {
-                    // 缓存
-                    AHUCache.saveSchedule(schoolYear, schoolTerm, response.data)
-                    Result.success(response.data)
-                } else {
-                    Result.failure(Throwable(response.msg))
-                }
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
 
     /**
      * 通过semesterId获取课程表
@@ -269,25 +220,6 @@ object AHURepository {
         }
     }
 
-    suspend fun getBanner() = withContext(Dispatchers.IO) {
-        try {
-            val response = AHUService.API.getBanner()
-            if (response.isSuccessful) {
-                val data = response.data.filter { it.isLegal }
-                AHUCache.saveBanner(data)
-                Result.success(data)
-            } else {
-                throw IllegalStateException(response.msg)
-            }
-        } catch (e: Exception) {
-            val cache = AHUCache.getBanner()
-            if (cache != null) {
-                Result.success(cache)
-            } else {
-                Result.failure(Throwable(e.message))
-            }
-        }
-    }
 
     /**
      * 爬虫登录

@@ -11,22 +11,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
-import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
 fun BathroomOpening(
     navController: NavController,
-    discoveryViewModel: DiscoveryViewModel = viewModel(),
 
-) {
+    ) {
     Column(
         modifier = Modifier
             .clip(SmoothRoundedCornerShape(24.dp))

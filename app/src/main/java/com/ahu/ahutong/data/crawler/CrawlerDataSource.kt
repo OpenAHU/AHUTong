@@ -17,11 +17,9 @@ import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Grade
 import com.google.gson.Gson
 import okhttp3.FormBody
-import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.jsoup.Jsoup
 import retrofit2.Response
-import kotlin.math.log
 import kotlin.text.Regex
 
 
@@ -56,15 +54,11 @@ class CrawlerDataSource : BaseDataSource {
         val currentSemesterPattern: Regex? =
             Regex("var\\s+currentSemester\\s*=\\s*(\\{.*?\\});")
 
-        if (semestersPattern == null) {
-            return AHUResponse<List<Course>>()
-        }
-
         if (currentSemesterPattern == null) {
             return AHUResponse<List<Course>>()
         }
 
-        val currentSemester = currentSemesterPattern!!.find(element.toString())
+        val currentSemester = currentSemesterPattern.find(element.toString())
 
 
 
@@ -226,8 +220,7 @@ class CrawlerDataSource : BaseDataSource {
         val response = AHUResponse<BathroomTelInfo>()
 
         var feeitemid: String? = null
-        var type: String? = "IEC"
-        var level: String? = "1"
+
         when (bathroom) {
             "竹园/龙河" -> {
                 feeitemid = "409"

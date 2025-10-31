@@ -10,7 +10,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -63,18 +61,12 @@ import kotlinx.coroutines.delay
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ahu.ahutong.data.dao.AHUCache
-import com.kyant.monet.a1
-import com.kyant.monet.n1
-import com.kyant.monet.withNight
 import kotlin.collections.forEach
 import kotlin.text.all
 import kotlin.text.format
@@ -115,9 +107,6 @@ fun ElectricityDeposit(
 
     val roomInfo by viewModel.roomInfo.collectAsState()
 
-    val isLoading by viewModel.isLoading.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-
     var campusDropdownExpanded by remember { mutableStateOf(false) }
     var buildingsDropdownExpanded by remember { mutableStateOf(false) }
     var floorsDropdownExpanded by remember { mutableStateOf(false) }
@@ -154,7 +143,6 @@ fun ElectricityDeposit(
                 .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                 .background(100.n1 withNight 20.n1)
         ) {
-            val balance = 10
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier

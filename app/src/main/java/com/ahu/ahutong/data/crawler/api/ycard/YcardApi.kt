@@ -1,17 +1,9 @@
 package com.ahu.ahutong.data.crawler.api.ycard
 
-import arch.sink.utils.Utils
-import com.ahu.ahutong.data.api.AHUCookieJar
-import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
-import com.ahu.ahutong.data.crawler.model.ycard.PayResponse
 import com.ahu.ahutong.data.crawler.model.ycard.Token
-
-import com.franmontiel.persistentcookiejar.cache.SetCookieCache
-import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
-import okhttp3.Authenticator
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
@@ -80,7 +72,6 @@ interface YcardApi {
 
         private val BASE_URL = "https://ycard.ahu.edu.cn/"
 
-        private val token :String = ""
 
         private val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.HEADERS

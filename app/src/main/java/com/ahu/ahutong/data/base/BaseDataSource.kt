@@ -8,7 +8,6 @@ import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Grade
-import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 

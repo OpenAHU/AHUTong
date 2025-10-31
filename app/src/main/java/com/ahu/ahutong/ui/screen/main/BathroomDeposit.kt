@@ -1,6 +1,5 @@
 package com.ahu.ahutong.ui.screen.main
 
-import ads_mobile_sdk.n3
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -44,7 +43,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -71,16 +69,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.data.crawler.PayState
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.model.BathRoom
 import com.ahu.ahutong.ui.component.LoadingIndicator
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.BathroomDepositViewModel
-import com.ahu.ahutong.ui.state.PaymentState
 import com.kyant.monet.a1
-import com.kyant.monet.a2
-import com.kyant.monet.a3
 import com.kyant.monet.n1
-import com.kyant.monet.n2
 import com.kyant.monet.withNight
 import kotlinx.coroutines.delay
 import kotlin.let

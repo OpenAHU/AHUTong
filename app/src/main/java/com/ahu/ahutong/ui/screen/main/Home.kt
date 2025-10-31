@@ -102,8 +102,8 @@ fun Home(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        BathroomOpening(navController = navController, discoveryViewModel = discoveryViewModel)
-                        ElectricityCard(navController = navController, discoveryViewModel = discoveryViewModel)
+                        BathroomOpening(navController = navController)
+                        ElectricityCard(navController = navController)
                     }
                 }
             }

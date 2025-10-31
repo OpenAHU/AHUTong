@@ -1,8 +1,5 @@
 package com.ahu.ahutong.ui.screen.main
 
-import android.R
-import android.preference.PreferenceManager
-import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -34,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -176,7 +172,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                         contentDescription = null
                     )
                 }
-                IconButton(onClick = { scheduleViewModel.refreshSchedule(isRefresh = true) }) {
+                IconButton(onClick = { scheduleViewModel.refreshSchedule() }) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = null

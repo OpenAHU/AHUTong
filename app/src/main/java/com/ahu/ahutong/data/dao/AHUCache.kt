@@ -1,6 +1,6 @@
 package com.ahu.ahutong.data.dao
 
-import arch.sink.utils.Utils
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.ext.fromJson
 import com.google.gson.Gson
@@ -14,7 +14,7 @@ import com.tencent.mmkv.MMKV
 object AHUCache {
 
     init {
-        MMKV.initialize(Utils.getApp())
+        MMKV.initialize(AHUApplication.getApp())
     }
 
     private val kv: MMKV = MMKV.mmkvWithID("ahu")
@@ -209,28 +209,6 @@ object AHUCache {
      */
     fun saveIsShowAllCourse(isCourse: Boolean) {
         kv.putBoolean("isShowAllCourse", isCourse)
-    }
-
-    /**
-     * 保存List<Banner>
-     * @param theme ScheduleTheme
-     */
-    fun saveBanner(banners: List<Banner>) {
-        val json = Gson().toJson(banners)
-        kv.putString("list_banner", json)
-    }
-
-
-    /**
-     * 获取List<Banner>
-     * @return List<Banner>?
-     */
-    fun getBanner(): List<Banner>? {
-        val config = kv.getString("list_banner", "")
-        if (!config.isNullOrEmpty()) {
-            return Gson().fromJson(config, object : TypeToken<List<Banner>>() {}.type)
-        }
-        return null
     }
 
     fun isShowWidgetTip(): Boolean {

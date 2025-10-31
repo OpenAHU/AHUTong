@@ -5,7 +5,6 @@ import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.manager.TokenManager
-import com.ahu.ahutong.data.crawler.model.ycard.Token
 import com.ahu.ahutong.data.dao.AHUCache
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator

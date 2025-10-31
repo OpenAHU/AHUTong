@@ -1,30 +1,19 @@
 package com.ahu.ahutong.ui.state
 
-import android.graphics.Color
-import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import arch.sink.utils.TimeUtils
-import com.ahu.ahutong.common.SingleLiveEvent
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.dao.PreferencesManager
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.ScheduleConfigBean
-import com.ahu.ahutong.ext.GlobalCoroutineExceptionHandler
 import com.ahu.ahutong.ext.launchSafe
-import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.ZoneId
@@ -37,8 +26,6 @@ import java.time.ZoneId
 class ScheduleViewModel () : ViewModel() {
     val TAG = "ScheduleViewModel"
     val schedule = MutableLiveData<Result<List<Course>>>()
-
-    val showSelectTimeDialog = SingleLiveEvent<Boolean>()
 
     val schoolYear: String
         get() = AHUCache.getSchoolYear() ?: "2022-2023"
@@ -58,15 +45,8 @@ class ScheduleViewModel () : ViewModel() {
 
     /**
      * 刷新课表
-     * @param schoolYear String
-     * @param schoolTerm String
-     * @param isRefresh Boolean
      */
-    fun refreshSchedule(
-        schoolYear: String = this.schoolYear,
-        schoolTerm: String = this.schoolTerm,
-        isRefresh: Boolean = false
-    ) {
+    fun refreshSchedule() {
         viewModelScope.launchSafe {
             withContext(Dispatchers.Main){
                 if (!AHUCache.isLogin()) {

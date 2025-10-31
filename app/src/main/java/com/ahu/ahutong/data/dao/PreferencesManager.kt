@@ -14,8 +14,6 @@ object PreferencesKeys{
     val IS_SHOW_ALL_COURSE = booleanPreferencesKey("is_show_all_course")
 }
 
-private val user = AHUCache.getCurrentUser()
-
 private val Context.dataStore by preferencesDataStore(name = "user_pref")
 
 class PreferencesManager @Inject constructor(@ApplicationContext private val context: Context) {

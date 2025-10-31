@@ -17,20 +17,16 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.PreferencesViewModel
 import com.kyant.monet.a1
@@ -38,8 +34,6 @@ import com.kyant.monet.a2
 import com.kyant.monet.n1
 import com.kyant.monet.n2
 import com.kyant.monet.withNight
-import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.format.TextStyle
 
 
 @Composable

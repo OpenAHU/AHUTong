@@ -8,7 +8,6 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.ext.launchSafe
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 class ExamViewModel : ViewModel() {
     val data = MutableLiveData<Result<List<Exam>>>()

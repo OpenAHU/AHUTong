@@ -30,15 +30,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
-import com.ahu.ahutong.ui.state.BusinessViewModel
 import com.ahu.ahutong.ui.state.DeveloperViewModel
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
 @Composable
 fun Contributors(
-    developerViewModel: DeveloperViewModel = viewModel(),
-    businessViewModel: BusinessViewModel = viewModel()
+    developerViewModel: DeveloperViewModel = viewModel()
 ) {
     val context = LocalContext.current
     Column(
@@ -55,8 +53,8 @@ fun Contributors(
             style = MaterialTheme.typography.headlineLarge
         )
         mapOf(
+            developerViewModel.partners to stringResource(id = R.string.mine_tv_partner),
             developerViewModel.developers to stringResource(id = R.string.mine_tv_developer),
-//            businessViewModel.partner to stringResource(id = R.string.mine_tv_business)
         ).forEach { (list, name) ->
             Text(
                 text = name,
@@ -74,45 +72,56 @@ fun Contributors(
                             .fillMaxWidth()
                             .clip(SmoothRoundedCornerShape(4.dp))
                             .background(100.n1 withNight 20.n1)
-                            .clickable {
-                                try {
-                                    context.startActivity(
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(it.getURL())).apply {
-                                            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                        }
-                                    )
-                                } catch (e: Exception) {
-                                    Toast.makeText(context, "请安装 QQ 或 Tim", Toast.LENGTH_SHORT).show()
-                                }
-                            }
+                            .clickable { it.onclick(context) }
                             .padding(24.dp, 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(24.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        AsyncImage(
-                            model = it.getAvatarUrl(),
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(CircleShape),
-                            contentDescription = null
-                        )
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(
-                                text = it.name,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = it.desc,
-                                color = 30.n1 withNight 90.n1,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = "QQ: ${it.qq}",
-                                color = 50.n1 withNight 80.n1,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                        // oh shit, Compose is too hard for me...
+                        when (it) {
+                            is DeveloperViewModel.Developer -> {
+                                AsyncImage(
+                                    model = it.img,
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape),
+                                    contentDescription = null
+                                )
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(
+                                        text = it.name,
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(
+                                        text = it.desc,
+                                        color = 30.n1 withNight 90.n1,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        text = "QQ: ${it.qq}",
+                                        color = 50.n1 withNight 80.n1,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+
+                            is DeveloperViewModel.Partner -> {
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(
+                                        text = it.name,
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(
+                                        text = it.desc,
+                                        color = 30.n1 withNight 90.n1,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                            }
                         }
+
                     }
                 }
             }

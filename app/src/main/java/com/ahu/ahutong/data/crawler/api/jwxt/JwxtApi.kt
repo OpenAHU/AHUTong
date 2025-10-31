@@ -1,18 +1,11 @@
 package com.ahu.ahutong.data.crawler.api.jwxt
 
-
-import arch.sink.utils.Utils
-import com.ahu.ahutong.data.api.AHUCookieJar
 import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.model.jwxt.CourseTable
-import com.ahu.ahutong.data.crawler.model.jwxt.CurrentSemester
 import com.ahu.ahutong.data.crawler.model.jwxt.CurrentTeachWeek
 import com.ahu.ahutong.data.crawler.model.jwxt.GradeResponse
 import com.ahu.ahutong.data.crawler.net.AutoLoginInterceptor
 import com.ahu.ahutong.data.crawler.net.TokenAuthenticator
-import com.franmontiel.persistentcookiejar.cache.SetCookieCache
-import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
@@ -22,8 +15,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query

@@ -83,6 +83,12 @@ class LicenseViewModel : ViewModel() {
                 "Kyant0",
                 "https://github.com/Kyant0/Monet",
                 "Apache Software License 2.0"
+            ),
+            License(
+                "More...",
+                "Various Developers",
+                "https://github.com/",
+                "..."
             )
 
         )
