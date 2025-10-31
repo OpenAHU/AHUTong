@@ -11,6 +11,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlin.math.sqrt
 
+/**
+ * Author: Kyant
+ */
 fun SmoothRoundedCornerShape(
     size: Dp,
     rndPrc: Float = 0.3f

@@ -12,14 +12,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.FormBody
 import android.util.Log
-import androidx.lifecycle.viewModelScope
-import androidx.savedstate.savedState
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.dao.AHUCache.saveRoomSelection
 import com.ahu.ahutong.data.model.ElectricityChargeInfo
 import com.ahu.ahutong.data.model.RoomSelectionInfo
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

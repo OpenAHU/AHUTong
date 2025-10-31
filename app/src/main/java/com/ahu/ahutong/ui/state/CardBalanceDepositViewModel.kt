@@ -22,8 +22,6 @@ class CardBalanceDepositViewModel : ViewModel() {
 
     val cardInfo: StateFlow<CardInfo?> = _cardInfo
 
-    private var token = ""
-
 
     private val _paymentState = MutableStateFlow<PaymentState>(PaymentState.Idle)
     val paymentState: StateFlow<PaymentState> = _paymentState

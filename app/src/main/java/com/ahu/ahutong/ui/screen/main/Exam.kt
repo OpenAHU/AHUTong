@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -99,10 +98,7 @@ fun Exam(
 
                                 val isFinished = calcTime(it.time)  //-1：错误  1：未考试 2：考试结束 3：考试中
 
-
-                                var cardColor = if (it.finished) Color.Gray else Color(0xFF4CAF50)
-
-                                cardColor = when(isFinished){
+                                val cardColor: Color = when(isFinished){
                                     1->Color(0xFF4CAF50)
                                     2->Color.Gray
                                     3->Color(0xFFFFC107)

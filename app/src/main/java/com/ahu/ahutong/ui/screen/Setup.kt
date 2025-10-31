@@ -12,10 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.screen.setup.Info
-import com.ahu.ahutong.ui.screen.setup.Login
 import com.ahu.ahutong.ui.screen.setup.Splash
 import com.ahu.ahutong.ui.state.AboutViewModel
-import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.utils.animatedComposable
 
@@ -26,7 +24,6 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Setup(
-    loginViewModel: LoginViewModel = viewModel(),
     scheduleViewModel: ScheduleViewModel = viewModel(),
     aboutViewModel: AboutViewModel = viewModel(),
     onSetup: () -> Unit

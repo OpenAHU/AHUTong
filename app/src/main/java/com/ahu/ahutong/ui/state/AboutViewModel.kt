@@ -3,7 +3,7 @@ package com.ahu.ahutong.ui.state
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import arch.sink.utils.Utils
+import com.ahu.ahutong.AHUApplication
 
 /**
  * @Author: SinkDev
@@ -12,8 +12,8 @@ import arch.sink.utils.Utils
  */
 class AboutViewModel : ViewModel() {
     val versionName: String? by lazy {
-        val packageInfo = Utils.getApp().packageManager.getPackageInfo(
-            Utils.getApp().packageName,
+        val packageInfo = AHUApplication.getApp().packageManager.getPackageInfo(
+            AHUApplication.getApp().packageName,
             0
         )
         packageInfo.versionName

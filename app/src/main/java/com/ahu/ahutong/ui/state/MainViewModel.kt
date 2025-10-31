@@ -2,11 +2,7 @@ package com.ahu.ahutong.ui.state
 
 import android.webkit.CookieManager
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.ahu.ahutong.data.dao.AHUCache
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * @Author: SinkDev

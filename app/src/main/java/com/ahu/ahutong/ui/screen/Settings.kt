@@ -1,7 +1,6 @@
 package com.ahu.ahutong.ui.screen
 
-import android.content.Intent
-import android.net.Uri
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -22,12 +21,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Article
 import androidx.compose.material.icons.outlined.ClearAll
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Login
 import androidx.compose.material.icons.outlined.PeopleOutline
 import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import arch.sink.utils.Utils
 import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.Constants
 import com.ahu.ahutong.R
@@ -55,11 +51,11 @@ import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
+@SuppressLint("ContextCastToActivity")
 @Composable
 fun Settings(
     navController: NavHostController,
@@ -329,6 +325,8 @@ fun Settings(
                     .padding(vertical = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
+                val app = (LocalContext.current as ComponentActivity).application
+
                 Text(
                     text = "您的登录状态、课表等信息将会被永久清除",
                     modifier = Modifier.padding(horizontal = 24.dp),
@@ -346,7 +344,7 @@ fun Settings(
 
                             val cookieJar = AHUCookieJar(
                                 SetCookieCache(),
-                                SharedPrefsCookiePersistor(Utils.getApp())
+                                SharedPrefsCookiePersistor(app)
                             )
 
                             cookieJar.clear()

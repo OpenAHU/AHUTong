@@ -99,7 +99,7 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.crashreport)
     implementation(libs.ads.mobile.sdk)
 
     val composeBom = platform("androidx.compose:compose-bom:2022.12.00")

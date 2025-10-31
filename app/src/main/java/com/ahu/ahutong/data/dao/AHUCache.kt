@@ -1,6 +1,6 @@
 package com.ahu.ahutong.data.dao
 
-import arch.sink.utils.Utils
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.model.*
 import com.ahu.ahutong.ext.fromJson
 import com.google.gson.Gson
@@ -14,7 +14,7 @@ import com.tencent.mmkv.MMKV
 object AHUCache {
 
     init {
-        MMKV.initialize(Utils.getApp())
+        MMKV.initialize(AHUApplication.getApp())
     }
 
     private val kv: MMKV = MMKV.mmkvWithID("ahu")

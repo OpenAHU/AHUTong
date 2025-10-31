@@ -1,8 +1,5 @@
 package com.ahu.ahutong
 
-//import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent

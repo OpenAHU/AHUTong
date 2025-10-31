@@ -4,7 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import arch.sink.utils.Utils
+import com.ahu.ahutong.AHUApplication
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -18,21 +18,21 @@ val GlobalCoroutineExceptionHandler = CoroutineExceptionHandler { _, throwable -
         when (throwable) {
             is UnknownHostException -> {
                 Toast.makeText(
-                    Utils.getApp(),
+                    AHUApplication.getApp(),
                     "网络不可用，请检查网络连接",
                     Toast.LENGTH_SHORT
                 ).show()
             }
             is SocketTimeoutException -> {
                 Toast.makeText(
-                    Utils.getApp(),
+                    AHUApplication.getApp(),
                     "请求超时，请重试",
                     Toast.LENGTH_SHORT
                 ).show()
             }
             else -> {
                 Toast.makeText(
-                    Utils.getApp(),
+                    AHUApplication.getApp(),
                     "发生未知错误: ${throwable.message}",
                     Toast.LENGTH_SHORT
                 ).show()
