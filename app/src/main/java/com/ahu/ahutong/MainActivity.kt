@@ -22,7 +22,6 @@ import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.ui.theme.AHUTheme
-import com.ahu.ahutong.widget.ClassWidget
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -61,11 +60,6 @@ class MainActivity : ComponentActivity() {
             discoveryViewModel.loadActivityBean()
             scheduleViewModel.loadConfig()
             scheduleViewModel.refreshSchedule()
-            // 更新小部件数据
-            val manager = AppWidgetManager.getInstance(this)
-            val componentName = ComponentName(this, ClassWidget::class.java)
-            val appWidgetIds = manager.getAppWidgetIds(componentName)
-            manager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview)
         }
     }
 }

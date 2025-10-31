@@ -1,13 +1,11 @@
 package com.ahu.ahutong.ui.state
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.crawler.PayState
-import com.ahu.ahutong.data.crawler.api.ycard.YcardApi
 import com.ahu.ahutong.data.crawler.model.ycard.BathroomPayRequest
 import com.ahu.ahutong.data.crawler.model.ycard.BathroomRequest
 import com.ahu.ahutong.data.crawler.model.ycard.PayResponse
@@ -19,7 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
-import okhttp3.FormBody
 
 class BathroomDepositViewModel: ViewModel() {
 
