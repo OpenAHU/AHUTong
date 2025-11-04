@@ -18,16 +18,15 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.state.ScheduleViewModel
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -96,7 +96,7 @@ fun Info(
                 onValueChange = { schoolYear = it },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(100.n1 withNight 20.n1),
                 textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
                 keyboardOptions = KeyboardOptions(
@@ -125,7 +125,7 @@ fun Info(
             LazyRow(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(100.n1 withNight 20.n1),
                 contentPadding = PaddingValues(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -135,7 +135,7 @@ fun Info(
                     Text(
                         text = it,
                         modifier = Modifier
-                            .clip(CircleShape)
+                            .clip(ContinuousCapsule)
                             .background(if (isSelected) 90.a1 else Color.Unspecified)
                             .clickable { schoolTerm = it }
                             .padding(16.dp, 8.dp),
@@ -155,7 +155,7 @@ fun Info(
                 onValueChange = { currentWeek = it },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(100.n1 withNight 20.n1),
                 textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
                 keyboardOptions = KeyboardOptions(
@@ -184,14 +184,14 @@ fun Info(
                 }
             }
         }
-        CompositionLocalProvider(LocalIndication provides rememberRipple(color = 0.n1)) {
+        CompositionLocalProvider(LocalIndication provides ripple(color = 0.n1)) {
             Text(
                 text = stringResource(id = R.string.ok),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
                     .padding(16.dp)
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(90.a1 withNight 85.a1)
                     .clickable(
                         role = Role.Button,

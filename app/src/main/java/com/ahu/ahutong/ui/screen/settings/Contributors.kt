@@ -1,8 +1,5 @@
 package com.ahu.ahutong.ui.screen.settings
 
-import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,6 +27,7 @@ import coil.compose.AsyncImage
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.DeveloperViewModel
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -84,7 +81,7 @@ fun Contributors(
                                     model = it.img,
                                     modifier = Modifier
                                         .size(64.dp)
-                                        .clip(CircleShape),
+                                        .clip(ContinuousCapsule),
                                     contentDescription = null
                                 )
                                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

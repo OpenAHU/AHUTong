@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.R
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.n1
 
 @Composable
@@ -35,11 +35,11 @@ fun Splash() {
             painter = painterResource(id = R.mipmap.ic_launcher_foreground),
             contentDescription = null,
             modifier = Modifier
-                .clip(CircleShape)
+                .clip(ContinuousCapsule)
                 .background(100.n1)
                 .padding(4.dp)
                 .size(128.dp)
-                .clip(CircleShape)
+                .clip(ContinuousCapsule)
                 .scale(1.5f)
         )
         Text(

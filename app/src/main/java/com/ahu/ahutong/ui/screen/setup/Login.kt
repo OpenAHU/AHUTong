@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -70,6 +69,7 @@ import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.state.LoginState
 import com.ahu.ahutong.ui.state.LoginViewModel
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import kotlinx.coroutines.delay
@@ -167,7 +167,7 @@ fun Login(
                 onValueChange = { userID = it },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(100.n1 withNight 20.n1)
                     .onFocusChanged {
                         if (it.isFocused) {
@@ -211,7 +211,7 @@ fun Login(
                 onValueChange = { password = it },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(100.n1 withNight 20.n1)
                     .onFocusChanged {
                         if (it.isFocused) {
@@ -309,7 +309,7 @@ private fun logIn(
         TokenManager.clear()
         AHUCache.setAgreementAccepted()
 
-        loginViewModel.loginWithCrawler(userID = userID,password = password)
+        loginViewModel.loginWithCrawler(userID = userID, password = password)
 
     }
 }
@@ -326,15 +326,17 @@ private fun Modifier.autofill(
     )
     LocalAutofillTree.current += autofillNode
 
-    this.onGloballyPositioned {
-        autofillNode.boundingBox = it.boundsInWindow()
-    }.onFocusChanged { focusState ->
-        autofill?.run {
-            if (focusState.isFocused) {
-                requestAutofillForNode(autofillNode)
-            } else {
-                cancelAutofillForNode(autofillNode)
+    this
+        .onGloballyPositioned {
+            autofillNode.boundingBox = it.boundsInWindow()
+        }
+        .onFocusChanged { focusState ->
+            autofill?.run {
+                if (focusState.isFocused) {
+                    requestAutofillForNode(autofillNode)
+                } else {
+                    cancelAutofillForNode(autofillNode)
+                }
             }
         }
-    }
 }

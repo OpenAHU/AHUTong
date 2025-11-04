@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -271,8 +270,8 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
                         contentDescription = "QR Code",
                         modifier = Modifier
                             .size(200.dp)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
-                        )
+                            .border(1.dp, Color.Gray, SmoothRoundedCornerShape(8.dp)),
+                    )
                 }
             } ?: Text(
                 text = "加载失败"

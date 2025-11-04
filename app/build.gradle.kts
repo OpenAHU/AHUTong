@@ -7,11 +7,9 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
-
 android {
     namespace = "com.ahu.ahutong"
     compileSdk = 36
-
 
     lint {
         //即使报错也不会停止打包
@@ -35,7 +33,6 @@ android {
             abiFilters.add("x86")
             abiFilters.add("x86_64")
         }
-
     }
 
     defaultConfig {
@@ -85,6 +82,13 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll(
+                "-Xlambdas=class",
+            )
+        }
+    }
     buildFeatures {
         dataBinding = true
         viewBinding = true
@@ -92,22 +96,13 @@ android {
         buildConfig = true
     }
     kapt.includeCompileClasspath = false
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.0-alpha02"
-    }
 }
 
 dependencies {
     implementation(libs.crashreport)
     implementation(libs.ads.mobile.sdk)
 
-    val composeBom = platform("androidx.compose:compose-bom:2022.12.00")
-    implementation(composeBom)
-    androidTestImplementation(composeBom)
-
     implementation(libs.persistentcookiejar)
-    implementation(libs.coil)
     implementation(libs.mmkv.static)
     implementation(libs.logging.interceptor)
     implementation(libs.retrofit)
@@ -115,26 +110,24 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.jsoup)
 
-    implementation(libs.androidx.runtime.livedata)
-    implementation(libs.ui)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.material3)
+    implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.glance.appwidget)
-    implementation(libs.accompanist.flowlayout)
+    implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.monet)
+    implementation(libs.kyant0.capsule)
 
     implementation(platform(libs.kotlin.bom))
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.androidx.core.ktx)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.zxing.android.embedded)
     implementation(libs.hilt.android)

@@ -18,19 +18,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +49,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ahu.ahutong.ui.component.LoadingIndicator
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.CardBalanceDepositViewModel
 import com.ahu.ahutong.ui.state.PaymentState
@@ -94,7 +93,7 @@ fun CardBalanceDeposit(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(SmoothRoundedCornerShape(16.dp))
                 .background(100.n1 withNight 20.n1)
         ) {
             val balance = 10
@@ -142,7 +141,7 @@ fun CardBalanceDeposit(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(SmoothRoundedCornerShape(16.dp))
                 .background(100.n1 withNight 20.n1),
         ) {
 
@@ -167,20 +166,22 @@ fun CardBalanceDeposit(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Transparent,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    ),
-                placeholder = { Text("请输入金额",color = 30.n1 withNight 70.n1) },
-                textStyle = TextStyle(fontSize = 16.sp,color = 10.n1 withNight 90.n1)
+                ),
+                placeholder = { Text("请输入金额", color = 30.n1 withNight 70.n1) },
+                textStyle = TextStyle(fontSize = 16.sp, color = 10.n1 withNight 90.n1)
             )
         }
 
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End) {
+            horizontalArrangement = Arrangement.End
+        ) {
             Box(
                 modifier = Modifier
                     .navigationBarsPadding()
@@ -200,7 +201,7 @@ fun CardBalanceDeposit(
             ) {
                 when (val state = paymentState) {
                     PaymentState.Idle -> {
-                        CompositionLocalProvider(LocalIndication provides rememberRipple(color = 0.n1)) {
+                        CompositionLocalProvider(LocalIndication provides ripple(color = 0.n1)) {
                             Text(
                                 text = "确认",
                                 modifier = Modifier
@@ -228,7 +229,7 @@ fun CardBalanceDeposit(
                             horizontalArrangement = Arrangement.spacedBy(24.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            LoadingIndicator(
+                            CircularProgressIndicator(
                                 modifier = Modifier.size(56.dp),
                                 color = 100.n1,
                                 strokeWidth = 6.dp
@@ -309,7 +310,12 @@ fun CardBalanceDeposit(
                 titleContentColor = 10.n1 withNight 90.n1,
                 onDismissRequest = { showConfirmDialog = false },
                 title = { Text("确认支付") },
-                text = { Text("您即将从绑定的银行卡扣除￥$amount 元，并充值到校园卡余额中。请确认金额无误后继续操作。", color = 40.n1 withNight 60.n1) },
+                text = {
+                    Text(
+                        "您即将从绑定的银行卡扣除￥$amount 元，并充值到校园卡余额中。请确认金额无误后继续操作。",
+                        color = 40.n1 withNight 60.n1
+                    )
+                },
                 confirmButton = {
                     Text(
                         text = "支付",

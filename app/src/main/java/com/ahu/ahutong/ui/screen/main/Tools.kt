@@ -5,13 +5,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,8 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -58,8 +57,8 @@ fun Tools(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-            crossAxisSpacing = 16.dp
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ToolItem(
                 stringId = R.string.grade,
@@ -102,7 +101,7 @@ fun Tools(navController: NavHostController) {
                 text = "添加",
                 modifier = Modifier
                     .padding(16.dp)
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(90.a1)
                     .clickable {
 //                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(

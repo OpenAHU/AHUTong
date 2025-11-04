@@ -2,14 +2,14 @@ package com.ahu.ahutong.ui.screen
 
 import android.util.Log
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,10 +20,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -42,11 +42,11 @@ fun Splash(navController: NavController) {
     LaunchedEffect(showAgreementDialog) {
         if (AHUCache.isAgreementAccepted()) {
             if (AHUCache.isLogin()) {
-                navController.navigate("home"){
+                navController.navigate("home") {
                     popUpTo("splash") { inclusive = true }
                 }
             } else {
-                navController.navigate("login"){
+                navController.navigate("login") {
                     popUpTo("splash") { inclusive = true }
                 }
             }
@@ -54,8 +54,8 @@ fun Splash(navController: NavController) {
     }
 
 
-    if(showAgreementDialog){
-        Log.e(TAG, "Splash: $showAgreementDialog", )
+    if (showAgreementDialog) {
+        Log.e(TAG, "Splash: $showAgreementDialog")
         AgreementDialog(
             onAgree = {
                 AHUCache.setAgreementAccepted()
@@ -104,29 +104,32 @@ fun AgreementDialog(
                     color = 10.n1 withNight 90.n1
                 )
             }
-
-
         },
+        shape = SmoothRoundedCornerShape(32.dp),
         confirmButton = {
-            TextButton(
+            FilledTonalButton(
                 onClick = onAgree,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(90.a1 withNight 85.a1)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.size(88.dp, 56.dp),
+                shape = SmoothRoundedCornerShape(16.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = 90.a1 withNight 85.a1,
+                    contentColor = 0.n1
+                )
             ) {
-                Text("同意", color = 0.n1)
+                Text("同意")
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDisagree,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(90.a1 withNight 85.a1)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.size(88.dp, 56.dp),
+                shape = SmoothRoundedCornerShape(16.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = 90.a1 withNight 85.a1,
+                    contentColor = 0.n1
+                )
             ) {
-                Text("拒绝", color = 0.n1)
+                Text("拒绝")
             }
         },
         containerColor = 100.n1 withNight 20.n1

@@ -18,10 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -33,7 +34,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ahu.ahutong.R
-import com.ahu.ahutong.ui.component.LoadingIndicator
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.LoginState
 import com.kyant.monet.a1
@@ -67,7 +67,7 @@ fun BoxScope.LoginDynamicIsland(
     ) {
         when (state) {
             LoginState.Idle -> {
-                CompositionLocalProvider(LocalIndication provides rememberRipple(color = 0.n1)) {
+                CompositionLocalProvider(LocalIndication provides ripple(color = 0.n1)) {
                     Text(
                         text = stringResource(id = R.string.login),
                         modifier = Modifier
@@ -90,7 +90,7 @@ fun BoxScope.LoginDynamicIsland(
                     horizontalArrangement = Arrangement.spacedBy(24.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    LoadingIndicator(
+                    CircularProgressIndicator(
                         modifier = Modifier.size(56.dp),
                         color = 100.n1,
                         strokeWidth = 6.dp

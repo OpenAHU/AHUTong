@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Home
@@ -72,6 +71,7 @@ import com.ahu.ahutong.ui.state.LoginViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.utils.animatedComposable
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -123,7 +123,7 @@ fun Main(
                 Login(
                     loginViewModel = loginViewModel,
                     onLoggedIn = {
-                        navController.navigate("home"){
+                        navController.navigate("home") {
                             popUpTo("login") { inclusive = true }
                         }
                         discoveryViewModel.loadActivityBean()
@@ -167,7 +167,7 @@ fun Main(
                 Contributors()
             }
 
-            animatedComposable("electricity_pay"){
+            animatedComposable("electricity_pay") {
                 ElectricityDeposit()
             }
 
@@ -175,19 +175,19 @@ fun Main(
                 CardBalanceDeposit()
             }
 
-            animatedComposable("preferences"){
+            animatedComposable("preferences") {
                 Preferences()
             }
 
-            animatedComposable("bathroom_deposit"){
+            animatedComposable("bathroom_deposit") {
                 BathroomDeposit()
             }
 
-            animatedComposable("debug"){
+            animatedComposable("debug") {
                 Debug()
             }
 
-            animatedComposable("splash"){
+            animatedComposable("splash") {
                 Splash(navController)
             }
 
@@ -219,7 +219,7 @@ fun Main(
                     text = "重新登录",
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .clip(CircleShape)
+                        .clip(ContinuousCapsule)
                         .background(90.a1 withNight 30.n1)
                         .clickable {
                             navController.navigate("login")
@@ -355,7 +355,7 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
                     selected = currentRoute == "tools",
                     onClick = {
                         navController.navigatePreservingHome("tools")
-                              },
+                    },
                     icon = {
                         Icon(
                             imageVector = Icons.Outlined.Build,
@@ -376,13 +376,14 @@ fun BoxScope.BottomNavBar(navController: NavHostController) {
         }
     }
 }
+
 fun NavController.navigatePreservingHome(route: String) {
     val currentRoute = this.currentBackStackEntry?.destination?.route
     if (currentRoute == route) return
 
     val homeRoute = "home"
 
-    Log.e("TAG", "navigatePreservingHome: $homeRoute", )
+    Log.e("TAG", "navigatePreservingHome: $homeRoute")
 
     this.navigate(route) {
         popUpTo(homeRoute) {

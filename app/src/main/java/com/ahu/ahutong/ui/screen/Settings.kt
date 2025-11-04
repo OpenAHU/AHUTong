@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Article
@@ -25,9 +24,16 @@ import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Login
 import androidx.compose.material.icons.outlined.PeopleOutline
 import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +57,7 @@ import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -108,7 +115,7 @@ fun Settings(
                 modifier = Modifier.clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
-                ){
+                ) {
                     val now = System.currentTimeMillis()
                     if (now - lastClickTime > interval) {
                         count = 1
@@ -127,11 +134,11 @@ fun Settings(
                     painter = painterResource(id = R.mipmap.ic_launcher_foreground),
                     contentDescription = null,
                     modifier = Modifier
-                        .clip(CircleShape)
+                        .clip(ContinuousCapsule)
                         .background(100.n1)
                         .padding(4.dp)
                         .size(64.dp)
-                        .clip(CircleShape)
+                        .clip(ContinuousCapsule)
                         .scale(1.75f)
                 )
                 Column {
@@ -191,7 +198,7 @@ fun Settings(
 //                    Row(
 //                        modifier = Modifier
 //                            .weight(1f)
-//                            .clip(CircleShape)
+//                            .clip(ContinuousCapsule)
 //                            .background(100.n1 withNight 30.n1)
 //                            .clickable { navController.navigate("info") }
 //                            .padding(12.dp, 8.dp),
@@ -214,7 +221,7 @@ fun Settings(
                     Row(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(CircleShape)
+                            .clip(ContinuousCapsule)
                             .background(100.n1 withNight 30.n1)
                             .clickable { navController.navigate("login") }
                             .padding(12.dp, 8.dp),
@@ -295,7 +302,7 @@ fun Settings(
 //                            .show()
 //                    }
 
-                    Toast.makeText(context,"暂未开放",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "暂未开放", Toast.LENGTH_SHORT).show()
 
                 }
             )
@@ -336,7 +343,7 @@ fun Settings(
                     text = "清除",
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .clip(CircleShape)
+                        .clip(ContinuousCapsule)
                         .background(90.a1 withNight 30.n1)
                         .clickable {
                             mainViewModel.logout()

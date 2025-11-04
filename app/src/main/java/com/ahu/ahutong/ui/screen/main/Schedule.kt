@@ -19,16 +19,15 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -56,16 +55,17 @@ import com.ahu.ahutong.ui.screen.main.schedule.CourseCardSpec
 import com.ahu.ahutong.ui.screen.main.schedule.CourseDetailDialog
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.ScheduleViewModel
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.Hct.Companion.toHct
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.toColor
 import com.kyant.monet.toSrgb
 import com.kyant.monet.withNight
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlinx.coroutines.launch
 
 @Composable
 fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
@@ -82,7 +82,8 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
         mutableStateOf(
             schedule.map { it.name }.distinct()
                 .mapIndexed { index, name ->
-                    name to baseColor.copy(h = 360.0 * index / schedule.map { it.name }.distinct().size).toSrgb().toColor()
+                    name to baseColor.copy(h = 360.0 * index / schedule.map { it.name }.distinct().size).toSrgb()
+                        .toColor()
                 }.toMap()
         )
     }
@@ -117,7 +118,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                     val week = it + 1
                     val isSelected = week == currentWeek
                     CompositionLocalProvider(
-                        LocalIndication provides rememberRipple(
+                        LocalIndication provides ripple(
                             color = if (isSelected) {
                                 100.n1 withNight 0.n1
                             } else {
@@ -128,7 +129,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                         Text(
                             text = week.toString(),
                             modifier = Modifier
-                                .clip(CircleShape)
+                                .clip(ContinuousCapsule)
                                 .background(
                                     animateColorAsState(
                                         targetValue = if (isSelected) {
@@ -156,7 +157,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
             // actions
             Row(
                 modifier = Modifier
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(100.n1 withNight 30.n1)
             ) {
                 IconButton(
@@ -272,7 +273,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                 val isCurrentWeek = currentWeek in course.weekIndexes
 
                 if ((currentWeek >= 1
-                    && currentWeek <= course.weekIndexes.last() && isShowAllCourse)
+                            && currentWeek <= course.weekIndexes.last() && isShowAllCourse)
 
                     || isCurrentWeek
 
@@ -281,7 +282,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
 
                         CourseCard(
                             course = course,
-                            color =  courseColors.getOrElse(course.name) { 50.a1 },
+                            color = courseColors.getOrElse(course.name) { 50.a1 },
                             cellWidth = cellWidth,
                             cellHeight = cellHeight,
                             isCurrentWeek = isCurrentWeek,

@@ -67,12 +67,6 @@ class LicenseViewModel : ViewModel() {
                 "Apache Software License 2.0"
             ),
             License(
-                "Accompanist",
-                "Google",
-                "https://github.com/google/accompanist",
-                "Apache Software License 2.0"
-            ),
-            License(
                 "ZXing Android Embedded",
                 "JourneyApps",
                 "https://github.com/journeyapps/zxing-android-embedded",

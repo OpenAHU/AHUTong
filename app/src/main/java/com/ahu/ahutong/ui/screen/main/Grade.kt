@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -35,6 +34,7 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.GradeViewModel
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -76,7 +76,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
             // actions
             Row(
                 modifier = Modifier
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(100.n1 withNight 30.n1)
             ) {
                 IconButton(onClick = { gradeViewModel.getGarde(isRefresh = false) }) {
@@ -90,7 +90,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
         LazyRow(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .clip(CircleShape)
+                .clip(ContinuousCapsule)
                 .background(100.n1 withNight 20.n1),
             contentPadding = PaddingValues(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -100,7 +100,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                 Text(
                     text = it,
                     modifier = Modifier
-                        .clip(CircleShape)
+                        .clip(ContinuousCapsule)
                         .background(if (isSelected) 90.a1 else Color.Unspecified)
                         .clickable {
                             gradeViewModel.schoolYear = it
@@ -115,7 +115,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
         LazyRow(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .clip(CircleShape)
+                .clip(ContinuousCapsule)
                 .background(100.n1 withNight 20.n1),
             contentPadding = PaddingValues(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -125,7 +125,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                 Text(
                     text = it,
                     modifier = Modifier
-                        .clip(CircleShape)
+                        .clip(ContinuousCapsule)
                         .background(if (isSelected) 90.a1 else Color.Unspecified)
                         .clickable { gradeViewModel.schoolTerm = it }
                         .padding(16.dp, 8.dp),
@@ -212,7 +212,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            text = "${it.courseNature?:""} (${it.courseNum})",
+                            text = "${it.courseNature ?: ""} (${it.courseNum})",
                             color = 50.n1 withNight 80.n1,
                             style = MaterialTheme.typography.bodyMedium
                         )

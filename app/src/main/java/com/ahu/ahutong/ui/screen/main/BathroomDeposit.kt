@@ -31,8 +31,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -40,10 +40,12 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -69,14 +71,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.data.crawler.PayState
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.ui.component.LoadingIndicator
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.BathroomDepositViewModel
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import kotlinx.coroutines.delay
-import kotlin.let
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,6 +117,12 @@ fun BathroomDeposit(
         lastTel = AHUCache.getPhone()
     }
 
+    val textFieldColors = TextFieldDefaults.colors(
+        unfocusedContainerColor = Color.Transparent,
+        focusedContainerColor = Color.Transparent,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+    )
 
     Column(
         modifier = Modifier
@@ -156,7 +162,6 @@ fun BathroomDeposit(
                     style = MaterialTheme.typography.titleMedium
                 )
 
-
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -169,11 +174,7 @@ fun BathroomDeposit(
                         modifier = Modifier
                             .menuAnchor()
                             .width(150.dp),
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                        ),
+                        colors = textFieldColors,
                         textStyle = TextStyle(
                             textAlign = TextAlign.End,
                             fontSize = 16.sp,
@@ -220,11 +221,7 @@ fun BathroomDeposit(
                             }
                             hasFocus = it.isFocused
                         },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    ),
+                    colors = textFieldColors,
                     textStyle = TextStyle(
                         textAlign = TextAlign.Center,
                         fontSize = 16.sp,
@@ -323,11 +320,7 @@ fun BathroomDeposit(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                ),
+                colors = textFieldColors,
                 placeholder = { Text("请输入金额", color = 30.n1 withNight 70.n1) },
                 textStyle = TextStyle(fontSize = 16.sp, color = 10.n1 withNight 90.n1)
             )
@@ -363,7 +356,7 @@ fun BathroomDeposit(
             ) {
                 when (val state = payState.value) {
                     PayState.Idle -> {
-                        CompositionLocalProvider(LocalIndication provides rememberRipple(color = 0.n1)) {
+                        CompositionLocalProvider(LocalIndication provides ripple(color = 0.n1)) {
                             Text(
                                 text = "确认",
                                 modifier = Modifier
@@ -392,7 +385,7 @@ fun BathroomDeposit(
                             horizontalArrangement = Arrangement.spacedBy(24.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            LoadingIndicator(
+                            CircularProgressIndicator(
                                 modifier = Modifier.size(56.dp),
                                 color = 100.n1,
                                 strokeWidth = 6.dp
@@ -483,11 +476,11 @@ fun BathroomDeposit(
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                                 visualTransformation = PasswordVisualTransformation(),
                                 isError = errorMsg != null,
-                                colors = TextFieldDefaults.outlinedTextFieldColors(
-                                    textColor = 10.n1 withNight 90.n1,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = 10.n1 withNight 90.n1,
+                                    unfocusedTextColor = 10.n1 withNight 90.n1,
                                     focusedBorderColor = 20.n1 withNight 80.n1
                                 )
-
                             )
                             if (errorMsg != null) {
                                 Text(

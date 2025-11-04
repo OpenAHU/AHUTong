@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -65,7 +64,7 @@ fun Exam(
         )
 
 
-        if(isLoading != true) {
+        if (isLoading != true) {
             if (!exam.isNullOrEmpty()) {
                 Column(
                     modifier = Modifier
@@ -98,26 +97,30 @@ fun Exam(
 
                                 val isFinished = calcTime(it.time)  //-1：错误  1：未考试 2：考试结束 3：考试中
 
-                                val cardColor: Color = when(isFinished){
-                                    1->Color(0xFF4CAF50)
-                                    2->Color.Gray
-                                    3->Color(0xFFFFC107)
-                                    else -> {Color.Red}
+                                val cardColor: Color = when (isFinished) {
+                                    1 -> Color(0xFF4CAF50)
+                                    2 -> Color.Gray
+                                    3 -> Color(0xFFFFC107)
+                                    else -> {
+                                        Color.Red
+                                    }
                                 }
 
 
                                 Box(
                                     modifier = Modifier
-                                        .background(color = cardColor, shape = RoundedCornerShape(12.dp))
+                                        .background(color = cardColor, shape = SmoothRoundedCornerShape(12.dp))
                                         .padding(horizontal = 8.dp, vertical = 4.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = when(isFinished){
-                                            1->"考试未开始"
-                                            2->"考试已结束"
-                                            3->"考试进行中"
-                                            else -> {"时间解析错误"}
+                                        text = when (isFinished) {
+                                            1 -> "考试未开始"
+                                            2 -> "考试已结束"
+                                            3 -> "考试进行中"
+                                            else -> {
+                                                "时间解析错误"
+                                            }
                                         },
                                         color = Color.White,
                                         fontSize = 12.sp
@@ -145,7 +148,7 @@ fun Exam(
                     style = MaterialTheme.typography.titleLarge
                 )
             }
-        }else{
+        } else {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -162,12 +165,11 @@ fun Exam(
         }
 
 
-
     }
 }
 
 
-fun calcTime(time:String):Int{
+fun calcTime(time: String): Int {
     val now = LocalDateTime.now()
     val parts = time.split(" ")
     if (parts.size != 2 || !parts[1].contains("~")) {

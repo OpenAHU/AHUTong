@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -46,6 +45,7 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.data.model.Tel
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.TelDirectoryViewModel
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
@@ -117,7 +117,7 @@ private fun Categories(
     LazyRow(
         modifier = Modifier
             .padding(horizontal = 16.dp)
-            .clip(CircleShape)
+            .clip(ContinuousCapsule)
             .background(100.n1 withNight 20.n1),
         contentPadding = PaddingValues(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -127,7 +127,7 @@ private fun Categories(
             Text(
                 text = it,
                 modifier = Modifier
-                    .clip(CircleShape)
+                    .clip(ContinuousCapsule)
                     .background(if (isSelected) 90.a1 else Color.Unspecified)
                     .clickable { onCategorySelected(it) }
                     .padding(16.dp, 8.dp),
