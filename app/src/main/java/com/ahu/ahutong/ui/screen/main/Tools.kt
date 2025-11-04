@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,17 +28,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.R
+import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
+import kotlinx.coroutines.launch
 
 @Composable
 fun Tools(navController: NavHostController) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,9 +110,11 @@ fun Tools(navController: NavHostController) {
                     .clip(ContinuousCapsule)
                     .background(90.a1)
                     .clickable {
-//                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
-//                            ScheduleAppWidgetReceiver::class.java
-//                        )
+                        scope.launch {
+                            GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+                                ScheduleAppWidgetReceiver::class.java
+                            )
+                        }
                     }
                     .padding(16.dp, 8.dp),
                 color = 0.n1,

@@ -38,17 +38,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.screen.main.BathroomDeposit
 import com.ahu.ahutong.ui.screen.main.CardBalanceDeposit
 import com.ahu.ahutong.ui.screen.main.ElectricityDeposit
@@ -76,6 +80,7 @@ import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -105,6 +110,8 @@ fun Main(
                 )
             }
             animatedComposable("setup") {
+                val context = LocalContext.current
+                val scope = rememberCoroutineScope()
                 Setup(
                     scheduleViewModel = scheduleViewModel,
                     aboutViewModel = aboutViewModel,
@@ -113,9 +120,11 @@ fun Main(
                         discoveryViewModel.loadActivityBean()
                         scheduleViewModel.loadConfig()
                         scheduleViewModel.refreshSchedule()
-//                        GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
-//                            ScheduleAppWidgetReceiver::class.java
-//                        )
+                        scope.launch {
+                            GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+                                ScheduleAppWidgetReceiver::class.java
+                            )
+                        }
                     }
                 )
             }
