@@ -25,3 +25,7 @@
     <img src="pic/bathroom_charge.png" alt="浴室缴费" width="32%">
     <img src="pic/electricity_charge.png" alt="电控缴费" width="32%">
 </div>
+
+## A Historic Moment
+An era has ended — **2025-11-01**.
+![772f0c1d-bc2a-4d27-a317-9b0ee1ae2a13](https://github.com/user-attachments/assets/07512859-7523-490a-a985-c93554c67a5f)
