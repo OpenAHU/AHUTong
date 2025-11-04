@@ -62,20 +62,20 @@ fun AtAGlance(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(32.dp, 8.dp, 16.dp, 0.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Text(
+                text = date,
+                style = MaterialTheme.typography.bodyLarge
+            )
             IconButton(onClick = { navController.navigate("settings") }) {
                 Icon(
                     imageVector = Icons.Outlined.Settings,
                     contentDescription = null
                 )
             }
-            Text(
-                text = date,
-                style = MaterialTheme.typography.bodyLarge
-            )
         }
         Column(
             modifier = Modifier
