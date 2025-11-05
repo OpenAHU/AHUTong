@@ -60,6 +60,7 @@ fun PhoneBook() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .padding(bottom = 80.dp)
             .systemBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {

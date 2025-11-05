@@ -53,6 +53,7 @@ fun Exam(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .padding(bottom = 80.dp)
             .systemBarsPadding()
             .padding(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)

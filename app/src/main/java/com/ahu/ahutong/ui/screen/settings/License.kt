@@ -37,6 +37,7 @@ fun License(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .padding(bottom = 80.dp)
             .systemBarsPadding()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
