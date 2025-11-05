@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 
 class InteractiveHighlight(
     val animationScope: CoroutineScope,
+    val userDragEnabled: Boolean = true,
     val position: (size: Size, offset: Offset) -> Offset = { _, offset -> offset }
 ) {
 
@@ -58,64 +59,72 @@ half4 main(float2 coord) {
         }
 
     val modifier: Modifier =
-        Modifier.drawWithContent {
-            val progress = pressProgressAnimation.value
-            if (progress > 0f) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && shader != null) {
-                    drawRect(
-                        Color.White.copy(0.08f * progress),
-                        blendMode = BlendMode.Plus
-                    )
-                    shader.apply {
-                        val position = position(size, positionAnimation.value)
-                        setFloatUniform("size", size.width, size.height)
-                        setColorUniform("color", Color.White.copy(0.15f * progress).toArgb())
-                        setFloatUniform("radius", size.minDimension * 1.5f)
-                        setFloatUniform(
-                            "position",
-                            position.x.fastCoerceIn(0f, size.width),
-                            position.y.fastCoerceIn(0f, size.height)
+        if (userDragEnabled) {
+            Modifier.drawWithContent {
+                val progress = pressProgressAnimation.value
+                if (progress > 0f) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && shader != null) {
+                        drawRect(
+                            Color.White.copy(0.08f * progress),
+                            blendMode = BlendMode.Plus
+                        )
+                        shader.apply {
+                            val position = position(size, positionAnimation.value)
+                            setFloatUniform("size", size.width, size.height)
+                            setColorUniform("color", Color.White.copy(0.15f * progress).toArgb())
+                            setFloatUniform("radius", size.minDimension * 1.5f)
+                            setFloatUniform(
+                                "position",
+                                position.x.fastCoerceIn(0f, size.width),
+                                position.y.fastCoerceIn(0f, size.height)
+                            )
+                        }
+                        drawRect(
+                            ShaderBrush(shader),
+                            blendMode = BlendMode.Plus
+                        )
+                    } else {
+                        drawRect(
+                            Color.White.copy(0.25f * progress),
+                            blendMode = BlendMode.Plus
                         )
                     }
-                    drawRect(
-                        ShaderBrush(shader),
-                        blendMode = BlendMode.Plus
-                    )
-                } else {
-                    drawRect(
-                        Color.White.copy(0.25f * progress),
-                        blendMode = BlendMode.Plus
-                    )
                 }
-            }
 
-            drawContent()
+                drawContent()
+            }
+        } else {
+            Modifier
         }
 
     val gestureModifier: Modifier =
-        Modifier.pointerInput(animationScope) {
-            inspectDragGestures(
-                onDragStart = { down ->
-                    startPosition = down.position
-                    animationScope.launch {
-                        launch { pressProgressAnimation.animateTo(1f, pressProgressAnimationSpec) }
-                        launch { positionAnimation.snapTo(startPosition) }
+        if (userDragEnabled) {
+            Modifier.pointerInput(animationScope) {
+                inspectDragGestures(
+                    onDragStart = { down ->
+                        startPosition = down.position
+                        animationScope.launch {
+                            launch { pressProgressAnimation.animateTo(1f, pressProgressAnimationSpec) }
+                            launch { positionAnimation.snapTo(startPosition) }
+                        }
+                    },
+                    onDragEnd = {
+                        animationScope.launch {
+                            launch { pressProgressAnimation.animateTo(0f, pressProgressAnimationSpec) }
+                            launch { positionAnimation.animateTo(startPosition, positionAnimationSpec) }
+                        }
+                    },
+                    onDragCancel = {
+                        animationScope.launch {
+                            launch { pressProgressAnimation.animateTo(0f, pressProgressAnimationSpec) }
+                            launch { positionAnimation.animateTo(startPosition, positionAnimationSpec) }
+                        }
                     }
-                },
-                onDragEnd = {
-                    animationScope.launch {
-                        launch { pressProgressAnimation.animateTo(0f, pressProgressAnimationSpec) }
-                        launch { positionAnimation.animateTo(startPosition, positionAnimationSpec) }
-                    }
-                },
-                onDragCancel = {
-                    animationScope.launch {
-                        launch { pressProgressAnimation.animateTo(0f, pressProgressAnimationSpec) }
-                        launch { positionAnimation.animateTo(startPosition, positionAnimationSpec) }
-                    }
+                ) { change, _ ->
+                    animationScope.launch { positionAnimation.snapTo(change.position) }
                 }
-            ) { change, _ ->
-                animationScope.launch { positionAnimation.snapTo(change.position) }
             }
+        } else {
+            Modifier
         }
 }

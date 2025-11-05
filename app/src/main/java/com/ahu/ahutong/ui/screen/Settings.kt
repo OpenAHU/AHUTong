@@ -87,7 +87,7 @@ fun Settings(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .systemBarsPadding()
-            .padding(bottom = 24.dp),
+            .padding(bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(

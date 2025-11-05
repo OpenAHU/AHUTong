@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PreferencesViewModel @Inject constructor(private val preferencesManager: PreferencesManager): ViewModel() {
+class PreferencesViewModel @Inject constructor(private val preferencesManager: PreferencesManager) : ViewModel() {
 
     private val _showQRCode = MutableStateFlow(false)
     val showQRCode: StateFlow<Boolean> = _showQRCode.asStateFlow()
@@ -19,32 +19,42 @@ class PreferencesViewModel @Inject constructor(private val preferencesManager: P
     private val _isShowAllCourse = MutableStateFlow(false)
     val isShowAllCourse: StateFlow<Boolean> = _isShowAllCourse.asStateFlow()
 
+    private val _useLiquidGlass = MutableStateFlow(true)
+    val useLiquidGlass: StateFlow<Boolean> = _useLiquidGlass.asStateFlow()
 
     init {
         viewModelScope.launch {
             preferencesManager.showQRCode.collect {
                 _showQRCode.value = it
             }
-
-
         }
         viewModelScope.launch {
             preferencesManager.isShowAllCourse.collect {
                 _isShowAllCourse.value = it
             }
         }
+        viewModelScope.launch {
+            preferencesManager.useLiquidGlass.collect {
+                _useLiquidGlass.value = it
+            }
+        }
     }
 
-    fun setShowQRCode(value : Boolean){
+    fun setShowQRCode(value: Boolean) {
         viewModelScope.launch {
             preferencesManager.setShowQRCode(value)
         }
     }
 
-    fun setIsShowAllCourse(value: Boolean){
+    fun setIsShowAllCourse(value: Boolean) {
         viewModelScope.launch {
             preferencesManager.setIsShowAllCourse(value)
         }
     }
 
+    fun setUseLiquidGlass(value: Boolean) {
+        viewModelScope.launch {
+            preferencesManager.setUseLiquidGlass(value)
+        }
+    }
 }

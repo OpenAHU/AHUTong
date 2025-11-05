@@ -1,8 +1,6 @@
 package com.ahu.ahutong.ui.screen.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,8 +36,8 @@ fun Preferences() {
     val preferencesViewModel: PreferencesViewModel = hiltViewModel()
 
     val showQRCode by preferencesViewModel.showQRCode.collectAsState()
-
     val isShowAllCourse by preferencesViewModel.isShowAllCourse.collectAsState()
+    val useLiquidGlass by preferencesViewModel.useLiquidGlass.collectAsState()
 
     val cardColor = 100.n1 withNight 20.n1
     val backdrop = rememberCanvasBackdrop { drawRect(cardColor) }
@@ -68,27 +65,17 @@ fun Preferences() {
         ) {
             Text(text = "主页", style = MaterialTheme.typography.headlineSmall)
             Row(
-                modifier = Modifier
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    )
-                    {
-                        preferencesViewModel.setShowQRCode(!preferencesViewModel.showQRCode.value)
-                    }
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "主页默认显示支付二维码")
                 LiquidToggle(
                     selected = { showQRCode },
-                    onSelect = {},
+                    onSelect = { preferencesViewModel.setShowQRCode(!preferencesViewModel.showQRCode.value) },
                     backdrop = backdrop
                 )
             }
-
-
         }
 
         Column(
@@ -101,22 +88,37 @@ fun Preferences() {
         ) {
             Text(text = "课表", style = MaterialTheme.typography.headlineSmall)
             Row(
-                modifier = Modifier
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    )
-                    {
-                        preferencesViewModel.setIsShowAllCourse(!preferencesViewModel.isShowAllCourse.value)
-                    }
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "显示非本周课程")
                 LiquidToggle(
                     selected = { isShowAllCourse },
-                    onSelect = {},
+                    onSelect = { preferencesViewModel.setIsShowAllCourse(!preferencesViewModel.isShowAllCourse.value) },
+                    backdrop = backdrop
+                )
+            }
+        }
+
+        Column(
+            modifier =
+                Modifier
+                    .clip(SmoothRoundedCornerShape(16.dp))
+                    .background(cardColor)
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(text = "液态玻璃", style = MaterialTheme.typography.headlineSmall)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "启用液态玻璃效果")
+                LiquidToggle(
+                    selected = { useLiquidGlass },
+                    onSelect = { preferencesViewModel.setUseLiquidGlass(!preferencesViewModel.useLiquidGlass.value) },
                     backdrop = backdrop
                 )
             }

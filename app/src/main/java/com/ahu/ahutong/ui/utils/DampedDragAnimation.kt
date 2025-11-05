@@ -23,6 +23,7 @@ class DampedDragAnimation(
     val visibilityThreshold: Float,
     val initialScale: Float,
     val pressedScale: Float,
+    val userDragEnabled: Boolean = true,
     val onDragStarted: DampedDragAnimation.(position: Offset) -> Unit,
     val onDragStopped: DampedDragAnimation.() -> Unit,
     val onDrag: DampedDragAnimation.(size: IntSize, dragAmount: Offset) -> Unit,
@@ -62,23 +63,27 @@ class DampedDragAnimation(
     val scaleY: Float get() = scaleYAnimation.value
     val velocity: Float get() = velocityAnimation.value
 
-    val modifier: Modifier = Modifier.pointerInput(Unit) {
-        inspectDragGestures(
-            onDragStart = { down ->
-                onDragStarted(down.position)
-                press()
-            },
-            onDragEnd = {
-                onDragStopped()
-                release()
-            },
-            onDragCancel = {
-                onDragStopped()
-                release()
+    val modifier: Modifier = if (userDragEnabled) {
+        Modifier.pointerInput(Unit) {
+            inspectDragGestures(
+                onDragStart = { down ->
+                    onDragStarted(down.position)
+                    press()
+                },
+                onDragEnd = {
+                    onDragStopped()
+                    release()
+                },
+                onDragCancel = {
+                    onDragStopped()
+                    release()
+                }
+            ) { change, dragAmount ->
+                onDrag(size, dragAmount)
             }
-        ) { change, dragAmount ->
-            onDrag(size, dragAmount)
         }
+    } else {
+        Modifier
     }
 
     fun press() {

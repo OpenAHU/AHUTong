@@ -2,7 +2,10 @@ package com.ahu.ahutong.ui.components
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +45,11 @@ import com.kyant.backdrop.highlight.Highlight
 import com.kyant.backdrop.shadow.InnerShadow
 import com.kyant.backdrop.shadow.Shadow
 import com.kyant.capsule.ContinuousCapsule
+import com.kyant.monet.a1
+import com.kyant.monet.a2
+import com.kyant.monet.n1
+import com.kyant.monet.n2
+import com.kyant.monet.withNight
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -51,6 +59,24 @@ fun LiquidToggle(
     backdrop: Backdrop,
     modifier: Modifier = Modifier
 ) {
+    val isLiquid = LocalIsLiquidGlassEnabled.current
+    if (!isLiquid) {
+        val switchColor = SwitchDefaults.colors(
+            checkedThumbColor = 80.a1 withNight 80.n1,
+            uncheckedThumbColor = 80.a2 withNight 40.n2,
+            checkedTrackColor = (80.a1 withNight 80.n1).copy(alpha = 0.5f),
+            uncheckedTrackColor = (80.a2 withNight 40.n2).copy(alpha = 0.5f),
+            uncheckedBorderColor = 80.n1 withNight 40.n1
+        )
+        Switch(
+            checked = selected(),
+            onCheckedChange = onSelect,
+            modifier = modifier.height(28f.dp),
+            colors = switchColor
+        )
+        return
+    }
+
     val isLightTheme = !isSystemInDarkTheme()
     val accentColor =
         if (isLightTheme) Color(0xFF34C759)
