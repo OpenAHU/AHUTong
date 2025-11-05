@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,12 +25,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ahu.ahutong.R
+import com.ahu.ahutong.ui.components.LiquidToggle
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.PreferencesViewModel
-import com.kyant.monet.a1
-import com.kyant.monet.a2
+import com.kyant.backdrop.backdrops.rememberCanvasBackdrop
 import com.kyant.monet.n1
-import com.kyant.monet.n2
 import com.kyant.monet.withNight
 
 
@@ -45,12 +42,8 @@ fun Preferences() {
 
     val isShowAllCourse by preferencesViewModel.isShowAllCourse.collectAsState()
 
-    val switchColor = SwitchDefaults.colors(
-        checkedThumbColor = 80.a1 withNight 80.n1,
-        uncheckedThumbColor = 80.a2 withNight 40.n2,
-        checkedTrackColor = (80.a1 withNight 80.n1).copy(alpha = 0.5f),
-        uncheckedTrackColor = (80.a2 withNight 40.n2).copy(alpha = 0.5f),
-    )
+    val cardColor = 100.n1 withNight 20.n1
+    val backdrop = rememberCanvasBackdrop { drawRect(cardColor) }
 
     Column(
         modifier = Modifier
@@ -69,11 +62,11 @@ fun Preferences() {
             modifier =
                 Modifier
                     .clip(SmoothRoundedCornerShape(16.dp))
-                    .background(100.n1 withNight 20.n1)
+                    .background(cardColor)
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "主页",style = MaterialTheme.typography.headlineSmall)
+            Text(text = "主页", style = MaterialTheme.typography.headlineSmall)
             Row(
                 modifier = Modifier
                     .clickable(
@@ -88,13 +81,12 @@ fun Preferences() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "主页默认显示支付二维码")
-                Switch(
-                    checked = showQRCode,
-                    onCheckedChange = null,
-                    colors = switchColor
+                LiquidToggle(
+                    selected = { showQRCode },
+                    onSelect = {},
+                    backdrop = backdrop
                 )
             }
-
 
 
         }
@@ -103,7 +95,7 @@ fun Preferences() {
             modifier =
                 Modifier
                     .clip(SmoothRoundedCornerShape(16.dp))
-                    .background(100.n1 withNight 20.n1)
+                    .background(cardColor)
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -122,10 +114,10 @@ fun Preferences() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "显示非本周课程")
-                Switch(
-                    checked = isShowAllCourse,
-                    onCheckedChange = null,
-                    colors = switchColor
+                LiquidToggle(
+                    selected = { isShowAllCourse },
+                    onSelect = {},
+                    backdrop = backdrop
                 )
             }
         }

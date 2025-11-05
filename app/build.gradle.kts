@@ -122,6 +122,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.monet)
+    implementation(libs.kyant0.backdrop)
     implementation(libs.kyant0.capsule)
 
     implementation(platform(libs.kotlin.bom))

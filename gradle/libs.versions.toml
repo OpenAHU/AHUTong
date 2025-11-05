@@ -21,6 +21,7 @@ persistentcookiejar = "v1.0.1"
 retrofitVersion = "2.11.0"
 zxingAndroidEmbeddedVersion = "4.3.0"
 adsMobileSdkVersion = "0.18.0-beta01"
+kyant0Backdrop = "1.0.0"
 kyant0Capsule = "2.1.1"
 
 [libraries]
@@ -53,6 +54,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbeddedVersion" }
 ads-mobile-sdk = { group = "com.google.android.libraries.ads.mobile.sdk", name = "ads-mobile-sdk", version.ref = "adsMobileSdkVersion" }
 crashreport = { module = "com.tencent.bugly:crashreport", version.ref = "crashreport" }
+kyant0-backdrop = { module = "io.github.kyant0:backdrop", version.ref = "kyant0Backdrop" }
 kyant0-capsule = { module = "io.github.kyant0:capsule", version.ref = "kyant0Capsule" }
 
 [plugins]
