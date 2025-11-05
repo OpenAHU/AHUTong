@@ -79,6 +79,18 @@ class LicenseViewModel : ViewModel() {
                 "Apache Software License 2.0"
             ),
             License(
+                "Backdrop",
+                "Kyant0",
+                "https://github.com/Kyant0/AndroidLiquidGlass",
+                "Apache Software License 2.0"
+            ),
+            License(
+                "Capsule",
+                "Kyant0",
+                "https://github.com/Kyant0/Capsule",
+                "Apache Software License 2.0"
+            ),
+            License(
                 "More...",
                 "Various Developers",
                 "https://github.com/",
