@@ -33,6 +33,7 @@ fun BoxScope.BottomNavBar(
     backdrop: Backdrop
 ) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    if (currentRoute == "login") return
     val selectedTabIndex by rememberUpdatedState(
         when (currentRoute) {
             "home", "electricity_pay", "card_balance_deposit", "bathroom_deposit" -> 0
