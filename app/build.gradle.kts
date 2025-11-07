@@ -22,26 +22,13 @@ android {
     defaultConfig {
         applicationId = "com.ahu.ahutong"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
-        versionName = "1.0.0-beta6"
+        versionName = "2.0.0-beta2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         ndk {
-            abiFilters.add("armeabi-v7a")
-            abiFilters.add("arm64-v8a")
-            abiFilters.add("x86")
-            abiFilters.add("x86_64")
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
-    }
-
-    defaultConfig {
-        applicationId = "com.ahu.ahutong"
-        minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "2.0.0-beta1"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
