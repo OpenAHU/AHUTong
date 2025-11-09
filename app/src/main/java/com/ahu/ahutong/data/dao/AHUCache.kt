@@ -1,11 +1,17 @@
 package com.ahu.ahutong.data.dao
 
 import com.ahu.ahutong.AHUApplication
-import com.ahu.ahutong.data.model.*
+import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.data.model.ElectricityChargeInfo
+import com.ahu.ahutong.data.model.Exam
+import com.ahu.ahutong.data.model.Grade
+import com.ahu.ahutong.data.model.RoomSelectionInfo
+import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.ext.fromJson
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
+
 /**
  * @Author SinkDev
  * @Date 2021/7/27-16:49
@@ -254,6 +260,22 @@ object AHUCache {
 
     fun setAgreementAccepted(){
         kv.putBoolean("agreementAccepted",true)
+    }
+
+    fun isPrivacyAccepted(): Boolean{
+        return kv.getBoolean("privacyAccepted",false)
+    }
+
+    fun setPrivacyAccepted(){
+        kv.putBoolean("privacyAccepted",true)
+    }
+
+    fun isBusinessAccepted(): Boolean{
+        return kv.getBoolean("businessAccepted",false)
+    }
+
+    fun setBusinessAccepted(){
+        kv.putBoolean("businessAccepted",true)
     }
 
     /**
