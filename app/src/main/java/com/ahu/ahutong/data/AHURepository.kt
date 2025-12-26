@@ -14,7 +14,7 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.User
-import com.ahu.ahutong.utils.DES
+import com.ahu.ahutong.sdk.RustSDK
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -227,101 +227,57 @@ object AHURepository {
 
     suspend fun loginWithCrawler(username: String, password: String): AHUResponse<User> =
         withContext(Dispatchers.IO) {
-            val adwmhLogin = async(Dispatchers.IO) {
+            val result = RustSDK.loginSafe(username, password)
 
-                var failedTimes = 0
-                var info: Info? = null
-                // 二维码可能识别失败，尝试5次呢
-                while (failedTimes < 5) {
-                    val captchaBytes = AdwmhApi.API.getAuthCode().bytes()
-                    val captchaPart = MultipartBody.Part.createFormData(
-                        "captcha", "img.jpg",
-                        captchaBytes.toRequestBody("image/jpg".toMediaType())
-                    )
+            val response = AHUResponse<User>()
+            if (result.isSuccess) {
+                response.code = 0
+                response.data = result.getOrNull()
+                response.msg = "登录成功"
 
-                    val captcha = AdwmhApi.API
-                        .getCaptchaResult("http://47.236.115.210:8000/captcha", captchaPart)
-                        .result
-
-                    info = AdwmhApi.API.loginWithCaptcha(
-                        username,
-                        password,
-                        0,
-                        captcha
-                    )
-
-                    if (info.code == 10000) {
-                        Log.e(TAG, "loginWithCrawler: $info")
-                        return@async info
-                    }
-                    failedTimes++
-                }
-
-                return@async info
-
+                syncCookies()
+            } else {
+                response.code = -1
+                response.msg = result.exceptionOrNull()?.message ?: "登录失败"
             }
-
-            val jwxtLogin = async {
-                val loginPage = JwxtApi.API.fetchLoginInfo()
-
-                val document = Jsoup.parse(loginPage.body()!!.string())
-                val lt = document.selectFirst("input[name=lt]")?.attr("value")
-
-                lt?.let {
-                    val cipher = DES().strEnc(username + password + lt, "1", "2", "3")
-
-                    val res = JwxtApi.API.device(
-                        "https://one.ahu.edu.cn/cas/device",
-                        username.length,
-                        password.length,
-                        cipher
-                    )
-                    Log.e(TAG, "loginWithCrawler: $res")
-
-                    val jwxtLoginUrl = "https://one.ahu.edu.cn/cas/login" +
-                            "?service=https%3A%2F%2Fjw.ahu.edu.cn%2Fstudent%2Fsso%2Flogin"
-
-                    val jwxtResponse = JwxtApi.API.login(
-                        jwxtLoginUrl,
-                        cipher,
-                        username.length,
-                        password.length,
-                        lt
-                    )
-
-                    if (jwxtResponse.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
-                        return@async true
-                    }
-
-                } ?: run {
-                    if (loginPage.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
-                        return@async true
-                    } else {
-                        return@async false
-                    }
-                }
-
-                return@async false
-            }
-
-            val crawlerResult = adwmhLogin.await()
-            val jwxtLoginSuccess: Boolean = jwxtLogin.await()
-
-            val result = AHUResponse<User>()
-
-
-            crawlerResult?.let {
-                if (it.code == 10000 && jwxtLoginSuccess) {
-                    result.code = 0
-                    result.data = User(it.`object`.user.userName, it.`object`.user.idNumber)
-                    result.msg = "登录成功"
-                    return@withContext result
-                }
-            }
-            result.code = -1;
-            result.msg = "登录失败"
-            return@withContext result
+            return@withContext response
         }
+
+    private fun syncCookies() {
+        try {
+            val json = RustSDK.getCookiesList()
+            // 解析 JSON 数组
+            val listType = object : com.google.gson.reflect.TypeToken<List<Map<String, Any>>>() {}.type
+            val cookies: List<Map<String, Any>> = Gson().fromJson(json, listType)
+
+            cookies.forEach {
+                val builder = okhttp3.Cookie.Builder()
+                    .name(it["name"] as String)
+                    .value(it["value"] as String)
+                val domainObj = it["domain"]
+                val path = it["path"] as String
+
+                val domain = if (domainObj != null) {
+                    domainObj as String
+                } else {
+                    // 如果 domain 为空，根据 path 进行简单的推断 (host-only cookie 处理)
+                    if (path.contains("/cas")) "one.ahu.edu.cn" else "jw.ahu.edu.cn"
+                }
+
+                builder.domain(domain)
+                    .path(path)
+
+                if (it["secure"] == true) builder.secure()
+                if (it["http_only"] == true) builder.httpOnly()
+
+                val cookie = builder.build()
+                com.ahu.ahutong.data.crawler.manager.CookieManager.cookieJar.addCookie(cookie)
+            }
+            Log.d(TAG, "Cookies synced from Rust SDK: " + cookies.size)
+        } catch(e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
 
     suspend fun getBathroomInfo(bathroom: String, tel: String): AHUResponse<BathroomTelInfo> =

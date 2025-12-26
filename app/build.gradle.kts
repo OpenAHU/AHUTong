@@ -11,6 +11,12 @@ android {
     namespace = "com.ahu.ahutong"
     compileSdk = 36
 
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
+        }
+    }
+
     lint {
         //即使报错也不会停止打包
         abortOnError = false

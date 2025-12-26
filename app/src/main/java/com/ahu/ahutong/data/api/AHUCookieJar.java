@@ -131,4 +131,12 @@ public class AHUCookieJar implements ClearableCookieJar {
             }
         }
     }
+
+    public void addCookie(Cookie cookie) {
+        List<Cookie> cookies = new ArrayList<>();
+        cookies.add(cookie);
+        cache.addAll(cookies);
+        // 如果需要持久化（下次启动免登录），这里会自动保存
+        persistor.saveAll(filterPersistentCookies(cookies));
+    }
 }

@@ -6,7 +6,6 @@ import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.crawler.api.ycard.YcardApi
-import com.ahu.ahutong.data.crawler.model.jwxt.CurrentSemester
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.Request
 import com.ahu.ahutong.data.dao.AHUCache
@@ -15,13 +14,11 @@ import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Grade
+import com.ahu.ahutong.sdk.RustSDK
 import com.google.gson.Gson
 import okhttp3.FormBody
 import okhttp3.ResponseBody
-import org.jsoup.Jsoup
 import retrofit2.Response
-import kotlin.text.Regex
-
 
 class CrawlerDataSource : BaseDataSource {
 
@@ -35,75 +32,18 @@ class CrawlerDataSource : BaseDataSource {
     }
 
     override suspend fun getSchedule(): AHUResponse<List<Course>> {
-        val basicInfo = JwxtApi.API.fetchCourseTableBasicInfo()
-        val doc = Jsoup.parse(basicInfo.body()!!.string())
-
-        val element = doc.select("script")
-            .map { it.data() }
-            .firstOrNull { it.contains("var semesters = JSON.parse") && it.contains("var currentSemester") }
-
-
-        if (element == null) {
-
-        }
-        val semestersPattern: Regex? =
-            Regex(
-                "var\\s+semesters\\s*=\\s*JSON\\.parse\\(\\s*'(.*?)'\\s*\\);",
-                RegexOption.DOT_MATCHES_ALL
-            )
-        val currentSemesterPattern: Regex? =
-            Regex("var\\s+currentSemester\\s*=\\s*(\\{.*?\\});")
-
-        if (currentSemesterPattern == null) {
-            return AHUResponse<List<Course>>()
-        }
-
-        val currentSemester = currentSemesterPattern.find(element.toString())
-
-
-
-
-        val gson = Gson()
-
-        val currentSemesterJson = gson.fromJson(
-            currentSemester!!.groups[1]!!.value.replace("\\\"", "\""),
-            CurrentSemester::class.java
-        )
-
-        val courseTable = JwxtApi.API.getCourse(currentSemesterJson.id, currentSemesterJson.id)
-
-        AHUCache.saveSchoolTerm(currentSemesterJson.name)
-
-        val courseList = ArrayList<Course>()
-
-        courseTable.studentTableVms[0].activities.forEach {
-
-            val sortedWeekIndexes = it.weekIndexes.sorted()
-
-            val course = Course()
-            course.name = it.courseName
-            course.setStartWeek(sortedWeekIndexes.get(0).toString())
-            course.setLength((it.endUnit - it.startUnit + 1).toString())
-            course.setWeekday(it.weekday.toString())
-            course.setEndWeek(sortedWeekIndexes.get(sortedWeekIndexes.size - 1).toString())
-            course.setStartTime(it.startUnit.toString())
-            course.location = it.room ?: "未知"
-            course.teacher = it.teacherNames.toString()
-            course.weekIndexes = sortedWeekIndexes
-            course.courseId = it.lessonId.toString()
-
-            Log.e(TAG, "getSchedule: $course")
-            courseList.add(course)
-        }
-
+        val result = RustSDK.getScheduleSafe()
+        
         val response = AHUResponse<List<Course>>()
-        response.data = courseList
-        response.code = 0
-        response.msg = ""
-
+        if (result.isSuccess) {
+            response.code = 0
+            response.data = result.getOrNull()
+            response.msg = "Success"
+        } else {
+            response.code = -1
+            response.msg = result.exceptionOrNull()?.message ?: "获取课表失败"
+        }
         return response
-
-
     }
 
     override suspend fun getGrade(): AHUResponse<Grade> {
