@@ -19,6 +19,7 @@ import com.google.gson.Gson
 import okhttp3.FormBody
 import okhttp3.ResponseBody
 import retrofit2.Response
+import com.ahu.ahutong.data.crawler.model.adwnh.Balance
 
 class CrawlerDataSource : BaseDataSource {
 
@@ -47,13 +48,18 @@ class CrawlerDataSource : BaseDataSource {
     }
 
     override suspend fun getGrade(): AHUResponse<Grade> {
-        var id = AHUCache.getJwxtStudentId()
-        id = id ?: getStudentId().also { AHUCache.setJwxtStudentId(it) }
+        val result = RustSDK.getGradeSafe()
+        if (result.isFailure) {
+            val response = AHUResponse<Grade>()
+            response.code = -1
+            response.msg = result.exceptionOrNull()?.message ?: "获取成绩失败"
+            return response
+        }
 
-        val data = JwxtApi.API.getGrade(id)
+        val data = result.getOrThrow()
         val map = hashMapOf<String, Grade.TermGradeListBean>()
 
-        data.semesterId2studentGrades.values.forEach { gradeList ->
+        data.semesterId2studentGrades?.values?.forEach { gradeList ->
             val newGradeList = mutableListOf<Grade.TermGradeListBean.GradeListBean>()
             var termName: String? = null
             
@@ -61,12 +67,12 @@ class CrawlerDataSource : BaseDataSource {
                 
                 termName = termName ?: it.semesterName
                 val grade = Grade.TermGradeListBean.GradeListBean()
-                grade.course = it.courseName
-                grade.credit = it.credits.toString()
-                grade.grade = it.gaGrade
-                grade.gradePoint = it.gp.toString()
-                grade.courseNature = it.courseType
-                grade.courseNum = it.courseCode
+                grade.course = it.courseName ?: ""
+                grade.credit = (it.credits ?: 0.0).toString()
+                grade.grade = it.gaGrade ?: ""
+                grade.gradePoint = (it.gp ?: 0.0).toString()
+                grade.courseNature = it.courseType ?: ""
+                grade.courseNum = it.courseCode ?: ""
                 newGradeList.add(grade)
             }
 
@@ -141,7 +147,15 @@ class CrawlerDataSource : BaseDataSource {
 
     override suspend fun getCardMoney(): AHUResponse<Card> {
         val card = Card()
-        card.balance = AdwmhApi.API.getBalance().`object`
+        val json = RustSDK.getBalance()
+        if (json != null && !json.contains("\"error\"")) {
+            try {
+                val balanceObj = Gson().fromJson(json, Balance::class.java)
+                card.balance = balanceObj.`object` ?: 0.0
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
         val result = AHUResponse<Card>();
         result.data = card
         result.code = 0
