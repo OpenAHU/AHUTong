@@ -5,6 +5,7 @@ import com.ahu.ahutong.data.model.User
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import androidx.annotation.Keep
+import com.ahu.ahutong.data.model.Exam
 
 /**
  * Rust SDK 的 Kotlin 封装层
@@ -63,6 +64,12 @@ object RustSDK {
      */
     external fun getBalance(): String?
 
+    /**
+     * 获取考试信息
+     * @return JSON 字符串
+     */
+    external fun getExamInfo(): String
+
 
     // --- 高级封装接口 (解析 JSON 为对象) ---
 
@@ -89,6 +96,21 @@ object RustSDK {
                 val type = object : TypeToken<List<Course>>() {}.type
                 val courses: List<Course> = Gson().fromJson(json, type)
                 Result.success(courses)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    fun getExamInfoSafe(): Result<List<Exam>> {
+        val json = getExamInfo()
+        return if (json.contains("\"error\"")) {
+            Result.failure(Exception(json))
+        } else {
+            try {
+                val type = object : TypeToken<List<Exam>>() {}.type
+                val exams: List<Exam> = Gson().fromJson(json, type)
+                Result.success(exams)
             } catch (e: Exception) {
                 Result.failure(e)
             }

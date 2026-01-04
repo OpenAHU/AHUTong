@@ -119,75 +119,14 @@ object AHURepository {
                 }
             }
             try {
-                val response = JwxtApi.API.getExamInfo()
-                val doc = Jsoup.parse(response.body()!!.string())
-//                val infos: Elements? = doc.select("tr.unfinished, tr.finished");
-                val exams = mutableListOf<Exam>()
-//                if (infos != null) {
-//                    for (row in infos) {
-//                        val time: String? = row.selectFirst("div.time")!!.text()
-//                        val spans: Elements = row.select("td").get(0).select("span")
-//                        val campus = spans.get(0).text()
-//                        val building = spans.get(1).text()
-//                        val room = spans.get(2).text()
-//                        val seat = spans.get(3).text()
-//
-//                        val course: String? = row.select("td").get(1).selectFirst("span")!!.text()
-//
-//                        val examType: String? =
-//                            row.select("td").get(1).selectFirst("span.tag-span")!!.text()
-//
-//
-//                        val exam = Exam()
-//                        exam.course = course
-//                        exam.location = "$campus-$room"
-//                        exam.seatNum = seat
-//                        exam.time = time
-//
-//                        exams.add(exam)
-//                    }
-//                }
-
-                val scripts = doc.select("script")
-
-                val regex =
-                    Regex("""studentExamInfoVms\s*=\s*(\[.*?]);""", RegexOption.DOT_MATCHES_ALL)
-                val gson = Gson()
-
-                var foundList: ExamInfo? = null
-
-                for (script in scripts) {
-                    val data = script.data()
-                    val match = regex.find(data)
-                    if (match != null) {
-                        val rawJson = match.groups[1]?.value ?: continue
-                        val fixedJson = rawJson.replace("'", "\"")
-                        try {
-                            foundList = gson.fromJson(fixedJson, ExamInfo::class.java)
-                            break
-                        } catch (e: Exception) {
-                            println("解析JSON失败: ${e.message}")
-                        }
-                    }
-                }
-
-                if (foundList != null) {
-                    foundList.forEach {
-                        val exam = Exam()
-                        exam.course = "${it.course.nameZh}(${it.examType.nameZh})"
-                        exam.time = it.examTime
-                        exam.seatNum = it.seatNo.toString()
-                        exam.location = "${it.requiredCampus.nameZh}-${it.room}"
-                        exam.finished = it.finished
-                        exams.add(exam)
-                    }
+                val result = RustSDK.getExamInfoSafe()
+                if (result.isSuccess) {
+                    val exams = result.getOrDefault(emptyList())
+                    AHUCache.saveExamInfo(exams)
+                    Result.success(exams)
                 } else {
-                    println("未找到 studentExamInfoVms 数据")
+                    Result.failure(result.exceptionOrNull() ?: Throwable("RustSDK Error"))
                 }
-
-                AHUCache.saveExamInfo(exams.toList())
-                Result.success(exams.toList())
-
             } catch (e: Exception) {
                 Result.failure(Throwable("请求错误 $e"))
             }

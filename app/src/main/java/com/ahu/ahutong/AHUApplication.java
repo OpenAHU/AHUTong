@@ -33,6 +33,10 @@ public class AHUApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // RustSDK add hotUpdate logic
+//        com.ahu.ahutong.sdk.RustSDK.INSTANCE.loadLibrary(this);
+
         CrashReport.initCrashReport(this, "2c2ccadcad", BuildConfig.DEBUG);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             HashSet<Class<Activity>> blockList = new HashSet<>(){
