@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -90,7 +91,10 @@ fun Exam(
                                 Text(
                                     text = it.course,
                                     fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = MaterialTheme.typography.titleMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
                                 )
 
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -124,7 +128,8 @@ fun Exam(
                                             }
                                         },
                                         color = Color.White,
-                                        fontSize = 12.sp
+                                        fontSize = 12.sp,
+                                        maxLines = 1
                                     )
                                 }
                             }

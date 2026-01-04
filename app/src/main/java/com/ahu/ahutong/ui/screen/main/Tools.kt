@@ -30,6 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.navigation.NavHostController
+import android.widget.Toast
+import com.ahu.ahutong.sdk.RustSDK
 import com.ahu.ahutong.R
 import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
@@ -83,6 +85,22 @@ fun Tools(navController: NavHostController) {
                 iconId = R.drawable.ic_exam,
                 tint = Color(0xFF4CAF50),
                 onClick = { navController.navigate("exam") }
+            )
+            ToolItem(
+                stringId = R.string.school_calendar,
+                iconId = R.drawable.ic_schedule,
+                tint = Color(0xFF9C27B0),
+                onClick = {
+                    scope.launch {
+                        Toast.makeText(context, "正在下载校历...", Toast.LENGTH_SHORT).show()
+                        val success = RustSDK.downloadSchoolCalendarToAlbum(context)
+                        if (success) {
+                            Toast.makeText(context, "校历已保存到相册", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             )
         }
         Column(

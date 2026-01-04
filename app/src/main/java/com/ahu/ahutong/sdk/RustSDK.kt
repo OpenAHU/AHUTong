@@ -17,6 +17,11 @@ import androidx.core.content.edit
 import com.ahu.ahutong.data.crawler.model.jwxt.GradeResponse
 import kotlinx.coroutines.withContext
 import android.content.Intent
+import android.content.ContentValues
+import android.provider.MediaStore
+import android.os.Build
+import android.os.Environment
+import java.io.FileInputStream
 import kotlin.system.exitProcess
 
 
@@ -276,6 +281,62 @@ object RustSDK {
      * @return JSON 字符串
      */
     external fun getGrade(): String
+
+    /**
+     * 下载校历图片到指定路径
+     * @param savePath 保存路径
+     * @return 是否成功
+     */
+    external fun downloadSchoolCalendar(savePath: String): Boolean
+
+    suspend fun downloadSchoolCalendarToAlbum(context: Context): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val cacheFile = File(context.cacheDir, "xiaoli_${System.currentTimeMillis()}.jpg")
+                val success = downloadSchoolCalendar(cacheFile.absolutePath)
+                if (success && cacheFile.exists()) {
+                    saveImageToGallery(context, cacheFile)
+                    true
+                } else {
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e(TAG_HOTUPDATE, "Failed to save calendar to album", e)
+                false
+            }
+        }
+    }
+
+    private fun saveImageToGallery(context: Context, imageFile: File) {
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "AHU_Calendar_${System.currentTimeMillis()}.jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AHUTong")
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+        }
+
+        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        } else {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+
+        val uri = context.contentResolver.insert(collection, values)
+        uri?.let {
+            context.contentResolver.openOutputStream(it).use { outputStream ->
+                FileInputStream(imageFile).use { inputStream ->
+                    inputStream.copyTo(outputStream!!)
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.clear()
+                values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                context.contentResolver.update(it, values, null, null)
+            }
+        }
+    }
 
 
     // --- 高级封装接口 (解析 JSON 为对象) ---

@@ -49,7 +49,7 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launchSafe {
 
             AHURepository.getCardMoney().onSuccess {
-                balance = it.balance
+                balance = it.balance ?: 0.0
 //                transitionBalance = it.transitionBalance
             }
 

@@ -6,9 +6,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Card {
     @SerializedName("balance")
-    private Double balance;
+    private Double balance = 0.0;
     @SerializedName("transitionBalance")
-    private Double transitionBalance;
+    private Double transitionBalance = 0.0;
 
     public Double getBalance() {
         return balance;
