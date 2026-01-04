@@ -6,6 +6,8 @@ import com.ahu.ahutong.data.crawler.CrawlerDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.crawler.configs.Constants
+import com.ahu.ahutong.data.crawler.manager.CookieManager
+import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.crawler.model.adwnh.Info
 import com.ahu.ahutong.data.crawler.model.jwxt.ExamInfo
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
@@ -19,6 +21,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import okhttp3.Cookie
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -227,6 +230,8 @@ object AHURepository {
 
     suspend fun loginWithCrawler(username: String, password: String): AHUResponse<User> =
         withContext(Dispatchers.IO) {
+            CookieManager.cookieJar.clear()
+            TokenManager.clear()
             val result = RustSDK.loginSafe(username, password)
 
             val response = AHUResponse<User>()

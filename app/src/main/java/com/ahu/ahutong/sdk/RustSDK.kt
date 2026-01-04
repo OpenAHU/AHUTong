@@ -4,11 +4,13 @@ import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.User
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.annotation.Keep
 
 /**
  * Rust SDK 的 Kotlin 封装层
  * 负责加载 native 库并提供类型安全的接口
  */
+@Keep
 object RustSDK {
 
     init {
@@ -27,7 +29,7 @@ object RustSDK {
      * 导出当前的 Cookies
      * @return JSON 格式的 Cookie 字符串
      */
-    external fun dumpCookies(): String
+    external fun dumpCookies(): String?
 
     /**
      * 登录 (底层 Rust 实现)

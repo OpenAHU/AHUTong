@@ -23,12 +23,22 @@ object AHUCache {
         MMKV.initialize(AHUApplication.getApp())
     }
 
-    private val kv: MMKV = MMKV.mmkvWithID("ahu")
+    private val kv_init: MMKV = MMKV.mmkvWithID("ahu")
+    private val kv: MMKV
+        get() {
+            val user = getCurrentUser()
+            return  if (user != null && !user.xh.isNullOrEmpty()) {
+                MMKV.mmkvWithID("ahu_${user.xh}")
+            } else {
+                MMKV.mmkvWithID("ahu_guest")
+            }
+        }
 
     /**
      * 清除全部数据
      */
     fun clearAll() {
+        kv_init.clearAll()
         kv.clearAll()
     }
 
@@ -38,14 +48,14 @@ object AHUCache {
      */
     fun saveCurrentUser(user: User) {
         val data = Gson().toJson(user)
-        kv.encode("current_user", data)
+        kv_init.encode("current_user", data)
     }
 
     /**
      * 清除本地登陆状态
      */
     fun clearCurrentUser() {
-        kv.encode("current_user", "")
+        kv_init.encode("current_user", "")
     }
 
     /**
@@ -53,7 +63,7 @@ object AHUCache {
      * @return User?
      */
     fun getCurrentUser(): User? {
-        val data = kv.decodeString("current_user") ?: ""
+        val data = kv_init.decodeString("current_user") ?: ""
         return data.fromJson(User::class.java)
     }
 
@@ -70,7 +80,7 @@ object AHUCache {
      * @param password String
      */
     fun saveWisdomPassword(password: String) {
-        kv.encode("password_wisdom", password)
+        kv_init.encode("password_wisdom", password)
     }
 
     /**
@@ -78,7 +88,7 @@ object AHUCache {
      * @return String?
      */
     fun getWisdomPassword(): String? {
-        return kv.decodeString("password_wisdom")
+        return kv_init.decodeString("password_wisdom")
     }
 
     /**

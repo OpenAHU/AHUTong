@@ -104,3 +104,6 @@
     public static int e(...);
     public static int wtf(...);
 }
+
+-keep class com.ahu.ahutong.sdk.RustSDK { *; }
+

@@ -33,7 +33,7 @@ class ScheduleViewModel () : ViewModel() {
     val schoolTerm: String
         get() = AHUCache.getSchoolTerm() ?: "1"
 
-    val scheduleConfig = MutableLiveData<ScheduleConfigBean>()
+    val scheduleConfig = MutableLiveData<ScheduleConfigBean?>()
 
     // 更新周
     fun changeWeek(week: Int) {
@@ -173,5 +173,10 @@ class ScheduleViewModel () : ViewModel() {
                 to = timetable.getValue(course.startTime + course.length - 1)
             )
         }
+    }
+
+    fun clear() {
+        schedule.value = Result.success(emptyList())
+        scheduleConfig.value = null
     }
 }

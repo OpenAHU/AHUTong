@@ -67,6 +67,7 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.sdk.RustSDK
 import com.ahu.ahutong.ui.state.LoginState
 import com.ahu.ahutong.ui.state.LoginViewModel
 import com.kyant.capsule.ContinuousCapsule
@@ -305,6 +306,7 @@ private fun logIn(
 //        )
         AHUApplication.sessionExpired = true
         AHUCache.clearAll()
+        RustSDK.init("")
         CookieManager.cookieJar.clear()
         TokenManager.clear()
         AHUCache.setAgreementAccepted()

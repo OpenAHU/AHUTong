@@ -105,6 +105,7 @@ fun Main(
                 Login(
                     loginViewModel = loginViewModel,
                     onLoggedIn = {
+                        scheduleViewModel.clear()
                         navController.navigate("home") {
                             popUpTo("login") { inclusive = true }
                         }

@@ -52,6 +52,7 @@ import com.ahu.ahutong.Constants
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.api.AHUCookieJar
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.sdk.RustSDK
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
@@ -348,6 +349,7 @@ fun Settings(
                         .clickable {
                             mainViewModel.logout()
                             AHUCache.clearAll()
+                            RustSDK.init("")
 
                             val cookieJar = AHUCookieJar(
                                 SetCookieCache(),
