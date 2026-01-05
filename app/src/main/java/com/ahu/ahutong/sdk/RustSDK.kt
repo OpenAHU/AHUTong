@@ -289,6 +289,13 @@ object RustSDK {
      */
     external fun downloadSchoolCalendar(savePath: String): Boolean
 
+    /**
+     * 获取更新日志
+     * @return String
+     */
+    external fun getUpdateLog(): String
+
+
     suspend fun downloadSchoolCalendarToAlbum(context: Context): Boolean {
         return withContext(Dispatchers.IO) {
             try {

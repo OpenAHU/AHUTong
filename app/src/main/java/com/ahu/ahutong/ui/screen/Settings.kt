@@ -53,6 +53,7 @@ import com.ahu.ahutong.R
 import com.ahu.ahutong.data.api.AHUCookieJar
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.sdk.RustSDK
+import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
@@ -333,7 +334,6 @@ fun Settings(
                     .padding(vertical = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                val app = (LocalContext.current as ComponentActivity).application
 
                 Text(
                     text = "您的登录状态、课表等信息将会被永久清除",
@@ -351,13 +351,8 @@ fun Settings(
                             AHUCache.clearAll()
                             RustSDK.init("")
 
-                            val cookieJar = AHUCookieJar(
-                                SetCookieCache(),
-                                SharedPrefsCookiePersistor(app)
-                            )
-
-                            cookieJar.clear()
-                            cookieJar.clearSession()
+                            CookieManager.cookieJar.clear()
+                            CookieManager.cookieJar.clearSession()
 
                             AHUApplication.sessionExpired = true
 
@@ -366,7 +361,9 @@ fun Settings(
                                 .makeText(context, "已清除所有数据", Toast.LENGTH_SHORT)
                                 .show()
 
-                            navController.navigate("login")
+                            navController.navigate("login") {
+                                popUpTo(0)
+                            }
                         }
                         .padding(16.dp, 8.dp),
                     style = MaterialTheme.typography.titleMedium
@@ -389,7 +386,7 @@ fun Settings(
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Text(
-                    text = Constants.UPDATE_LOG,
+                    text = RustSDK.getUpdateLog(),
                     modifier = Modifier.padding(horizontal = 24.dp),
                     style = MaterialTheme.typography.bodyLarge
                 )

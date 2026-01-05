@@ -184,7 +184,7 @@ object AHUCache {
      * @return String?
      */
     fun getSchoolYear(): String? {
-        return kv.decodeString("defaultSchoolYear")
+        return kv.decodeString("defaultSchoolYear") ?: kv_init.decodeString("defaultSchoolYear")
     }
 
     /**
@@ -200,7 +200,7 @@ object AHUCache {
      * @return String?
      */
     fun getSchoolTerm(): String? {
-        return kv.getString("defaultSchoolTerm", null)
+        return kv.getString("defaultSchoolTerm", kv_init.getString("defaultSchoolTerm", null))
     }
 
     /**
@@ -255,7 +255,7 @@ object AHUCache {
     }
 
     fun getJwxtStudentId() : String?{
-        return kv.getString("jwxt_stu_id",null)
+        return kv.getString("jwxt_stu_id", kv_init.getString("jwxt_stu_id", null))
     }
 
 
@@ -311,7 +311,7 @@ object AHUCache {
      * @return ElectricityChargeInfo?
      */
     fun getElectricityChargeInfo(): ElectricityChargeInfo? {
-        val data = kv.decodeString("electricity_charge_acl") ?: ""
+        val data = kv.decodeString("electricity_charge_acl") ?: kv_init.decodeString("electricity_charge_acl") ?: ""
         if (data.isEmpty()) {
             return null
         }
@@ -332,5 +332,22 @@ object AHUCache {
     fun saveRoomSelection(info: RoomSelectionInfo) {
         val data = Gson().toJson(info)
         kv.encode("room_selection_info", data)
+    }
+
+    /**
+     * 保存一卡通余额
+     * @param balance Double
+     */
+    fun saveCardBalance(balance: Double) {
+        kv.encode("card_balance", balance)
+    }
+
+    /**
+     * 获取一卡通余额
+     * @return Double?
+     */
+    fun getCardBalance(): Double? {
+        if (!kv.containsKey("card_balance")) return null
+        return kv.decodeDouble("card_balance")
     }
 }

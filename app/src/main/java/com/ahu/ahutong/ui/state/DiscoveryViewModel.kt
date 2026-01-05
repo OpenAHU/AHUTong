@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.ext.launchSafe
 import com.google.zxing.BarcodeFormat
@@ -46,11 +47,17 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
     var state = MutableStateFlow<Boolean>(false);
 
     fun loadActivityBean() {
+        // 优先加载缓存
+        AHUCache.getCardBalance()?.let {
+            balance = it
+        }
+
         viewModelScope.launchSafe {
 
             AHURepository.getCardMoney().onSuccess {
-                balance = it.balance ?: 0.0
-//                transitionBalance = it.transitionBalance
+                val newBalance = it.balance ?: 0.0
+                balance = newBalance
+                AHUCache.saveCardBalance(newBalance)
             }
 
             AHURepository.getBathRooms().onSuccess {

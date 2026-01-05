@@ -31,6 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.navigation.NavHostController
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
+import android.os.Build
 import com.ahu.ahutong.sdk.RustSDK
 import com.ahu.ahutong.R
 import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
@@ -45,6 +49,28 @@ import kotlinx.coroutines.launch
 fun Tools(navController: NavHostController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    val downloadCalendar = {
+        scope.launch {
+            Toast.makeText(context, "正在下载校历...", Toast.LENGTH_SHORT).show()
+            val success = RustSDK.downloadSchoolCalendarToAlbum(context)
+            if (success) {
+                Toast.makeText(context, "校历已保存到相册", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            downloadCalendar()
+        } else {
+            Toast.makeText(context, "需要存储权限才能保存校历", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -91,14 +117,10 @@ fun Tools(navController: NavHostController) {
                 iconId = R.drawable.ic_schedule,
                 tint = Color(0xFF9C27B0),
                 onClick = {
-                    scope.launch {
-                        Toast.makeText(context, "正在下载校历...", Toast.LENGTH_SHORT).show()
-                        val success = RustSDK.downloadSchoolCalendarToAlbum(context)
-                        if (success) {
-                            Toast.makeText(context, "校历已保存到相册", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT).show()
-                        }
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                        launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    } else {
+                        downloadCalendar()
                     }
                 }
             )

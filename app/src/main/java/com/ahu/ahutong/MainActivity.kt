@@ -23,6 +23,11 @@ import com.ahu.ahutong.ui.theme.AHUTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.ahu.ahutong.ui.component.HotUpdateDialog
 
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
@@ -72,9 +77,26 @@ class MainActivity : ComponentActivity() {
         }
 
         if (AHUCache.isLogin()) {
+            val user = AHUCache.getCurrentUser()
+            val pwd = AHUCache.getWisdomPassword()
+
             discoveryViewModel.loadActivityBean()
             scheduleViewModel.loadConfig()
             scheduleViewModel.refreshSchedule()
+
+            // 启动时自动登录 Rust SDK，以确保 Session 有效（解决覆盖安装或重启后余额不显示问题）
+            lifecycleScope.launch(Dispatchers.IO) {
+                if (user != null && !pwd.isNullOrEmpty()) {
+                    RustSDK.loginSafe(user.name, pwd)
+                }
+                
+                withContext(Dispatchers.Main) {
+                    // 登录后再次刷新，确保获取最新数据（如果之前的请求因未登录失败）
+                    discoveryViewModel.loadActivityBean()
+                    scheduleViewModel.loadConfig()
+                    scheduleViewModel.refreshSchedule()
+                }
+            }
         }
     }
 }

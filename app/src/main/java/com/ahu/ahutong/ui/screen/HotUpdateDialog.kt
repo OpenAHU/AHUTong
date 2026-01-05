@@ -51,7 +51,7 @@ fun HotUpdateDialog(
         },
         text = {
             Text(
-                text = "已完成热更新。为防止数据异常，请立即重启应用以应用新版本。",
+                text = "已完成热更新，更新内容可前往设置-更新日志中查看。为防止数据异常，请立即重启应用以应用新版本。",
                 style = MaterialTheme.typography.bodyMedium,
                 color = contentColor
             )

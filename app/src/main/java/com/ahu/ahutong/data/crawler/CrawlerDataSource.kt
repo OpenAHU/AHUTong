@@ -145,16 +145,16 @@ class CrawlerDataSource : BaseDataSource {
         return response
     }
 
-    override suspend fun getCardMoney(): AHUResponse<Card> {
+        override suspend fun getCardMoney(): AHUResponse<Card> {
         val card = Card()
-        val json = RustSDK.getBalance()
-        if (json != null && !json.contains("\"error\"")) {
-            try {
-                val balanceObj = Gson().fromJson(json, Balance::class.java)
-                card.balance = balanceObj.`object` ?: 0.0
-            } catch (e: Exception) {
-                e.printStackTrace()
+        try {
+            val cardInfo = YcardApi.API.loadCardRecharge()
+            if (cardInfo.success) {
+                val balanceFen = cardInfo.data.card.firstOrNull()?.accinfo?.firstOrNull()?.balance ?: 0
+                card.balance = balanceFen / 100.0
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         val result = AHUResponse<Card>();
         result.data = card
