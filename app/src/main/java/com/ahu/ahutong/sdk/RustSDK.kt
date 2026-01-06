@@ -21,12 +21,7 @@ import android.content.ContentValues
 import android.provider.MediaStore
 import android.os.Build
 import android.os.Environment
-import android.util.Base64
 import java.io.FileInputStream
-import java.security.KeyFactory
-import java.security.MessageDigest
-import java.security.Signature
-import java.security.spec.X509EncodedKeySpec
 import kotlin.system.exitProcess
 import org.conscrypt.Conscrypt
 import java.security.Security
@@ -36,7 +31,7 @@ import java.security.Security
  * @Author Yukon
  * @Email 605606366@qq.com
  */
-// TODO: 迁移到 rustsdk 中
+
 /**
  * Rust SDK 的 Kotlin 封装层
  * 负责加载 native 库并提供类型安全的接口
@@ -46,11 +41,8 @@ object RustSDK {
 
     private const val TAG_HOTUPDATE = "HotUpdate"
     private const val LIB_NAME = "libahutong_rs.so"
-    // Fallback IP to bypass SNI blocking of openahu.org
-    private const val SERVER_IP = "118.25.8.226" 
     private var isLoaded = false
     private val scope = kotlinx.coroutines.CoroutineScope(Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
-    private val bcProvider = org.bouncycastle.jce.provider.BouncyCastleProvider()
 
     init {
         // Keep Conscrypt as well
@@ -137,9 +129,16 @@ object RustSDK {
             val prefs = context.getSharedPreferences("rust_sdk_config", Context.MODE_PRIVATE)
             val currentVersion = prefs.getInt("so_version", 299)
 
-            // Force using IP address directly and ignore native return value to ensure SNI bypass
-            // val configUrl = runCatching { getUpdateConfigUrl() } ...
-            val configUrl = "https://$SERVER_IP/api/check_update"
+            // Get original URL and Host from SDK
+            val originalConfigUrl = getUpdateConfigUrl()
+            val originalHost = try { URL(originalConfigUrl).host } catch (e: Exception) { 
+                Log.w(TAG_HOTUPDATE, "Failed to parse host from config url", e)
+                "" 
+            }
+            val serverIp = getApiServerIp()
+            
+            // Construct IP-based URL by replacing host
+            val configUrl = originalConfigUrl.replace(originalHost, serverIp)
 
             Log.i(
                 TAG_HOTUPDATE,
@@ -168,7 +167,7 @@ object RustSDK {
                         try {
                             this.sslSocketFactory = getConscryptSocketFactory()
                             this.hostnameVerifier = javax.net.ssl.HostnameVerifier { hostname, session ->
-                                if (hostname == SERVER_IP) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
+                                if (hostname == serverIp) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
                             }
                         } catch (e: Exception) {
                             Log.w(TAG_HOTUPDATE, "Failed to set Conscrypt factory", e)
@@ -235,7 +234,7 @@ object RustSDK {
             val config: UpdateConfig = try {
                 Gson().fromJson(jsonStr, UpdateConfig::class.java).let {
                     // Replace domain with IP for download url
-                    it.copy(url = it.url.replace("openahu.org", SERVER_IP))
+                    it.copy(url = it.url.replace(originalHost, serverIp))
                 }.also {
                     Log.i(
                         TAG_HOTUPDATE,
@@ -299,46 +298,29 @@ object RustSDK {
         val targetFile = File(libDir, LIB_NAME)
 
         try {
-            Log.i(TAG_HOTUPDATE, "start downloading the new version .so: $urlStr to ${tempFile.absolutePath}")
-            val conn = URL(urlStr).openConnection()
-            if (conn is javax.net.ssl.HttpsURLConnection) {
-                try {
-                    conn.sslSocketFactory = getConscryptSocketFactory()
-                    conn.hostnameVerifier = javax.net.ssl.HostnameVerifier { hostname, session ->
-                        if (hostname == SERVER_IP) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG_HOTUPDATE, "Failed to set Conscrypt factory in download", e)
-                }
+            if (tempFile.exists()) tempFile.delete()
+
+            Log.i(TAG_HOTUPDATE, "native downloadUpdate: $urlStr -> ${tempFile.absolutePath}")
+
+            val ok = try {
+                downloadUpdate(urlStr, tempFile.absolutePath, expectSha256Hex, signatureBase64)
+            } catch (t: Throwable) {
+                Log.e(TAG_HOTUPDATE, "downloadUpdate native call failed", t)
+                false
             }
 
-            conn.getInputStream().use { input ->
-                FileOutputStream(tempFile).use { output ->
-                    input.copyTo(output)
-                }
-            }
-
-            val localSha256 = sha256(tempFile).joinToString("") { "%02x".format(it) }
-            if (!localSha256.equals(expectSha256Hex, ignoreCase = true)) {
-                Log.e(TAG_HOTUPDATE, "SHA-256 mismatch")
+            if (!ok || !tempFile.exists() || tempFile.length() <= 0L) {
+                Log.e(TAG_HOTUPDATE, "downloadUpdate failed or temp file missing/empty")
                 tempFile.delete()
                 return false
             }
 
-            if (!verifyEd25519(tempFile, signatureBase64)) {
-                Log.e(TAG_HOTUPDATE, "Ed25519 signature verify failed")
-                tempFile.delete()
-                return false
+            if (targetFile.exists() && !targetFile.delete()) {
+                Log.w(TAG_HOTUPDATE, "Failed to delete existing target file: ${targetFile.absolutePath}")
             }
 
-            if (targetFile.exists()) {
-                if (!targetFile.delete()) {
-                    Log.e(TAG_HOTUPDATE, "Failed to delete existing target file")
-                }
-            }
-            
             var moveSuccess = false
-            if (tempFile.renameTo(targetFile)) {
+            if(tempFile.renameTo(targetFile)) {
                 moveSuccess = true
             } else {
                 Log.w(TAG_HOTUPDATE, "renameTo failed, trying copy...")
@@ -356,32 +338,20 @@ object RustSDK {
             }
 
             if (!moveSuccess) {
-                 Log.e(TAG_HOTUPDATE, "Failed to move/copy file to target: ${targetFile.absolutePath}")
-                 return false
+                Log.e(TAG_HOTUPDATE, "Failed to move/copy file to target: ${targetFile.absolutePath}")
+                return false
             }
-            
+
             targetFile.setReadable(true, false)
-            targetFile.setExecutable(true, false) 
+            targetFile.setExecutable(true, false)
 
             Log.i(TAG_HOTUPDATE, "hotUpdate success! Saved to: ${targetFile.absolutePath}. take effect on the next startup")
             return true
         } catch (e: Exception) {
-            Log.e(TAG_HOTUPDATE, "download failed", e)
+            Log.e(TAG_HOTUPDATE, "downloadAndSave failed", e)
             tempFile.delete()
             return false
         }
-    }
-
-    private fun getFileMD5(file: File): String {
-        val md = java.security.MessageDigest.getInstance("MD5")
-        file.inputStream().use { fis ->
-            val buffer = ByteArray(8192)
-            var bytesRead: Int
-            while (fis.read(buffer).also { bytesRead = it} != -1) {
-                md.update(buffer, 0, bytesRead)
-            }
-        }
-        return md.digest().joinToString("") { "%02x".format(it) }
     }
 
     /**
@@ -464,6 +434,18 @@ object RustSDK {
      * @return String
      */
     @JvmStatic external fun getUpdateConfigUrl(): String
+    @JvmStatic external fun getApiServerIp(): String
+
+    /**
+     * 让 Rust 侧完成：下载 + sha256 校验 + ed25519 验签 + 写入 savePath
+     * JNI 签名：(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+     */
+    private external fun downloadUpdate(
+        url: String,
+        savePath: String,
+        expectedSha256: String,
+        signature: String
+    ): Boolean
 
 
 
@@ -488,12 +470,13 @@ object RustSDK {
     }
 
     private fun downloadSchoolCalendarKotlin(savePath: String): Boolean {
-        val urlStr = "https://$SERVER_IP/download/xiaoli.jpg"
+        val serverIp = getApiServerIp()
+        val urlStr = "https://$serverIp/download/xiaoli.jpg"
         return try {
             val conn = URL(urlStr).openConnection()
             if (conn is javax.net.ssl.HttpsURLConnection) {
                 conn.hostnameVerifier = javax.net.ssl.HostnameVerifier { hostname, session ->
-                    if (hostname == SERVER_IP) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
+                    if (hostname == serverIp) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
                 }
             }
             conn.getInputStream().use { input ->
@@ -505,18 +488,6 @@ object RustSDK {
         } catch (e: Exception) {
             Log.e(TAG_HOTUPDATE, "Failed to download calendar (Kotlin fallback)", e)
             false
-        }
-    }
-
-    suspend fun downloadSchoolCalendarToAlbum(context: Context): Boolean {
-        return withContext(Dispatchers.IO) {
-            val file = fetchSchoolCalendar(context)
-            if (file != null) {
-                saveImageToGallery(context, file)
-                true
-            } else {
-                false
-            }
         }
     }
 
@@ -663,64 +634,6 @@ object RustSDK {
         android.os.Process.killProcess(android.os.Process.myPid())
         exitProcess(0)
     }
-
-    private const val ED25519_PUBLIC_KEY_BASE64 = "MCowBQYDK2VwAyEAsQ2Fz04RzJgfvt/dsExlo44l3RFQ4JAMHGRrAn9IXNk="
-
-    private fun sha256(file: File): ByteArray {
-        val md = MessageDigest.getInstance("SHA-256")
-        file.inputStream().use { fis ->
-            val buf = ByteArray(8192)
-            var len: Int
-            while (fis.read(buf).also { len = it } > 0) {
-                md.update(buf, 0, len)
-            }
-        }
-        return md.digest()
-    }
-
-    private fun verifyEd25519(
-        file: File,
-        signatureBase64: String
-    ): Boolean {
-        return try {
-            val publicKeyBytes = Base64.decode(
-                ED25519_PUBLIC_KEY_BASE64,
-                Base64.DEFAULT
-            )
-
-            val keySpec = X509EncodedKeySpec(publicKeyBytes)
-            // Explicitly use Bouncy Castle for Ed25519
-            val keyFactory = try {
-                Log.d(TAG_HOTUPDATE, "Attempting to get KeyFactory for Ed25519 with BC provider instance")
-                KeyFactory.getInstance("Ed25519", bcProvider)
-            } catch (e: Exception) {
-                Log.w(TAG_HOTUPDATE, "Ed25519 not found in BC, trying EdDSA", e)
-                // Fallback if BC fails (unlikely if dependency is correct)
-                KeyFactory.getInstance("EdDSA", bcProvider)
-            }
-            
-            val publicKey = keyFactory.generatePublic(keySpec)
-
-            val sig = try {
-                Log.d(TAG_HOTUPDATE, "Attempting to get Signature for Ed25519 with BC provider instance")
-                Signature.getInstance("Ed25519", bcProvider)
-            } catch (e: Exception) {
-                Log.w(TAG_HOTUPDATE, "Signature Ed25519 not found in BC, trying EdDSA", e)
-                Signature.getInstance("EdDSA", bcProvider)
-            }
-            
-            sig.initVerify(publicKey)
-
-            sig.update(sha256(file))
-
-            val signatureBytes = Base64.decode(signatureBase64, Base64.DEFAULT)
-            sig.verify(signatureBytes)
-        } catch (e: Throwable) {
-            Log.e(TAG_HOTUPDATE, "Ed25519 verify failed", e)
-            false
-        }
-    }
-
 }
 
 data class UpdateConfig(
