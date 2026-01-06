@@ -21,8 +21,16 @@ import android.content.ContentValues
 import android.provider.MediaStore
 import android.os.Build
 import android.os.Environment
+import android.util.Base64
 import java.io.FileInputStream
+import java.security.KeyFactory
+import java.security.MessageDigest
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 import kotlin.system.exitProcess
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.util.encoders.Hex
+import java.security.Security
 
 
 /**
@@ -41,6 +49,13 @@ object RustSDK {
     private const val LIB_NAME = "libahutong_rs.so"
     private var isLoaded = false
     private val scope = kotlinx.coroutines.CoroutineScope(Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
+
+    init {
+        Security.removeProvider("BC")
+        Security.addProvider(BouncyCastleProvider())
+    }
+
+    fun isNativeLoaded(): Boolean = isLoaded
 
 
     /**
@@ -113,9 +128,10 @@ object RustSDK {
         scope.launch(Dispatchers.IO) {
             try {
                 val prefs = context.getSharedPreferences("rust_sdk_config", Context.MODE_PRIVATE)
-                val currentVersion = prefs.getInt("so_version", 300)
+                val currentVersion = prefs.getInt("so_version", 299)
 
-                val configUrl = "http://47.236.115.210:5000/api/check_update"
+                val configUrl = runCatching { getUpdateConfigUrl() }
+                    .getOrDefault("https://openahu.org/api/check_update")
                 val jsonStr = try {
                     (URL(configUrl).openConnection() as java.net.HttpURLConnection).apply {
                         connectTimeout = 5000
@@ -131,7 +147,7 @@ object RustSDK {
                 if (config.version > currentVersion) {
                     Log.i(TAG_HOTUPDATE, "new version found: ${config.version} -> old version: $currentVersion")
 
-                    val success = downloadAndSave(context, config.url, config.md5)
+                    val success = downloadAndSave(context, config.url, config.sha256, config.signature)
 
                     if (success) {
                         prefs.edit { putInt("so_version", config.version) }
@@ -151,7 +167,12 @@ object RustSDK {
     /**
      * 下载并覆盖旧文件
      */
-    private fun downloadAndSave(context: Context, urlStr: String, expectMd5: String): Boolean {
+    private fun downloadAndSave(
+        context: Context,
+        urlStr: String,
+        expectSha256Hex: String,
+        signatureBase64: String
+    ): Boolean {
         // 使用与 loadLibrary 一致的路径获取方式
         val libDir = context.getDir("jniLibs", Context.MODE_PRIVATE)
         val tempFile = File(libDir, "$LIB_NAME.tmp")
@@ -165,9 +186,15 @@ object RustSDK {
                 }
             }
 
-            val downloadedMd5 = getFileMD5(tempFile)
-            if (!downloadedMd5.equals(expectMd5, ignoreCase = true)) {
-                Log.e(TAG_HOTUPDATE, "File verification failed! Expected: $expectMd5, Actual: $downloadedMd5")
+            val localSha256 = sha256(tempFile).joinToString("") { "%02x".format(it) }
+            if (!localSha256.equals(expectSha256Hex, ignoreCase = true)) {
+                Log.e(TAG_HOTUPDATE, "SHA-256 mismatch")
+                tempFile.delete()
+                return false
+            }
+
+            if (!verifyEd25519(tempFile, signatureBase64)) {
+                Log.e(TAG_HOTUPDATE, "Ed25519 signature verify failed")
                 tempFile.delete()
                 return false
             }
@@ -175,7 +202,6 @@ object RustSDK {
             if (targetFile.exists()) {
                 if (!targetFile.delete()) {
                     Log.e(TAG_HOTUPDATE, "Failed to delete existing target file")
-                    // 尝试继续覆盖
                 }
             }
             
@@ -215,7 +241,7 @@ object RustSDK {
     }
 
     private fun getFileMD5(file: File): String {
-        val md = java.security.MessageDigest.getInstance("MD5")
+        val md = java.security.MessageDigest.getInstance("MD5", "BC")
         file.inputStream().use { fis ->
             val buffer = ByteArray(8192)
             var bytesRead: Int
@@ -223,7 +249,7 @@ object RustSDK {
                 md.update(buffer, 0, bytesRead)
             }
         }
-        return md.digest().joinToString("") { "%02x".format(it) }
+        return Hex.toHexString(md.digest())
     }
 
     /**
@@ -293,28 +319,54 @@ object RustSDK {
      * 获取更新日志
      * @return String
      */
-    external fun getUpdateLog(): String
+    @JvmStatic external fun getUpdateLog(): String
+
+    /**
+     * 获取版本号
+     * @return String
+     */
+    @JvmStatic external fun getVersionName(): String
+
+    /**
+     * 获取热更新链接
+     * @return String
+     */
+    @JvmStatic external fun getUpdateConfigUrl(): String
 
 
-    suspend fun downloadSchoolCalendarToAlbum(context: Context): Boolean {
+
+    suspend fun fetchSchoolCalendar(context: Context): File? {
         return withContext(Dispatchers.IO) {
             try {
                 val cacheFile = File(context.cacheDir, "xiaoli_${System.currentTimeMillis()}.jpg")
+                Log.d("RustSDK", "Downloading calendar to temp file: ${cacheFile.absolutePath}")
                 val success = downloadSchoolCalendar(cacheFile.absolutePath)
+                Log.d("RustSDK", "Download result: $success")
                 if (success && cacheFile.exists()) {
-                    saveImageToGallery(context, cacheFile)
-                    true
+                    cacheFile
                 } else {
-                    false
+                    null
                 }
             } catch (e: Exception) {
-                Log.e(TAG_HOTUPDATE, "Failed to save calendar to album", e)
+                Log.e(TAG_HOTUPDATE, "Failed to fetch calendar", e)
+                null
+            }
+        }
+    }
+
+    suspend fun downloadSchoolCalendarToAlbum(context: Context): Boolean {
+        return withContext(Dispatchers.IO) {
+            val file = fetchSchoolCalendar(context)
+            if (file != null) {
+                saveImageToGallery(context, file)
+                true
+            } else {
                 false
             }
         }
     }
 
-    private fun saveImageToGallery(context: Context, imageFile: File) {
+    fun saveImageToGallery(context: Context, imageFile: File) {
         val values = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, "AHU_Calendar_${System.currentTimeMillis()}.jpg")
             put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
@@ -349,7 +401,14 @@ object RustSDK {
     // --- 高级封装接口 (解析 JSON 为对象) ---
 
     fun loginSafe(username: String, password: String): Result<User> {
-        val json = login(username, password)
+        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+        Log.d("RustSDK", "Calling native login with username: $username, password length: ${password.length}")
+        val json = try {
+            login(username, password)
+        } catch (t: Throwable) {
+            return Result.failure(t)
+        }
+        Log.d("RustSDK", "Native login returned: $json")
         return if (json.contains("\"error\"")) {
             Result.failure(Exception(json)) // 简单处理，实际可解析 error 字段
         } else {
@@ -363,7 +422,12 @@ object RustSDK {
     }
 
     fun getScheduleSafe(): Result<List<Course>> {
-        val json = getSchedule()
+        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+        val json = try {
+            getSchedule()
+        } catch (t: Throwable) {
+            return Result.failure(t)
+        }
         return if (json.contains("\"error\"")) {
             Result.failure(Exception(json))
         } else {
@@ -378,7 +442,12 @@ object RustSDK {
     }
 
     fun getExamInfoSafe(): Result<List<Exam>> {
-        val json = getExamInfo()
+        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+        val json = try {
+            getExamInfo()
+        } catch (t: Throwable) {
+            return Result.failure(t)
+        }
         return if (json.contains("\"error\"")) {
             Result.failure(Exception(json))
         } else {
@@ -393,7 +462,12 @@ object RustSDK {
     }
 
     fun getGradeSafe(): Result<GradeResponse> {
-        val json = getGrade()
+        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+        val json = try {
+            getGrade()
+        } catch (t: Throwable) {
+            return Result.failure(t)
+        }
         return if (json.contains("\"error\"")) {
             Result.failure(Exception(json))
         } else {
@@ -403,6 +477,24 @@ object RustSDK {
             } catch (e: Exception) {
                 Result.failure(e)
             }
+        }
+    }
+
+    fun initSafe(cookiesJson: String) {
+        if (!isLoaded) return
+        try {
+            init(cookiesJson)
+        } catch (t: Throwable) {
+            Log.e(TAG_HOTUPDATE, "Native init failed", t)
+        }
+    }
+
+    fun getCookiesListSafe(): String {
+        if (!isLoaded) return "[]"
+        return try {
+            getCookiesList()
+        } catch (t: Throwable) {
+            "[]"
         }
     }
 
@@ -417,10 +509,54 @@ object RustSDK {
         android.os.Process.killProcess(android.os.Process.myPid())
         exitProcess(0)
     }
+
+    private const val ED25519_PUBLIC_KEY_BASE64 = "MCowBQYDK2VwAyEAsQ2Fz04RzJgfvt/dsExlo44l3RFQ4JAMHGRrAn9IXNk="
+
+    private fun sha256(file: File): ByteArray {
+        val md = MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { fis ->
+            val buf = ByteArray(8192)
+            var len: Int
+            while (fis.read(buf).also { len = it } > 0) {
+                md.update(buf, 0, len)
+            }
+        }
+        return md.digest()
+    }
+
+    private fun verifyEd25519(
+        file: File,
+        signatureBase64: String
+    ): Boolean {
+        return try {
+            val publicKeyBytes = Base64.decode(
+                ED25519_PUBLIC_KEY_BASE64,
+                Base64.DEFAULT
+            )
+
+            val keySpec = X509EncodedKeySpec(publicKeyBytes)
+            val keyFactory = KeyFactory.getInstance("Ed25519")
+            val publicKey = keyFactory.generatePublic(keySpec)
+
+            val sig = Signature.getInstance("Ed25519")
+            sig.initVerify(publicKey)
+
+            sig.update(sha256(file))
+
+            val signatureBytes = Base64.decode(signatureBase64, Base64.DEFAULT)
+            sig.verify(signatureBytes)
+        } catch (e: Throwable) {
+            Log.e(TAG_HOTUPDATE, "Ed25519 verify failed", e)
+            false
+        }
+    }
+
 }
 
 data class UpdateConfig(
     val version: Int,
     val url: String,
-    val md5: String
+    val sha256: String,
+    val signature: String,
+    val alg: String
 )

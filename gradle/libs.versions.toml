@@ -25,6 +25,7 @@ kyant0Backdrop = "1.0.0"
 kyant0Capsule = "2.1.1"
 
 [libraries]
+bouncycastle = "org.bouncycastle:bcprov-jdk15to18:1.83"
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

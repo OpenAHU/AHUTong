@@ -189,7 +189,7 @@ object AHURepository {
 
     private fun syncCookies() {
         try {
-            val json = RustSDK.getCookiesList()
+            val json = RustSDK.getCookiesListSafe()
             // 解析 JSON 数组
             val listType = object : com.google.gson.reflect.TypeToken<List<Map<String, Any>>>() {}.type
             val cookies: List<Map<String, Any>> = Gson().fromJson(json, listType)

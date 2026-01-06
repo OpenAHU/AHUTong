@@ -306,7 +306,7 @@ private fun logIn(
 //        )
         AHUApplication.sessionExpired = true
         AHUCache.clearAll()
-        RustSDK.init("")
+        RustSDK.initSafe("")
         CookieManager.cookieJar.clear()
         TokenManager.clear()
         AHUCache.setAgreementAccepted()
