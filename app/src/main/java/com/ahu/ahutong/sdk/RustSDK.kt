@@ -28,8 +28,7 @@ import java.security.MessageDigest
 import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
 import kotlin.system.exitProcess
-import org.bouncycastle.jce.provider.BouncyCastleProvider
-import org.bouncycastle.util.encoders.Hex
+import org.conscrypt.Conscrypt
 import java.security.Security
 
 
@@ -37,7 +36,7 @@ import java.security.Security
  * @Author Yukon
  * @Email 605606366@qq.com
  */
-
+// TODO: 迁移到 rustsdk 中
 /**
  * Rust SDK 的 Kotlin 封装层
  * 负责加载 native 库并提供类型安全的接口
@@ -47,12 +46,15 @@ object RustSDK {
 
     private const val TAG_HOTUPDATE = "HotUpdate"
     private const val LIB_NAME = "libahutong_rs.so"
+    // Fallback IP to bypass SNI blocking of openahu.org
+    private const val SERVER_IP = "118.25.8.226" 
     private var isLoaded = false
     private val scope = kotlinx.coroutines.CoroutineScope(Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
+    private val bcProvider = org.bouncycastle.jce.provider.BouncyCastleProvider()
 
     init {
-        Security.removeProvider("BC")
-        Security.addProvider(BouncyCastleProvider())
+        // Keep Conscrypt as well
+        Security.insertProviderAt(Conscrypt.newProvider(), 1)
     }
 
     fun isNativeLoaded(): Boolean = isLoaded
@@ -116,6 +118,12 @@ object RustSDK {
         }
     }
 
+    private fun getConscryptSocketFactory(): javax.net.ssl.SSLSocketFactory {
+        val context = javax.net.ssl.SSLContext.getInstance("TLS", "Conscrypt")
+        context.init(null, null, null) // 使用默认的 TrustManager，Conscrypt 会处理根证书
+        return context.socketFactory
+    }
+
     /**
      * 后台检查并下载更新.so文件
      */
@@ -126,43 +134,155 @@ object RustSDK {
         }
 
         scope.launch(Dispatchers.IO) {
-            try {
-                val prefs = context.getSharedPreferences("rust_sdk_config", Context.MODE_PRIVATE)
-                val currentVersion = prefs.getInt("so_version", 299)
+            val prefs = context.getSharedPreferences("rust_sdk_config", Context.MODE_PRIVATE)
+            val currentVersion = prefs.getInt("so_version", 299)
 
-                val configUrl = runCatching { getUpdateConfigUrl() }
-                    .getOrDefault("https://openahu.org/api/check_update")
-                val jsonStr = try {
-                    (URL(configUrl).openConnection() as java.net.HttpURLConnection).apply {
-                        connectTimeout = 5000
-                        readTimeout = 5000
-                        requestMethod = "GET"
-                    }.inputStream.bufferedReader().use { it.readText() }
-                } catch (e: Exception) {
-                    Log.w(TAG_HOTUPDATE, "check update network error: ${e.message}")
+            // Force using IP address directly and ignore native return value to ensure SNI bypass
+            // val configUrl = runCatching { getUpdateConfigUrl() } ...
+            val configUrl = "https://$SERVER_IP/api/check_update"
+
+            Log.i(
+                TAG_HOTUPDATE,
+                "checkUpdate start. currentVersion=$currentVersion, url=$configUrl, " +
+                        "is64Bit=${android.os.Process.is64Bit()}, thread=${Thread.currentThread().name}"
+            )
+
+            // 2) 发起网络请求（带完整日志）
+            val startMs = System.currentTimeMillis()
+            val jsonStr: String = try {
+                val url = URL(configUrl)
+                val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
+
+                    instanceFollowRedirects = true
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                    requestMethod = "GET"
+                    useCaches = false
+
+                    // 建议加上这些头，很多网关/防火墙对“空 UA”会更敏感
+                    setRequestProperty("User-Agent", "RustSdkHotUpdate/1.0 (Android)")
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("Connection", "close")
+
+                    if (this is javax.net.ssl.HttpsURLConnection) {
+                        try {
+                            this.sslSocketFactory = getConscryptSocketFactory()
+                            this.hostnameVerifier = javax.net.ssl.HostnameVerifier { hostname, session ->
+                                if (hostname == SERVER_IP) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
+                            }
+                        } catch (e: Exception) {
+                            Log.w(TAG_HOTUPDATE, "Failed to set Conscrypt factory", e)
+                        }
+                    }
+                }
+
+                // 触发真正连接/请求
+                val code = conn.responseCode
+                val finalUrl = runCatching { conn.url?.toString() }.getOrNull()
+
+                val headers = buildString {
+                    for ((k, v) in conn.headerFields) {
+                        if (k == null) continue
+                        append(k).append(": ").append(v?.joinToString(";") ?: "").append("\n")
+                    }
+                }
+
+                val stream =
+                    if (code in 200..299) conn.inputStream
+                    else conn.errorStream
+
+                val body = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
+                    ?: ""
+
+                val cost = System.currentTimeMillis() - startMs
+                Log.i(
+                    TAG_HOTUPDATE,
+                    "checkUpdate http done. code=$code cost=${cost}ms " +
+                            "originUrl=$configUrl finalUrl=$finalUrl " +
+                            "contentLength=${conn.contentLengthLong} " +
+                            "contentType=${conn.contentType}"
+                )
+                Log.d(TAG_HOTUPDATE, "checkUpdate response headers:\n$headers")
+
+                // 只打印前 400 字符，避免日志爆炸
+                Log.d(
+                    TAG_HOTUPDATE,
+                    "checkUpdate response body (first 400 chars): ${body.take(400)}"
+                )
+
+                if (code !in 200..299) {
+                    // 非 2xx 直接认为失败（避免后面 Gson 解析异常掩盖真实问题）
+                    Log.w(
+                        TAG_HOTUPDATE,
+                        "checkUpdate non-2xx response. code=$code, body(first200)=${body.take(200)}"
+                    )
                     return@launch
                 }
-                val config = Gson().fromJson(jsonStr, UpdateConfig::class.java)
 
+                body
+            } catch (e: Exception) {
+                val cost = System.currentTimeMillis() - startMs
+                // 这里用带堆栈的日志，定位 Connection reset / handshake / dns 会更清楚
+                Log.w(
+                    TAG_HOTUPDATE,
+                    "check update network error after ${cost}ms. url=$configUrl, ex=${e.javaClass.name}: ${e.message}",
+                    e
+                )
+                return@launch
+            }
+
+            // 3) 解析 JSON（带保护日志）
+            val config: UpdateConfig = try {
+                Gson().fromJson(jsonStr, UpdateConfig::class.java).let {
+                    // Replace domain with IP for download url
+                    it.copy(url = it.url.replace("openahu.org", SERVER_IP))
+                }.also {
+                    Log.i(
+                        TAG_HOTUPDATE,
+                        "checkUpdate parsed config ok. remoteVersion=${it.version}, soUrl=${it.url.take(200)}"
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(
+                    TAG_HOTUPDATE,
+                    "checkUpdate parse json failed. url=$configUrl, json(first300)=${jsonStr.take(300)}",
+                    e
+                )
+                return@launch
+            }
+
+            // 4) 版本判断 & 下载
+            try {
                 if (config.version > currentVersion) {
-                    Log.i(TAG_HOTUPDATE, "new version found: ${config.version} -> old version: $currentVersion")
+                    Log.i(
+                        TAG_HOTUPDATE,
+                        "new version found. remote=${config.version} > local=$currentVersion. start download..."
+                    )
 
                     val success = downloadAndSave(context, config.url, config.sha256, config.signature)
 
                     if (success) {
-                        prefs.edit { putInt("so_version", config.version) }
-                        withContext(Dispatchers.Main){
+                        prefs.edit().putInt("so_version", config.version).apply()
+                        Log.i(TAG_HOTUPDATE, "hotUpdate download success. saved version=${config.version}")
+
+                        withContext(Dispatchers.Main) {
                             onSuccess?.invoke()
                         }
+                    } else {
+                        Log.w(TAG_HOTUPDATE, "hotUpdate downloadAndSave failed. remote=${config.version}")
                     }
                 } else {
-                    Log.d(TAG_HOTUPDATE, "no update needed, current version: $currentVersion, remote: ${config.version}")
+                    Log.d(
+                        TAG_HOTUPDATE,
+                        "no update needed. local=$currentVersion, remote=${config.version}"
+                    )
                 }
             } catch (e: Exception) {
-                Log.e(TAG_HOTUPDATE, "update check failed", e)
+                Log.e(TAG_HOTUPDATE, "checkUpdate post-process failed", e)
             }
         }
     }
+
 
     /**
      * 下载并覆盖旧文件
@@ -180,7 +300,19 @@ object RustSDK {
 
         try {
             Log.i(TAG_HOTUPDATE, "start downloading the new version .so: $urlStr to ${tempFile.absolutePath}")
-            URL(urlStr).openStream().use { input ->
+            val conn = URL(urlStr).openConnection()
+            if (conn is javax.net.ssl.HttpsURLConnection) {
+                try {
+                    conn.sslSocketFactory = getConscryptSocketFactory()
+                    conn.hostnameVerifier = javax.net.ssl.HostnameVerifier { hostname, session ->
+                        if (hostname == SERVER_IP) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG_HOTUPDATE, "Failed to set Conscrypt factory in download", e)
+                }
+            }
+
+            conn.getInputStream().use { input ->
                 FileOutputStream(tempFile).use { output ->
                     input.copyTo(output)
                 }
@@ -241,7 +373,7 @@ object RustSDK {
     }
 
     private fun getFileMD5(file: File): String {
-        val md = java.security.MessageDigest.getInstance("MD5", "BC")
+        val md = java.security.MessageDigest.getInstance("MD5")
         file.inputStream().use { fis ->
             val buffer = ByteArray(8192)
             var bytesRead: Int
@@ -249,7 +381,7 @@ object RustSDK {
                 md.update(buffer, 0, bytesRead)
             }
         }
-        return Hex.toHexString(md.digest())
+        return md.digest().joinToString("") { "%02x".format(it) }
     }
 
     /**
@@ -340,7 +472,8 @@ object RustSDK {
             try {
                 val cacheFile = File(context.cacheDir, "xiaoli_${System.currentTimeMillis()}.jpg")
                 Log.d("RustSDK", "Downloading calendar to temp file: ${cacheFile.absolutePath}")
-                val success = downloadSchoolCalendar(cacheFile.absolutePath)
+                // Use Kotlin implementation to bypass SNI block
+                val success = downloadSchoolCalendarKotlin(cacheFile.absolutePath)
                 Log.d("RustSDK", "Download result: $success")
                 if (success && cacheFile.exists()) {
                     cacheFile
@@ -351,6 +484,27 @@ object RustSDK {
                 Log.e(TAG_HOTUPDATE, "Failed to fetch calendar", e)
                 null
             }
+        }
+    }
+
+    private fun downloadSchoolCalendarKotlin(savePath: String): Boolean {
+        val urlStr = "https://$SERVER_IP/download/xiaoli.jpg"
+        return try {
+            val conn = URL(urlStr).openConnection()
+            if (conn is javax.net.ssl.HttpsURLConnection) {
+                conn.hostnameVerifier = javax.net.ssl.HostnameVerifier { hostname, session ->
+                    if (hostname == SERVER_IP) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
+                }
+            }
+            conn.getInputStream().use { input ->
+                FileOutputStream(File(savePath)).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            true
+        } catch (e: Exception) {
+            Log.e(TAG_HOTUPDATE, "Failed to download calendar (Kotlin fallback)", e)
+            false
         }
     }
 
@@ -535,10 +689,26 @@ object RustSDK {
             )
 
             val keySpec = X509EncodedKeySpec(publicKeyBytes)
-            val keyFactory = KeyFactory.getInstance("Ed25519")
+            // Explicitly use Bouncy Castle for Ed25519
+            val keyFactory = try {
+                Log.d(TAG_HOTUPDATE, "Attempting to get KeyFactory for Ed25519 with BC provider instance")
+                KeyFactory.getInstance("Ed25519", bcProvider)
+            } catch (e: Exception) {
+                Log.w(TAG_HOTUPDATE, "Ed25519 not found in BC, trying EdDSA", e)
+                // Fallback if BC fails (unlikely if dependency is correct)
+                KeyFactory.getInstance("EdDSA", bcProvider)
+            }
+            
             val publicKey = keyFactory.generatePublic(keySpec)
 
-            val sig = Signature.getInstance("Ed25519")
+            val sig = try {
+                Log.d(TAG_HOTUPDATE, "Attempting to get Signature for Ed25519 with BC provider instance")
+                Signature.getInstance("Ed25519", bcProvider)
+            } catch (e: Exception) {
+                Log.w(TAG_HOTUPDATE, "Signature Ed25519 not found in BC, trying EdDSA", e)
+                Signature.getInstance("EdDSA", bcProvider)
+            }
+            
             sig.initVerify(publicKey)
 
             sig.update(sha256(file))
