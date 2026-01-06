@@ -158,10 +158,7 @@ class ScheduleAppWidget : GlanceAppWidget() {
                                                 maxLines = 1
                                             )
                                             Text(
-                                                text = course.location
-                                                    .replace("博学", "博")
-                                                    .replace("楼", "")
-                                                    .replace("育场", ""),
+                                                text = shortenLocation(course.location),
                                                 modifier = GlanceModifier.fillMaxWidth(),
                                                 style = TextStyle(
                                                     color = ColorProvider(40.n1, 90.n1),
@@ -226,3 +223,17 @@ private fun getTimeDistance(beginDate: Date, endDate: Date): Long {
     dayDistance = abs(dayDistance)
     return dayDistance
 }
+
+private val LOCATION_SHORTEN_MAP = mapOf(
+    "博学北楼" to "博北",
+    "博学南楼" to "博南",
+    "笃行北楼" to "笃北",
+    "笃行南楼" to "笃南",
+    "互联大楼" to "互楼",
+    "体育场" to "体"
+)
+
+private val LOCATION_PATTERN = Regex(LOCATION_SHORTEN_MAP.keys.joinToString("|") { Regex.escape(it) })
+
+private fun shortenLocation(location: String?): String =
+    (location ?: "").replace(LOCATION_PATTERN) { LOCATION_SHORTEN_MAP[it.value].orEmpty() }
