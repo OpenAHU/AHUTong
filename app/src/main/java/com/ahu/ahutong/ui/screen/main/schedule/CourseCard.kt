@@ -78,10 +78,12 @@ fun CourseCard(
                 // TODO: more shortenings
                 text = if (isCurrentWeek) {
                     course.location
-                        ?.replace("博学", "博")
-                        ?.replace("笃行", "笃")
-                        ?.replace("楼", "")
-                        ?.replace("育场", "")
+                        ?.replace("博学北楼", "博北")
+                        ?.replace("博学南楼", "博南")
+                        ?.replace("笃行南楼", "笃南")
+                        ?.replace("笃行北楼", "笃北")
+                        ?.replace("互联大楼", "互楼")
+                        ?.replace("体育场", "体")
                         .takeIf { !it.isNullOrBlank() } ?: "未知"
                 } else {
                     "非本周"
