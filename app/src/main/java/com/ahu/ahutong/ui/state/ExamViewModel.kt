@@ -12,14 +12,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class ExamViewModel : ViewModel() {
     val data = MutableLiveData<Result<List<Exam>>>()
     val isLoading = MutableStateFlow<Boolean?>(null)
+    val errorMessage = MutableStateFlow<String?>(null)
+
     fun loadExam(isRefresh: Boolean = false) = viewModelScope.launchSafe {
         val user = AHUCache.getCurrentUser()
         if (user == null) {
             data.value = Result.failure(Throwable("账户未登录"))
+            errorMessage.value = "账户未登录"
             return@launchSafe
         }
         isLoading.value = true
-        data.value = AHURepository.getExamInfo(isRefresh, user.xh, user.name)
+        errorMessage.value = null
+        val result = AHURepository.getExamInfo(isRefresh, user.xh, user.name)
+        data.value = result
+        if (result.isFailure) {
+            errorMessage.value = result.exceptionOrNull()?.message ?: "获取考试信息失败"
+        }
         isLoading.value = false
     }
 }

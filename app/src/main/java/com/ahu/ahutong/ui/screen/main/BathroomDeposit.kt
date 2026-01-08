@@ -26,7 +26,9 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -322,7 +324,16 @@ fun BathroomDeposit(
                 modifier = Modifier.fillMaxWidth(),
                 colors = textFieldColors,
                 placeholder = { Text("请输入金额", color = 30.n1 withNight 70.n1) },
-                textStyle = TextStyle(fontSize = 16.sp, color = 10.n1 withNight 90.n1)
+                textStyle = TextStyle(fontSize = 16.sp, color = 10.n1 withNight 90.n1),
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.clearFocus() }
+                ),
+                singleLine = true
             )
 
 

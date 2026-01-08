@@ -2,6 +2,7 @@ package com.ahu.ahutong.ui.screen.main
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,19 +18,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,64 +58,222 @@ import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
-// TODO: implement search query
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhoneBook() {
     val context = LocalContext.current
     var dialData by rememberSaveable { mutableStateOf<Tel?>(null) }
     var selectedCategory by rememberSaveable { mutableStateOf("师生综合服务大厅") }
+    var isSearchActive by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+
+    BackHandler(enabled = isSearchActive) {
+        isSearchActive = false
+        searchQuery = ""
+    }
+
+    val allTels = remember {
+        TelDirectoryViewModel.TelBook.values.flatten()
+    }
+
+    val searchResults = if (searchQuery.isBlank()) {
+        emptyList()
+    } else {
+        allTels.filter {
+            it.name.contains(searchQuery, ignoreCase = true) ||
+                    (it.tel?.contains(searchQuery) == true) ||
+                    (it.tel2?.contains(searchQuery) == true)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .padding(bottom = 80.dp)
-            .systemBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+            .systemBarsPadding()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp, 32.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(id = R.string.phone_book),
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Row {
-                IconButton(onClick = {}) {
+        if (isSearchActive) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp, 24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = {
+                    isSearchActive = false
+                    searchQuery = ""
+                }) {
                     Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back"
                     )
+                }
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp),
+                    placeholder = { Text("搜索电话或部门") },
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                    ),
+                    trailingIcon = if (searchQuery.isNotEmpty()) {
+                        {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Clear"
+                                )
+                            }
+                        }
+                    } else null
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp, 32.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(id = R.string.phone_book),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Row {
+                    IconButton(onClick = { isSearchActive = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null
+                        )
+                    }
                 }
             }
         }
-        Categories(
-            selectedCategory = selectedCategory,
-            onCategorySelected = { selectedCategory = it }
-        )
-        Telephones(
-            selectedCategory = selectedCategory,
-            onItemClick = {
-                if (it.tel != null && it.tel2 != null && it.tel != it.tel2) {
-                    dialData = it
-                } else {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_DIAL,
-                            Uri.parse("tel:0551-${it.tel ?: it.tel2}")
+
+        if (isSearchActive) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "未找到相关结果",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    )
+                    }
+                } else {
+                    items(searchResults) { tel ->
+                        TelItem(
+                            tel = tel,
+                            onItemClick = {
+                                if (it.tel != null && it.tel2 != null && it.tel != it.tel2) {
+                                    dialData = it
+                                } else {
+                                    context.startActivity(
+                                        Intent(
+                                            Intent.ACTION_DIAL,
+                                            Uri.parse("tel:0551-${it.tel ?: it.tel2}")
+                                        )
+                                    )
+                                }
+                            }
+                        )
+                    }
                 }
             }
-        )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                Categories(
+                    selectedCategory = selectedCategory,
+                    onCategorySelected = { selectedCategory = it }
+                )
+                Telephones(
+                    selectedCategory = selectedCategory,
+                    onItemClick = {
+                        if (it.tel != null && it.tel2 != null && it.tel != it.tel2) {
+                            dialData = it
+                        } else {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_DIAL,
+                                    Uri.parse("tel:0551-${it.tel ?: it.tel2}")
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+        }
     }
     DialDialog(
         onDismiss = { dialData = null },
         tel = dialData
     )
+}
+
+@Composable
+private fun TelItem(
+    tel: Tel,
+    onItemClick: (Tel) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SmoothRoundedCornerShape(4.dp))
+            .background(100.n1 withNight 20.n1)
+            .clickable { onItemClick(tel) }
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = tel.name,
+            style = MaterialTheme.typography.titleMedium
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            when {
+                tel.tel != null && tel.tel2 != null && tel.tel == tel.tel2 -> {
+                    Tel(tel = tel.tel)
+                }
+
+                tel.tel != null && tel.tel2 == null -> {
+                    Tel(tel = tel.tel, campus = "磬苑")
+                }
+
+                tel.tel == null && tel.tel2 != null -> {
+                    Tel(tel = tel.tel2, campus = "龙河")
+                }
+
+                tel.tel != null && tel.tel2 != null && tel.tel != tel.tel2 -> {
+                    Tel(tel = tel.tel, campus = "磬苑")
+                    Tel(tel = tel.tel2, campus = "龙河")
+                }
+            }
+        }
+    }
 }
 
 @Composable

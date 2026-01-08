@@ -1,6 +1,7 @@
 package com.ahu.ahutong.ui.screen.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -61,12 +62,16 @@ fun Preferences() {
                 Modifier
                     .clip(SmoothRoundedCornerShape(16.dp))
                     .background(cardColor)
+                    .clickable { preferencesViewModel.setShowQRCode(!preferencesViewModel.showQRCode.value) }
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(text = "主页", style = MaterialTheme.typography.headlineSmall)
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(SmoothRoundedCornerShape(8.dp))
+                    .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -84,12 +89,16 @@ fun Preferences() {
                 Modifier
                     .clip(SmoothRoundedCornerShape(16.dp))
                     .background(cardColor)
+                    .clickable { preferencesViewModel.setIsShowAllCourse(!preferencesViewModel.isShowAllCourse.value) }
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(text = "课表", style = MaterialTheme.typography.headlineSmall)
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(SmoothRoundedCornerShape(8.dp))
+                    .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -107,12 +116,16 @@ fun Preferences() {
                 Modifier
                     .clip(SmoothRoundedCornerShape(16.dp))
                     .background(cardColor)
+                    .clickable { preferencesViewModel.setUseLiquidGlass(!preferencesViewModel.useLiquidGlass.value) }
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(text = "液态玻璃", style = MaterialTheme.typography.headlineSmall)
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(SmoothRoundedCornerShape(8.dp))
+                    .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {

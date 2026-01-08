@@ -449,16 +449,36 @@ object RustSDK {
 
 
 
-    suspend fun fetchSchoolCalendar(context: Context): File? {
+    /**
+     * 获取已缓存的校历文件
+     */
+    fun getCachedSchoolCalendar(context: Context): File? {
+        val dir = File(context.filesDir, "images")
+        if (!dir.exists()) dir.mkdirs()
+        val file = File(dir, "xiaoli.jpg")
+        return if (file.exists()) file else null
+    }
+
+    suspend fun fetchSchoolCalendar(context: Context, onProgress: (Float) -> Unit): File? {
         return withContext(Dispatchers.IO) {
             try {
-                val cacheFile = File(context.cacheDir, "xiaoli_${System.currentTimeMillis()}.jpg")
-                Log.d("RustSDK", "Downloading calendar to temp file: ${cacheFile.absolutePath}")
+                // 优先使用 filesDir 保证持久化
+                val dir = File(context.filesDir, "images")
+                if (!dir.exists()) dir.mkdirs()
+                val saveFile = File(dir, "xiaoli.jpg")
+
+                if (saveFile.exists()) {
+                    Log.d("RustSDK", "Found cached calendar: ${saveFile.absolutePath}")
+                    onProgress(1.0f)
+                    return@withContext saveFile
+                }
+
+                Log.d("RustSDK", "Downloading calendar to file: ${saveFile.absolutePath}")
                 // Use Kotlin implementation to bypass SNI block
-                val success = downloadSchoolCalendarKotlin(cacheFile.absolutePath)
+                val success = downloadSchoolCalendarKotlin(saveFile.absolutePath, onProgress)
                 Log.d("RustSDK", "Download result: $success")
-                if (success && cacheFile.exists()) {
-                    cacheFile
+                if (success && saveFile.exists()) {
+                    saveFile
                 } else {
                     null
                 }
@@ -469,7 +489,7 @@ object RustSDK {
         }
     }
 
-    private fun downloadSchoolCalendarKotlin(savePath: String): Boolean {
+    private fun downloadSchoolCalendarKotlin(savePath: String, onProgress: (Float) -> Unit): Boolean {
         val serverIp = getApiServerIp()
         val urlStr = "https://$serverIp/download/xiaoli.jpg"
         return try {
@@ -479,9 +499,21 @@ object RustSDK {
                     if (hostname == serverIp) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
                 }
             }
+            val totalBytes = conn.contentLength
+            var downloadedBytes = 0
+            
             conn.getInputStream().use { input ->
                 FileOutputStream(File(savePath)).use { output ->
-                    input.copyTo(output)
+                    val buffer = ByteArray(8 * 1024)
+                    var bytes = input.read(buffer)
+                    while (bytes >= 0) {
+                        output.write(buffer, 0, bytes)
+                        downloadedBytes += bytes
+                        if (totalBytes > 0) {
+                            onProgress(downloadedBytes.toFloat() / totalBytes)
+                        }
+                        bytes = input.read(buffer)
+                    }
                 }
             }
             true
@@ -547,59 +579,83 @@ object RustSDK {
     }
 
     fun getScheduleSafe(): Result<List<Course>> {
-        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+        if (!isLoaded) {
+            Log.e(TAG_HOTUPDATE, "getScheduleSafe: Native library not loaded")
+            return Result.failure(IllegalStateException("Native library not loaded"))
+        }
         val json = try {
             getSchedule()
         } catch (t: Throwable) {
+            Log.e(TAG_HOTUPDATE, "getScheduleSafe: Native call failed", t)
             return Result.failure(t)
         }
-        return if (json.contains("\"error\"")) {
-            Result.failure(Exception(json))
+        
+        if (json.contains("\"error\"")) {
+            Log.e(TAG_HOTUPDATE, "getScheduleSafe: Server returned error: $json")
+            return Result.failure(Exception(json))
         } else {
-            try {
+            return try {
                 val type = object : TypeToken<List<Course>>() {}.type
                 val courses: List<Course> = Gson().fromJson(json, type)
+                Log.d(TAG_HOTUPDATE, "getScheduleSafe: Success, parsed ${courses.size} courses")
                 Result.success(courses)
             } catch (e: Exception) {
+                Log.e(TAG_HOTUPDATE, "getScheduleSafe: JSON parse failed. JSON: $json", e)
                 Result.failure(e)
             }
         }
     }
 
     fun getExamInfoSafe(): Result<List<Exam>> {
-        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+        if (!isLoaded) {
+            Log.e(TAG_HOTUPDATE, "getExamInfoSafe: Native library not loaded")
+            return Result.failure(IllegalStateException("Native library not loaded"))
+        }
         val json = try {
             getExamInfo()
         } catch (t: Throwable) {
+            Log.e(TAG_HOTUPDATE, "getExamInfoSafe: Native call failed", t)
             return Result.failure(t)
         }
-        return if (json.contains("\"error\"")) {
-            Result.failure(Exception(json))
+        
+        if (json.contains("\"error\"")) {
+            Log.e(TAG_HOTUPDATE, "getExamInfoSafe: Server returned error: $json")
+            return Result.failure(Exception(json))
         } else {
-            try {
+            return try {
                 val type = object : TypeToken<List<Exam>>() {}.type
                 val exams: List<Exam> = Gson().fromJson(json, type)
+                Log.d(TAG_HOTUPDATE, "getExamInfoSafe: Success, parsed ${exams.size} exams")
                 Result.success(exams)
             } catch (e: Exception) {
+                Log.e(TAG_HOTUPDATE, "getExamInfoSafe: JSON parse failed. JSON: $json", e)
                 Result.failure(e)
             }
         }
     }
 
     fun getGradeSafe(): Result<GradeResponse> {
-        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+        if (!isLoaded) {
+            Log.e(TAG_HOTUPDATE, "getGradeSafe: Native library not loaded")
+            return Result.failure(IllegalStateException("Native library not loaded"))
+        }
         val json = try {
             getGrade()
         } catch (t: Throwable) {
+            Log.e(TAG_HOTUPDATE, "getGradeSafe: Native call failed", t)
             return Result.failure(t)
         }
-        return if (json.contains("\"error\"")) {
-            Result.failure(Exception(json))
+        
+        if (json.contains("\"error\"")) {
+            Log.e(TAG_HOTUPDATE, "getGradeSafe: Server returned error: $json")
+            return Result.failure(Exception(json))
         } else {
-            try {
+            return try {
                 val response = Gson().fromJson(json, GradeResponse::class.java)
+                Log.d(TAG_HOTUPDATE, "getGradeSafe: Success, parsed data. semester map size: ${response.semesterId2studentGrades?.size}")
                 Result.success(response)
             } catch (e: Exception) {
+                Log.e(TAG_HOTUPDATE, "getGradeSafe: JSON parse failed. JSON: $json", e)
                 Result.failure(e)
             }
         }

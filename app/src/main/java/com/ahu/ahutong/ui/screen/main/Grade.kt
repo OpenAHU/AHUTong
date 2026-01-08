@@ -38,14 +38,28 @@ import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
+    val grade = gradeViewModel.grade
+    val errorMessage = gradeViewModel.errorMessage
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
-        if (AHUCache.isLogin()) {
+        if (grade == null) {
             gradeViewModel.getGarde()
         }
     }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            gradeViewModel.errorMessage = null
+        }
+    }
+
     val schoolYears = GradeViewModel.schoolYears
     val schoolTerms = GradeViewModel.terms.keys.toTypedArray()
     val gradeData = gradeViewModel.grade?.let {

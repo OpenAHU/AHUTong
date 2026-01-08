@@ -1,6 +1,9 @@
 package com.ahu.ahutong.ui.screen
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
+import androidx.core.net.toUri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -287,25 +290,20 @@ fun Settings(
                 label = stringResource(id = R.string.mine_tv_feedback),
                 icon = Icons.Outlined.Feedback,
                 onClick = {
-//                    try {
-//                        context.startActivity(
-//                            Intent(
-//                                Intent.ACTION_VIEW,
-//                                Uri.parse(
-//                                    "mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3DL3WKrBqXGuSoqrpbm4zVqHWN-WyB-Y29"
-//                                )
-//                            ).apply {
-//                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-//                            }
-//                        )
-//                    } catch (e: Exception) {
-//                        Toast
-//                            .makeText(context, "请安装 QQ 或 Tim", Toast.LENGTH_SHORT)
-//                            .show()
-//                    }
-
-                    Toast.makeText(context, "暂未开放", Toast.LENGTH_SHORT).show()
-
+                    try {
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                "mqqapi://card/show_pslcard?src_type=internal&version=1&uin=1006203134&card_type=group&source=qrcode".toUri()
+                            ).apply {
+                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            }
+                        )
+                    } catch (e: Exception) {
+                        Toast
+                            .makeText(context, "请安装 QQ 或 Tim", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             )
             SettingItem(
@@ -331,6 +329,7 @@ fun Settings(
                 modifier = Modifier
                     .clip(SmoothRoundedCornerShape(32.dp))
                     .background(96.n1 withNight 10.n1)
+                    .verticalScroll(rememberScrollState())
                     .padding(vertical = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
@@ -385,11 +384,16 @@ fun Settings(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     style = MaterialTheme.typography.headlineMedium
                 )
-                Text(
-                    text = RustSDK.getUpdateLog(),
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp)
+                ) {
+                    Text(
+                        text = RustSDK.getUpdateLog(),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
         }
     }

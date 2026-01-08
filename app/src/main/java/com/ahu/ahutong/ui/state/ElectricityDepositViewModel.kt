@@ -265,6 +265,7 @@ class ElectricityDepositViewModel: ViewModel() {
                 if (responseBody.isNullOrEmpty()) {
                     responseWrapper.code = -1
                     responseWrapper.msg = "服务器返回内容为空"
+                    Log.e("ElectricityDepositViewModel", "getCampus Error: Server returned empty body")
                     return responseWrapper
                 }
                 val parsedResponse = Gson().fromJson(responseBody, CampusApiResponse::class.java)
@@ -272,17 +273,21 @@ class ElectricityDepositViewModel: ViewModel() {
                     responseWrapper.code = 0
                     responseWrapper.msg = "success"
                     responseWrapper.data = parsedResponse.map.data
+                    Log.d("ElectricityDepositViewModel", "getCampus Success: Loaded ${parsedResponse.map.data.size} items")
                 } else {
                     responseWrapper.code = -1
                     responseWrapper.msg = "解析数据失败，未找到校区列表"
+                    Log.e("ElectricityDepositViewModel", "getCampus Parse Error: map.data is null")
                 }
             } else {
                 responseWrapper.code = res.code()
                 responseWrapper.msg = "请求接口失败: ${res.message()}"
+                Log.e("ElectricityDepositViewModel", "getCampus Network Error: ${res.code()} ${res.message()}")
             }
         } catch (e: Exception) {
             responseWrapper.code = -1
             responseWrapper.msg = "发生未知错误: ${e.message}"
+            Log.e("ElectricityDepositViewModel", "getCampus Exception", e)
             e.printStackTrace()
         }
         return responseWrapper
@@ -748,7 +753,7 @@ class ElectricityDepositViewModel: ViewModel() {
                     val parsedResponse = Gson().fromJson(responseBody, FinalPayResponse::class.java)
                     if (parsedResponse.code == 200 && parsedResponse.success) {
                         _errorMessage.value = null
-                        _payState.value = PayState.Succeeded("支付成功!")
+                        _payState.value = PayState.Succeeded(orderId)
                         Log.d("ElectricityDepositViewModel", "支付成功!")
                         val chargeAmount = amount.toDoubleOrNull()
                         if (chargeAmount != null && chargeAmount > 0) {

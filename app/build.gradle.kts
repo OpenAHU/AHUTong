@@ -30,10 +30,10 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "3.0.0"
+        versionName = "3.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            abiFilters += listOf("arm64-v8a")
         }
     }
 
@@ -45,12 +45,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-
-            ndk {
-                abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
-            }
-//            signingConfig = signingConfigs.getByName("my_custom_debug_sign")
         }
+//            signingConfig = signingConfigs.getByName("my_custom_debug_sign")
         debug {
             isMinifyEnabled = false
             isShrinkResources = false
@@ -128,5 +124,4 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
     implementation(libs.conscrypt)
-    implementation(libs.bouncycastle)
 }

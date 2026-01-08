@@ -260,7 +260,7 @@ object AHUCache {
 
 
     fun saveString(key: String ,value : String){
-        kv.putString("key",value)
+        kv.putString(key,value)
     }
 
 

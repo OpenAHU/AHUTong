@@ -67,6 +67,9 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+import androidx.compose.runtime.LaunchedEffect
+import android.widget.Toast
+
 @Composable
 fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
     val scope = rememberCoroutineScope()
@@ -76,7 +79,16 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
     val state = rememberLazyListState(
         initialFirstVisibleItemIndex = (currentWeek - 3).coerceAtLeast(0)
     )
-    val schedule = scheduleViewModel.schedule.observeAsState().value?.getOrNull() ?: emptyList()
+    val scheduleResult = scheduleViewModel.schedule.observeAsState().value
+    val schedule = scheduleResult?.getOrNull() ?: emptyList()
+    val context = LocalContext.current
+    
+    LaunchedEffect(scheduleResult) {
+        scheduleResult?.exceptionOrNull()?.let {
+            Toast.makeText(context, "加载课表失败: ${it.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
     val baseColor = 50.a1.toSrgb().toHct()
     val courseColors by remember(Unit) {
         mutableStateOf(
@@ -88,7 +100,6 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
         )
     }
 
-    val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context = context) }
 
     val isShowAllCourse by preferencesManager.isShowAllCourse.collectAsState(initial = false)

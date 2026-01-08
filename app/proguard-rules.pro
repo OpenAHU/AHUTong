@@ -48,6 +48,7 @@
 -keep class com.ahu.ahutong.ui.screen.main.ElectricityDepositKt { *; }
 -keep class com.ahu.ahutong.ui.screen.main.home.ElectricityPaymentKt { *; }
 -keep class com.ahu.ahutong.data.dao.AHUCache { *; }
+-keep class com.ahu.ahutong.ui.component.** { *; }
 -keep class com.ahu.ahutong.ui.state.** { *; }
 
 -keepclassmembers class kotlinx.coroutines.** {
@@ -73,9 +74,7 @@
     private *;
 }
 
--keepclassmembers class com.ahu.ahutong.data.crawler.model.** {
-     *;
-}
+-keep class com.ahu.ahutong.data.crawler.model.** { *; }
 
 
 -renamesourcefileattribute AHUTong
@@ -96,14 +95,15 @@
       public *** print(...);
   }
 
--assumenosideeffects class android.util.Log {
-    public static int v(...);
-    public static int i(...);
-    public static int d(...);
-    public static int w(...);
-    public static int e(...);
-    public static int wtf(...);
-}
+#-assumenosideeffects class android.util.Log {
+#    public static int v(...);
+#    public static int i(...);
+#    public static int d(...);
+#    public static int w(...);
+#    public static int e(...);
+#    public static int wtf(...);
+#}
 
 -keep class com.ahu.ahutong.sdk.RustSDK { *; }
+-keep class com.ahu.ahutong.sdk.UpdateConfig { *; }
 

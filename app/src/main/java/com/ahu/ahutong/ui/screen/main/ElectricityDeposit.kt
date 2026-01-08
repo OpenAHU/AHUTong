@@ -68,6 +68,9 @@ import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -89,6 +92,7 @@ fun ElectricityDeposit(
         }
     }
 
+    val focusManager = LocalFocusManager.current
     val campusList by viewModel.campusList.collectAsState()
     val selectedCampus by viewModel.selectedCampus.collectAsState()
 
@@ -111,6 +115,27 @@ fun ElectricityDeposit(
     val context = LocalContext.current
     var infoClickCount by remember { mutableStateOf(0) }
     var currentToast by remember { mutableStateOf<Toast?>(null) }
+    fun showToast(msg: String) {
+        currentToast?.cancel()
+        currentToast = Toast.makeText(context, msg, Toast.LENGTH_SHORT).also { it.show() }
+    }
+    fun validateBefore(level: Int): Boolean {
+        val msg = when {
+            level >= 1 && selectedCampus == null -> "请先选择校区"
+            level >= 2 && selectedBuilding == null -> "请先选择楼栋"
+            level >= 3 && selectedFloor == null -> "请先选择楼层"
+            else -> null
+        }
+        return if (msg != null) {
+            showToast(msg)
+            false
+        } else true
+    }
+
+    val openBuildingMenu = { if (validateBefore(1)) buildingsDropdownExpanded = true }
+    val openFloorMenu = { if (validateBefore(2)) floorsDropdownExpanded = true }
+    val openRoomMenu = { if (validateBefore(3)) roomsDropdownExpanded = true }
+
     var showResetDialog by remember { mutableStateOf(false) }
 
     var amount by remember { mutableStateOf("") }
@@ -168,12 +193,12 @@ fun ElectricityDeposit(
 
                     DropdownMenu(
                         expanded = campusDropdownExpanded,
-                        modifier = Modifier.heightIn(max = 350.dp),
+                        modifier = Modifier.heightIn(max = 350.dp).background(99.n1 withNight 10.n1),
                         onDismissRequest = { campusDropdownExpanded = false },
                     ) {
                         campusList.forEach { campus ->
                             DropdownMenuItem(
-                                text = { Text(campus.name) },
+                                text = { Text(campus.name, color = 10.n1 withNight 90.n1) },
                                 onClick = {
                                     viewModel.onCampusSelected(campus)
                                     campusDropdownExpanded = false
@@ -188,7 +213,7 @@ fun ElectricityDeposit(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
-                    .clickable { buildingsDropdownExpanded = true },
+                    .clickable { openBuildingMenu() },
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(text = "选择楼栋", style = MaterialTheme.typography.titleMedium)
@@ -196,7 +221,7 @@ fun ElectricityDeposit(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable { buildingsDropdownExpanded = true }
+                        .clickable { openBuildingMenu() }
                 ) {
                     Text(
                         text = selectedBuilding?.name ?: "请选择楼栋"
@@ -208,12 +233,12 @@ fun ElectricityDeposit(
 
                     DropdownMenu(
                         expanded = buildingsDropdownExpanded,
-                        modifier = Modifier.heightIn(max = 450.dp),
+                        modifier = Modifier.heightIn(max = 450.dp).background(99.n1 withNight 10.n1),
                         onDismissRequest = { buildingsDropdownExpanded = false },
                     ) {
                         buildingsList.forEach { building ->
                             DropdownMenuItem(
-                                text = { Text(building.name) },
+                                text = { Text(building.name, color = 10.n1 withNight 90.n1) },
                                 onClick = {
                                     viewModel.onBuildingSelected(building)
                                     buildingsDropdownExpanded = false
@@ -228,7 +253,7 @@ fun ElectricityDeposit(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
-                    .clickable { floorsDropdownExpanded = true },
+                    .clickable { openFloorMenu() },
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(text = "选择楼层", style = MaterialTheme.typography.titleMedium)
@@ -236,7 +261,7 @@ fun ElectricityDeposit(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable { floorsDropdownExpanded = true }
+                        .clickable { openFloorMenu() },
                 ) {
                     Text(
                         text = selectedFloor?.name ?: "请选择楼层"
@@ -248,12 +273,12 @@ fun ElectricityDeposit(
 
                     DropdownMenu(
                         expanded = floorsDropdownExpanded,
-                        modifier = Modifier.heightIn(max = 450.dp),
+                        modifier = Modifier.heightIn(max = 450.dp).background(99.n1 withNight 10.n1),
                         onDismissRequest = { floorsDropdownExpanded = false },
                     ) {
                         floorsList.forEach { floor ->
                             DropdownMenuItem(
-                                text = { Text(floor.name) },
+                                text = { Text(floor.name, color = 10.n1 withNight 90.n1) },
                                 onClick = {
                                     viewModel.onfloorSelected(floor)
                                     floorsDropdownExpanded = false
@@ -268,7 +293,7 @@ fun ElectricityDeposit(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
-                    .clickable { roomsDropdownExpanded = true },
+                    .clickable { openRoomMenu() },
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(text = "选择房间", style = MaterialTheme.typography.titleMedium)
@@ -276,7 +301,7 @@ fun ElectricityDeposit(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable { roomsDropdownExpanded = true }
+                        .clickable { openRoomMenu() },
                 ) {
                     Text(
                         text = selectedRoom?.name ?: "请选择房间"
@@ -289,11 +314,11 @@ fun ElectricityDeposit(
                     DropdownMenu(
                         expanded = roomsDropdownExpanded,
                         onDismissRequest = { roomsDropdownExpanded = false },
-                        modifier = Modifier.heightIn(max = 500.dp)
+                        modifier = Modifier.heightIn(max = 500.dp).background(99.n1 withNight 10.n1)
                     ) {
                         roomsList.forEach { room ->
                             DropdownMenuItem(
-                                text = { Text(room.name) },
+                                text = { Text(room.name, color = 10.n1 withNight 90.n1) },
                                 onClick = {
                                     viewModel.onRoomSelected(room)
                                     roomsDropdownExpanded = false
@@ -387,8 +412,17 @@ fun ElectricityDeposit(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                 ),
-                placeholder = { Text("请输入金额") },
-                textStyle = TextStyle(fontSize = 16.sp, color = 10.n1 withNight 90.n1)
+                placeholder = { Text("请输入金额", color = 30.n1 withNight 70.n1) },
+                textStyle = TextStyle(fontSize = 16.sp, color = 10.n1 withNight 90.n1),
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.clearFocus() }
+                ),
+                singleLine = true
             )
         }
         Row(
@@ -420,10 +454,14 @@ fun ElectricityDeposit(
                                 .clickable(
                                     role = Role.Button,
                                     onClick = {
-                                        if (selectedRoom != null && amount.isNotEmpty()) {
-                                            showDialog = true
-                                        } else {
-
+                                        when {
+                                            selectedCampus == null -> showToast("请先选择校区")
+                                            selectedBuilding == null -> showToast("请先选择楼栋")
+                                            selectedFloor == null -> showToast("请先选择楼层")
+                                            selectedRoom == null -> showToast("请先选择房间")
+                                            amount.isBlank() -> showToast("请输入缴费金额")
+                                            (amount.toDoubleOrNull() ?: 0.0) <= 0.0 -> showToast("请输入有效金额")
+                                            else -> showDialog = true
                                         }
                                     }
                                 )
@@ -471,7 +509,7 @@ fun ElectricityDeposit(
                                 tint = 100.n1
                             )
                             Text(
-                                text = "支付成功！",
+                                text = "支付成功！ 订单号：${(payState.value as PayState.Succeeded).message}",
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .clickable {

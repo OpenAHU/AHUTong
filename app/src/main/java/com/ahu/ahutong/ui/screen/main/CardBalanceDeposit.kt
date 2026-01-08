@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -43,9 +45,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -70,6 +75,8 @@ fun CardBalanceDeposit(
     val paymentState by viewModel.paymentState.collectAsState()
 
     var showConfirmDialog by remember { mutableStateOf(false) }
+
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(Unit) {
         viewModel.load()
@@ -173,7 +180,16 @@ fun CardBalanceDeposit(
                     unfocusedIndicatorColor = Color.Transparent,
                 ),
                 placeholder = { Text("请输入金额", color = 30.n1 withNight 70.n1) },
-                textStyle = TextStyle(fontSize = 16.sp, color = 10.n1 withNight 90.n1)
+                textStyle = TextStyle(fontSize = 16.sp, color = 10.n1 withNight 90.n1),
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.clearFocus() }
+                ),
+                singleLine = true
             )
         }
 

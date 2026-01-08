@@ -20,7 +20,10 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -81,15 +84,31 @@ fun Tools(navController: NavHostController) {
     var showPreview by remember { mutableStateOf(false) }
     var calendarFile by remember { mutableStateOf<File?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var progress by remember { mutableFloatStateOf(0f) }
 
     val fetchCalendar = {
-        isLoading = true
         scope.launch(Dispatchers.IO) {
             val tag = "SchoolCalendarFetch"
+            
+            val cached = RustSDK.getCachedSchoolCalendar(context)
+            if (cached != null) {
+                withContext(Dispatchers.Main) {
+                    calendarFile = cached
+                    showPreview = true
+                }
+                return@launch
+            }
+
+            withContext(Dispatchers.Main) {
+                isLoading = true
+                progress = 0f
+            }
             Log.d(tag, "开始获取校历 (IO Thread)...")
 
             try {
-                val file = RustSDK.fetchSchoolCalendar(context)
+                val file = RustSDK.fetchSchoolCalendar(context) {
+                    progress = it
+                }
 
                 withContext(Dispatchers.Main) {
                     isLoading = false
@@ -124,16 +143,46 @@ fun Tools(navController: NavHostController) {
     if (isLoading) {
         Dialog(onDismissRequest = { }) {
             Surface(
-                shape = SmoothRoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface
+                shape = SmoothRoundedCornerShape(24.dp),
+                color = 96.n1 withNight 10.n1,
+                shadowElevation = 8.dp,
+                tonalElevation = 6.dp,
+                modifier = Modifier.padding(16.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(24.dp),
+                    modifier = Modifier.padding(32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    CircularProgressIndicator()
-                    Text("正在获取校历...")
+                    if (progress > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(progress)
+                                    .fillMaxHeight()
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                            )
+                        }
+                        Text(
+                            text = "正在下载 ${(progress * 100).toInt()}%",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = 10.n1 withNight 96.n1
+                        )
+                    } else {
+                        CircularProgressIndicator()
+                        Text(
+                            text = "正在获取校历...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = 10.n1 withNight 96.n1
+                        )
+                    }
                 }
             }
         }

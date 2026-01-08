@@ -26,7 +26,7 @@ class DeveloperViewModel : ViewModel() {
         CardInfo {
 
         override val img: String
-            get() = "http://q1.qlogo.cn/g?b=qq&nk=$qq&s=640"
+            get() = "https://q1.qlogo.cn/g?b=qq&nk=$qq&s=640"
         override val onclick: (Context) -> Unit
             get() = { context ->
                 try {

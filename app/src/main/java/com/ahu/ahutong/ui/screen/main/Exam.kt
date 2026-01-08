@@ -41,6 +41,9 @@ import com.kyant.monet.withNight
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 @Composable
 fun Exam(
     examViewModel: ExamViewModel = viewModel()
@@ -50,6 +53,16 @@ fun Exam(
     }
     val exam = examViewModel.data.observeAsState().value?.getOrNull()
     val isLoading by examViewModel.isLoading.collectAsState()
+    val errorMessage by examViewModel.errorMessage.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            examViewModel.errorMessage.value = null
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
