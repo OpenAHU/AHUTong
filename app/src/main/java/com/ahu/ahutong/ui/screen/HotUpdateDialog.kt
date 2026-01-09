@@ -21,6 +21,7 @@ import com.kyant.monet.withNight
 
 @Composable
 fun HotUpdateDialog(
+    isDownloading: Boolean = false,
     onConfirm: () -> Unit
 ) {
     val contentColor = 10.n1 withNight 90.n1
@@ -43,7 +44,7 @@ fun HotUpdateDialog(
         },
         title = {
             Text(
-                text = "更新完成",
+                text = if (isDownloading) "正在更新" else "更新完成",
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.headlineSmall,
                 color = contentColor
@@ -51,7 +52,10 @@ fun HotUpdateDialog(
         },
         text = {
             Text(
-                text = "已完成热更新，更新内容可前往设置-更新日志中查看。为防止数据异常，请立即重启应用以应用新版本。",
+                text = if (isDownloading) 
+                    "正在下载热更新，请稍候..." 
+                else 
+                    "已完成热更新，更新内容可前往设置-更新日志中查看。为防止数据异常，请立即重启应用以应用新版本。",
                 style = MaterialTheme.typography.bodyMedium,
                 color = contentColor
             )
@@ -59,16 +63,18 @@ fun HotUpdateDialog(
         shape = SmoothRoundedCornerShape(32.dp),
         containerColor = containerColor,
         confirmButton = {
-            FilledTonalButton(
-                onClick = onConfirm,
-                modifier = Modifier.height(56.dp),
-                shape = SmoothRoundedCornerShape(16.dp),
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = 90.a1 withNight 85.a1,
-                    contentColor = 0.n1
-                )
-            ) {
-                Text("立即重启")
+            if (!isDownloading) {
+                FilledTonalButton(
+                    onClick = onConfirm,
+                    modifier = Modifier.height(56.dp),
+                    shape = SmoothRoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = 90.a1 withNight 85.a1,
+                        contentColor = 0.n1
+                    )
+                ) {
+                    Text("立即重启")
+                }
             }
         }
     )

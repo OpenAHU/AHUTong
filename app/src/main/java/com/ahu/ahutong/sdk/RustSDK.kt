@@ -55,9 +55,16 @@ object RustSDK {
     /**
      * 加载 Library
      * @param context 上下文
+     * @param onHotUpdateFound 当发现热更新并准备下载时，回调此函数。
      * @param onHotUpdateSuccess 当热更新下载成功并覆盖后，回调此函数。可以在这里处理弹窗逻辑。
+     * @param onHotUpdateFinished 当热更新检查结束后，回调此函数。在这里调用ApkUpdate。
      */
-    fun loadLibrary(context: Context, onHotUpdateSuccess: (() -> Unit)? = null){
+    fun loadLibrary(
+        context: Context,
+        onHotUpdateFound: (() -> Unit)? = null,
+        onHotUpdateSuccess: (() -> Unit)? = null,
+        onHotUpdateFinished: (() -> Unit)? = null
+    ){
         if (isLoaded) return
 
         try {
@@ -92,7 +99,7 @@ object RustSDK {
                     System.load(customLib.absolutePath)
                     Log.i(TAG_HOTUPDATE, "HotUpdate: already load: ${customLib.absolutePath}")
                     isLoaded = true
-                    checkUpdate(context, onHotUpdateSuccess)
+                    checkUpdate(context, onHotUpdateFound, onHotUpdateSuccess, onHotUpdateFinished)
                     return
                 } catch (e: Throwable) {
                     customLib.delete()
@@ -104,9 +111,10 @@ object RustSDK {
             System.loadLibrary("ahutong_rs")
             isLoaded = true
             Log.i(TAG_HOTUPDATE, "Native: load .so success")
-            checkUpdate(context, onHotUpdateSuccess)
+            checkUpdate(context, onHotUpdateFound, onHotUpdateSuccess, onHotUpdateFinished)
         } catch (e: Throwable) {
             Log.e(TAG_HOTUPDATE, "Native: load .so failed", e)
+            onHotUpdateFinished?.invoke()
         }
     }
 
@@ -119,165 +127,179 @@ object RustSDK {
     /**
      * 后台检查并下载更新.so文件
      */
-    private fun checkUpdate(context: Context, onSuccess: (() -> Unit)? = null) {
+    private fun checkUpdate(
+        context: Context,
+        onFound: (() -> Unit)? = null,
+        onSuccess: (() -> Unit)? = null,
+        onFinished: (() -> Unit)? = null
+    ) {
         if (!android.os.Process.is64Bit()) {
             Log.w(TAG_HOTUPDATE, "current device is not a 64-bit environment, skip the hotUpdate")
+            onFinished?.invoke()
             return
         }
 
         scope.launch(Dispatchers.IO) {
-            val prefs = context.getSharedPreferences("rust_sdk_config", Context.MODE_PRIVATE)
-            val currentVersion = prefs.getInt("so_version", 299)
+            try {
+                val prefs = context.getSharedPreferences("rust_sdk_config", Context.MODE_PRIVATE)
+                val currentVersion = prefs.getInt("so_version", 299)
 
-            // Get original URL and Host from SDK
-            val originalConfigUrl = getUpdateConfigUrl()
-            val originalHost = try { URL(originalConfigUrl).host } catch (e: Exception) { 
-                Log.w(TAG_HOTUPDATE, "Failed to parse host from config url", e)
-                "" 
-            }
-            val serverIp = getApiServerIp()
-            
-            // Construct IP-based URL by replacing host
-            val configUrl = originalConfigUrl.replace(originalHost, serverIp)
-
-            Log.i(
-                TAG_HOTUPDATE,
-                "checkUpdate start. currentVersion=$currentVersion, url=$configUrl, " +
-                        "is64Bit=${android.os.Process.is64Bit()}, thread=${Thread.currentThread().name}"
-            )
-
-            // 2) 发起网络请求（带完整日志）
-            val startMs = System.currentTimeMillis()
-            val jsonStr: String = try {
-                val url = URL(configUrl)
-                val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
-
-                    instanceFollowRedirects = true
-                    connectTimeout = 5000
-                    readTimeout = 5000
-                    requestMethod = "GET"
-                    useCaches = false
-
-                    // 建议加上这些头，很多网关/防火墙对“空 UA”会更敏感
-                    setRequestProperty("User-Agent", "RustSdkHotUpdate/1.0 (Android)")
-                    setRequestProperty("Accept", "application/json")
-                    setRequestProperty("Connection", "close")
-
-                    if (this is javax.net.ssl.HttpsURLConnection) {
-                        try {
-                            this.sslSocketFactory = getConscryptSocketFactory()
-                            this.hostnameVerifier = javax.net.ssl.HostnameVerifier { hostname, session ->
-                                if (hostname == serverIp) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
-                            }
-                        } catch (e: Exception) {
-                            Log.w(TAG_HOTUPDATE, "Failed to set Conscrypt factory", e)
-                        }
-                    }
+                // Get original URL and Host from SDK
+                val originalConfigUrl = getUpdateConfigUrl()
+                val originalHost = try { URL(originalConfigUrl).host } catch (e: Exception) {
+                    Log.w(TAG_HOTUPDATE, "Failed to parse host from config url", e)
+                    ""
                 }
+                val serverIp = getApiServerIp()
 
-                // 触发真正连接/请求
-                val code = conn.responseCode
-                val finalUrl = runCatching { conn.url?.toString() }.getOrNull()
+                // Construct IP-based URL by replacing host
+                val configUrl = originalConfigUrl.replace(originalHost, serverIp)
 
-                val headers = buildString {
-                    for ((k, v) in conn.headerFields) {
-                        if (k == null) continue
-                        append(k).append(": ").append(v?.joinToString(";") ?: "").append("\n")
-                    }
-                }
-
-                val stream =
-                    if (code in 200..299) conn.inputStream
-                    else conn.errorStream
-
-                val body = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
-                    ?: ""
-
-                val cost = System.currentTimeMillis() - startMs
                 Log.i(
                     TAG_HOTUPDATE,
-                    "checkUpdate http done. code=$code cost=${cost}ms " +
-                            "originUrl=$configUrl finalUrl=$finalUrl " +
-                            "contentLength=${conn.contentLengthLong} " +
-                            "contentType=${conn.contentType}"
-                )
-                Log.d(TAG_HOTUPDATE, "checkUpdate response headers:\n$headers")
-
-                // 只打印前 400 字符，避免日志爆炸
-                Log.d(
-                    TAG_HOTUPDATE,
-                    "checkUpdate response body (first 400 chars): ${body.take(400)}"
+                    "checkUpdate start. currentVersion=$currentVersion, url=$configUrl, " +
+                            "is64Bit=${android.os.Process.is64Bit()}, thread=${Thread.currentThread().name}"
                 )
 
-                if (code !in 200..299) {
-                    // 非 2xx 直接认为失败（避免后面 Gson 解析异常掩盖真实问题）
+                // 2) 发起网络请求（带完整日志）
+                val startMs = System.currentTimeMillis()
+                val jsonStr: String = try {
+                    val url = URL(configUrl)
+                    val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
+
+                        instanceFollowRedirects = true
+                        connectTimeout = 5000
+                        readTimeout = 5000
+                        requestMethod = "GET"
+                        useCaches = false
+
+                        // 建议加上这些头，很多网关/防火墙对“空 UA”会更敏感
+                        setRequestProperty("User-Agent", "RustSdkHotUpdate/1.0 (Android)")
+                        setRequestProperty("Accept", "application/json")
+                        setRequestProperty("Connection", "close")
+
+                        if (this is javax.net.ssl.HttpsURLConnection) {
+                            try {
+                                this.sslSocketFactory = getConscryptSocketFactory()
+                                this.hostnameVerifier = javax.net.ssl.HostnameVerifier { hostname, session ->
+                                    if (hostname == serverIp) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)
+                                }
+                            } catch (e: Exception) {
+                                Log.w(TAG_HOTUPDATE, "Failed to set Conscrypt factory", e)
+                            }
+                        }
+                    }
+
+                    // 触发真正连接/请求
+                    val code = conn.responseCode
+                    val finalUrl = runCatching { conn.url?.toString() }.getOrNull()
+
+                    val headers = buildString {
+                        for ((k, v) in conn.headerFields) {
+                            if (k == null) continue
+                            append(k).append(": ").append(v?.joinToString(";") ?: "").append("\n")
+                        }
+                    }
+
+                    val stream =
+                        if (code in 200..299) conn.inputStream
+                        else conn.errorStream
+
+                    val body = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
+                        ?: ""
+
+                    val cost = System.currentTimeMillis() - startMs
+                    Log.i(
+                        TAG_HOTUPDATE,
+                        "checkUpdate http done. code=$code cost=${cost}ms " +
+                                "originUrl=$configUrl finalUrl=$finalUrl " +
+                                "contentLength=${conn.contentLengthLong} " +
+                                "contentType=${conn.contentType}"
+                    )
+                    Log.d(TAG_HOTUPDATE, "checkUpdate response headers:\n$headers")
+
+                    // 只打印前 400 字符，避免日志爆炸
+                    Log.d(
+                        TAG_HOTUPDATE,
+                        "checkUpdate response body (first 400 chars): ${body.take(400)}"
+                    )
+
+                    if (code !in 200..299) {
+                        // 非 2xx 直接认为失败（避免后面 Gson 解析异常掩盖真实问题）
+                        Log.w(
+                            TAG_HOTUPDATE,
+                            "checkUpdate non-2xx response. code=$code, body(first200)=${body.take(200)}"
+                        )
+                        return@launch
+                    }
+
+                    body
+                } catch (e: Exception) {
+                    val cost = System.currentTimeMillis() - startMs
+                    // 这里用带堆栈的日志，定位 Connection reset / handshake / dns 会更清楚
                     Log.w(
                         TAG_HOTUPDATE,
-                        "checkUpdate non-2xx response. code=$code, body(first200)=${body.take(200)}"
+                        "check update network error after ${cost}ms. url=$configUrl, ex=${e.javaClass.name}: ${e.message}",
+                        e
                     )
                     return@launch
                 }
 
-                body
-            } catch (e: Exception) {
-                val cost = System.currentTimeMillis() - startMs
-                // 这里用带堆栈的日志，定位 Connection reset / handshake / dns 会更清楚
-                Log.w(
-                    TAG_HOTUPDATE,
-                    "check update network error after ${cost}ms. url=$configUrl, ex=${e.javaClass.name}: ${e.message}",
-                    e
-                )
-                return@launch
-            }
-
-            // 3) 解析 JSON（带保护日志）
-            val config: UpdateConfig = try {
-                Gson().fromJson(jsonStr, UpdateConfig::class.java).let {
-                    // Replace domain with IP for download url
-                    it.copy(url = it.url.replace(originalHost, serverIp))
-                }.also {
-                    Log.i(
+                // 3) 解析 JSON（带保护日志）
+                val config: UpdateConfig = try {
+                    Gson().fromJson(jsonStr, UpdateConfig::class.java).let {
+                        // Replace domain with IP for download url
+                        it.copy(url = it.url.replace(originalHost, serverIp))
+                    }.also {
+                        Log.i(
+                            TAG_HOTUPDATE,
+                            "checkUpdate parsed config ok. remoteVersion=${it.version}, soUrl=${it.url.take(200)}"
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.e(
                         TAG_HOTUPDATE,
-                        "checkUpdate parsed config ok. remoteVersion=${it.version}, soUrl=${it.url.take(200)}"
+                        "checkUpdate parse json failed. url=$configUrl, json(first300)=${jsonStr.take(300)}",
+                        e
                     )
+                    return@launch
                 }
-            } catch (e: Exception) {
-                Log.e(
-                    TAG_HOTUPDATE,
-                    "checkUpdate parse json failed. url=$configUrl, json(first300)=${jsonStr.take(300)}",
-                    e
-                )
-                return@launch
-            }
 
-            // 4) 版本判断 & 下载
-            try {
-                if (config.version > currentVersion) {
-                    Log.i(
-                        TAG_HOTUPDATE,
-                        "new version found. remote=${config.version} > local=$currentVersion. start download..."
-                    )
-
-                    val success = downloadAndSave(context, config.url, config.sha256, config.signature)
-
-                    if (success) {
-                        prefs.edit().putInt("so_version", config.version).apply()
-                        Log.i(TAG_HOTUPDATE, "hotUpdate download success. saved version=${config.version}")
+                // 4) 版本判断 & 下载
+                try {
+                    if (config.version > currentVersion) {
+                        Log.i(
+                            TAG_HOTUPDATE,
+                            "new version found. remote=${config.version} > local=$currentVersion. start download..."
+                        )
 
                         withContext(Dispatchers.Main) {
-                            onSuccess?.invoke()
+                            onFound?.invoke()
+                        }
+
+                        val success = downloadAndSave(context, config.url, config.sha256, config.signature)
+
+                        if (success) {
+                            prefs.edit().putInt("so_version", config.version).apply()
+                            Log.i(TAG_HOTUPDATE, "hotUpdate download success. saved version=${config.version}")
+
+                            withContext(Dispatchers.Main) {
+                                onSuccess?.invoke()
+                            }
+                        } else {
+                            Log.w(TAG_HOTUPDATE, "hotUpdate downloadAndSave failed. remote=${config.version}")
                         }
                     } else {
-                        Log.w(TAG_HOTUPDATE, "hotUpdate downloadAndSave failed. remote=${config.version}")
+                        Log.d(
+                            TAG_HOTUPDATE,
+                            "no update needed. local=$currentVersion, remote=${config.version}"
+                        )
                     }
-                } else {
-                    Log.d(
-                        TAG_HOTUPDATE,
-                        "no update needed. local=$currentVersion, remote=${config.version}"
-                    )
+                } catch (e: Exception) {
+                    Log.e(TAG_HOTUPDATE, "checkUpdate post-process failed", e)
                 }
-            } catch (e: Exception) {
-                Log.e(TAG_HOTUPDATE, "checkUpdate post-process failed", e)
+            } finally {
+                withContext(Dispatchers.Main) { onFinished?.invoke() }
             }
         }
     }
@@ -434,12 +456,19 @@ object RustSDK {
      * @return String
      */
     @JvmStatic external fun getUpdateConfigUrl(): String
+
+    /**
+     * 获取服务端 ip
+     * @return String
+     */
     @JvmStatic external fun getApiServerIp(): String
 
     /**
-     * 让 Rust 侧完成：下载 + sha256 校验 + ed25519 验签 + 写入 savePath
-     * JNI 签名：(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+     * 检查 APK 更新
+     * @return String
      */
+    @JvmStatic external fun checkApkUpdate(currentVersionCode: Long): String
+
     private external fun downloadUpdate(
         url: String,
         savePath: String,
@@ -447,7 +476,20 @@ object RustSDK {
         signature: String
     ): Boolean
 
+    private external fun downloadApkUpdate(
+        url: String,
+        savePath: String,
+        expectedSha256: String,
+        signature: String
+    ): Boolean
 
+    private external fun downloadApkUpdateWithProgress(
+        url: String,
+        savePath: String,
+        expectedSha256: String,
+        signature: String,
+        callback: ProgressCallback
+    ): Boolean
 
     /**
      * 获取已缓存的校历文件
@@ -554,8 +596,115 @@ object RustSDK {
         }
     }
 
+    fun downloadApkToFileWithProgress(
+        context: Context,
+        info: ApkUpdateInfo,
+        onProgress: (downloaded: Long, total: Long) -> Unit
+    ): Result<File> {
+        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+        if (!info.update) return Result.failure(IllegalArgumentException("No update available"))
+        if (info.url.isNullOrEmpty() || info.sha256.isNullOrEmpty() || info.signature.isNullOrEmpty()) {
+            return Result.failure(IllegalArgumentException("Missing url/sha256/signature"))
+        }
+
+        val dir = context.getExternalFilesDir(null)
+            ?: return Result.failure(Exception("External storage not available"))
+
+        val outFile = File(dir, "update-${info.versionCode}.apk")
+
+        val ok = try {
+            downloadApkUpdateWithProgress(
+                info.url!!,
+                outFile.absolutePath,
+                info.sha256!!,
+                info.signature!!,
+                object : ProgressCallback {
+                    override fun onProgress(downloaded: Long, total: Long) {
+                        onProgress(downloaded, total)
+                    }
+                }
+            )
+        } catch (t: Throwable) {
+            return Result.failure(t)
+        }
+
+        return if (ok && outFile.exists() && outFile.length() > 0L) {
+            Result.success(outFile)
+        } else {
+            Result.failure(Exception("downloadApkUpdateWithProgress failed"))
+        }
+    }
+
+
 
     // --- 高级封装接口 (解析 JSON 为对象) ---
+
+    fun checkApkUpdateSafe(context: Context): Result<ApkUpdateInfo> {
+        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+
+        val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+        val currentVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            packageInfo.longVersionCode
+        } else {
+            packageInfo.versionCode.toLong()
+        }
+
+        val json = try {
+            checkApkUpdate(currentVersionCode)
+        } catch (t: Throwable) {
+            return Result.failure(t)
+        }
+
+        if (json.contains("\"error\"")) {
+            return Result.failure(Exception(json))
+        }
+
+        return try {
+            val info = Gson().fromJson(json, ApkUpdateInfo::class.java)
+            Result.success(info)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun downloadApkToFile(context: Context, info: ApkUpdateInfo): Result<File> {
+        if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
+        if (!info.update) return Result.failure(IllegalArgumentException("No update available"))
+        if (info.url.isNullOrEmpty() || info.sha256.isNullOrEmpty() || info.signature.isNullOrEmpty()) {
+            return Result.failure(IllegalArgumentException("Missing url/sha256/signature"))
+        }
+
+        val dir = context.getExternalFilesDir(null)
+            ?: return Result.failure(Exception("External storage not available"))
+
+        // Cleanup old APKs
+        try {
+            dir.listFiles()?.forEach { file ->
+                if (file.isFile && file.name.startsWith("update-") && file.name.endsWith(".apk")) {
+                    val currentName = "update-${info.versionCode}.apk"
+                    if (file.name != currentName) {
+                        file.delete()
+                        Log.i(TAG_HOTUPDATE, "Deleted old apk: ${file.name}")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG_HOTUPDATE, "Failed to clean old apks", e)
+        }
+
+        val outFile = File(dir, "update-${info.versionCode}.apk")
+        val ok = try {
+            downloadApkUpdate(info.url, outFile.absolutePath, info.sha256!!, info.signature!!)
+        } catch (t: Throwable) {
+            return Result.failure(t)
+        }
+
+        return if (ok && outFile.exists() && outFile.length() > 0L) {
+            Result.success(outFile)
+        } else {
+            Result.failure(Exception("downloadApkUpdate failed"))
+        }
+    }
 
     fun loginSafe(username: String, password: String): Result<User> {
         if (!isLoaded) return Result.failure(IllegalStateException("Native library not loaded"))
@@ -692,10 +841,23 @@ object RustSDK {
     }
 }
 
+@Keep
 data class UpdateConfig(
     val version: Int,
     val url: String,
     val sha256: String,
     val signature: String,
     val alg: String
+)
+
+@Keep
+data class ApkUpdateInfo(
+    val update: Boolean,
+    val force: Boolean,
+    val versionCode: Long,
+    val versionName: String,
+    val changelog: String,
+    val url: String? = null,
+    val sha256: String? = null,
+    val signature: String? = null
 )
