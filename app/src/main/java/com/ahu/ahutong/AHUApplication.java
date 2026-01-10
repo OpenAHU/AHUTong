@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Build;
 
-import com.ahu.ahutong.extension.ActivityRecorder;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import java.util.HashSet;
@@ -44,7 +43,6 @@ public class AHUApplication extends Application {
                 //  so that corresponding hiding or recording processing can be performed accordingly.
             };
             // todo add privacy related options
-            ActivityRecorder.Companion.init(this, true, blockList);
         }
     }
 }
