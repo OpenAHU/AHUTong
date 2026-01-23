@@ -49,7 +49,9 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
     fun loadActivityBean() {
         // 优先加载缓存
         AHUCache.getCardBalance()?.let {
-            balance = it
+            if (it > 0.0) {
+                balance = it
+            }
         }
 
         viewModelScope.launchSafe {

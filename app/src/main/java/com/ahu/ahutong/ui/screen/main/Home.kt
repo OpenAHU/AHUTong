@@ -56,6 +56,8 @@ fun Home(
         calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
     }
     LaunchedEffect(Unit) {
+        discoveryViewModel.loadActivityBean()
+
         repeat(2 - discoveryViewModel.visibilities.size) {
             delay(100)
             discoveryViewModel.visibilities += discoveryViewModel.visibilities.lastIndex + 1
