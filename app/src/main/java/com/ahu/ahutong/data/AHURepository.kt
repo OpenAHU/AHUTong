@@ -16,6 +16,7 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.User
+import com.ahu.ahutong.sdk.LocalServiceClient
 import com.ahu.ahutong.sdk.RustSDK
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,11 @@ object AHURepository {
     val TAG = this::class.java.simpleName
 
     var dataSource: BaseDataSource = CrawlerDataSource()
+    
+    /**
+     * 获取 HTTP 客户端
+     */
+    private fun getHttpClient(): LocalServiceClient? = LocalServiceClient.getInstance()
 
     /**
      * 通过semesterId获取课程表
@@ -71,8 +77,6 @@ object AHURepository {
         } catch (e: Throwable) {
             Result.failure(e)
         }
-
-
     }
 
 
@@ -105,10 +109,6 @@ object AHURepository {
 
     /**
      *  获取考试信息
-     * @param isRefresh Boolean 是否获取缓存
-     * @param studentID String
-     * @param studentName String
-     * @return Result<(kotlin.collections.List<com.ahu.ahutong.data.model.Exam>..kotlin.collections.List<com.ahu.ahutong.data.model.Exam>?)>
      */
     suspend fun getExamInfo(isRefresh: Boolean = false, studentID: String, studentName: String) =
         withContext(Dispatchers.IO) {
@@ -119,7 +119,16 @@ object AHURepository {
                 }
             }
             try {
-                val result = RustSDK.getExamInfoSafe()
+                // 优先使用 HTTP 客户端
+                val httpClient = getHttpClient()
+                val result = if (httpClient != null) {
+                    Log.d("LocalServiceClient", "[getExamInfo] Using HTTP client")
+                    httpClient.getExamInfo()
+                } else {
+                    Log.d("LocalServiceClient", "[getExamInfo] Fallback to JNI")
+                    RustSDK.getExamInfoSafe()
+                }
+                
                 if (result.isSuccess) {
                     val exams = result.getOrDefault(emptyList())
                     AHUCache.saveExamInfo(exams)
@@ -134,7 +143,6 @@ object AHURepository {
 
     /**
      *  获取余额
-     * @return Result<(kotlin.String..kotlin.String?)>
      */
     suspend fun getCardMoney() = withContext(Dispatchers.IO) {
         try {
@@ -166,12 +174,20 @@ object AHURepository {
     /**
      * 爬虫登录
      */
-
     suspend fun loginWithCrawler(username: String, password: String): AHUResponse<User> =
         withContext(Dispatchers.IO) {
             CookieManager.cookieJar.clear()
             TokenManager.clear()
-            val result = RustSDK.loginSafe(username, password)
+            
+            // 优先使用 HTTP 客户端
+            val httpClient = getHttpClient()
+            val result = if (httpClient != null) {
+                Log.d("LocalServiceClient", "[login] Using HTTP client")
+                httpClient.login(username, password)
+            } else {
+                Log.d("LocalServiceClient", "[login] Fallback to JNI")
+                RustSDK.loginSafe(username, password)
+            }
 
             val response = AHUResponse<User>()
             if (result.isSuccess) {
@@ -189,7 +205,19 @@ object AHURepository {
 
     private fun syncCookies() {
         try {
-            val json = RustSDK.getCookiesListSafe()
+            // 优先使用 HTTP 客户端
+            val httpClient = getHttpClient()
+            val json = if (httpClient != null) {
+                Log.d("LocalServiceClient", "[syncCookies] Using HTTP client")
+                // 使用协程同步获取
+                kotlinx.coroutines.runBlocking {
+                    httpClient.getCookiesList().getOrDefault("[]")
+                }
+            } else {
+                Log.d("LocalServiceClient", "[syncCookies] Fallback to JNI")
+                RustSDK.getCookiesListSafe()
+            }
+            
             // 解析 JSON 数组
             val listType = object : com.google.gson.reflect.TypeToken<List<Map<String, Any>>>() {}.type
             val cookies: List<Map<String, Any>> = Gson().fromJson(json, listType)
@@ -225,32 +253,24 @@ object AHURepository {
 
 
     suspend fun getBathroomInfo(bathroom: String, tel: String): AHUResponse<BathroomTelInfo> =
-        withContext(
-            Dispatchers.IO
-        ) {
+        withContext(Dispatchers.IO) {
             dataSource.getBathroomTelInfo(bathroom = bathroom, tel = tel)
         }
 
 
     suspend fun getCardInfo(): AHUResponse<CardInfo> =
-        withContext(
-            Dispatchers.IO
-        ) {
+        withContext(Dispatchers.IO) {
             dataSource.getCardInfo()
         }
 
 
     suspend fun getOrderThirdData(request: Request): AHUResponse<Response<ResponseBody>> =
-        withContext(
-            Dispatchers.IO
-        ){
+        withContext(Dispatchers.IO){
             dataSource.getOrderThirdData(request)
         }
 
     suspend fun pay(request:Request):AHUResponse<Response<ResponseBody>> =
-        withContext(
-            Dispatchers.IO
-        ){
+        withContext(Dispatchers.IO){
             dataSource.pay(request)
         }
 

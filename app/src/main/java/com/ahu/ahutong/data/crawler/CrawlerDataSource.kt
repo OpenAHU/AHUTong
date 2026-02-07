@@ -5,6 +5,7 @@ import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
+import com.ahu.ahutong.data.crawler.model.jwxt.GradeResponse
 import com.ahu.ahutong.data.crawler.api.ycard.YcardApi
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.Request
@@ -14,6 +15,7 @@ import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Grade
+import com.ahu.ahutong.sdk.LocalServiceClient
 import com.ahu.ahutong.sdk.RustSDK
 import com.google.gson.Gson
 import okhttp3.FormBody
@@ -24,6 +26,11 @@ import com.ahu.ahutong.data.crawler.model.adwnh.Balance
 class CrawlerDataSource : BaseDataSource {
 
     val TAG = this::class.java.simpleName
+    
+    /**
+     * 获取 HTTP 客户端，如果不可用则返回 null（fallback 到 JNI）
+     */
+    private fun getHttpClient(): LocalServiceClient? = LocalServiceClient.getInstance()
 
     override suspend fun getSchedule(
         schoolYear: String,
@@ -33,9 +40,27 @@ class CrawlerDataSource : BaseDataSource {
     }
 
     override suspend fun getSchedule(): AHUResponse<List<Course>> {
-        val result = RustSDK.getScheduleSafe()
-        
         val response = AHUResponse<List<Course>>()
+        
+        // 优先使用 HTTP 客户端
+        val httpClient = getHttpClient()
+        if (httpClient != null) {
+            Log.d("LocalServiceClient", "[getSchedule] Using HTTP client")
+            val result = httpClient.getSchedule()
+            if (result.isSuccess) {
+                response.code = 0
+                response.data = result.getOrNull()
+                response.msg = "Success"
+            } else {
+                response.code = -1
+                response.msg = result.exceptionOrNull()?.message ?: "获取课表失败"
+            }
+            return response
+        }
+        
+        // Fallback: 直接 JNI 调用
+        Log.d("LocalServiceClient", "[getSchedule] Fallback to JNI")
+        val result = RustSDK.getScheduleSafe()
         if (result.isSuccess) {
             response.code = 0
             response.data = result.getOrNull()
@@ -48,6 +73,24 @@ class CrawlerDataSource : BaseDataSource {
     }
 
     override suspend fun getGrade(): AHUResponse<Grade> {
+        // 优先使用 HTTP 客户端
+        val httpClient = getHttpClient()
+        if (httpClient != null) {
+            Log.d("LocalServiceClient", "[getGrade] Using HTTP client")
+            val result = httpClient.getGrade()
+            if (result.isSuccess) {
+                val data = result.getOrThrow()
+                return convertGradeResponse(data)
+            } else {
+                val response = AHUResponse<Grade>()
+                response.code = -1
+                response.msg = result.exceptionOrNull()?.message ?: "获取成绩失败"
+                return response
+            }
+        }
+        
+        // Fallback: 直接 JNI 调用
+        Log.d("LocalServiceClient", "[getGrade] Fallback to JNI")
         val result = RustSDK.getGradeSafe()
         if (result.isFailure) {
             val response = AHUResponse<Grade>()
@@ -56,7 +99,13 @@ class CrawlerDataSource : BaseDataSource {
             return response
         }
 
-        val data = result.getOrThrow()
+        return convertGradeResponse(result.getOrThrow())
+    }
+    
+    /**
+     * 转换 GradeResponse 为 Grade
+     */
+    private fun convertGradeResponse(data: GradeResponse): AHUResponse<Grade> {
         val map = hashMapOf<String, Grade.TermGradeListBean>()
 
         data.semesterId2studentGrades?.values?.forEach { gradeList ->

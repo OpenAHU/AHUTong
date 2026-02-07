@@ -492,6 +492,18 @@ object RustSDK {
     ): Boolean
 
     /**
+     * 启动本地 HTTP 服务
+     * @param port 端口号，传 0 则随机分配
+     * @return JSON 字符串：成功 {"port": 12345, "token": "xxx"}，失败 {"error": "..."}
+     */
+    external fun startServer(port: Int): String
+
+    /**
+     * 停止本地 HTTP 服务
+     */
+    external fun stopServer()
+
+    /**
      * 获取已缓存的校历文件
      */
     fun getCachedSchoolCalendar(context: Context): File? {

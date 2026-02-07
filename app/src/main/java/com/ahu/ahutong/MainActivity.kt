@@ -36,6 +36,7 @@ import java.io.File
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import com.ahu.ahutong.sdk.LocalServiceClient
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -140,6 +141,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         )
+        
+        // 在 native library 加载后启动本地 HTTP 服务
+        startLocalService()
 
         if (AHUCache.isLogin()) {
             val user = AHUCache.getCurrentUser()
@@ -152,7 +156,15 @@ class MainActivity : ComponentActivity() {
             // 启动时自动登录 Rust SDK，以确保 Session 有效（解决覆盖安装或重启后余额不显示问题）
             lifecycleScope.launch(Dispatchers.IO) {
                 if (user != null && !pwd.isNullOrEmpty()) {
-                    RustSDK.loginSafe(user.name, pwd)
+                    // 优先使用 HTTP 客户端登录
+                    val httpClient = com.ahu.ahutong.sdk.LocalServiceClient.getInstance()
+                    if (httpClient != null) {
+                        Log.d("LocalServiceClient", "[auto-login] Using HTTP client")
+                        httpClient.login(user.name, pwd)
+                    } else {
+                        Log.d("LocalServiceClient", "[auto-login] Fallback to JNI")
+                        RustSDK.loginSafe(user.name, pwd)
+                    }
                 }
                 
                 withContext(Dispatchers.Main) {
@@ -298,6 +310,35 @@ class MainActivity : ComponentActivity() {
         } catch (e: Exception) {
             Log.e("ApkUpdate", "start install activity failed", e)
             throw e
+        }
+    }
+
+    /**
+     * 启动 Rust 本地 HTTP 服务
+     */
+    private fun startLocalService() {
+        if (!RustSDK.isNativeLoaded()) {
+            Log.w("MainActivity", "Native library not loaded, skipping local service start")
+            return
+        }
+        
+        try {
+            val result = RustSDK.startServer(0)
+            Log.i("MainActivity", "startServer result: $result")
+            
+            if (result.contains("\"error\"")) {
+                Log.e("MainActivity", "Failed to start local server: $result")
+                return
+            }
+            
+            val json = org.json.JSONObject(result)
+            val port = json.getInt("port")
+            val token = json.getString("token")
+            
+            LocalServiceClient.initialize(port, token)
+            Log.i("MainActivity", "Local service started on port: $port")
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Failed to start local service", e)
         }
     }
 
