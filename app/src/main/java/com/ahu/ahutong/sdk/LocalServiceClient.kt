@@ -17,6 +17,11 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.concurrent.TimeUnit
 
 /**
+ * @Author Yukon
+ * @Email 605606366@qq.com
+ */
+
+/**
  * 本地 HTTP 服务客户端
  * 通过 HTTP 调用 Rust 本地服务，替代直接 JNI 调用
  */
@@ -60,6 +65,15 @@ class LocalServiceClient(
         .build()
     
     private val gson = Gson()
+    
+    private fun extractErrorMessage(json: String): String? {
+        return try {
+            val map = gson.fromJson(json, Map::class.java) as? Map<*, *>
+            map?.get("error") as? String
+        } catch (_: Throwable) {
+            null
+        }
+    }
 
     /**
      * 健康检查
@@ -144,7 +158,7 @@ class LocalServiceClient(
             client.newCall(request).execute().use { response ->
                 val json = response.body?.string() ?: "{}"
                 if (json.contains("\"error\"")) {
-                    Result.failure(Exception(json))
+                    Result.failure(Exception(extractErrorMessage(json) ?: json))
                 } else {
                     val user = gson.fromJson(json, User::class.java)
                     Result.success(user)
@@ -169,7 +183,7 @@ class LocalServiceClient(
             client.newCall(request).execute().use { response ->
                 val json = response.body?.string() ?: "[]"
                 if (json.contains("\"error\"")) {
-                    Result.failure(Exception(json))
+                    Result.failure(Exception(extractErrorMessage(json) ?: json))
                 } else {
                     val type = object : TypeToken<List<Course>>() {}.type
                     val courses: List<Course> = gson.fromJson(json, type)
@@ -195,7 +209,7 @@ class LocalServiceClient(
             client.newCall(request).execute().use { response ->
                 val json = response.body?.string() ?: "[]"
                 if (json.contains("\"error\"")) {
-                    Result.failure(Exception(json))
+                    Result.failure(Exception(extractErrorMessage(json) ?: json))
                 } else {
                     val type = object : TypeToken<List<Exam>>() {}.type
                     val exams: List<Exam> = gson.fromJson(json, type)
@@ -226,7 +240,7 @@ class LocalServiceClient(
             client.newCall(request).execute().use { response ->
                 val json = response.body?.string() ?: "{}"
                 if (json.contains("\"error\"")) {
-                    Result.failure(Exception(json))
+                    Result.failure(Exception(extractErrorMessage(json) ?: json))
                 } else {
                     val gradeResponse = gson.fromJson(json, GradeResponse::class.java)
                     Result.success(gradeResponse)
@@ -251,7 +265,7 @@ class LocalServiceClient(
             client.newCall(request).execute().use { response ->
                 val json = response.body?.string() ?: "{}"
                 if (json.contains("\"error\"")) {
-                    Result.failure(Exception(json))
+                    Result.failure(Exception(extractErrorMessage(json) ?: json))
                 } else {
                     val card = gson.fromJson(json, Card::class.java)
                     Result.success(card)
@@ -276,7 +290,7 @@ class LocalServiceClient(
             client.newCall(request).execute().use { response ->
                 val json = response.body?.string() ?: "{}"
                 if (json.contains("\"error\"")) {
-                    Result.failure(Exception(json))
+                    Result.failure(Exception(extractErrorMessage(json) ?: json))
                 } else {
                     Result.success(json)
                 }
@@ -300,7 +314,7 @@ class LocalServiceClient(
             client.newCall(request).execute().use { response ->
                 val json = response.body?.string() ?: "{}"
                 if (json.contains("\"error\"")) {
-                    Result.failure(Exception(json))
+                    Result.failure(Exception(extractErrorMessage(json) ?: json))
                 } else {
                     val map = gson.fromJson(json, Map::class.java) as? Map<String, String>
                     Result.success(map?.get("access_token") ?: "")

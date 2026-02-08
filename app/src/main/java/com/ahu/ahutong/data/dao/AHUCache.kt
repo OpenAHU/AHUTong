@@ -3,6 +3,7 @@ package com.ahu.ahutong.data.dao
 import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.ElectricityChargeInfo
+import com.ahu.ahutong.data.model.ElectricityDepositHistoryItem
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.data.model.RoomSelectionInfo
@@ -295,6 +296,18 @@ object AHUCache {
     fun getRoomSelection(): RoomSelectionInfo? {
         val data = kv.decodeString("room_selection_info") ?: ""
         return data.fromJson(RoomSelectionInfo::class.java)
+    }
+
+    fun saveElectricityDepositHistory(history: List<ElectricityDepositHistoryItem>) {
+        kv.encode("electricity_room_history", Gson().toJson(history))
+    }
+
+    fun getElectricityDepositHistory(): List<ElectricityDepositHistoryItem> {
+        val data = kv.decodeString("electricity_room_history")
+            ?: kv_init.decodeString("electricity_room_history")
+            ?: ""
+        if (data.isEmpty()) return emptyList()
+        return data.fromJson(object : TypeToken<List<ElectricityDepositHistoryItem>>() {}.type) ?: emptyList()
     }
 
     /**

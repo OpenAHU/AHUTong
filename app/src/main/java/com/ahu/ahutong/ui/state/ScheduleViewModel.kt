@@ -54,7 +54,7 @@ class ScheduleViewModel () : ViewModel() {
                     return@withContext
                 }
 
-                val result = AHURepository.getSchedule(isRefresh = false)
+                val result = AHURepository.getSchedule(isRefresh = true)
                 schedule.value = result
             }
 

@@ -24,14 +24,22 @@ class GradeViewModel : ViewModel() {
     var schoolYear by mutableStateOf(schoolYears.firstOrNull())
     var schoolTerm by mutableStateOf(terms.keys.firstOrNull())
     var errorMessage by mutableStateOf<String?>(null)
+    var isLoading by mutableStateOf(false)
 
     fun getGarde(isRefresh: Boolean = false) = viewModelScope.launch {
-        val result = AHURepository.getGrade(isRefresh)
-        if (result.isSuccess) {
-            grade = result.getOrNull()
-            errorMessage = null
-        } else {
-            errorMessage = result.exceptionOrNull()?.message ?: "获取成绩失败"
+        isLoading = true
+        try {
+            val result = AHURepository.getGrade(isRefresh)
+            if (result.isSuccess) {
+                grade = result.getOrNull()
+                errorMessage = null
+            } else {
+                errorMessage = result.exceptionOrNull()?.message ?: "获取成绩失败"
+            }
+        } catch (t: Throwable) {
+            errorMessage = t.message ?: "获取成绩失败"
+        } finally {
+            isLoading = false
         }
     }
 

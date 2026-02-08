@@ -142,7 +142,7 @@ object RustSDK {
         scope.launch(Dispatchers.IO) {
             try {
                 val prefs = context.getSharedPreferences("rust_sdk_config", Context.MODE_PRIVATE)
-                val currentVersion = prefs.getInt("so_version", 299)
+                val currentVersion = prefs.getInt("so_version", 301)
 
                 // Get original URL and Host from SDK
                 val originalConfigUrl = getUpdateConfigUrl()

@@ -106,4 +106,6 @@
 
 -keep class com.ahu.ahutong.sdk.RustSDK { *; }
 -keep class com.ahu.ahutong.sdk.UpdateConfig { *; }
+-keep class com.ahu.ahutong.sdk.ProgressCallback { *; }
+-keep class com.ahu.ahutong.sdk.LocalServiceClient { *; }
 
