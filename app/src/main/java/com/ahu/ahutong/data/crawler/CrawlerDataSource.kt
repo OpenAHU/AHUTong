@@ -81,12 +81,25 @@ class CrawlerDataSource : BaseDataSource {
             if (result.isSuccess) {
                 val data = result.getOrThrow()
                 return convertGradeResponse(data)
-            } else {
-                val response = AHUResponse<Grade>()
-                response.code = -1
-                response.msg = result.exceptionOrNull()?.message ?: "获取成绩失败"
-                return response
             }
+            
+            Log.w("LocalServiceClient", "[getGrade] HTTP failed, fallback to JNI: ${result.exceptionOrNull()?.message}")
+            val jniResult = RustSDK.getGradeSafe()
+            if (jniResult.isSuccess) {
+                return convertGradeResponse(jniResult.getOrThrow())
+            }
+            
+            val response = AHUResponse<Grade>()
+            response.code = -1
+            val msg = result.exceptionOrNull()?.message
+                ?: jniResult.exceptionOrNull()?.message
+                ?: "获取成绩失败"
+            response.msg = if (msg.contains("error decoding response body", ignoreCase = true)) {
+                "教务系统返回异常（可能登录失效），请重新登录后重试"
+            } else {
+                msg
+            }
+            return response
         }
         
         // Fallback: 直接 JNI 调用
@@ -95,7 +108,12 @@ class CrawlerDataSource : BaseDataSource {
         if (result.isFailure) {
             val response = AHUResponse<Grade>()
             response.code = -1
-            response.msg = result.exceptionOrNull()?.message ?: "获取成绩失败"
+            val msg = result.exceptionOrNull()?.message ?: "获取成绩失败"
+            response.msg = if (msg.contains("error decoding response body", ignoreCase = true)) {
+                "教务系统返回异常（可能登录失效），请重新登录后重试"
+            } else {
+                msg
+            }
             return response
         }
 

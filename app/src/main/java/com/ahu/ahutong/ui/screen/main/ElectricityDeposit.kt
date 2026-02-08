@@ -106,6 +106,7 @@ fun ElectricityDeposit(
     val selectedRoom by viewModel.selectedRoom.collectAsState()
 
     val roomInfo by viewModel.roomInfo.collectAsState()
+    val historyOptions by viewModel.historyOptions.collectAsState()
 
     var campusDropdownExpanded by remember { mutableStateOf(false) }
     var buildingsDropdownExpanded by remember { mutableStateOf(false) }
@@ -323,6 +324,34 @@ fun ElectricityDeposit(
                                     viewModel.onRoomSelected(room)
                                     roomsDropdownExpanded = false
                                 }
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (historyOptions.size == 2) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 8.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    historyOptions.forEach { item ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Text(
+                                text = item.label,
+                                modifier = Modifier
+                                    .clip(SmoothRoundedCornerShape(16.dp))
+                                    .background(90.a1 withNight 30.n1)
+                                    .padding(8.dp)
+                                    .clickable { viewModel.selectHistory(item) },
+                                color = 10.n1 withNight 90.n1,
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }

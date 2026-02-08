@@ -15,6 +15,7 @@ import android.util.Log
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.dao.AHUCache.saveRoomSelection
 import com.ahu.ahutong.data.model.ElectricityChargeInfo
+import com.ahu.ahutong.data.model.ElectricityDepositHistoryItem
 import com.ahu.ahutong.data.model.RoomSelectionInfo
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -151,15 +152,38 @@ class ElectricityDepositViewModel: ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
+    private val _historyOptions = MutableStateFlow<List<ElectricityDepositHistoryItem>>(emptyList())
+    val historyOptions: StateFlow<List<ElectricityDepositHistoryItem>> = _historyOptions
+
     init {
         _campusList.value = emptyList()
         _selectedCampus.value = null
-        val lastSelection = AHUCache.getRoomSelection()
-        if (lastSelection != null) {
-            Log.d("ElectricityDepositViewModel", "选择从缓存恢复")
-            loadAndRestoreSelection(lastSelection)
-        } else {
+        val history = AHUCache.getElectricityDepositHistory()
+        if (history.size == 2) {
+            _historyOptions.value = history
             fetchCampuses()
+        } else {
+            val lastSelection = AHUCache.getRoomSelection()
+            if (history.isEmpty() && lastSelection != null) {
+                val seedLabel = normalizeLabel(lastSelection.room?.name ?: "")
+                if (seedLabel.isNotBlank()) {
+                    AHUCache.saveElectricityDepositHistory(
+                        listOf(
+                            ElectricityDepositHistoryItem(
+                                selection = lastSelection,
+                                label = seedLabel,
+                                updatedAt = System.currentTimeMillis()
+                            )
+                        )
+                    )
+                }
+            }
+            if (lastSelection != null) {
+                Log.d("ElectricityDepositViewModel", "选择从缓存恢复")
+                loadAndRestoreSelection(lastSelection)
+            } else {
+                fetchCampuses()
+            }
         }
     }
 
@@ -191,6 +215,11 @@ class ElectricityDepositViewModel: ViewModel() {
                 _isLoading.value = false
             }
         }
+    }
+
+    fun selectHistory(item: ElectricityDepositHistoryItem) {
+        _historyOptions.value = emptyList()
+        loadAndRestoreSelection(item.selection)
     }
 
     fun onCampusSelected(campus: CampusDataItem) {
@@ -780,6 +809,17 @@ class ElectricityDepositViewModel: ViewModel() {
                             room = _selectedRoom.value
                         )
                         saveRoomSelection(roomSelectionInfo)
+
+                        val label = normalizeLabel(_fullRoomDetails.value?.data?.roomName ?: _selectedRoom.value?.name ?: "")
+                        val newItem = ElectricityDepositHistoryItem(
+                            selection = roomSelectionInfo,
+                            label = label,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        val existingHistory = AHUCache.getElectricityDepositHistory()
+                        val key = selectionKey(roomSelectionInfo)
+                        val updatedHistory = (listOf(newItem) + existingHistory.filter { selectionKey(it.selection) != key }).take(2)
+                        AHUCache.saveElectricityDepositHistory(updatedHistory)
                     } else {
                         val errorMessage = parsedResponse.msg ?: "支付失败，未知错误"
                         _errorMessage.value = errorMessage
@@ -817,5 +857,23 @@ class ElectricityDepositViewModel: ViewModel() {
                 }
             }
         }
+    }
+
+    private fun selectionKey(selection: RoomSelectionInfo): String {
+        return listOf(
+            selection.campus?.value,
+            selection.building?.value,
+            selection.floor?.value,
+            selection.room?.value
+        ).joinToString("|") { it ?: "" }
+    }
+
+    private fun normalizeLabel(raw: String): String {
+        var value = raw.trim()
+        if (value.startsWith("房间：")) {
+            value = value.removePrefix("房间：").trim()
+        }
+        val parts = value.split(Regex("\\s+")).filter { it.isNotBlank() }
+        return if (parts.isEmpty()) "" else parts.last()
     }
 }

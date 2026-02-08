@@ -157,7 +157,7 @@ class MainActivity : ComponentActivity() {
             lifecycleScope.launch(Dispatchers.IO) {
                 if (user != null && !pwd.isNullOrEmpty()) {
                     // 优先使用 HTTP 客户端登录
-                    val httpClient = com.ahu.ahutong.sdk.LocalServiceClient.getInstance()
+                    val httpClient = LocalServiceClient.getInstance()
                     if (httpClient != null) {
                         Log.d("LocalServiceClient", "[auto-login] Using HTTP client")
                         httpClient.login(user.name, pwd)
