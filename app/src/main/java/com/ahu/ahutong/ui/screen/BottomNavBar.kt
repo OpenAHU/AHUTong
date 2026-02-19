@@ -39,7 +39,7 @@ fun BoxScope.BottomNavBar(
             "home", "electricity_pay", "card_balance_deposit", "bathroom_deposit" -> 0
             "schedule", "info" -> 1
             "tools", "grade", "phone_book", "exam" -> 2
-            "settings", "settings__license", "settings__contributors", "preferences" -> 3
+            "settings", "settings__license", "settings__contributors", "preferences","debug"-> 3
             else -> 0
         }
     )

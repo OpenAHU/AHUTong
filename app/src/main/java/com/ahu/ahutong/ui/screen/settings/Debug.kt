@@ -12,7 +12,6 @@ import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.dao.AHUCache
 
-
 @Composable
 fun Debug() {
 
@@ -35,6 +34,15 @@ fun Debug() {
             AHUCache.clearAll()
         }) {
             Text(text = "清除缓存")
+        }
+
+        var mocked = AHUCache.getMockData()
+        Button(onClick = {
+            mocked =!mocked
+            AHUCache.setMockData(mocked)
+
+        }){
+            Text(text =" ${ if(mocked) "关闭" else "使用" }mock数据")
         }
     }
 }

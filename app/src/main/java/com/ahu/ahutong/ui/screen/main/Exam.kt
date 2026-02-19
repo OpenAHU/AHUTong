@@ -81,13 +81,19 @@ fun Exam(
 
         if (isLoading != true) {
             if (!exam.isNullOrEmpty()) {
+                val sortedExams = exam.sortedWith(
+                    compareBy(
+                        { calcTime(it.time) },
+                        { parseStartTime(it.time) ?: LocalDateTime.MAX }
+                    )
+                )
                 Column(
                     modifier = Modifier
                         .padding(16.dp)
                         .clip(SmoothRoundedCornerShape(32.dp)),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    exam.forEach {
+                    sortedExams.forEach {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -113,12 +119,12 @@ fun Exam(
                                 Spacer(modifier = Modifier.width(8.dp))
 
 
-                                val isFinished = calcTime(it.time)  //-1：错误  1：未考试 2：考试结束 3：考试中
+                                val isFinished = calcTime(it.time)
 
                                 val cardColor: Color = when (isFinished) {
+                                    0 -> Color(0xFFFFC107)
                                     1 -> Color(0xFF4CAF50)
                                     2 -> Color.Gray
-                                    3 -> Color(0xFFFFC107)
                                     else -> {
                                         Color.Red
                                     }
@@ -133,9 +139,9 @@ fun Exam(
                                 ) {
                                     Text(
                                         text = when (isFinished) {
+                                            0 -> "进行中"
                                             1 -> "未开始"
                                             2 -> "已结束"
-                                            3 -> "进行中"
                                             else -> {
                                                 "时间解析错误"
                                             }
@@ -192,14 +198,14 @@ fun calcTime(time: String): Int {
     val now = LocalDateTime.now()
     val parts = time.split(" ")
     if (parts.size != 2 || !parts[1].contains("~")) {
-        return -1;
+        return 3;
     }
 
     val datePart = parts[0]                   // "2025-06-23"
     val timeParts = parts[1].split("~")       // ["10:20", "12:20"]
 
     if (timeParts.size != 2) {
-        return -1
+        return 3
     }
 
     val startDateTimeStr = "${datePart} ${timeParts[0]}"
@@ -212,6 +218,17 @@ fun calcTime(time: String): Int {
     when {
         now.isBefore(startTime) -> return 1
         now.isAfter(endTime) -> return 2
-        else -> return 3
+        else -> return 0
     }
+}
+
+private fun parseStartTime(time: String): LocalDateTime? {
+    val parts = time.split(" ")
+    if (parts.size != 2 || !parts[1].contains("~")) return null
+    val datePart = parts[0]
+    val timeParts = parts[1].split("~")
+    if (timeParts.size != 2) return null
+    val startDateTimeStr = "$datePart ${timeParts[0]}"
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    return runCatching { LocalDateTime.parse(startDateTimeStr, formatter) }.getOrNull()
 }

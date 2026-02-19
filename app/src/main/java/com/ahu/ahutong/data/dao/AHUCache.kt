@@ -363,4 +363,13 @@ object AHUCache {
         if (!kv.containsKey("card_balance")) return null
         return kv.decodeDouble("card_balance")
     }
+
+    fun getMockData(): Boolean {
+        if (!kv.containsKey("mock_data")) return false
+        return kv.decodeBool("mock_data")
+    }
+
+    fun setMockData(enable: Boolean) {
+        kv.encode("mock_data", enable)
+    }
 }
