@@ -18,6 +18,7 @@ import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.User
+import com.ahu.ahutong.data.mock.MockDataSource
 import com.ahu.ahutong.sdk.LocalServiceClient
 import com.ahu.ahutong.sdk.RustSDK
 import com.google.gson.Gson
@@ -43,7 +44,10 @@ object AHURepository {
 
     val TAG = this::class.java.simpleName
 
-    var dataSource: BaseDataSource = CrawlerDataSource()
+    private var dataSource: BaseDataSource = CrawlerDataSource()
+    fun initializeDataSource(useMock: Boolean = AHUCache.getMockData()) {
+        dataSource = if (useMock) MockDataSource() else CrawlerDataSource()
+    }
     
     /**
      * 获取 HTTP 客户端
@@ -184,22 +188,13 @@ object AHURepository {
                 }
             }
             try {
-                // 优先使用 HTTP 客户端
-                val httpClient = getHttpClient()
-                val result = if (httpClient != null) {
-                    Log.d("LocalServiceClient", "[getExamInfo] Using HTTP client")
-                    httpClient.getExamInfo()
-                } else {
-                    Log.d("LocalServiceClient", "[getExamInfo] Fallback to JNI")
-                    RustSDK.getExamInfoSafe()
-                }
-                
-                if (result.isSuccess) {
-                    val exams = result.getOrDefault(emptyList())
+                val response = dataSource.getExamInfo(studentID, studentName)
+                if (response.isSuccessful) {
+                    val exams = response.data ?: emptyList()
                     AHUCache.saveExamInfo(exams)
                     Result.success(exams)
                 } else {
-                    Result.failure(result.exceptionOrNull() ?: Throwable("RustSDK Error"))
+                    Result.failure(Throwable(response.msg ?: "获取考试信息失败"))
                 }
             } catch (e: Exception) {
                 Result.failure(Throwable("请求错误 $e"))

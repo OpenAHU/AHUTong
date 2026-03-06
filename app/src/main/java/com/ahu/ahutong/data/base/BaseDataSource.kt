@@ -7,6 +7,7 @@ import com.ahu.ahutong.data.model.BathRoom
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.Grade
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -36,6 +37,11 @@ interface BaseDataSource {
     suspend fun getCardMoney(): AHUResponse<Card>
 
     suspend fun getBathRooms(): AHUResponse<List<BathRoom>>
+
+    /**
+     * get exam info
+     */
+    suspend fun getExamInfo(studentID: String, studentName: String): AHUResponse<List<Exam>>
 
 
     /**

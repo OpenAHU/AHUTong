@@ -14,6 +14,7 @@ import com.ahu.ahutong.data.model.BathRoom
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.sdk.LocalServiceClient
 import com.ahu.ahutong.sdk.RustSDK
@@ -248,6 +249,31 @@ class CrawlerDataSource : BaseDataSource {
 
     override suspend fun getBathRooms(): AHUResponse<List<BathRoom>> {
         return AHUResponse<List<BathRoom>>()
+    }
+
+    override suspend fun getExamInfo(studentID: String, studentName: String): AHUResponse<List<Exam>> {
+        val response = AHUResponse<List<Exam>>()
+        try {
+            val httpClient = getHttpClient()
+            val result = if (httpClient != null) {
+                Log.d("LocalServiceClient", "[getExamInfo] Using HTTP client")
+                httpClient.getExamInfo()
+            } else {
+                Log.d("LocalServiceClient", "[getExamInfo] Fallback to JNI")
+                RustSDK.getExamInfoSafe()
+            }
+            if (result.isSuccess) {
+                response.code = 0
+                response.data = result.getOrNull()
+            } else {
+                response.code = -1
+                response.msg = result.exceptionOrNull()?.message ?: "获取考试信息失败"
+            }
+        } catch (e: Exception) {
+            response.code = -1
+            response.msg = "请求错误 $e"
+        }
+        return response
     }
 
     override suspend fun getBathroomTelInfo(

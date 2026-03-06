@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.ahu.ahutong.sdk.LocalServiceClient;
 import com.ahu.ahutong.sdk.RustSDK;
 import com.tencent.bugly.crashreport.CrashReport;
+import com.ahu.ahutong.data.AHURepository;
+import com.ahu.ahutong.data.dao.AHUCache;
 
 import org.json.JSONObject;
 
@@ -41,6 +44,13 @@ public class AHUApplication extends Application {
         super.onCreate();
 
         CrashReport.initCrashReport(this, "2c2ccadcad", BuildConfig.DEBUG);
+
+        // 初始化数据源（根据 Mock 开关）
+        if(AHUCache.INSTANCE.getMockData()){
+            AHURepository.INSTANCE.initializeDataSource(true);
+            Toast.makeText(this,"正在使用mock数据",Toast.LENGTH_SHORT).show();
+        }
+
 
         // 注意: Local Service 在 MainActivity.init() 中启动（native library 加载后）
 
