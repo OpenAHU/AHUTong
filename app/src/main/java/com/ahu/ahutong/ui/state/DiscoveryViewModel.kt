@@ -58,8 +58,10 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
 
             AHURepository.getCardMoney().onSuccess {
                 val newBalance = it.balance ?: 0.0
-                balance = newBalance
-                AHUCache.saveCardBalance(newBalance)
+                if (newBalance > 0.0) {
+                    balance = newBalance
+                    AHUCache.saveCardBalance(newBalance)
+                }
             }
 
             AHURepository.getBathRooms().onSuccess {

@@ -48,9 +48,15 @@ class CrawlerDataSource : BaseDataSource {
             Log.d("LocalServiceClient", "[getSchedule] Using HTTP client")
             val result = httpClient.getSchedule()
             if (result.isSuccess) {
-                response.code = 0
-                response.data = result.getOrNull()
-                response.msg = "Success"
+                val data = result.getOrNull()
+                if (data != null) {
+                    response.code = 0
+                    response.data = data
+                    response.msg = "Success"
+                } else {
+                    response.code = -1
+                    response.msg = "课表数据为空，可能登录已过期"
+                }
             } else {
                 response.code = -1
                 response.msg = result.exceptionOrNull()?.message ?: "获取课表失败"
@@ -62,9 +68,15 @@ class CrawlerDataSource : BaseDataSource {
         Log.d("LocalServiceClient", "[getSchedule] Fallback to JNI")
         val result = RustSDK.getScheduleSafe()
         if (result.isSuccess) {
-            response.code = 0
-            response.data = result.getOrNull()
-            response.msg = "Success"
+            val data = result.getOrNull()
+            if (data != null) {
+                response.code = 0
+                response.data = data
+                response.msg = "Success"
+            } else {
+                response.code = -1
+                response.msg = "课表数据为空，可能登录已过期"
+            }
         } else {
             response.code = -1
             response.msg = result.exceptionOrNull()?.message ?: "获取课表失败"
@@ -213,19 +225,24 @@ class CrawlerDataSource : BaseDataSource {
     }
 
         override suspend fun getCardMoney(): AHUResponse<Card> {
-        val card = Card()
+        val result = AHUResponse<Card>()
         try {
             val cardInfo = YcardApi.API.loadCardRecharge()
             if (cardInfo.success) {
                 val balanceFen = cardInfo.data.card.firstOrNull()?.accinfo?.firstOrNull()?.balance ?: 0
+                val card = Card()
                 card.balance = balanceFen / 100.0
+                result.data = card
+                result.code = 0
+            } else {
+                result.code = -1
+                result.msg = "一卡通接口返回失败"
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            result.code = -1
+            result.msg = "获取一卡通余额失败: ${e.message}"
         }
-        val result = AHUResponse<Card>();
-        result.data = card
-        result.code = 0
         return result
     }
 

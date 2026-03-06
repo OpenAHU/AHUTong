@@ -1,6 +1,7 @@
 package com.ahu.ahutong.data
 
 import android.util.Log
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.CrawlerDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
@@ -14,6 +15,7 @@ import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.Request
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.BathroomTelInfo
+import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.sdk.LocalServiceClient
@@ -21,6 +23,7 @@ import com.ahu.ahutong.sdk.RustSDK
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.Cookie
 import okhttp3.MediaType.Companion.toMediaType
@@ -49,8 +52,10 @@ object AHURepository {
 
     /**
      * 通过semesterId获取课程表
+     * @param isRefresh 是否强制刷新
+     * @param isRetry 是否为重试（静默重登录后），防止无限循环
      */
-    suspend fun getSchedule(isRefresh: Boolean = false) = withContext(Dispatchers.IO) {
+    suspend fun getSchedule(isRefresh: Boolean = false, isRetry: Boolean = false): Result<List<Course>> = withContext(Dispatchers.IO) {
 
         if (!isRefresh) {
             AHUCache.getSchoolTerm()?.let{
@@ -63,22 +68,82 @@ object AHURepository {
 
         try {
             val response = dataSource.getSchedule()
+            val data = response.data
 
-            AHUCache.getSchoolTerm()?.let{
-                AHUCache.saveSchedule(it,response.data)
-            }
-
-            if (response.isSuccessful) {
-                Result.success(response.data)
-
+            if (response.isSuccessful && data != null) {
+                AHUCache.getSchoolTerm()?.let{
+                    AHUCache.saveSchedule(it, data)
+                }
+                Result.success(data)
+            } else if (!isRetry) {
+                // 数据为空或请求失败，可能是登录状态过期，尝试静默重新登录
+                Log.e(TAG, "getSchedule: 数据异常(data=${data}, msg=${response.msg})，尝试静默重新登录")
+                val reLoginResult = silentReLogin()
+                if (reLoginResult) {
+                    Log.e(TAG, "getSchedule: 静默重登录成功，重试获取课表")
+                    getSchedule(isRefresh = true, isRetry = true)
+                } else {
+                    Result.failure(Throwable(response.msg ?: "获取课表失败，请重新登录"))
+                }
             } else {
-                Result.failure(Throwable(response.msg))
+                Result.failure(Throwable(response.msg ?: "获取课表失败，请重新登录"))
             }
         } catch (e: Throwable) {
+            if (!isRetry) {
+                // 异常也可能是 session 过期导致的解析错误，尝试静默重登录
+                Log.e(TAG, "getSchedule: 异常(${e.message})，尝试静默重新登录")
+                val reLoginResult = silentReLogin()
+                if (reLoginResult) {
+                    Log.e(TAG, "getSchedule: 静默重登录成功，重试获取课表")
+                    return@withContext getSchedule(isRefresh = true, isRetry = true)
+                }
+            }
             Result.failure(e)
         }
     }
 
+    /**
+     * 静默重新登录
+     * 使用缓存的学号和密码尝试重新登录，避免用户手动操作
+     * @return Boolean 是否登录成功
+     */
+    private suspend fun silentReLogin(): Boolean {
+        return try {
+            synchronized(AHUApplication.reLoginMutex) {
+                if (!AHUApplication.sessionExpired) {
+                    // 已经有其他请求成功重登录了
+                    Log.d(TAG, "silentReLogin: 已有其他请求完成重登录")
+                    return@synchronized true
+                }
+
+                val user = AHUCache.getCurrentUser()
+                val password = AHUCache.getWisdomPassword()
+
+                if (user?.xh.isNullOrEmpty() || password.isNullOrEmpty()) {
+                    Log.e(TAG, "silentReLogin: 缺少缓存的登录凭据")
+                    return@synchronized false
+                }
+
+                Log.d(TAG, "silentReLogin: 使用缓存凭据尝试重新登录...")
+                val loginResult = runBlocking {
+                    loginWithCrawler(user!!.xh, password)
+                }
+
+                if (loginResult.isSuccessful) {
+                    AHUApplication.sessionExpired = false
+                    Log.d(TAG, "silentReLogin: 重新登录成功")
+                    true
+                } else {
+                    AHUApplication.sessionExpired = true
+                    Log.e(TAG, "silentReLogin: 重新登录失败 - ${loginResult.msg}")
+                    false
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "silentReLogin: 重新登录异常", e)
+            false
+        }
+    }
 
     /**
      * 查询成绩 本地优先

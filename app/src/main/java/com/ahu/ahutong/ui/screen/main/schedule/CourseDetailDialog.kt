@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ahu.ahutong.data.model.Course
@@ -97,6 +98,8 @@ fun CourseDetailDialog(
                     )
                     Text(
                         text = course.location,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -107,7 +110,9 @@ fun CourseDetailDialog(
                         .background(80.n1 withNight 30.n1)
                 )
                 Row(
-                    modifier = Modifier.padding(24.dp, 16.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(24.dp, 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -118,6 +123,8 @@ fun CourseDetailDialog(
                     )
                     Text(
                         text = course.teacher,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
