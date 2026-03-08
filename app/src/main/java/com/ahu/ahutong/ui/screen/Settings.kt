@@ -57,6 +57,8 @@ import com.ahu.ahutong.data.api.AHUCookieJar
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.sdk.RustSDK
 import com.ahu.ahutong.data.crawler.manager.CookieManager
+import com.ahu.ahutong.data.mock_server.MockServer
+import com.ahu.ahutong.data.server.AhuTong
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.MainViewModel
@@ -78,12 +80,19 @@ fun Settings(
     var isClearCacheDialogShown by rememberSaveable { mutableStateOf(false) }
     var isUpdateLogDialogShown by rememberSaveable { mutableStateOf(false) }
     val tip by remember { aboutViewModel.tipState }
+    var updateLog by remember { mutableStateOf("") }
 
     LaunchedEffect(tip) {
         tip?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             aboutViewModel.tipState.value = null;
         }
+
+        runCatching { AhuTong.API.getApkUpdateInfo().changelog }
+            .onSuccess { updateLog = it }
+            .onFailure {
+                updateLog = "获取失败"
+            }
     }
 
 
@@ -390,7 +399,8 @@ fun Settings(
                         .padding(horizontal = 24.dp)
                 ) {
                     Text(
-                        text = RustSDK.getUpdateLog(),
+//                        text = RustSDK.getUpdateLog(),
+                        text = updateLog,
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }

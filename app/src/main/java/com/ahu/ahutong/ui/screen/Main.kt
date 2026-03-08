@@ -31,6 +31,7 @@ import com.ahu.ahutong.ui.screen.main.Grade
 import com.ahu.ahutong.ui.screen.main.Home
 import com.ahu.ahutong.ui.screen.main.PhoneBook
 import com.ahu.ahutong.ui.screen.main.Schedule
+import com.ahu.ahutong.ui.screen.main.SchoolCalendar
 import com.ahu.ahutong.ui.screen.main.Tools
 import com.ahu.ahutong.ui.screen.settings.Contributors
 import com.ahu.ahutong.ui.screen.settings.Debug
@@ -126,6 +127,9 @@ fun Main(
             }
             animatedComposable("tools") {
                 Tools(navController = navController)
+            }
+            animatedComposable("school_calendar") {
+                SchoolCalendar(navController = navController)
             }
             animatedComposable("grade") {
                 Grade()

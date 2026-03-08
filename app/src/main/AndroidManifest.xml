@@ -23,7 +23,6 @@
 
     <application
         android:name=".AHUApplication"
-        android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"

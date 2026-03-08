@@ -866,7 +866,7 @@ data class UpdateConfig(
 data class ApkUpdateInfo(
     val update: Boolean,
     val force: Boolean,
-    val versionCode: Long,
+    val versionCode: Int,
     val versionName: String,
     val changelog: String,
     val url: String? = null,

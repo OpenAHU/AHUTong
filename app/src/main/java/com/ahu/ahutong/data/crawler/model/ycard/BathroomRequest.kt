@@ -4,7 +4,7 @@ class BathroomRequest(
     bathroom: String,
     amount: String,
     thirdPartyJson: String
-) : Request() {
+) : RequestBody() {
 
     init {
         var feeitemid :String? = null

@@ -3,7 +3,7 @@ package com.ahu.ahutong.data.mock
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
-import com.ahu.ahutong.data.crawler.model.ycard.Request
+import com.ahu.ahutong.data.crawler.model.ycard.RequestBody
 import com.ahu.ahutong.data.model.BathRoom
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
@@ -101,11 +101,15 @@ class MockDataSource : BaseDataSource {
         return AHUResponse<CardInfo>().apply { code = -1; data = null }
     }
 
-    override suspend fun getOrderThirdData(request: Request): AHUResponse<Response<ResponseBody>> {
+    override suspend fun getOrderThirdData(request: RequestBody): AHUResponse<Response<ResponseBody>> {
         return AHUResponse<Response<ResponseBody>>().apply { code = 0; data = null }
     }
 
-    override suspend fun pay(request: Request): AHUResponse<Response<ResponseBody>> {
+    override suspend fun pay(request: RequestBody): AHUResponse<Response<ResponseBody>> {
         return AHUResponse<Response<ResponseBody>>().apply { code = 0; data = null }
+    }
+
+    override suspend fun getSchoolCalendar(): AHUResponse<Response<ResponseBody>> {
+        TODO("Not yet implemented")
     }
 }

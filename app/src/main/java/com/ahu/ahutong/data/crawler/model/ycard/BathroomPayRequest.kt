@@ -3,7 +3,7 @@ package com.ahu.ahutong.data.crawler.model.ycard
 class BathroomPayRequest (
     orderId: String,
     plaintext: String,
-) : Request() {
+) : RequestBody() {
 
     val uuid = "da07e4442e4841cca1655cb29653a023"
     val mapString = "1690457382"

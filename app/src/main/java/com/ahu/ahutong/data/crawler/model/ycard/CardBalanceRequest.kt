@@ -7,7 +7,7 @@ import com.ahu.ahutong.data.crawler.utils.sha256
 class CardBalanceRequest(
     tranamt: String,
     yktcard: String
-) : Request() {
+) : RequestBody() {
 
     init {
         val appId = "56321"

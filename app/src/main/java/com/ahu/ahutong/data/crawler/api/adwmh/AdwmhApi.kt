@@ -44,7 +44,7 @@ interface AdwmhApi {
 
     @POST
     @Multipart
-    suspend fun getCaptchaResult(@Url url: String,@Part file: MultipartBody.Part): Captcha
+    suspend fun getCaptchaResult(@Url url: String,@Part data: MultipartBody.Part): Captcha
 
 
 

@@ -1,10 +1,13 @@
 package com.ahu.ahutong
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,16 +33,25 @@ import kotlinx.coroutines.withContext
 import android.content.Intent
 import androidx.core.content.FileProvider
 import android.util.Log
-import com.ahu.ahutong.sdk.ApkUpdateInfo
 import com.ahu.ahutong.ui.component.ApkUpdateDialog
 import java.io.File
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
+import com.ahu.ahutong.data.mock_server.MockServer
+import com.ahu.ahutong.data.server.AhuTong
+import com.ahu.ahutong.data.server.model.ApkUpdateInfo
+import com.ahu.ahutong.ext.launchSafe
 import com.ahu.ahutong.sdk.LocalServiceClient
+import okio.buffer
+import okio.sink
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    val TAG = "MainActivity"
+
     private val mainViewModel: MainViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
     private val discoveryViewModel: DiscoveryViewModel by viewModels()
@@ -60,6 +72,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        initializeActivityResultLauncher()
         init()
 
         setContent {
@@ -67,31 +80,31 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 var isReLoginDialogShown by rememberSaveable { mutableStateOf(false) }
 
-                if (showHotUpdateDialog) {
-                    HotUpdateDialog(
-                        isDownloading = isHotUpdateDownloading,
-                        onConfirm = {
-                            // 调用 SDK 的重启逻辑
-                            RustSDK.restartApp(this)
-                        }
-                    )
-                }
-                if (showApkUpdateDialog && apkUpdateInfo != null) {
-                    ApkUpdateDialog(
-                        info = apkUpdateInfo!!,
-                        downloading = apkDownloading,
-                        progress = apkProgress,
-                        errorText = apkErrorText,
-                        onConfirm = {
-                            ensureInstallPermissionThen {
-                                startDownloadAndInstallApk(apkUpdateInfo!!)
-                            }
-                        },
-                        onDismiss = {
-                            showApkUpdateDialog = false
-                        }
-                    )
-                }
+//                if (showHotUpdateDialog) {
+//                    HotUpdateDialog(
+//                        isDownloading = isHotUpdateDownloading,
+//                        onConfirm = {
+//                            // 调用 SDK 的重启逻辑
+//                            RustSDK.restartApp(this)
+//                        }
+//                    )
+//                }
+//                if (showApkUpdateDialog && apkUpdateInfo != null) {
+//                    ApkUpdateDialog(
+//                        info = apkUpdateInfo!!,
+//                        downloading = apkDownloading,
+//                        progress = apkProgress,
+//                        errorText = apkErrorText,
+//                        onConfirm = {
+//                            ensureInstallPermissionThen {
+//                                startDownloadAndInstallApk(apkUpdateInfo!!)
+//                            }
+//                        },
+//                        onDismiss = {
+//                            showApkUpdateDialog = false
+//                        }
+//                    )
+//                }
 
 
                 Main(
@@ -107,104 +120,104 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            packageManager.canRequestPackageInstalls()
-        ) {
-            pendingApkUpdateInfo?.let { info ->
-                pendingApkUpdateInfo = null
-                startDownloadAndInstallApk(info)
-            }
-        }
-    }
-
     private fun init() {
+        lifecycleScope.launchSafe {
+            checkApkUpdate()
+        }
+
+
         var hotUpdateApplied = java.util.concurrent.atomic.AtomicBoolean(false)
 
-        RustSDK.loadLibrary(
-            context = this,
-            onHotUpdateFound = {
-                isHotUpdateDownloading = true
-                showHotUpdateDialog = true
-            },
-            onHotUpdateSuccess = {
-                hotUpdateApplied.set(true)
-                isHotUpdateDownloading = false
-                showHotUpdateDialog = true
-            },
-            onHotUpdateFinished = {
-                if (!hotUpdateApplied.get()) {
-                    showHotUpdateDialog = false
-                    isHotUpdateDownloading = false
-                    checkApkUpdateOnStartup()
-                }
-            }
-        )
-        
+//        RustSDK.loadLibrary(
+//            context = this,
+//            onHotUpdateFound = {
+//                isHotUpdateDownloading = true
+//                showHotUpdateDialog = true
+//            },
+//            onHotUpdateSuccess = {
+//                hotUpdateApplied.set(true)
+//                isHotUpdateDownloading = false
+//                showHotUpdateDialog = true
+//            },
+//            onHotUpdateFinished = {
+//                if (!hotUpdateApplied.get()) {
+//                    showHotUpdateDialog = false
+//                    isHotUpdateDownloading = false
+//                    checkApkUpdateOnStartup()
+//                }
+//            }
+//        )
+
         // 在 native library 加载后启动本地 HTTP 服务
-        startLocalService()
+//        startLocalService()
+
+
 
         if (AHUCache.isLogin()) {
-            val user = AHUCache.getCurrentUser()
-            val pwd = AHUCache.getWisdomPassword()
+//            val user = AHUCache.getCurrentUser()
+//            val pwd = AHUCache.getWisdomPassword()
+
 
             discoveryViewModel.loadActivityBean()
             scheduleViewModel.loadConfig()
             scheduleViewModel.refreshSchedule()
 
-            // 启动时自动登录 Rust SDK，以确保 Session 有效（解决覆盖安装或重启后余额不显示问题）
-            lifecycleScope.launch(Dispatchers.IO) {
-                if (user != null && !pwd.isNullOrEmpty()) {
-                    // 优先使用 HTTP 客户端登录
-                    val httpClient = LocalServiceClient.getInstance()
-                    if (httpClient != null) {
-                        Log.d("LocalServiceClient", "[auto-login] Using HTTP client")
-                        httpClient.login(user.name, pwd)
-                    } else {
-                        Log.d("LocalServiceClient", "[auto-login] Fallback to JNI")
-                        RustSDK.loginSafe(user.name, pwd)
-                    }
-                }
-                
-                withContext(Dispatchers.Main) {
-                    // 登录后再次刷新，确保获取最新数据（如果之前的请求因未登录失败）
-                    discoveryViewModel.loadActivityBean()
-                    scheduleViewModel.loadConfig()
-                    scheduleViewModel.refreshSchedule()
-                }
-            }
+
         }
     }
-    private fun checkApkUpdateOnStartup() {
-        Log.i("ApkUpdate", "start checkApkUpdateOnStartup")
+//    private fun checkApkUpdateOnStartup() {
+//        Log.i("ApkUpdate", "start checkApkUpdateOnStartup")
+//
+//        lifecycleScope.launch(Dispatchers.IO) {
+//            if (!RustSDK.isNativeLoaded()) {
+//                Log.w("ApkUpdate", "native not loaded, skip apk update check")
+//                return@launch
+//            }
+//
+//            val result = RustSDK.checkApkUpdateSafe(this@MainActivity)
+//            result.onSuccess { info ->
+//                Log.i(
+//                    "ApkUpdate",
+//                    "check result: update=${info.update}, force=${info.force}, " +
+//                            "remoteVersionCode=${info.versionCode}, versionName=${info.versionName}"
+//                )
+//                if (info.update) {
+//                    withContext(Dispatchers.Main) {
+//                        apkUpdateInfo = info
+//                        apkErrorText = null
+//                        showApkUpdateDialog = true
+//                    }
+//                }
+//            }.onFailure { e ->
+//                Log.w("ApkUpdate", "checkApkUpdateSafe failed: ${e.message}", e)
+//            }
+//        }
+//    }
+//
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            if (!RustSDK.isNativeLoaded()) {
-                Log.w("ApkUpdate", "native not loaded, skip apk update check")
-                return@launch
-            }
+    private lateinit var requestInstallPermissionLauncher: ActivityResultLauncher<Intent>
 
-            val result = RustSDK.checkApkUpdateSafe(this@MainActivity)
-            result.onSuccess { info ->
-                Log.i(
-                    "ApkUpdate",
-                    "check result: update=${info.update}, force=${info.force}, " +
-                            "remoteVersionCode=${info.versionCode}, versionName=${info.versionName}"
-                )
-                if (info.update) {
-                    withContext(Dispatchers.Main) {
-                        apkUpdateInfo = info
-                        apkErrorText = null
-                        showApkUpdateDialog = true
+    private fun initializeActivityResultLauncher() {
+        requestInstallPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                // 权限请求结果回调
+                Log.i("ApkUpdate", "permission=${result.resultCode}")
+                if (result.resultCode == RESULT_OK) {
+                    val canInstall = packageManager.canRequestPackageInstalls()
+                    Log.i("ApkUpdate", "canRequestPackageInstalls after permission=$canInstall")
+                    if (canInstall) {
+                        // 执行待执行的action
+                        pendingInstallAction?.invoke()
+                        pendingInstallAction = null
                     }
+                } else {
+                    Toast.makeText(this, "未授权安装权限，安装失败", Toast.LENGTH_SHORT).show()
                 }
-            }.onFailure { e ->
-                Log.w("ApkUpdate", "checkApkUpdateSafe failed: ${e.message}", e)
             }
-        }
     }
+    private var pendingInstallAction: (() -> Unit)? = null
 
+    // 3. 处理安装权限请求
     private fun ensureInstallPermissionThen(action: () -> Unit) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             action()
@@ -219,78 +232,66 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        pendingApkUpdateInfo = apkUpdateInfo
+        // 保存待执行的action
+        pendingInstallAction = action
 
+        // 请求权限
         val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
             data = Uri.parse("package:$packageName")
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        startActivity(intent)
+
+        // 使用 ActivityResultLauncher 启动设置页面
+        requestInstallPermissionLauncher.launch(intent)
     }
 
-    private fun startDownloadAndInstallApk(info: ApkUpdateInfo) {
-        if (apkDownloading) {
-            Log.w("ApkUpdate", "download already in progress, ignore click")
-            return
-        }
+//    private fun startDownloadAndInstallApk(info: ApkUpdateInfo) {
+//        if (apkDownloading) {
+//            Log.w("ApkUpdate", "download already in progress, ignore click")
+//            return
+//        }
+//
+//        Log.i(
+//            "ApkUpdate",
+//            "start download: versionCode=${info.versionCode}, url=${info.url}"
+//        )
+//
+//        apkDownloading = true
+//        apkErrorText = null
+//
+//        lifecycleScope.launch(Dispatchers.IO) {
+//            val result = RustSDK.downloadApkToFileWithProgress(this@MainActivity, info) { downloaded, total ->
+//                lifecycleScope.launch(Dispatchers.Main) {
+//                    apkProgress = if (total > 0) downloaded.toFloat() / total.toFloat() else null
+//                }
+//            }
+//
+//            withContext(Dispatchers.Main) {
+//                apkDownloading = false
+//                apkProgress = null
+//
+//                result.onSuccess { apkFile ->
+//                    Log.i(
+//                        "ApkUpdate",
+//                        "download success: path=${apkFile.absolutePath}, size=${apkFile.length()}"
+//                    )
+//                    runCatching {
+//                        installApk(apkFile, info)
+//                        Log.i("ApkUpdate", "install intent started")
+//                        if (!info.force) showApkUpdateDialog = false
+//                    }.onFailure { t ->
+//                        Log.e("ApkUpdate", "installApk failed", t)
+//                        apkErrorText = t.message ?: "安装启动失败"
+//                    }
+//                }.onFailure { e ->
+//                    Log.e("ApkUpdate", "download failed", e)
+//                    apkErrorText = e.message ?: "下载失败"
+//                }
+//            }
+//        }
+//    }
 
-        Log.i(
-            "ApkUpdate",
-            "start download: versionCode=${info.versionCode}, url=${info.url}"
-        )
-
-        apkDownloading = true
-        apkErrorText = null
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            val result = RustSDK.downloadApkToFileWithProgress(this@MainActivity, info) { downloaded, total ->
-                lifecycleScope.launch(Dispatchers.Main) {
-                    apkProgress = if (total > 0) downloaded.toFloat() / total.toFloat() else null
-                }
-            }
-
-            withContext(Dispatchers.Main) {
-                apkDownloading = false
-                apkProgress = null
-
-                result.onSuccess { apkFile ->
-                    Log.i(
-                        "ApkUpdate",
-                        "download success: path=${apkFile.absolutePath}, size=${apkFile.length()}"
-                    )
-                    runCatching {
-                        installApk(apkFile, info)
-                        Log.i("ApkUpdate", "install intent started")
-                        if (!info.force) showApkUpdateDialog = false
-                    }.onFailure { t ->
-                        Log.e("ApkUpdate", "installApk failed", t)
-                        apkErrorText = t.message ?: "安装启动失败"
-                    }
-                }.onFailure { e ->
-                    Log.e("ApkUpdate", "download failed", e)
-                    apkErrorText = e.message ?: "下载失败"
-                }
-            }
-        }
-    }
-
-    private fun installApk(apkFile: File, info: ApkUpdateInfo) {
+    private fun installApk(apkFile: File) {
         Log.i("ApkUpdate", "installApk called, file=${apkFile.absolutePath}")
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val canInstall = packageManager.canRequestPackageInstalls()
-            Log.i("ApkUpdate", "canRequestPackageInstalls=$canInstall")
-
-            if (!canInstall) {
-                pendingApkUpdateInfo = info
-                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                    data = Uri.parse("package:$packageName")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                startActivity(intent)
-                return
-            }
-        }
 
         val uri = FileProvider.getUriForFile(
             this,
@@ -321,25 +322,56 @@ class MainActivity : ComponentActivity() {
             Log.w("MainActivity", "Native library not loaded, skipping local service start")
             return
         }
-        
+
         try {
             val result = RustSDK.startServer(0)
             Log.i("MainActivity", "startServer result: $result")
-            
+
             if (result.contains("\"error\"")) {
                 Log.e("MainActivity", "Failed to start local server: $result")
                 return
             }
-            
+
             val json = org.json.JSONObject(result)
             val port = json.getInt("port")
             val token = json.getString("token")
-            
+
             LocalServiceClient.initialize(port, token)
             Log.i("MainActivity", "Local service started on port: $port")
         } catch (e: Exception) {
             Log.e("MainActivity", "Failed to start local service", e)
         }
     }
+
+    suspend private fun checkApkUpdate() {
+        try {
+            val info = withContext(Dispatchers.IO) { AhuTong.API.getApkUpdateInfo() }
+            Log.i(TAG, "checkApkUpdate: server=${info.versionCode}, local=${BuildConfig.VERSION_CODE}")
+            if (info.versionCode != BuildConfig.VERSION_CODE) {
+                runOnUiThread {
+                    Toast.makeText(this, "发现新版本：${info.versionName}(${info.versionCode})", Toast.LENGTH_SHORT).show()
+                }
+                if (!info.url.isNullOrEmpty()) {
+                    withContext(Dispatchers.IO) {
+                        val body = AhuTong.API.downloadByUrl(info.url)
+                        val dir = getExternalFilesDir(null) ?: filesDir
+                        val outFile = File(dir, "update-${info.versionCode}.apk")
+                        outFile.sink().buffer().use { sink ->
+                            sink.writeAll(body.source())
+                        }
+                        Log.i(TAG, "APK downloaded to: ${outFile.absolutePath}")
+                        withContext(Dispatchers.Main) {
+                            ensureInstallPermissionThen {
+                                installApk(outFile)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "checkApkUpdate failed", e)
+        }
+    }
+
 
 }

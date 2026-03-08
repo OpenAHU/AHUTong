@@ -4,7 +4,7 @@ import com.ahu.ahutong.data.crawler.utils.generateNonce
 import com.ahu.ahutong.data.crawler.utils.getTimestamp
 import com.ahu.ahutong.data.crawler.utils.sha256
 
-class CardPayRequest(orderId: String) : Request() {
+class CardPayRequest(orderId: String) : RequestBody() {
 
     init {
         val time = getTimestamp()

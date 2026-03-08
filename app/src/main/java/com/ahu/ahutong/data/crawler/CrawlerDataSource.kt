@@ -5,33 +5,31 @@ import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
-import com.ahu.ahutong.data.crawler.model.jwxt.GradeResponse
 import com.ahu.ahutong.data.crawler.api.ycard.YcardApi
+import com.ahu.ahutong.data.crawler.model.jwxt.CurrentSemester
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
-import com.ahu.ahutong.data.crawler.model.ycard.Request
+import com.ahu.ahutong.data.crawler.model.ycard.RequestBody
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.mock_server.MockServer
 import com.ahu.ahutong.data.model.BathRoom
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.Grade
-import com.ahu.ahutong.sdk.LocalServiceClient
-import com.ahu.ahutong.sdk.RustSDK
+import com.ahu.ahutong.data.server.AhuTong
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import okhttp3.FormBody
 import okhttp3.ResponseBody
+import org.jsoup.Jsoup
 import retrofit2.Response
-import com.ahu.ahutong.data.crawler.model.adwnh.Balance
+import kotlin.text.Regex
+
 
 class CrawlerDataSource : BaseDataSource {
 
     val TAG = this::class.java.simpleName
-    
-    /**
-     * 获取 HTTP 客户端，如果不可用则返回 null（fallback 到 JNI）
-     */
-    private fun getHttpClient(): LocalServiceClient? = LocalServiceClient.getInstance()
 
     override suspend fun getSchedule(
         schoolYear: String,
@@ -41,118 +39,96 @@ class CrawlerDataSource : BaseDataSource {
     }
 
     override suspend fun getSchedule(): AHUResponse<List<Course>> {
+        val basicInfo = JwxtApi.API.fetchCourseTableBasicInfo()
+        val doc = Jsoup.parse(basicInfo.body()!!.string())
+
+        val element = doc.select("script")
+            .map { it.data() }
+            .firstOrNull { it.contains("var semesters = JSON.parse") && it.contains("var currentSemester") }
+
+
+        if (element == null) {
+
+        }
+        val semestersPattern: Regex? =
+            Regex(
+                "var\\s+semesters\\s*=\\s*JSON\\.parse\\(\\s*'(.*?)'\\s*\\);",
+                RegexOption.DOT_MATCHES_ALL
+            )
+        val currentSemesterPattern: Regex? =
+            Regex("var\\s+currentSemester\\s*=\\s*(\\{.*?\\});")
+
+        if (currentSemesterPattern == null) {
+            return AHUResponse<List<Course>>()
+        }
+
+        val currentSemester = currentSemesterPattern.find(element.toString())
+
+
+        val gson = Gson()
+
+        val currentSemesterJson = gson.fromJson(
+            currentSemester!!.groups[1]!!.value.replace("\\\"", "\""),
+            CurrentSemester::class.java
+        )
+
+        val courseTable = JwxtApi.API.getCourse(currentSemesterJson.id, currentSemesterJson.id)
+
+        AHUCache.saveSchoolTerm(currentSemesterJson.name)
+
+        val courseList = ArrayList<Course>()
+
+        courseTable.studentTableVms[0].activities.forEach {
+
+            val sortedWeekIndexes = it.weekIndexes.sorted()
+
+            val course = Course()
+            course.name = it.courseName
+            course.setStartWeek(sortedWeekIndexes.get(0).toString())
+            course.setLength((it.endUnit - it.startUnit + 1).toString())
+            course.setWeekday(it.weekday.toString())
+            course.setEndWeek(sortedWeekIndexes.get(sortedWeekIndexes.size - 1).toString())
+            course.setStartTime(it.startUnit.toString())
+            course.location = it.room ?: "未知"
+            course.teacher = it.teacherNames.toString()
+            course.weekIndexes = sortedWeekIndexes
+            course.courseId = it.lessonId.toString()
+
+            Log.e(TAG, "getSchedule: $course")
+            courseList.add(course)
+        }
+
         val response = AHUResponse<List<Course>>()
-        
-        // 优先使用 HTTP 客户端
-        val httpClient = getHttpClient()
-        if (httpClient != null) {
-            Log.d("LocalServiceClient", "[getSchedule] Using HTTP client")
-            val result = httpClient.getSchedule()
-            if (result.isSuccess) {
-                val data = result.getOrNull()
-                if (data != null) {
-                    response.code = 0
-                    response.data = data
-                    response.msg = "Success"
-                } else {
-                    response.code = -1
-                    response.msg = "课表数据为空，可能登录已过期"
-                }
-            } else {
-                response.code = -1
-                response.msg = result.exceptionOrNull()?.message ?: "获取课表失败"
-            }
-            return response
-        }
-        
-        // Fallback: 直接 JNI 调用
-        Log.d("LocalServiceClient", "[getSchedule] Fallback to JNI")
-        val result = RustSDK.getScheduleSafe()
-        if (result.isSuccess) {
-            val data = result.getOrNull()
-            if (data != null) {
-                response.code = 0
-                response.data = data
-                response.msg = "Success"
-            } else {
-                response.code = -1
-                response.msg = "课表数据为空，可能登录已过期"
-            }
-        } else {
-            response.code = -1
-            response.msg = result.exceptionOrNull()?.message ?: "获取课表失败"
-        }
+        response.data = courseList
+        response.code = 0
+        response.msg = ""
+
         return response
+
+
     }
 
     override suspend fun getGrade(): AHUResponse<Grade> {
-        // 优先使用 HTTP 客户端
-        val httpClient = getHttpClient()
-        if (httpClient != null) {
-            Log.d("LocalServiceClient", "[getGrade] Using HTTP client")
-            val result = httpClient.getGrade()
-            if (result.isSuccess) {
-                val data = result.getOrThrow()
-                return convertGradeResponse(data)
-            }
-            
-            Log.w("LocalServiceClient", "[getGrade] HTTP failed, fallback to JNI: ${result.exceptionOrNull()?.message}")
-            val jniResult = RustSDK.getGradeSafe()
-            if (jniResult.isSuccess) {
-                return convertGradeResponse(jniResult.getOrThrow())
-            }
-            
-            val response = AHUResponse<Grade>()
-            response.code = -1
-            val msg = result.exceptionOrNull()?.message
-                ?: jniResult.exceptionOrNull()?.message
-                ?: "获取成绩失败"
-            response.msg = if (msg.contains("error decoding response body", ignoreCase = true)) {
-                "教务系统返回异常（可能登录失效），请重新登录后重试"
-            } else {
-                msg
-            }
-            return response
-        }
-        
-        // Fallback: 直接 JNI 调用
-        Log.d("LocalServiceClient", "[getGrade] Fallback to JNI")
-        val result = RustSDK.getGradeSafe()
-        if (result.isFailure) {
-            val response = AHUResponse<Grade>()
-            response.code = -1
-            val msg = result.exceptionOrNull()?.message ?: "获取成绩失败"
-            response.msg = if (msg.contains("error decoding response body", ignoreCase = true)) {
-                "教务系统返回异常（可能登录失效），请重新登录后重试"
-            } else {
-                msg
-            }
-            return response
-        }
+        var id = AHUCache.getJwxtStudentId()
+        id = id ?: getStudentId().also { AHUCache.setJwxtStudentId(it) }
 
-        return convertGradeResponse(result.getOrThrow())
-    }
-    
-    /**
-     * 转换 GradeResponse 为 Grade
-     */
-    private fun convertGradeResponse(data: GradeResponse): AHUResponse<Grade> {
+        val data = JwxtApi.API.getGrade(id)
         val map = hashMapOf<String, Grade.TermGradeListBean>()
 
         data.semesterId2studentGrades?.values?.forEach { gradeList ->
             val newGradeList = mutableListOf<Grade.TermGradeListBean.GradeListBean>()
             var termName: String? = null
-            
+
             gradeList.forEach { it ->
-                
+
                 termName = termName ?: it.semesterName
                 val grade = Grade.TermGradeListBean.GradeListBean()
-                grade.course = it.courseName ?: ""
-                grade.credit = (it.credits ?: 0.0).toString()
-                grade.grade = it.gaGrade ?: ""
-                grade.gradePoint = (it.gp ?: 0.0).toString()
-                grade.courseNature = it.courseType ?: ""
-                grade.courseNum = it.courseCode ?: ""
+                grade.course = it.courseName
+                grade.credit = it.credits.toString()
+                grade.grade = it.gaGrade
+                grade.gradePoint = it.gp.toString()
+                grade.courseNature = it.courseType
+                grade.courseNum = it.courseCode
                 newGradeList.add(grade)
             }
 
@@ -177,11 +153,12 @@ class CrawlerDataSource : BaseDataSource {
                     (it.gradePoint?.toDoubleOrNull() ?: 0.0) * (it.credit?.toDoubleOrNull() ?: 0.0)
                 }
 
-                termGradeList.termGradePointAverage = if (termGradeList.termTotalCredit.toDouble() > 0) {
-                    "%.2f".format(totalGradePointWeighted / termGradeList.termTotalCredit.toDouble())
-                } else {
-                    "0.0"
-                }
+                termGradeList.termGradePointAverage =
+                    if (termGradeList.termTotalCredit.toDouble() > 0) {
+                        "%.2f".format(totalGradePointWeighted / termGradeList.termTotalCredit.toDouble())
+                    } else {
+                        "0.0"
+                    }
 
                 map[it] = termGradeList
             }
@@ -189,14 +166,14 @@ class CrawlerDataSource : BaseDataSource {
         }
 
         val response = AHUResponse<Grade>()
-        val termGradeList =  map.values.toList()
+        val termGradeList = map.values.toList()
         val grade = Grade()
 
         grade.totalCredit = termGradeList.sumOf {
             it.termTotalCredit?.toDoubleOrNull() ?: 0.0
         }.toString()
 
-        grade.totalGradePoint =termGradeList.sumOf {
+        grade.totalGradePoint = termGradeList.sumOf {
             val avg = it.termGradePointAverage?.toDoubleOrNull() ?: 0.0
             val credit = it.termTotalCredit?.toDoubleOrNull() ?: 0.0
             avg * credit
@@ -209,7 +186,7 @@ class CrawlerDataSource : BaseDataSource {
         }
 
 
-        grade.totalGradePointAverage =if (grade.totalCredit.toDouble() > 0) {
+        grade.totalGradePointAverage = if (grade.totalCredit.toDouble() > 0) {
             "%.2f".format(weightedGradePointSum / grade.totalCredit.toDouble())
         } else {
             "0.0"
@@ -225,25 +202,12 @@ class CrawlerDataSource : BaseDataSource {
         return response
     }
 
-        override suspend fun getCardMoney(): AHUResponse<Card> {
-        val result = AHUResponse<Card>()
-        try {
-            val cardInfo = YcardApi.API.loadCardRecharge()
-            if (cardInfo.success) {
-                val balanceFen = cardInfo.data.card.firstOrNull()?.accinfo?.firstOrNull()?.balance ?: 0
-                val card = Card()
-                card.balance = balanceFen / 100.0
-                result.data = card
-                result.code = 0
-            } else {
-                result.code = -1
-                result.msg = "一卡通接口返回失败"
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            result.code = -1
-            result.msg = "获取一卡通余额失败: ${e.message}"
-        }
+    override suspend fun getCardMoney(): AHUResponse<Card> {
+        val card = Card()
+        card.balance = AdwmhApi.API.getBalance().`object`
+        val result = AHUResponse<Card>();
+        result.data = card
+        result.code = 0
         return result
     }
 
@@ -251,29 +215,74 @@ class CrawlerDataSource : BaseDataSource {
         return AHUResponse<List<BathRoom>>()
     }
 
-    override suspend fun getExamInfo(studentID: String, studentName: String): AHUResponse<List<Exam>> {
-        val response = AHUResponse<List<Exam>>()
-        try {
-            val httpClient = getHttpClient()
-            val result = if (httpClient != null) {
-                Log.d("LocalServiceClient", "[getExamInfo] Using HTTP client")
-                httpClient.getExamInfo()
+    override suspend fun getExamInfo(
+        studentID: String,
+        studentName: String
+    ): AHUResponse<List<Exam>> {
+        return try {
+            val res = JwxtApi.API.fetchExamArrangePage()
+            if (!res.isSuccessful || res.body() == null) {
+                AHUResponse<List<Exam>>().apply {
+                    code = -1
+                    msg = "请求失败"
+                    data = emptyList()
+                }
             } else {
-                Log.d("LocalServiceClient", "[getExamInfo] Fallback to JNI")
-                RustSDK.getExamInfoSafe()
-            }
-            if (result.isSuccess) {
-                response.code = 0
-                response.data = result.getOrNull()
-            } else {
-                response.code = -1
-                response.msg = result.exceptionOrNull()?.message ?: "获取考试信息失败"
+                val html = res.body()!!.string()
+                val regex = Regex("(?s)studentExamInfoVms\\s*=\\s*(\\[.*?]);")
+                val match = regex.find(html)
+                if (match == null) {
+                    AHUResponse<List<Exam>>().apply {
+                        code = 0
+                        msg = "未发现考试信息"
+                        data = emptyList()
+                    }
+                } else {
+                    val jsonStr = match.groupValues[1]
+                    val fixedJson = jsonStr.replace("'", "\"")
+                    val jsonArray = JsonParser.parseString(fixedJson).asJsonArray
+                    val list = mutableListOf<Exam>()
+                    jsonArray.forEach { elem ->
+                        val obj = elem.asJsonObject
+                        val courseObj = obj.getAsJsonObject("course")
+                        val examTypeObj = obj.getAsJsonObject("examType")
+                        val courseName = courseObj?.get("nameZh")?.asString ?: ""
+                        val examTypeName = examTypeObj?.get("nameZh")?.asString ?: ""
+                        val courseDisplay = if (examTypeName.isNotEmpty()) "$courseName($examTypeName)" else courseName
+                        val time = obj.get("examTime")?.asString ?: ""
+                        val seatVal = obj.get("seatNo")
+                        val seatNum = when {
+                            seatVal == null || seatVal.isJsonNull -> ""
+                            seatVal.isJsonPrimitive && seatVal.asJsonPrimitive.isNumber -> seatVal.asNumber.toString()
+                            else -> seatVal.asString
+                        }
+                        val campus = obj.getAsJsonObject("requiredCampus")?.get("nameZh")?.asString ?: ""
+                        val room = obj.get("room")?.asString ?: ""
+                        val location = if (campus.isNotEmpty() && room.isNotEmpty()) "$campus-$room" else campus + room
+                        val finished = obj.get("finished")?.asBoolean ?: false
+                        val exam = Exam().apply {
+                            setCourse(courseDisplay)
+                            setTime(time)
+                            setSeatNum(seatNum)
+                            setLocation(location)
+                            setFinished(finished)
+                        }
+                        list.add(exam)
+                    }
+                    AHUResponse<List<Exam>>().apply {
+                        code = 0
+                        data = list
+                        msg = ""
+                    }
+                }
             }
         } catch (e: Exception) {
-            response.code = -1
-            response.msg = "请求错误 $e"
+            AHUResponse<List<Exam>>().apply {
+                code = -1
+                msg = "解析失败: ${e.message}"
+                data = emptyList()
+            }
         }
-        return response
     }
 
     override suspend fun getBathroomTelInfo(
@@ -346,16 +355,23 @@ class CrawlerDataSource : BaseDataSource {
         return response
     }
 
-    override suspend fun getOrderThirdData(request : Request): AHUResponse<Response<ResponseBody>> {
+    override suspend fun getOrderThirdData(request: RequestBody): AHUResponse<Response<ResponseBody>> {
         val response = AHUResponse<Response<ResponseBody>>()
         response.data = YcardApi.API.getOrderThirdData(request.toFormBody())
         response.code = 0;
         return response
     }
 
-    override suspend fun pay(request: Request): AHUResponse<Response<ResponseBody>> {
+    override suspend fun pay(request: RequestBody): AHUResponse<Response<ResponseBody>> {
         val response = AHUResponse<Response<ResponseBody>>()
         response.data = YcardApi.API.pay(request.toFormBody())
+        response.code = 0;
+        return response
+    }
+
+    override suspend fun getSchoolCalendar(): AHUResponse<Response<ResponseBody>> {
+        val response = AHUResponse<Response<ResponseBody>>()
+        response.data = AhuTong.API.downloadFile("xiaoli.jpg");
         response.code = 0;
         return response
     }

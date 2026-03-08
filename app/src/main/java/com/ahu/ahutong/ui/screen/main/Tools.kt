@@ -62,7 +62,8 @@ import android.os.Build
 import android.util.Log
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.ahu.ahutong.sdk.RustSDK
+import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.utils.FileUtils
 import com.ahu.ahutong.R
 import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
@@ -80,186 +81,7 @@ import java.io.File
 fun Tools(navController: NavHostController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    
-    var showPreview by remember { mutableStateOf(false) }
-    var calendarFile by remember { mutableStateOf<File?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
-    var progress by remember { mutableFloatStateOf(0f) }
 
-    val fetchCalendar = {
-        scope.launch(Dispatchers.IO) {
-            val tag = "SchoolCalendarFetch"
-            
-            val cached = RustSDK.getCachedSchoolCalendar(context)
-            if (cached != null) {
-                withContext(Dispatchers.Main) {
-                    calendarFile = cached
-                    showPreview = true
-                }
-                return@launch
-            }
-
-            withContext(Dispatchers.Main) {
-                isLoading = true
-                progress = 0f
-            }
-            Log.d(tag, "开始获取校历 (IO Thread)...")
-
-            try {
-                val file = RustSDK.fetchSchoolCalendar(context) {
-                    progress = it
-                }
-
-                withContext(Dispatchers.Main) {
-                    isLoading = false
-                    if (file != null && file.exists()) {
-                        calendarFile = file
-                        showPreview = true
-                    } else {
-                        Log.e(tag, "获取失败：SDK 返回 null")
-                        Toast.makeText(context, "获取失败，请检查网络连接", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(tag, "异常: ${e.message}")
-                withContext(Dispatchers.Main) {
-                    isLoading = false
-                    Toast.makeText(context, "获取异常: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            fetchCalendar()
-        } else {
-            Toast.makeText(context, "需要存储权限才能保存校历", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    if (isLoading) {
-        Dialog(onDismissRequest = { }) {
-            Surface(
-                shape = SmoothRoundedCornerShape(24.dp),
-                color = 96.n1 withNight 10.n1,
-                shadowElevation = 8.dp,
-                tonalElevation = 6.dp,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    if (progress > 0f) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(progress)
-                                    .fillMaxHeight()
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                            )
-                        }
-                        Text(
-                            text = "正在下载 ${(progress * 100).toInt()}%",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = 10.n1 withNight 96.n1
-                        )
-                    } else {
-                        CircularProgressIndicator()
-                        Text(
-                            text = "正在获取校历...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = 10.n1 withNight 96.n1
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    if (showPreview && calendarFile != null) {
-        Dialog(
-            onDismissRequest = { showPreview = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)
-            ) {
-                var scale by remember { mutableFloatStateOf(1f) }
-                var offset by remember { mutableStateOf(Offset.Zero) }
-
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(calendarFile)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "School Calendar",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) {
-                            detectTransformGestures { _, pan, zoom, _ ->
-                                scale = (scale * zoom).coerceIn(0.5f, 5f)
-                                offset += pan
-                            }
-                        }
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onDoubleTap = {
-                                    scale = 1f
-                                    offset = Offset.Zero
-                                }
-                            )
-                        }
-                        .graphicsLayer(
-                            scaleX = scale,
-                            scaleY = scale,
-                            translationX = offset.x,
-                            translationY = offset.y
-                        ),
-                    contentScale = ContentScale.Fit
-                )
-
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .padding(16.dp)
-                        .systemBarsPadding(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = { showPreview = false }) {
-                        Text("退出", color = Color.White)
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = {
-                        scope.launch(Dispatchers.IO) {
-                            RustSDK.saveImageToGallery(context, calendarFile!!)
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "已保存到相册", Toast.LENGTH_SHORT).show()
-                                showPreview = false
-                            }
-                        }
-                    }) {
-                        Text("保存到相册", color = Color.White)
-                    }
-                }
-            }
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -306,11 +128,7 @@ fun Tools(navController: NavHostController) {
                 iconId = R.drawable.ic_schedule,
                 tint = Color(0xFF9C27B0),
                 onClick = {
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                        launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    } else {
-                        fetchCalendar()
-                    }
+                    navController.navigate("school_calendar")
                 }
             )
         }

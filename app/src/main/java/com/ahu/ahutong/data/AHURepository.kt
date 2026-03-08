@@ -1,40 +1,33 @@
 package com.ahu.ahutong.data
 
 import android.util.Log
-import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.CrawlerDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.crawler.configs.Constants
-import com.ahu.ahutong.data.crawler.manager.CookieManager
-import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.crawler.model.adwnh.Info
-import com.ahu.ahutong.data.crawler.model.jwxt.ExamInfo
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
-import com.ahu.ahutong.data.crawler.model.ycard.Request
+import com.ahu.ahutong.data.crawler.model.ycard.RequestBody
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Course
-import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.data.mock.MockDataSource
+import com.ahu.ahutong.data.server.AhuTong
 import com.ahu.ahutong.sdk.LocalServiceClient
 import com.ahu.ahutong.sdk.RustSDK
+import com.ahu.ahutong.utils.DES
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import okhttp3.Cookie
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import org.jsoup.Jsoup
 import retrofit2.Response
-
-
 /**
  * @Author: SinkDev
  * @Date: 2021/7/31-下午9:12
@@ -59,7 +52,7 @@ object AHURepository {
      * @param isRefresh 是否强制刷新
      * @param isRetry 是否为重试（静默重登录后），防止无限循环
      */
-    suspend fun getSchedule(isRefresh: Boolean = false, isRetry: Boolean = false): Result<List<Course>> = withContext(Dispatchers.IO) {
+    suspend fun getSchedule(isRefresh: Boolean = false): Result<List<Course>> = withContext(Dispatchers.IO) {
 
         if (!isRefresh) {
             AHUCache.getSchoolTerm()?.let{
@@ -72,80 +65,19 @@ object AHURepository {
 
         try {
             val response = dataSource.getSchedule()
-            val data = response.data
 
-            if (response.isSuccessful && data != null) {
-                AHUCache.getSchoolTerm()?.let{
-                    AHUCache.saveSchedule(it, data)
-                }
-                Result.success(data)
-            } else if (!isRetry) {
-                // 数据为空或请求失败，可能是登录状态过期，尝试静默重新登录
-                Log.e(TAG, "getSchedule: 数据异常(data=${data}, msg=${response.msg})，尝试静默重新登录")
-                val reLoginResult = silentReLogin()
-                if (reLoginResult) {
-                    Log.e(TAG, "getSchedule: 静默重登录成功，重试获取课表")
-                    getSchedule(isRefresh = true, isRetry = true)
-                } else {
-                    Result.failure(Throwable(response.msg ?: "获取课表失败，请重新登录"))
-                }
+            AHUCache.getSchoolTerm()?.let{
+                AHUCache.saveSchedule(it,response.data)
+            }
+
+            if (response.isSuccessful) {
+                Result.success(response.data)
+
             } else {
-                Result.failure(Throwable(response.msg ?: "获取课表失败，请重新登录"))
+                Result.failure(Throwable(response.msg))
             }
         } catch (e: Throwable) {
-            if (!isRetry) {
-                // 异常也可能是 session 过期导致的解析错误，尝试静默重登录
-                Log.e(TAG, "getSchedule: 异常(${e.message})，尝试静默重新登录")
-                val reLoginResult = silentReLogin()
-                if (reLoginResult) {
-                    Log.e(TAG, "getSchedule: 静默重登录成功，重试获取课表")
-                    return@withContext getSchedule(isRefresh = true, isRetry = true)
-                }
-            }
             Result.failure(e)
-        }
-    }
-
-    /**
-     * 静默重新登录
-     * 使用缓存的学号和密码尝试重新登录，避免用户手动操作
-     * @return Boolean 是否登录成功
-     */
-    private suspend fun silentReLogin(): Boolean {
-        return try {
-            synchronized(AHUApplication.reLoginMutex) {
-                if (!AHUApplication.sessionExpired) {
-                    // 已经有其他请求成功重登录了
-                    Log.d(TAG, "silentReLogin: 已有其他请求完成重登录")
-                    return@synchronized true
-                }
-
-                val user = AHUCache.getCurrentUser()
-                val password = AHUCache.getWisdomPassword()
-
-                if (user?.xh.isNullOrEmpty() || password.isNullOrEmpty()) {
-                    Log.e(TAG, "silentReLogin: 缺少缓存的登录凭据")
-                    return@synchronized false
-                }
-
-                Log.d(TAG, "silentReLogin: 使用缓存凭据尝试重新登录...")
-                val loginResult = runBlocking {
-                    loginWithCrawler(user!!.xh, password)
-                }
-
-                if (loginResult.isSuccessful) {
-                    AHUApplication.sessionExpired = false
-                    Log.d(TAG, "silentReLogin: 重新登录成功")
-                    true
-                } else {
-                    AHUApplication.sessionExpired = true
-                    Log.e(TAG, "silentReLogin: 重新登录失败 - ${loginResult.msg}")
-                    false
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "silentReLogin: 重新登录异常", e)
-            false
         }
     }
 
@@ -236,31 +168,103 @@ object AHURepository {
      */
     suspend fun loginWithCrawler(username: String, password: String): AHUResponse<User> =
         withContext(Dispatchers.IO) {
-            CookieManager.cookieJar.clear()
-            TokenManager.clear()
-            
-            // 优先使用 HTTP 客户端
-            val httpClient = getHttpClient()
-            val result = if (httpClient != null) {
-                Log.d("LocalServiceClient", "[login] Using HTTP client")
-                httpClient.login(username, password)
-            } else {
-                Log.d("LocalServiceClient", "[login] Fallback to JNI")
-                RustSDK.loginSafe(username, password)
+            val adwmhLogin = async(Dispatchers.IO) {
+
+                var failedTimes = 0
+                var info: Info? = null
+                // 二维码可能识别失败，尝试5次呢
+                while (failedTimes < 5) {
+                    Log.e(TAG, "loginWithCrawler: ${failedTimes+1} 登录", )
+                    val captchaBytes = AdwmhApi.API.getAuthCode().bytes()
+                    Log.e(TAG, "loginWithCrawler: ${captchaBytes}", )
+                    val captchaPart = MultipartBody.Part.createFormData(
+                        "captcha", "img.jpg",
+                        captchaBytes.toRequestBody("image/jpg".toMediaType())
+                    )
+                    val captcha = AhuTong.API
+                        .getCaptchaResult(captchaPart)
+                        .result
+
+
+                    Log.e(TAG, "loginWithCrawler: ${captcha}", )
+                    info = AdwmhApi.API.loginWithCaptcha(
+                        username,
+                        password,
+                        0,
+                        captcha
+                    )
+
+                    if (info.code == 10000) {
+                        Log.e(TAG, "loginWithCrawler: $info")
+                        return@async info
+                    }
+                    failedTimes++
+                }
+
+                return@async info
+
             }
 
-            val response = AHUResponse<User>()
-            if (result.isSuccess) {
-                response.code = 0
-                response.data = result.getOrNull()
-                response.msg = "登录成功"
+            val jwxtLogin = async {
+                val loginPage = JwxtApi.API.fetchLoginInfo()
 
-                syncCookies()
-            } else {
-                response.code = -1
-                response.msg = result.exceptionOrNull()?.message ?: "登录失败"
+                val document = Jsoup.parse(loginPage.body()!!.string())
+                val lt = document.selectFirst("input[name=lt]")?.attr("value")
+
+                lt?.let {
+                    val cipher = DES().strEnc(username + password + lt, "1", "2", "3")
+
+                    val res = JwxtApi.API.device(
+                        "https://one.ahu.edu.cn/cas/device",
+                        username.length,
+                        password.length,
+                        cipher
+                    )
+                    Log.e(TAG, "loginWithCrawler: $res")
+
+                    val jwxtLoginUrl = "https://one.ahu.edu.cn/cas/login" +
+                            "?service=https%3A%2F%2Fjw.ahu.edu.cn%2Fstudent%2Fsso%2Flogin"
+
+                    val jwxtResponse = JwxtApi.API.login(
+                        jwxtLoginUrl,
+                        cipher,
+                        username.length,
+                        password.length,
+                        lt
+                    )
+
+                    if (jwxtResponse.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
+                        return@async true
+                    }
+
+                } ?: run {
+                    if (loginPage.raw().request.url.toString().endsWith(Constants.JWXT_HOME)) {
+                        return@async true
+                    } else {
+                        return@async false
+                    }
+                }
+
+                return@async false
             }
-            return@withContext response
+
+            val crawlerResult = adwmhLogin.await()
+            val jwxtLoginSuccess: Boolean = jwxtLogin.await()
+
+            val result = AHUResponse<User>()
+
+
+            crawlerResult?.let {
+                if (it.code == 10000 && jwxtLoginSuccess) {
+                    result.code = 0
+                    result.data = User(it.`object`.user.userName, it.`object`.user.idNumber)
+                    result.msg = "登录成功"
+                    return@withContext result
+                }
+            }
+            result.code = -1;
+            result.msg = "登录失败"
+            return@withContext result
         }
 
     private fun syncCookies() {
@@ -324,14 +328,20 @@ object AHURepository {
         }
 
 
-    suspend fun getOrderThirdData(request: Request): AHUResponse<Response<ResponseBody>> =
+    suspend fun getOrderThirdData(request: RequestBody): AHUResponse<Response<ResponseBody>> =
         withContext(Dispatchers.IO){
             dataSource.getOrderThirdData(request)
         }
 
-    suspend fun pay(request:Request):AHUResponse<Response<ResponseBody>> =
+    suspend fun pay(request: RequestBody):AHUResponse<Response<ResponseBody>> =
         withContext(Dispatchers.IO){
             dataSource.pay(request)
+        }
+
+
+    suspend fun getSchoolCalendar(): AHUResponse<Response<ResponseBody>> =
+        withContext(Dispatchers.IO) {
+            dataSource.getSchoolCalendar()
         }
 
 }

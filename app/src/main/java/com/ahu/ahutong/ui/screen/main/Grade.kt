@@ -82,15 +82,22 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
     }
 
     val trimmedQuery = if (searchExpanded) searchQuery.trim() else ""
+    fun fuzzyContains(text: String, query: String): Boolean {
+        if (query.isBlank()) return false
+        val q = query.filterNot { it.isWhitespace() }
+        if (q.isEmpty()) return false
+        val pattern = q.map { Regex.escape(it.toString()) }.joinToString(".*")
+        return Regex(pattern, RegexOption.IGNORE_CASE).containsMatchIn(text)
+    }
     val searchResultsByTerm = gradeViewModel.grade?.termGradeList
         ?.mapNotNull { term ->
             val matches = term.gradeList
                 ?.filter { item ->
                     val q = trimmedQuery
                     q.isNotEmpty() && (
-                            (item.course ?: "").contains(q, ignoreCase = true) ||
-                                    (item.courseNum ?: "").contains(q, ignoreCase = true) ||
-                                    (item.courseNature ?: "").contains(q, ignoreCase = true)
+                            fuzzyContains(item.course ?: "", q) ||
+                                    fuzzyContains(item.courseNum ?: "", q) ||
+                                    fuzzyContains(item.courseNature ?: "", q)
                             )
                 }
                 .orEmpty()

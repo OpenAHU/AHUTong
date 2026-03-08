@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.screen.settings
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,8 @@ fun Debug() {
         Button(onClick = {
             CookieManager.cookieJar.clear()
             TokenManager.clear()
+            CookieManager.cookieJar.logAllCookies()
+            Log.e("TAG", "Debug: ${TokenManager.getToken()}", )
         }) {
             Text(text = "清除所有cookie & token")
         }

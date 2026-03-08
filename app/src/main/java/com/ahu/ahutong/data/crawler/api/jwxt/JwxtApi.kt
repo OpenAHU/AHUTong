@@ -41,6 +41,9 @@ interface JwxtApi {
     @GET("/student/for-std/exam-arrange/info/96223")
     suspend fun getExamInfo(): Response<ResponseBody>
 
+    @GET("/student/for-std/exam-arrange")
+    suspend fun fetchExamArrangePage(): Response<ResponseBody>
+
     // To retrieve a student's examInfo/grade, you need their ID
     // This interface return's student' grade, and it also returns student's ID via its redirect URL
     // So,before you get above data, you need access this interface to get student's ID

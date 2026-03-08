@@ -4,15 +4,15 @@ import okhttp3.FormBody
 
 
 
-open class Request{
+open class RequestBody{
     protected val params: MutableMap<String, Any> = linkedMapOf()
 
-    fun addParam(key: String, value: Any): Request {
+    fun addParam(key: String, value: Any): RequestBody {
         params[key] = value
         return this
     }
 
-    fun addParams(newParams: Map<String, Any>): Request {
+    fun addParams(newParams: Map<String, Any>): RequestBody {
         params.putAll(newParams)
         return this
     }
