@@ -46,7 +46,7 @@ class ScheduleViewModel () : ViewModel() {
     /**
      * 刷新课表
      */
-    fun refreshSchedule() {
+    fun refreshSchedule(isRefresh:Boolean = false) {
         viewModelScope.launchSafe {
             withContext(Dispatchers.Main){
                 if (!AHUCache.isLogin()) {
@@ -54,7 +54,7 @@ class ScheduleViewModel () : ViewModel() {
                     return@withContext
                 }
 
-                val result = AHURepository.getSchedule(isRefresh = true)
+                val result = AHURepository.getSchedule(isRefresh = isRefresh)
                 schedule.value = result
             }
 
