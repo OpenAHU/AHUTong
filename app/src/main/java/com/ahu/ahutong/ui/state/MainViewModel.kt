@@ -33,7 +33,7 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { AhuTong.API.getApkUpdateInfo() }
                 .onSuccess { info ->
-                    if (info.versionCode != BuildConfig.VERSION_CODE) {
+                    if (info.versionCode > BuildConfig.VERSION_CODE) {
                         withContext(Dispatchers.Main) {
                             apkUpdateInfo.value = info
                             apkErrorText.value = null
