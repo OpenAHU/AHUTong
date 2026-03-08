@@ -136,7 +136,12 @@ fun SchoolCalendar(navController: NavHostController) {
     }
 
     LaunchedEffect(Unit) {
-        fetchCalendar()
+        val cached = FileUtils.getImageFile(context, "xiaoli.jpg")
+        if (cached.exists()) {
+            calendarFile = cached
+        } else {
+            fetchCalendar()
+        }
     }
 
     Box(
