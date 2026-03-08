@@ -62,16 +62,6 @@ class MainActivity : ComponentActivity() {
     private val scheduleViewModel: ScheduleViewModel by viewModels()
     private val aboutViewModel: AboutViewModel by viewModels()
 
-    private var showHotUpdateDialog by mutableStateOf(false)
-    private var isHotUpdateDownloading by mutableStateOf(false)
-    private var showApkUpdateDialog by mutableStateOf(false)
-    private var apkUpdateInfo by mutableStateOf<ApkUpdateInfo?>(null)
-    private var apkDownloading by mutableStateOf(false)
-    private var apkErrorText by mutableStateOf<String?>(null)
-    private var apkDownloadJob: Job? = null
-
-    private var pendingApkUpdateInfo: ApkUpdateInfo? = null
-    private var apkProgress by mutableStateOf<Float?>(null)
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,22 +84,34 @@ class MainActivity : ComponentActivity() {
 //                        }
 //                    )
 //                }
-                if (showApkUpdateDialog && apkUpdateInfo != null) {
+                if (mainViewModel.showApkUpdateDialog.value && mainViewModel.apkUpdateInfo.value != null) {
                     ApkUpdateDialog(
-                        info = apkUpdateInfo!!,
-                        downloading = apkDownloading,
-                        progress = apkProgress,
-                        errorText = apkErrorText,
+                        info = mainViewModel.apkUpdateInfo.value!!,
+                        downloading = mainViewModel.apkDownloading.value,
+                        progress = mainViewModel.apkProgress.value,
+                        errorText = mainViewModel.apkErrorText.value,
                         onConfirm = {
-                            startDownloadAndInstallApk(apkUpdateInfo!!)
+                            mainViewModel.startApkDownload(this@MainActivity)
                         },
                         onDismiss = {
-                            showApkUpdateDialog = false
+                            mainViewModel.showApkUpdateDialog.value = false
                         },
-                        onCancel = { cancelApkDownload() }
+                        onCancel = {
+                            mainViewModel.showApkUpdateDialog.value = false
+                            Toast.makeText(this@MainActivity, "已转到后台下载", Toast.LENGTH_SHORT).show()
+                        }
                     )
                 }
 
+                val downloaded = mainViewModel.downloadedApkFile.value
+                if (downloaded != null) {
+                    androidx.compose.runtime.LaunchedEffect(downloaded) {
+                        ensureInstallPermissionThen {
+                            installApk(downloaded)
+                        }
+                        mainViewModel.markInstallHandled()
+                    }
+                }
 
                 Main(
                     navController = navController,
@@ -125,9 +127,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun init() {
-        lifecycleScope.launchSafe {
-            checkApkUpdate()
-        }
+        lifecycleScope.launchSafe { mainViewModel.checkApkUpdate() }
 
 
         var hotUpdateApplied = java.util.concurrent.atomic.AtomicBoolean(false)
@@ -248,85 +248,7 @@ class MainActivity : ComponentActivity() {
         requestInstallPermissionLauncher.launch(intent)
     }
 
-    private fun startDownloadAndInstallApk(info: ApkUpdateInfo) {
-        if (apkDownloading) {
-            Log.w("ApkUpdate", "download already in progress, ignore click")
-            return
-        }
-
-        if (info.url.isNullOrEmpty()) {
-            apkErrorText = "下载地址为空"
-            return
-        }
-
-        Log.i("ApkUpdate", "start download: versionCode=${info.versionCode}, url=${info.url}")
-
-        apkDownloading = true
-        apkErrorText = null
-
-        apkDownloadJob = lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val body = AhuTong.API.downloadByUrl(info.url!!)
-                val total = body.contentLength()
-                val dir = getExternalFilesDir(null) ?: filesDir
-                val outFile = File(dir, "update-${info.versionCode}.apk")
-
-                var completed = 0L
-                body.byteStream().use { input: InputStream ->
-                    FileOutputStream(outFile).use { output ->
-                        val buffer = ByteArray(8 * 1024)
-                        var read = input.read(buffer)
-                        while (read >= 0 && this.isActive) {
-                            output.write(buffer, 0, read)
-                            completed += read
-                            if (total > 0) {
-                                withContext(Dispatchers.Main) {
-                                    apkProgress = completed.toFloat() / total.toFloat()
-                                }
-                            }
-                            read = input.read(buffer)
-                        }
-                        output.flush()
-                    }
-                }
-
-                withContext(Dispatchers.Main) {
-                    apkDownloading = false
-                    apkProgress = null
-                    if (!this@launch.isActive) {
-                        apkErrorText = null
-                        return@withContext
-                    }
-                    runCatching {
-                        ensureInstallPermissionThen {
-                            installApk(outFile)
-                        }
-                        if (!info.force) showApkUpdateDialog = false
-                    }.onFailure { t ->
-                        Log.e("ApkUpdate", "installApk failed", t)
-                        apkErrorText = t.message ?: "安装启动失败"
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("ApkUpdate", "download failed", e)
-                withContext(Dispatchers.Main) {
-                    apkDownloading = false
-                    apkProgress = null
-                    apkErrorText = e.message ?: "下载失败"
-                }
-            }
-        }
-    }
-
-    private fun cancelApkDownload() {
-        if (apkDownloading) {
-            apkDownloadJob?.cancel()
-            apkDownloadJob = null
-            apkDownloading = false
-            apkProgress = null
-            apkErrorText = null
-        }
-    }
+    // Update download logic moved into MainViewModel
 
     private fun installApk(apkFile: File) {
         Log.i("ApkUpdate", "installApk called, file=${apkFile.absolutePath}")
@@ -381,21 +303,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    suspend private fun checkApkUpdate() {
-        try {
-            val info = withContext(Dispatchers.IO) { AhuTong.API.getApkUpdateInfo() }
-            Log.i(TAG, "checkApkUpdate: server=${info.versionCode}, local=${BuildConfig.VERSION_CODE}")
-            if (info.versionCode != BuildConfig.VERSION_CODE) {
-                withContext(Dispatchers.Main) {
-                    apkUpdateInfo = info
-                    apkErrorText = null
-                    showApkUpdateDialog = true
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "checkApkUpdate failed", e)
-        }
-    }
+    // update check moved into MainViewModel
 
 
 }
