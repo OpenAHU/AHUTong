@@ -283,11 +283,8 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
 
                 val isCurrentWeek = currentWeek in course.weekIndexes
 
-                if ((currentWeek >= 1
-                            && currentWeek <= course.weekIndexes.last() && isShowAllCourse)
-
-                    || isCurrentWeek
-
+                if ((currentWeek >= 1 && currentWeek <= course.weekIndexes.last() && isShowAllCourse)
+                     || isCurrentWeek
                 ) {
                     key(course.hashCode()) {
 

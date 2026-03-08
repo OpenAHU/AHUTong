@@ -58,7 +58,7 @@ fun CourseCard(
                         mainRowHeight + (cellHeight + cellSpacing) * (course.startTime - 1) + cellSpacing
                     )
                     .clip(SmoothRoundedCornerShape(8.dp))
-                    .background(if (!isCurrentWeek) Color.Gray else 70.a1 withNight 60.a1)
+                    .background(if (!isCurrentWeek) Color.Gray else color)
                     .pointerInput(Unit) {
                         detectTapGestures { onClick(course) }
                     }
