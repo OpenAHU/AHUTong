@@ -38,6 +38,9 @@ class LoginViewModel : ViewModel() {
                 succeedMessage = "欢迎，${response.data.name}！"
                 AHUCache.saveCurrentUser(response.data)
                 AHUCache.saveWisdomPassword(password)
+                AHUCache.setAgreementAccepted()
+                AHUCache.setBusinessAccepted()
+                AHUCache.setPrivacyAccepted()
                 Result.success(response.data)
             }else{
                 state = LoginState.Failed

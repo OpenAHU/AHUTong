@@ -322,7 +322,7 @@ private fun logIn(
 //        RustSDK.initSafe("")
         CookieManager.cookieJar.clear()
         TokenManager.clear()
-        AHUCache.setAgreementAccepted()
+
 
         loginViewModel.loginWithCrawler(userID = userID, password = password)
 
