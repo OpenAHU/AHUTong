@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.ahu.ahutong.sdk.ApkUpdateInfo
+import com.ahu.ahutong.data.server.model.ApkUpdateInfo
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.monet.a1
 import com.kyant.monet.n1
@@ -33,6 +33,7 @@ fun ApkUpdateDialog(
     errorText: String? = null,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    onCancel: () -> Unit = {},
 ) {
     val contentColor = 10.n1 withNight 90.n1
     val containerColor = 100.n1 withNight 20.n1
@@ -145,13 +146,21 @@ fun ApkUpdateDialog(
             }
         },
         dismissButton = {
-            if (!info.force) {
+            if (downloading) {
                 TextButton(
-                    onClick = onDismiss,
-                    enabled = !downloading
+                    onClick = onCancel,
+                    enabled = true
                 ) {
-                    Text("稍后", color = contentColor)
+                    Text("取消", color = contentColor)
                 }
+            } else {
+                    TextButton(
+                        onClick = onDismiss,
+                        enabled = true
+                    ) {
+                        Text("稍后更新", color = contentColor)
+                    }
+
             }
         }
     )
