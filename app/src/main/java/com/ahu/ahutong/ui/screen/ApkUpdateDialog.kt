@@ -149,16 +149,19 @@ fun ApkUpdateDialog(
             if (downloading) {
                 TextButton(
                     onClick = onCancel,
-                    enabled = true
+                    enabled = true,
+                    modifier = Modifier.height(56.dp),
                 ) {
-                    Text("取消", color = contentColor)
+                    Text("后台下载", color = contentColor)
                 }
             } else {
                     TextButton(
                         onClick = onDismiss,
-                        enabled = true
+                        enabled = true,
+                        modifier = Modifier.height(56.dp),
                     ) {
                         Text("稍后更新", color = contentColor)
+
                     }
 
             }

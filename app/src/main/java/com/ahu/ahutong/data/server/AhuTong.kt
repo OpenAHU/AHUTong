@@ -15,6 +15,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Streaming
 import retrofit2.http.Url
 
 interface AhuTong {
@@ -29,6 +30,7 @@ interface AhuTong {
     @GET("/download/{filename}")
     suspend fun downloadFile(@Path(value = "filename", encoded = true) filename: String): retrofit2.Response<ResponseBody>
 
+    @Streaming
     @GET
     suspend fun downloadByUrl(@Url fileUrl: String): ResponseBody
 
