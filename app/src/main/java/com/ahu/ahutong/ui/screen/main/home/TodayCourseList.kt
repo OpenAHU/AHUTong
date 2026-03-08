@@ -38,7 +38,7 @@ import com.kyant.monet.withNight
 fun TodayCourseList(
     todayCourses: List<Course>,
     currentMinutes: Int,
-    navController: NavHostController
+    navController: NavHostController?
 ) {
     val currentCourseIndex = todayCourses.indexOfLast {
         val range = ScheduleViewModel.getCourseTimeRangeInMinutes(it)
@@ -50,7 +50,7 @@ fun TodayCourseList(
             .padding(horizontal = 16.dp)
             .clip(SmoothRoundedCornerShape(32.dp))
             .background(100.n1 withNight 20.n1)
-            .clickable { navController.navigate("schedule") }
+            .clickable { navController?.navigate("schedule") }
             .padding(16.dp)
             .composed {
                 val offColor = 70.n1 withNight 60.n1

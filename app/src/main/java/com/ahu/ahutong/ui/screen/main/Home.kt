@@ -114,7 +114,7 @@ fun Home(
 }
 
 @Composable
-private fun SlideInContent(
+fun SlideInContent(
     visible: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable AnimatedVisibilityScope.() -> Unit
