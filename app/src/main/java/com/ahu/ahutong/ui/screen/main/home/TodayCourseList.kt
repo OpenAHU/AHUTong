@@ -140,7 +140,6 @@ fun TodayCourseList(
                 )
                 Text(
                     text = course.name,
-                    modifier = Modifier.weight(1f),
                     color = if (isOngoing) 0.n1 else Color.Unspecified,
                     fontWeight = if (isOngoing) FontWeight.Bold else null,
                     maxLines = 1,
@@ -148,6 +147,7 @@ fun TodayCourseList(
                 )
                 Text(
                     text = shortenLocation(course.location),
+                    modifier = Modifier.weight(1f),
                     color = if (isOngoing) 20.n1 else 50.n1 withNight 80.n1,
                     fontWeight = if (isOngoing) FontWeight.Bold else null,
                     textAlign = TextAlign.End,
