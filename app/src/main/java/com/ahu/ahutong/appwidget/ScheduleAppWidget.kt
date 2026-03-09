@@ -110,10 +110,10 @@ private fun ScheduleWidgetContent(
         }
     )
     val dateText = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(Date())
-    val currentCourseIndex = todayCourses.indexOfLast {
+    val remainingCourses = todayCourses.filter {
         val range = ScheduleViewModel.getCourseTimeRangeInMinutes(it)
-        currentMinutes > range.first
-    }.coerceAtLeast(0)
+        currentMinutes <= range.last
+    }
     val backgroundColor = cp(100.n1, 20.n1)
     val offColor = cp(70.n1, 60.n1)
     val onColor = cp(50.a1, 90.a1)
@@ -137,7 +137,7 @@ private fun ScheduleWidgetContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "今日课程 ${todayCourses.size} 节",
+                    text = if (remainingCourses.size == 0) "今天没课啦" else "还剩 ${remainingCourses.size} 节",
                     style = TextStyle(
                         color = primaryTextColor,
                         fontSize = 15.sp,
@@ -164,9 +164,9 @@ private fun ScheduleWidgetContent(
                 )
             }
             Spacer(modifier = GlanceModifier.height(10.dp))
-            if (todayCourses.isEmpty()) {
+            if (remainingCourses.isEmpty()) {
                 Text(
-                    text = "今日无课程",
+                    text = "没课啦",
                     style = TextStyle(
                         color = primaryTextColor,
                         fontSize = 16.sp,
@@ -190,10 +190,10 @@ private fun ScheduleWidgetContent(
                 Column(
                     modifier = GlanceModifier.fillMaxWidth()
                 ) {
-                    todayCourses.forEachIndexed { index, course ->
+                    remainingCourses.forEachIndexed { index, course ->
                         val currentRange = ScheduleViewModel.getCourseTimeRangeInMinutes(course)
                         val isOngoing = currentMinutes in currentRange
-                        val isPassed = index <= currentCourseIndex
+                        val isPassed = currentMinutes > currentRange.first
                         val rowColor = if (isOngoing) activatedRowColor else cp(
                             Color.Transparent,
                             Color.Transparent
@@ -251,7 +251,7 @@ private fun ScheduleWidgetContent(
                                 }
                             }
                         }
-                        if (index != todayCourses.lastIndex) {
+                        if (index != remainingCourses.lastIndex) {
                             Spacer(modifier = GlanceModifier.height(4.dp))
                         }
                     }
