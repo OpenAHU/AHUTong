@@ -107,6 +107,10 @@ class MainActivity : ComponentActivity() {
                 if (downloaded != null) {
                     androidx.compose.runtime.LaunchedEffect(downloaded) {
                         ensureInstallPermissionThen {
+                            val info = mainViewModel.apkUpdateInfo.value
+                            if (info != null) {
+                                mainViewModel.writeUpdateMarker(this@MainActivity, info.versionCode)
+                            }
                             installApk(downloaded)
                         }
                         mainViewModel.markInstallHandled()
@@ -127,7 +131,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun init() {
-        lifecycleScope.launchSafe { mainViewModel.checkApkUpdate() }
+        lifecycleScope.launchSafe {
+            mainViewModel.handleUpdateFiles(this@MainActivity)
+            mainViewModel.checkApkUpdate()
+        }
 
 
         var hotUpdateApplied = java.util.concurrent.atomic.AtomicBoolean(false)
