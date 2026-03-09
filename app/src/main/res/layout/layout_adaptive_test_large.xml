@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="30dp"
+    android:id="@+id/layout_wight"
+    >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        >
+        <TextView
+            android:id="@+id/adaptive_test_title_large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="还剩 0 节"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/adaptive_test_subtitle_large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="03-09/周一"
+            android:textColor="#99000000"
+            android:textSize="10sp"
+            android:paddingStart="12dp"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/adaptive_test_items_large"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical" />
+</LinearLayout>
