@@ -165,7 +165,7 @@ fun ApkUpdateDialog(
                     }
                     Spacer(Modifier.width(4.dp))
                 }
-                if (downloading) {
+                if (downloading && !info.force) {
                     TextButton(
                         onClick = onCancel,
                         enabled = true,
@@ -173,7 +173,7 @@ fun ApkUpdateDialog(
                     ) {
                         Text("后台下载", color = contentColor)
                     }
-                } else {
+                } else if (!downloading && !info.force) {
                     TextButton(
                         onClick = onDismiss,
                         enabled = true,
