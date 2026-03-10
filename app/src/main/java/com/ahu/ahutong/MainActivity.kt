@@ -90,8 +90,15 @@ class MainActivity : ComponentActivity() {
                         downloading = mainViewModel.apkDownloading.value,
                         progress = mainViewModel.apkProgress.value,
                         errorText = mainViewModel.apkErrorText.value,
+                        apkLocalReady = mainViewModel.apkLocalReady.value,
                         onConfirm = {
                             mainViewModel.startApkDownload(this@MainActivity)
+                        },
+                        onInstallLocal = {
+                            mainViewModel.installLocalApk(this@MainActivity)
+                        },
+                        onRedownload = {
+                            mainViewModel.startApkDownload(this@MainActivity, forceRedownload = true)
                         },
                         onDismiss = {
                             mainViewModel.showApkUpdateDialog.value = false
@@ -127,7 +134,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun init() {
-        lifecycleScope.launchSafe { mainViewModel.checkApkUpdate() }
+        lifecycleScope.launchSafe {
+            mainViewModel.checkApkUpdate(this@MainActivity)
+        }
 
 
         var hotUpdateApplied = java.util.concurrent.atomic.AtomicBoolean(false)
