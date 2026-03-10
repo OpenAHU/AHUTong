@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.security.MessageDigest
 
 class MainViewModel : ViewModel() {
 
@@ -27,94 +28,159 @@ class MainViewModel : ViewModel() {
     var apkProgress = mutableStateOf<Float?>(null)
     var apkErrorText = mutableStateOf<String?>(null)
     var downloadedApkFile = mutableStateOf<File?>(null)
+    /** 本地已存在目标版本 APK，可直接安装 */
+    var apkLocalReady = mutableStateOf(false)
 
     private var apkDownloadJob: Job? = null
 
-    /**
-     * 启动时处理更新标记文件，必须在 checkApkUpdate 之前调用
-     */
-    suspend fun handleUpdateFiles(context: Context) = withContext(Dispatchers.IO) {
-        val dir = context.getExternalFilesDir(null) ?: context.filesDir
-        val updateFile = File(dir, "update")
-        val checkFile = File(dir, "check")
+    private val apkFileRegex = Regex("""^update-(\d+)\.apk$""")
 
-        if (checkFile.exists()) {
-            // check 文件存在 → 上次安装失败且已重试过，清理所有文件
-            Log.i("ApkUpdate", "check file found, cleaning up all update files")
-            if (updateFile.exists()) {
-                runCatching {
-                    val targetVersion = updateFile.readText().trim()
-                    File(dir, "update-${targetVersion}.apk").delete()
-                }
-                updateFile.delete()
+    /** 计算文件 SHA-256，返回小写 hex，必须在 IO 线程调用 */
+    private fun sha256Of(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(8 * 1024)
+            var read = input.read(buffer)
+            while (read >= 0) {
+                digest.update(buffer, 0, read)
+                read = input.read(buffer)
             }
-            checkFile.delete()
-            return@withContext
         }
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
 
-        if (updateFile.exists()) {
-            val targetVersion = updateFile.readText().trim()
-            val currentVersion = BuildConfig.VERSION_CODE.toString()
-            if (targetVersion == currentVersion) {
-                // 版本一致，更新成功，清理 update 文件和 apk
-                Log.i("ApkUpdate", "update successful (version=$targetVersion), cleaning up")
-                File(dir, "update-${targetVersion}.apk").delete()
-                updateFile.delete()
-            } else {
-                // 版本不一致，创建 check 文件
-                Log.i("ApkUpdate", "update version mismatch: current=$currentVersion, target=$targetVersion, creating check")
-                checkFile.writeText("check")
+    /**
+     * 启动时检查云端更新、清理残留 APK、检测本地缓存
+     * 全部在 IO 线程执行，不阻塞主线程
+     */
+    suspend fun checkApkUpdate(context: Context) = withContext(Dispatchers.IO) {
+        val dir = context.getExternalFilesDir(null) ?: context.filesDir
+
+        // 1. 清理版本号 <= 当前版本的残留 APK（安全校验文件名）
+        cleanStaleApks(dir)
+
+        // 2. 从云端获取最新版本信息
+        val info = runCatching { AhuTong.API.getApkUpdateInfo() }.getOrNull() ?: return@withContext
+        if (info.versionCode <= BuildConfig.VERSION_CODE) return@withContext
+
+        // 3. 检查本地是否已有该版本的 APK，并校验 sha256
+        val localApk = File(dir, "update-${info.versionCode}.apk")
+        val localReady = if (localApk.exists() && localApk.length() > 0) {
+            if (!info.sha256.isNullOrEmpty()) {
+                val localHash = runCatching { sha256Of(localApk) }.getOrNull()
+                val match = localHash.equals(info.sha256, ignoreCase = true)
+                if (!match) {
+                    Log.w("ApkUpdate", "local APK sha256 mismatch, expected=${info.sha256}, got=$localHash, deleting")
+                    localApk.delete()
+                }
+                match
+            } else true
+        } else false
+
+        withContext(Dispatchers.Main) {
+            apkUpdateInfo.value = info
+            apkErrorText.value = null
+            apkLocalReady.value = localReady
+            showApkUpdateDialog.value = true
+        }
+    }
+
+    /**
+     * 清理版本号 <= 当前版本的 APK，跳过不符合命名规范的文件
+     */
+    private fun cleanStaleApks(dir: File) {
+        val files = dir.listFiles() ?: return
+        for (file in files) {
+            val match = apkFileRegex.matchEntire(file.name) ?: continue
+            val versionCode = match.groupValues[1].toIntOrNull() ?: continue
+            if (versionCode <= BuildConfig.VERSION_CODE) {
+                Log.i("ApkUpdate", "deleting stale APK: ${file.name}")
+                file.delete()
             }
         }
     }
 
     /**
-     * 在触发安装前写入更新标记文件
-     * 首次安装 → 写 update；update 已存在 → 写 check
+     * 直接安装本地已缓存的 APK（用户点击"安装"按钮）
      */
-    fun writeUpdateMarker(context: Context, targetVersionCode: Int) {
+    fun installLocalApk(context: Context) {
+        val info = apkUpdateInfo.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             val dir = context.getExternalFilesDir(null) ?: context.filesDir
-            val updateFile = File(dir, "update")
-            if (updateFile.exists()) {
-                val checkFile = File(dir, "check")
-                checkFile.writeText("check")
-                Log.i("ApkUpdate", "update file already exists, wrote check instead")
-            } else {
-                updateFile.writeText(targetVersionCode.toString())
-                Log.i("ApkUpdate", "wrote update marker: version=$targetVersionCode")
+            val localApk = File(dir, "update-${info.versionCode}.apk")
+            if (!localApk.exists() || localApk.length() <= 0) {
+                withContext(Dispatchers.Main) {
+                    apkLocalReady.value = false
+                    apkErrorText.value = "本地文件已丢失，请重新下载"
+                }
+                return@launch
+            }
+            // 校验 sha256
+            if (!info.sha256.isNullOrEmpty()) {
+                val localHash = runCatching { sha256Of(localApk) }.getOrNull()
+                if (!localHash.equals(info.sha256, ignoreCase = true)) {
+                    Log.w("ApkUpdate", "install: sha256 mismatch, deleting corrupt APK")
+                    localApk.delete()
+                    withContext(Dispatchers.Main) {
+                        apkLocalReady.value = false
+                        apkErrorText.value = "本地文件已损坏，请重新下载"
+                    }
+                    return@launch
+                }
+            }
+            withContext(Dispatchers.Main) {
+                downloadedApkFile.value = localApk
             }
         }
     }
 
-    fun checkApkUpdate() {
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching { AhuTong.API.getApkUpdateInfo() }
-                .onSuccess { info ->
-                    if (info.versionCode > BuildConfig.VERSION_CODE) {
-                        withContext(Dispatchers.Main) {
-                            apkUpdateInfo.value = info
-                            apkErrorText.value = null
-                            showApkUpdateDialog.value = true
-                        }
-                    }
-                }
-        }
-    }
-
-    fun startApkDownload(context: Context) {
+    fun startApkDownload(context: Context, forceRedownload: Boolean = false) {
         val info = apkUpdateInfo.value ?: return
         if (apkDownloading.value) return
 
-        // 检查本地是否已存在该版本 APK，存在则直接使用
-        val dir = context.getExternalFilesDir(null) ?: context.filesDir
-        val existingApk = File(dir, "update-${info.versionCode}.apk")
-        if (existingApk.exists() && existingApk.length() > 0) {
-            Log.i("ApkUpdate", "APK already exists locally: ${existingApk.absolutePath}")
-            downloadedApkFile.value = existingApk
-            return
+        if (!forceRedownload) {
+            // 检查本地是否已存在该版本 APK 并校验完整性（IO 安全）
+            viewModelScope.launch(Dispatchers.IO) {
+                val dir = context.getExternalFilesDir(null) ?: context.filesDir
+                val existingApk = File(dir, "update-${info.versionCode}.apk")
+                if (existingApk.exists() && existingApk.length() > 0) {
+                    // 校验 sha256
+                    if (!info.sha256.isNullOrEmpty()) {
+                        val localHash = runCatching { sha256Of(existingApk) }.getOrNull()
+                        if (!localHash.equals(info.sha256, ignoreCase = true)) {
+                            Log.w("ApkUpdate", "cached APK sha256 mismatch, deleting")
+                            existingApk.delete()
+                            withContext(Dispatchers.Main) {
+                                apkLocalReady.value = false
+                                doApkDownload(context, info)
+                            }
+                            return@launch
+                        }
+                    }
+                    Log.i("ApkUpdate", "APK already exists locally: ${existingApk.absolutePath}")
+                    withContext(Dispatchers.Main) {
+                        apkLocalReady.value = true
+                        downloadedApkFile.value = existingApk
+                    }
+                    return@launch
+                }
+                withContext(Dispatchers.Main) { doApkDownload(context, info) }
+            }
+        } else {
+            // 强制重新下载：先删除本地缓存
+            viewModelScope.launch(Dispatchers.IO) {
+                val dir = context.getExternalFilesDir(null) ?: context.filesDir
+                val existingApk = File(dir, "update-${info.versionCode}.apk")
+                existingApk.delete()
+                withContext(Dispatchers.Main) {
+                    apkLocalReady.value = false
+                    doApkDownload(context, info)
+                }
+            }
         }
+    }
 
+    private fun doApkDownload(context: Context, info: ApkUpdateInfo) {
         if (info.url.isNullOrEmpty()) {
             apkErrorText.value = "下载地址为空"
             return
@@ -159,9 +225,36 @@ class MainViewModel : ViewModel() {
                     }
                 }
 
+                // 校验下载完整性
+                if (total > 0 && completed != total) {
+                    outFile.delete()
+                    withContext(Dispatchers.Main) {
+                        apkDownloading.value = false
+                        apkProgress.value = null
+                        apkErrorText.value = "下载不完整（${completed}/${total}），请重试"
+                    }
+                    return@launch
+                }
+
+                // 校验 sha256
+                if (!info.sha256.isNullOrEmpty()) {
+                    val hash = runCatching { sha256Of(outFile) }.getOrNull()
+                    if (!hash.equals(info.sha256, ignoreCase = true)) {
+                        Log.w("ApkUpdate", "download sha256 mismatch: expected=${info.sha256}, got=$hash")
+                        outFile.delete()
+                        withContext(Dispatchers.Main) {
+                            apkDownloading.value = false
+                            apkProgress.value = null
+                            apkErrorText.value = "文件校验失败，请重试"
+                        }
+                        return@launch
+                    }
+                }
+
                 withContext(Dispatchers.Main) {
                     apkDownloading.value = false
                     apkProgress.value = null
+                    apkLocalReady.value = true
                     downloadedApkFile.value = outFile
                 }
             } catch (e: Exception) {

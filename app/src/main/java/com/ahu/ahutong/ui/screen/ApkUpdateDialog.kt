@@ -1,8 +1,10 @@
 package com.ahu.ahutong.ui.component
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -15,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,7 +34,10 @@ fun ApkUpdateDialog(
     downloading: Boolean,
     progress: Float? = null,
     errorText: String? = null,
+    apkLocalReady: Boolean = false,
     onConfirm: () -> Unit,
+    onInstallLocal: () -> Unit = {},
+    onRedownload: () -> Unit = {},
     onDismiss: () -> Unit,
     onCancel: () -> Unit = {},
 ) {
@@ -121,7 +127,7 @@ fun ApkUpdateDialog(
         containerColor = containerColor,
         confirmButton = {
             FilledTonalButton(
-                onClick = onConfirm,
+                onClick = if (apkLocalReady && !downloading) onInstallLocal else onConfirm,
                 enabled = !downloading,
                 modifier = Modifier.height(56.dp),
                 shape = SmoothRoundedCornerShape(16.dp),
@@ -138,32 +144,44 @@ fun ApkUpdateDialog(
                 }
             ) {
                 Text(
-                    text = if (downloading) "下载中…" else "下载并安装",
+                    text = when {
+                        downloading -> "下载中…"
+                        apkLocalReady -> "安装"
+                        else -> "下载并安装"
+                    },
                     style = if (downloading) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge,
                     fontWeight = if (downloading) FontWeight.Normal else FontWeight.Medium
                 )
-//                Text(if (downloading) "下载中(apk传输比较慢，请稍等)..." else "下载并安装")
             }
         },
         dismissButton = {
-            if (downloading) {
-                TextButton(
-                    onClick = onCancel,
-                    enabled = true,
-                    modifier = Modifier.height(56.dp),
-                ) {
-                    Text("后台下载", color = contentColor)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (apkLocalReady && !downloading) {
+                    TextButton(
+                        onClick = onRedownload,
+                        modifier = Modifier.height(56.dp),
+                    ) {
+                        Text("重新下载", color = contentColor)
+                    }
+                    Spacer(Modifier.width(4.dp))
                 }
-            } else {
+                if (downloading) {
+                    TextButton(
+                        onClick = onCancel,
+                        enabled = true,
+                        modifier = Modifier.height(56.dp),
+                    ) {
+                        Text("后台下载", color = contentColor)
+                    }
+                } else {
                     TextButton(
                         onClick = onDismiss,
                         enabled = true,
                         modifier = Modifier.height(56.dp),
                     ) {
                         Text("稍后更新", color = contentColor)
-
                     }
-
+                }
             }
         }
     )

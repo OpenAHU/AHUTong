@@ -90,8 +90,15 @@ class MainActivity : ComponentActivity() {
                         downloading = mainViewModel.apkDownloading.value,
                         progress = mainViewModel.apkProgress.value,
                         errorText = mainViewModel.apkErrorText.value,
+                        apkLocalReady = mainViewModel.apkLocalReady.value,
                         onConfirm = {
                             mainViewModel.startApkDownload(this@MainActivity)
+                        },
+                        onInstallLocal = {
+                            mainViewModel.installLocalApk(this@MainActivity)
+                        },
+                        onRedownload = {
+                            mainViewModel.startApkDownload(this@MainActivity, forceRedownload = true)
                         },
                         onDismiss = {
                             mainViewModel.showApkUpdateDialog.value = false
@@ -107,10 +114,6 @@ class MainActivity : ComponentActivity() {
                 if (downloaded != null) {
                     androidx.compose.runtime.LaunchedEffect(downloaded) {
                         ensureInstallPermissionThen {
-                            val info = mainViewModel.apkUpdateInfo.value
-                            if (info != null) {
-                                mainViewModel.writeUpdateMarker(this@MainActivity, info.versionCode)
-                            }
                             installApk(downloaded)
                         }
                         mainViewModel.markInstallHandled()
@@ -132,8 +135,7 @@ class MainActivity : ComponentActivity() {
 
     private fun init() {
         lifecycleScope.launchSafe {
-            mainViewModel.handleUpdateFiles(this@MainActivity)
-            mainViewModel.checkApkUpdate()
+            mainViewModel.checkApkUpdate(this@MainActivity)
         }
 
 
