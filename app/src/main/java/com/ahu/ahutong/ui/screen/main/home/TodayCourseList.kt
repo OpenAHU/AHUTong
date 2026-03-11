@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -40,6 +42,31 @@ fun TodayCourseList(
     currentMinutes: Int,
     navController: NavHostController?
 ) {
+    if (todayCourses.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(SmoothRoundedCornerShape(32.dp))
+                .background(100.n1 withNight 20.n1)
+                .clickable { navController?.navigate("schedule") }
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "今天暂无课程",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "点击查看完整课表",
+                color = 50.n1 withNight 80.n1,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        return
+    }
+
     val currentCourseIndex = todayCourses.indexOfLast {
         val range = ScheduleViewModel.getCourseTimeRangeInMinutes(it)
         currentMinutes > range.first
@@ -125,7 +152,7 @@ fun TodayCourseList(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(24.dp)
+                    .heightIn(min = 24.dp)
                     .padding(start = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -136,22 +163,29 @@ fun TodayCourseList(
                     color = if (isOngoing) 20.n1 else 50.n1 withNight 80.n1,
                     fontWeight = if (isOngoing) FontWeight.Bold else null,
                     maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Clip,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
                     text = course.name,
+                    modifier = Modifier.weight(1f),
                     color = if (isOngoing) 0.n1 else Color.Unspecified,
                     fontWeight = if (isOngoing) FontWeight.Bold else null,
                     maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Clip,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
                     text = shortenLocation(course.location),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.widthIn(min = 56.dp, max = 96.dp),
                     color = if (isOngoing) 20.n1 else 50.n1 withNight 80.n1,
                     fontWeight = if (isOngoing) FontWeight.Bold else null,
                     textAlign = TextAlign.End,
                     maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Clip,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

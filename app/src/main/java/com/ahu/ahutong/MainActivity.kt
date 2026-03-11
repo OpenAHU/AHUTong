@@ -213,16 +213,13 @@ class MainActivity : ComponentActivity() {
     private fun initializeActivityResultLauncher() {
         requestInstallPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                // 权限请求结果回调
-                Log.i("ApkUpdate", "permission=${result.resultCode}")
-                if (result.resultCode == RESULT_OK) {
-                    val canInstall = packageManager.canRequestPackageInstalls()
-                    Log.i("ApkUpdate", "canRequestPackageInstalls after permission=$canInstall")
-                    if (canInstall) {
-                        // 执行待执行的action
-                        pendingInstallAction?.invoke()
-                        pendingInstallAction = null
-                    }
+                // Settings 页面返回的 resultCode 在不同 ROM 上不可靠，按真实权限状态判断
+                Log.i("ApkUpdate", "permission resultCode=${result.resultCode}")
+                val canInstall = packageManager.canRequestPackageInstalls()
+                Log.i("ApkUpdate", "canRequestPackageInstalls after permission=$canInstall")
+                if (canInstall) {
+                    pendingInstallAction?.invoke()
+                    pendingInstallAction = null
                 } else {
                     Toast.makeText(this, "未授权安装权限，安装失败", Toast.LENGTH_SHORT).show()
                 }

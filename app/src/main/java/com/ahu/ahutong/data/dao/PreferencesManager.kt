@@ -13,6 +13,7 @@ object PreferencesKeys {
     val SHOW_QR_CODE = booleanPreferencesKey("show_qr_code")
     val IS_SHOW_ALL_COURSE = booleanPreferencesKey("is_show_all_course")
     val USE_LIQUID_GLASS = booleanPreferencesKey("use_liquid_glass")
+    val COURSE_REMINDER_ENABLED = booleanPreferencesKey("course_reminder_enabled")
 }
 
 private val Context.dataStore by preferencesDataStore(name = "user_pref")
@@ -46,6 +47,16 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
     suspend fun setUseLiquidGlass(value: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[PreferencesKeys.USE_LIQUID_GLASS] = value
+        }
+    }
+
+    val courseReminderEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[PreferencesKeys.COURSE_REMINDER_ENABLED] ?: false
+    }
+
+    suspend fun setCourseReminderEnabled(value: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[PreferencesKeys.COURSE_REMINDER_ENABLED] = value
         }
     }
 

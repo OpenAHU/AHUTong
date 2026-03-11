@@ -39,9 +39,9 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.ahu.ahutong.MainActivity
 import com.ahu.ahutong.data.AHURepository
-import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
-import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.debug.DebugClock
 import com.ahu.ahutong.data.model.Course
+import com.ahu.ahutong.data.schedule.CurrentWeekResolver
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.kyant.monet.LocalTonalPalettes
 import com.kyant.monet.TonalPalettes.Companion.toTonalPalettes
@@ -50,8 +50,6 @@ import com.kyant.monet.n1
 import com.kyant.monet.toColor
 import com.kyant.monet.toSrgb
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 import kotlin.collections.filter
 import kotlin.collections.orEmpty
@@ -60,15 +58,12 @@ import kotlin.collections.sortedBy
 class ScheduleAppWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val teachWeek = runCatching { JwxtApi.API.getCurrentTeachWeek() }.getOrNull()
-        teachWeek?.let { AHUCache.saveSchoolTerm(it.currentSemester) }
-        val currentWeek = teachWeek?.weekIndex ?: 1
-        val weekDay =
-            (Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK] - 1).takeIf { it != 0 } ?: 7
+        val scheduleConfig = CurrentWeekResolver.resolveLocalFirst().config
+        val currentWeek = scheduleConfig.week
+        val weekDay = scheduleConfig.weekDay
         val schedule =
             runCatching { AHURepository.getSchedule(false) }.getOrNull()?.getOrNull().orEmpty()
-        val calendar = Calendar.getInstance(Locale.CHINA)
-        val currentMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+        val currentMinutes = DebugClock.currentMinutes()
         val todayCourses = schedule
             .filter { currentWeek in it.startWeek..it.endWeek }
             .filter { it.weekday == weekDay }
@@ -118,7 +113,7 @@ private fun ScheduleWidgetContent(
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
     )
-    val dateText = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(Date())
+    val dateText = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(DebugClock.nowDate())
     val remainingCourses = todayCourses.filter {
         val range = ScheduleViewModel.getCourseTimeRangeInMinutes(it)
         currentMinutes <= range.last

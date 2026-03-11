@@ -15,13 +15,11 @@ import android.widget.RemoteViews
 import androidx.compose.ui.graphics.toArgb
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.AHURepository
-import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
-import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.debug.DebugClock
+import com.ahu.ahutong.data.schedule.CurrentWeekResolver
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 
@@ -95,18 +93,13 @@ class ScheduleAdaptiveWidgetProvider : AppWidgetProvider() {
         } else {
             R.id.adaptive_test_items_small
         }
-        val teachWeek = runCatching {
-            runBlocking { JwxtApi.API.getCurrentTeachWeek() }
-        }.getOrNull()
-        teachWeek?.let { AHUCache.saveSchoolTerm(it.currentSemester) }
-        val currentWeek = teachWeek?.weekIndex ?: 1
-        val weekDay =
-            (Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK] - 1).takeIf { it != 0 } ?: 7
+        val scheduleConfig = runBlocking { CurrentWeekResolver.resolveLocalFirst().config }
+        val currentWeek = scheduleConfig.week
+        val weekDay = scheduleConfig.weekDay
         val schedule = runCatching {
             runBlocking { AHURepository.getSchedule(false) }
         }.getOrNull()?.getOrNull().orEmpty()
-        val calendar = Calendar.getInstance(Locale.CHINA)
-        val currentMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+        val currentMinutes = DebugClock.currentMinutes()
         val todayCourses = schedule
             .filter { currentWeek in it.startWeek..it.endWeek }
             .filter { it.weekday == weekDay }
@@ -122,24 +115,16 @@ class ScheduleAdaptiveWidgetProvider : AppWidgetProvider() {
             currentMinutes <= ScheduleViewModel.getCourseTimeRangeInMinutes(it).last
         }
 
-        val displayCourses = when {
-            remainingCourses.size >= 3 -> remainingCourses.take(3)
-            todayCourses.size >= 3 -> todayCourses.take(3)
-            else -> todayCourses
-        }
+        val displayCourses = remainingCourses.take(3)
         val widgetColors = resolve(context)
         val titleText: String
         val subtitleText: String
         if (displayCourses.isEmpty()) {
             titleText = "今天没课啦"
-            subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(Date())
+            subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(DebugClock.nowDate())
         } else {
-            titleText = if (remainingCourses.isEmpty()) {
-                "今日课程${todayCourses.size}节"
-            } else {
-                "还剩${remainingCourses.size}节"
-            }
-            subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(Date())
+            titleText = "还剩${remainingCourses.size}节"
+            subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(DebugClock.nowDate())
         }
         val remoteViews = RemoteViews(context.packageName, layoutRes)
         remoteViews.setOnClickPendingIntent(

@@ -3,20 +3,21 @@ package com.ahu.ahutong.ui.state
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.AHURepository
-import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.debug.DebugClock
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.ScheduleConfigBean
+import com.ahu.ahutong.data.schedule.CurrentWeekResolver
 import com.ahu.ahutong.ext.launchSafe
+import com.ahu.ahutong.notification.CourseReminderScheduler
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.LocalDate
-import java.time.ZoneId
 
 /**
  * @Author SinkDev
@@ -28,10 +29,12 @@ class ScheduleViewModel () : ViewModel() {
     val schedule = MutableLiveData<Result<List<Course>>>()
 
     val schoolYear: String
-        get() = AHUCache.getSchoolYear() ?: "2022-2023"
+        get() = CurrentWeekResolver.getCachedSemesterKey()?.schoolYear
+            ?: AHUCache.getSchoolYear()
+            ?: "2022-2023"
 
     val schoolTerm: String
-        get() = AHUCache.getSchoolTerm() ?: "1"
+        get() = CurrentWeekResolver.getCachedSemesterKey()?.schoolTerm ?: "1"
 
     val scheduleConfig = MutableLiveData<ScheduleConfigBean?>()
 
@@ -56,6 +59,9 @@ class ScheduleViewModel () : ViewModel() {
 
                 val result = AHURepository.getSchedule(isRefresh = isRefresh)
                 schedule.value = result
+                if (result.isSuccess) {
+                    CourseReminderScheduler.reschedule(AHUApplication.getApp())
+                }
             }
 
         }
@@ -63,41 +69,20 @@ class ScheduleViewModel () : ViewModel() {
 
     fun loadConfig() {
         viewModelScope.launchSafe {
-            withContext(Dispatchers.IO) {
-//                var time = AHUCache.getSchoolTermStartTime(schoolYear, schoolTerm)
-//                if (time == null) {
-//                    showSelectTimeDialog.callFromOtherThread()
-//                    time = "2022-2-21"
-//                }
-                // 创建课程表配置
-                val scheduleConfigBean = ScheduleConfigBean()
-                // 是否显示全部课程
-                scheduleConfigBean.isShowAll = AHUCache.isShowAllCourse()
-                // 根据开学时间， 获取当前周数
-//                val date = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
-//                    .parse(time)
-                // 开学时间
-//                scheduleConfigBean.startTime = date
-                // 当前周数
+            val initialConfig = withContext(Dispatchers.IO) {
+                CurrentWeekResolver.resolveLocalFirst()
+            }
+            scheduleConfig.postValue(initialConfig.config)
+            CourseReminderScheduler.reschedule(AHUApplication.getApp())
 
-                val scheduleConfigResult = JwxtApi.API.getCurrentTeachWeek()
-
-                AHUCache.saveSchoolTerm(scheduleConfigResult.currentSemester)
-
-                scheduleConfigBean.week = scheduleConfigResult.weekIndex
-                // 当前周几
-                scheduleConfigBean.weekDay = (Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK] - 1)
-                    .takeIf { it != 0 } ?: 7
-
-                // 计算startTime
-                val currentDate = LocalDate.now()
-                val pastDate = currentDate.plusDays(scheduleConfigResult.dayIndex.toLong())
-                val startDate: Date = Date.from(pastDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
-                scheduleConfigBean.startTime = startDate
-
-                scheduleConfigBean
-            }.let {
-                scheduleConfig.postValue(it)
+            if (!DebugClock.isMocked() && initialConfig.source != CurrentWeekResolver.Source.REMOTE) {
+                val remoteConfig = withContext(Dispatchers.IO) {
+                    runCatching { CurrentWeekResolver.syncRemoteConfig() }.getOrNull()
+                }
+                remoteConfig?.config?.let {
+                    scheduleConfig.postValue(it)
+                    CourseReminderScheduler.reschedule(AHUApplication.getApp())
+                }
             }
         }
     }
@@ -109,21 +94,28 @@ class ScheduleViewModel () : ViewModel() {
      * @param week Int
      */
     fun saveTime(schoolYear: String, schoolTerm: String, week: Int) {
+        val semesterKey = CurrentWeekResolver.buildSemesterKey(schoolYear, schoolTerm)
         AHUCache.saveSchoolYear(schoolYear)
-        AHUCache.saveSchoolTerm(schoolTerm)
+        AHUCache.saveSchoolTerm(semesterKey)
         // 推算开学日期
-        val instance = Calendar.getInstance(Locale.CHINA)
+        val instance = DebugClock.nowCalendar(Locale.CHINA)
         instance.add(Calendar.DATE, (week - 1) * -7)
         instance.firstDayOfWeek = Calendar.MONDAY
         instance.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         // 修改当前的开学时间和周数
-        scheduleConfig.value?.startTime = instance.time
-        changeWeek(week)
+        val configBean = (scheduleConfig.value ?: ScheduleConfigBean()).apply {
+            isShowAll = AHUCache.isShowAllCourse()
+            startTime = instance.time
+            this.week = week
+            weekDay = CurrentWeekResolver.getCurrentWeekDay()
+        }
+        scheduleConfig.value = configBean
         AHUCache.saveSchoolTermStartTime(
             schoolYear,
             schoolTerm,
             SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(instance.time)
         )
+        CourseReminderScheduler.reschedule(AHUApplication.getApp())
     }
 
     companion object {

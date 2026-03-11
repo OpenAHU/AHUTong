@@ -372,4 +372,17 @@ object AHUCache {
     fun setMockData(enable: Boolean) {
         kv.encode("mock_data", enable)
     }
+
+    fun saveMockCurrentTimeMillis(value: Long) {
+        kv.encode("mock_current_time_millis", value)
+    }
+
+    fun getMockCurrentTimeMillis(): Long? {
+        if (!kv.containsKey("mock_current_time_millis")) return null
+        return kv.decodeLong("mock_current_time_millis")
+    }
+
+    fun clearMockCurrentTimeMillis() {
+        kv.removeValueForKey("mock_current_time_millis")
+    }
 }

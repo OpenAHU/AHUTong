@@ -16,16 +16,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.ahu.ahutong.data.debug.DebugClock
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.kyant.monet.a1
 import com.kyant.monet.withNight
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -50,7 +51,7 @@ fun AtAGlance(
     } else {
         false
     }
-    val date = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(Date())
+    val date = SimpleDateFormat("MM-dd / EE", Locale.CHINA).format(DebugClock.nowDate())
     Column(
         modifier = Modifier.padding(vertical = 0.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
@@ -110,6 +111,7 @@ fun AtAGlance(
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
+                overflow = TextOverflow.Clip,
                 style = MaterialTheme.typography.headlineLarge
             )
             Text(
@@ -133,11 +135,13 @@ fun AtAGlance(
                             duration % 60 == 0 -> "${duration / 60}小时整"
                             duration > 60 -> "${duration / 60}小时${duration % 60}分钟"
                             else -> "${duration}分钟"
-                        } + "，地点在 ${todayCourses[currentCourseIndex].location}"
+                        } + "，在 ${todayCourses[currentCourseIndex].location}"
                     }
 
                     else -> "准备您自己的安排吧"
                 },
+                maxLines = 1,
+                overflow = TextOverflow.Clip,
                 style = MaterialTheme.typography.bodyLarge
             )
         }

@@ -82,6 +82,10 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
     val scheduleResult = scheduleViewModel.schedule.observeAsState().value
     val schedule = scheduleResult?.getOrNull() ?: emptyList()
     val context = LocalContext.current
+
+    LaunchedEffect(scheduleConfig?.week) {
+        scheduleConfig?.week?.let { currentWeek = it }
+    }
     
     LaunchedEffect(scheduleResult) {
         scheduleResult?.exceptionOrNull()?.let {

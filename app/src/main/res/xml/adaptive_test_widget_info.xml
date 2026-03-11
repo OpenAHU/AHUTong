@@ -7,5 +7,5 @@
     android:minResizeHeight="80dp"
     android:previewImage="@mipmap/schedule_widget_prev"
     android:resizeMode="horizontal|vertical"
-    android:updatePeriodMillis="0"
+    android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen" />
