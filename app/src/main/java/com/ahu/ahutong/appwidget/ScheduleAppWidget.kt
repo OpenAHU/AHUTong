@@ -3,6 +3,7 @@ package com.ahu.ahutong.appwidget
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
@@ -58,6 +59,7 @@ import kotlin.collections.sortedBy
 class ScheduleAppWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        Log.e("ScheduleAppWidget", "provideGlance: 更新小组件", )
         val scheduleConfig = CurrentWeekResolver.resolveLocalFirst().config
         val currentWeek = scheduleConfig.week
         val weekDay = scheduleConfig.weekDay
@@ -89,6 +91,16 @@ class ScheduleAppWidget : GlanceAppWidget() {
 
 class ScheduleAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = ScheduleAppWidget()
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WidgetUpdateScheduler.scheduleNext(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        WidgetUpdateScheduler.cancel(context)
+    }
 }
 
 class RefreshAction : ActionCallback {
@@ -97,6 +109,7 @@ class RefreshAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
+        Log.e("ScheduleAppWidget", "provideGlance: 更新小组件", )
         ScheduleAppWidget().update(context, glanceId)
     }
 }
@@ -163,9 +176,13 @@ private fun ScheduleWidgetContent(
                     Spacer(modifier = GlanceModifier.defaultWeight())
                     Text(
                         text = "刷新",
-                        modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>()),
+                        modifier = GlanceModifier
+                            .cornerRadius(12.dp)
+                            .background(onColor)
+                            .clickable(actionRunCallback<RefreshAction>())
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                         style = TextStyle(
-                            color = onColor,
+                            color = cp(100.n1, 20.n1),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -229,7 +246,10 @@ private fun ScheduleWidgetContent(
                                     Text(
                                         text = course.name,
                                         style = TextStyle(
-                                            color = if (isOngoing) cp(0.n1, 0.n1) else primaryTextColor,
+                                            color = if (isOngoing) cp(
+                                                0.n1,
+                                                0.n1
+                                            ) else primaryTextColor,
                                             fontSize = 14.sp,
                                             fontWeight = if (isOngoing) FontWeight.Bold else FontWeight.Medium
                                         ),
@@ -243,7 +263,10 @@ private fun ScheduleWidgetContent(
                                         Text(
                                             text = "${course.startTime}-${course.startTime + course.length - 1}节",
                                             style = TextStyle(
-                                                color = if (isOngoing) cp(20.n1, 20.n1) else secondaryTextColor,
+                                                color = if (isOngoing) cp(
+                                                    20.n1,
+                                                    20.n1
+                                                ) else secondaryTextColor,
                                                 fontSize = 11.sp
                                             )
                                         )
@@ -251,7 +274,10 @@ private fun ScheduleWidgetContent(
                                         Text(
                                             text = shortenLocation(course.location),
                                             style = TextStyle(
-                                                color = if (isOngoing) cp(20.n1, 20.n1) else secondaryTextColor,
+                                                color = if (isOngoing) cp(
+                                                    20.n1,
+                                                    20.n1
+                                                ) else secondaryTextColor,
                                                 fontSize = 11.sp
                                             ),
                                             maxLines = 1

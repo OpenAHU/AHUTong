@@ -1,21 +1,32 @@
 package com.ahu.ahutong
 
-import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
+import com.ahu.ahutong.appwidget.WidgetUpdateScheduler
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.ext.launchSafe
+import com.ahu.ahutong.sdk.LocalServiceClient
 import com.ahu.ahutong.sdk.RustSDK
+import com.ahu.ahutong.ui.component.ApkUpdateDialog
 import com.ahu.ahutong.ui.screen.Main
 import com.ahu.ahutong.ui.state.AboutViewModel
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
@@ -24,32 +35,7 @@ import com.ahu.ahutong.ui.state.MainViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.ui.theme.AHUTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.ahu.ahutong.ui.component.HotUpdateDialog
-
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import android.content.Intent
-import androidx.core.content.FileProvider
-import android.util.Log
-import com.ahu.ahutong.ui.component.ApkUpdateDialog
 import java.io.File
-import android.net.Uri
-import android.os.Build
-import android.provider.Settings
-import android.widget.Toast
-import com.ahu.ahutong.data.mock_server.MockServer
-import com.ahu.ahutong.data.server.AhuTong
-import com.ahu.ahutong.data.server.model.ApkUpdateInfo
-import com.ahu.ahutong.ext.launchSafe
-import com.ahu.ahutong.sdk.LocalServiceClient
-import okio.buffer
-import okio.sink
-import java.io.FileOutputStream
-import java.io.InputStream
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.isActive
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -137,7 +123,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launchSafe {
             mainViewModel.checkApkUpdate(this@MainActivity)
         }
-
+        WidgetUpdateScheduler.scheduleNext(this@MainActivity)
 
         var hotUpdateApplied = java.util.concurrent.atomic.AtomicBoolean(false)
 

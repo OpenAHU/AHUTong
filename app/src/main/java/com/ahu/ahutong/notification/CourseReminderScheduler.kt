@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 object CourseReminderScheduler {
-    private const val CHANNEL_ID = "course_reminder"
+    private const val CHANNEL_ID = "course_reminder_v2"
     private const val CHANNEL_NAME = "课前提醒"
     private const val REQUEST_CODE = 2001
     private const val DEBUG_REQUEST_CODE_BASE = 2100
@@ -51,9 +51,10 @@ object CourseReminderScheduler {
         val channel = NotificationChannel(
             CHANNEL_ID,
             CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_HIGH
         ).apply {
             description = "上课前 10 分钟提醒"
+            enableLights(true)
         }
         manager.createNotificationChannel(channel)
     }
@@ -99,7 +100,7 @@ object CourseReminderScheduler {
 
     fun scheduleDebugReminder(context: Context, delayMinutes: Int) {
         createNotificationChannel(context)
-        val triggerAtMillis = System.currentTimeMillis() + delayMinutes * 60_000L
+        val triggerAtMillis = System.currentTimeMillis() + delayMinutes * 10_000L
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             DEBUG_REQUEST_CODE_BASE + delayMinutes,
@@ -158,7 +159,10 @@ object CourseReminderScheduler {
             .setContentTitle(courseName)
             .setContentText(contentText)
             .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_EVENT)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(true)
             .setContentIntent(contentIntent)
             .build()

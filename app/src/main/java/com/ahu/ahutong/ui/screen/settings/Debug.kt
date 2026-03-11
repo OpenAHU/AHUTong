@@ -138,6 +138,7 @@ fun Debug(
                     mockedData = it
                     AHUCache.setMockData(it)
                     AHURepository.initializeDataSource(it)
+                    AHUCache.clearMockCurrentTimeMillis()
                     Toast.makeText(
                         context,
                         if (it) "已开启 mock 数据" else "已关闭 mock 数据",

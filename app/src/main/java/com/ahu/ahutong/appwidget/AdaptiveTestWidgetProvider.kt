@@ -28,19 +28,41 @@ class ScheduleAdaptiveWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action != ACTION_REFRESH) return
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        val appWidgetId = intent.getIntExtra(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID
-        )
-        if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            updateAppWidget(context, appWidgetManager, appWidgetId)
-        } else {
-            val ids = appWidgetManager.getAppWidgetIds(
-                ComponentName(context, ScheduleAdaptiveWidgetProvider::class.java)
+        if (intent.action == ACTION_REFRESH) {
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val appWidgetId = intent.getIntExtra(
+                AppWidgetManager.EXTRA_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID
             )
-            onUpdate(context, appWidgetManager, ids)
+            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                updateAppWidget(context, appWidgetManager, appWidgetId)
+            } else {
+                val ids = appWidgetManager.getAppWidgetIds(
+                    ComponentName(context, ScheduleAdaptiveWidgetProvider::class.java)
+                )
+                onUpdate(context, appWidgetManager, ids)
+            }
+        }
+    }
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WidgetUpdateScheduler.scheduleNext(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        // Only cancel if no other widgets need it? 
+        // Actually Scheduler handles updates for BOTH, so if one is disabled but other is active, we shouldn't cancel globally.
+        // But for simplicity, if this provider is disabled (last widget removed), we might cancel.
+        // However, ScheduleAppWidgetReceiver also manages it. 
+        // A safer approach: Scheduler runs if EITHER is active. 
+        // But Scheduler.cancel() cancels the pending intent which is shared.
+        // We should check if any widgets exist.
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        val glanceIds = appWidgetManager.getAppWidgetIds(ComponentName(context, ScheduleAppWidgetReceiver::class.java))
+        if (glanceIds.isEmpty()) {
+             WidgetUpdateScheduler.cancel(context)
         }
     }
 
@@ -119,10 +141,10 @@ class ScheduleAdaptiveWidgetProvider : AppWidgetProvider() {
         val titleText: String
         val subtitleText: String
         if (displayCourses.isEmpty()) {
-            titleText = "今天没课啦"
+            titleText = "没课啦🎉"
             subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(DebugClock.nowDate())
         } else {
-            titleText = "还剩${remainingCourses.size}节"
+            titleText = "还剩 ${remainingCourses.size} 节"
             subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(DebugClock.nowDate())
         }
         val remoteViews = RemoteViews(context.packageName, layoutRes)

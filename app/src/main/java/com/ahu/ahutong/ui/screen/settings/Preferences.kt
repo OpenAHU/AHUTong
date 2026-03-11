@@ -22,6 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +48,7 @@ fun Preferences() {
 
     val preferencesViewModel: PreferencesViewModel = hiltViewModel()
     val context = LocalContext.current
+    var isRequestingPermission by remember { mutableStateOf(false) }
 
     val showQRCode by preferencesViewModel.showQRCode.collectAsState()
     val isShowAllCourse by preferencesViewModel.isShowAllCourse.collectAsState()
@@ -56,6 +60,7 @@ fun Preferences() {
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
+        isRequestingPermission = false
         if (granted) {
             preferencesViewModel.setCourseReminderEnabled(true)
             CourseReminderScheduler.reschedule(context)
@@ -116,7 +121,10 @@ fun Preferences() {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
                             ) {
-                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                if (!isRequestingPermission) {
+                                    isRequestingPermission = true
+                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
                             } else {
                                 preferencesViewModel.setCourseReminderEnabled(true)
                                 CourseReminderScheduler.reschedule(context)
@@ -156,7 +164,10 @@ fun Preferences() {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
                             ) {
-                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                if (!isRequestingPermission) {
+                                    isRequestingPermission = true
+                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
                             } else {
                                 preferencesViewModel.setCourseReminderEnabled(true)
                                 CourseReminderScheduler.reschedule(context)
