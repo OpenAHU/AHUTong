@@ -27,6 +27,7 @@ import com.ahu.ahutong.ui.screen.main.BathroomDeposit
 import com.ahu.ahutong.ui.screen.main.CardBalanceDeposit
 import com.ahu.ahutong.ui.screen.main.ElectricityDeposit
 import com.ahu.ahutong.ui.screen.main.Exam
+import com.ahu.ahutong.ui.screen.main.FreeClassroom
 import com.ahu.ahutong.ui.screen.main.Grade
 import com.ahu.ahutong.ui.screen.main.Home
 import com.ahu.ahutong.ui.screen.main.PhoneBook
@@ -139,6 +140,9 @@ fun Main(
             }
             animatedComposable("exam") {
                 Exam()
+            }
+            animatedComposable("free_classroom") {
+                FreeClassroom()
             }
             animatedComposable("settings") {
                 Settings(

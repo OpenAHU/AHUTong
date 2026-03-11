@@ -102,7 +102,6 @@ fun Tools(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ToolItem(
@@ -130,6 +129,12 @@ fun Tools(navController: NavHostController) {
                 onClick = {
                     navController.navigate("school_calendar")
                 }
+            )
+            ToolItem(
+                stringId = R.string.free_classroom,
+                iconId = R.drawable.ic_round_business_24,
+                tint = Color(0xFF03A9F4),
+                onClick = { navController.navigate("free_classroom") }
             )
         }
         Column(
@@ -180,12 +185,13 @@ private fun ToolItem(
 ) {
     Column(
         modifier = Modifier
+            .width(88.dp)
             .clip(SmoothRoundedCornerShape(16.dp))
             .clickable(
                 role = Role.Button,
                 onClick = onClick
             )
-            .padding(16.dp, 8.dp),
+            .padding(vertical = 16.dp, horizontal = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
