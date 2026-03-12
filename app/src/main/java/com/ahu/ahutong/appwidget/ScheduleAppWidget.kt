@@ -91,16 +91,6 @@ class ScheduleAppWidget : GlanceAppWidget() {
 
 class ScheduleAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = ScheduleAppWidget()
-
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
-        WidgetUpdateScheduler.scheduleNext(context)
-    }
-
-    override fun onDisabled(context: Context) {
-        super.onDisabled(context)
-        WidgetUpdateScheduler.cancel(context)
-    }
 }
 
 class RefreshAction : ActionCallback {

@@ -136,7 +136,7 @@ class ScheduleAdaptiveWidgetProvider : AppWidgetProvider() {
             currentMinutes <= ScheduleViewModel.getCourseTimeRangeInMinutes(it).last
         }
 
-        val displayCourses = remainingCourses.take(3)
+        val displayCourses = remainingCourses
         val widgetColors = resolve(context)
         val titleText: String
         val subtitleText: String

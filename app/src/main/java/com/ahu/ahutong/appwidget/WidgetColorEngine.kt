@@ -7,11 +7,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import com.ahu.ahutong.appwidget.MonetEngine.palettes
+import com.ahu.ahutong.data.dao.PreferencesKeys
+import androidx.datastore.preferences.preferencesDataStore
 import com.kyant.monet.LocalTonalPalettes
 import com.kyant.monet.TonalPalettes
 import com.kyant.monet.toColor
 import com.kyant.monet.toSrgb
 import com.kyant.monet.TonalPalettes.Companion.toTonalPalettes
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
+
+private val Context.dataStore by preferencesDataStore(name = "user_pref")
 
 data class WidgetColors(
     val background: Color,

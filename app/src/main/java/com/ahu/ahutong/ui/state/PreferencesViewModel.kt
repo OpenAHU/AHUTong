@@ -22,10 +22,18 @@ class PreferencesViewModel @Inject constructor(private val preferencesManager: P
     private val _useLiquidGlass = MutableStateFlow(true)
     val useLiquidGlass: StateFlow<Boolean> = _useLiquidGlass.asStateFlow()
 
+    private val _themeColor = MutableStateFlow<String?>(null)
+    val themeColor: StateFlow<String?> = _themeColor.asStateFlow()
+
     private val _courseReminderEnabled = MutableStateFlow(false)
     val courseReminderEnabled: StateFlow<Boolean> = _courseReminderEnabled.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            preferencesManager.themeColor.collect {
+                _themeColor.value = it
+            }
+        }
         viewModelScope.launch {
             preferencesManager.showQRCode.collect {
                 _showQRCode.value = it
@@ -69,6 +77,12 @@ class PreferencesViewModel @Inject constructor(private val preferencesManager: P
     fun setCourseReminderEnabled(value: Boolean) {
         viewModelScope.launch {
             preferencesManager.setCourseReminderEnabled(value)
+        }
+    }
+
+    fun setThemeColor(value: String?) {
+        viewModelScope.launch {
+            preferencesManager.setThemeColor(value)
         }
     }
 }

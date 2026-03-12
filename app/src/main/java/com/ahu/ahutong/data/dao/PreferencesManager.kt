@@ -2,6 +2,7 @@ package com.ahu.ahutong.data.dao
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -14,11 +15,26 @@ object PreferencesKeys {
     val IS_SHOW_ALL_COURSE = booleanPreferencesKey("is_show_all_course")
     val USE_LIQUID_GLASS = booleanPreferencesKey("use_liquid_glass")
     val COURSE_REMINDER_ENABLED = booleanPreferencesKey("course_reminder_enabled")
+    val THEME_COLOR = stringPreferencesKey("theme_color_hex")
 }
 
 private val Context.dataStore by preferencesDataStore(name = "user_pref")
 
 class PreferencesManager @Inject constructor(@ApplicationContext private val context: Context) {
+
+    val themeColor: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[PreferencesKeys.THEME_COLOR]
+    }
+
+    suspend fun setThemeColor(value: String?) {
+        context.dataStore.edit { prefs ->
+            if (value == null) {
+                prefs.remove(PreferencesKeys.THEME_COLOR)
+            } else {
+                prefs[PreferencesKeys.THEME_COLOR] = value
+            }
+        }
+    }
 
     val showQRCode: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[PreferencesKeys.SHOW_QR_CODE] ?: false
