@@ -310,7 +310,7 @@ fun Debug(
 
         DebugSection(
             title = "通知测试",
-            subtitle = "独立预约一条测试通知，不影响正式的下一次课前提醒",
+            subtitle = "独立预约测试通知，不影响正式的下一次课前提醒；岛卡测试需先在设置页开启实验开关",
             cardColor = cardColor
         ) {
             Row(
@@ -333,6 +333,36 @@ fun Debug(
                     onClick = {
                         CourseReminderScheduler.scheduleDebugReminder(context, 5)
                         Toast.makeText(context, "已预约 5 分钟后测试通知", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                DebugActionButton(
+                    text = "1 分钟后模拟岛卡",
+                    modifier = Modifier.weight(1f),
+                    containerColor = primaryButtonColor,
+                    onClick = {
+                        CourseReminderScheduler.scheduleDebugLiveUpdateReminder(context, 1)
+                        Toast.makeText(
+                            context,
+                            "已预约岛卡测试；满足条件时会显示 Live Update",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+                DebugActionButton(
+                    text = "5 分钟后模拟岛卡",
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        CourseReminderScheduler.scheduleDebugLiveUpdateReminder(context, 5)
+                        Toast.makeText(
+                            context,
+                            "已预约岛卡测试；满足条件时会显示 Live Update",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 )
             }
