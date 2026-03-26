@@ -232,7 +232,7 @@ fun Preferences() {
                 ) {
                     Text(text = "课前倒计时岛卡提醒（实验性）")
                     Text(
-                        text = "需同时开启课前提醒；Android 16 及系统支持时显示 Live Update，否则自动回退为普通通知",
+                        text = "仅部分系统支持 需同时开启课前提醒",
                         color = 50.n1 withNight 80.n1,
                         style = MaterialTheme.typography.bodyMedium
                     )
