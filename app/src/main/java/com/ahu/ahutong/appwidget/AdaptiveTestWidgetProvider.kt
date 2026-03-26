@@ -8,20 +8,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.compose.ui.graphics.toArgb
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.AHURepository
-import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
-import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.debug.DebugClock
+import com.ahu.ahutong.data.schedule.CurrentWeekResolver
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 
@@ -31,19 +28,41 @@ class ScheduleAdaptiveWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action != ACTION_REFRESH) return
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        val appWidgetId = intent.getIntExtra(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID
-        )
-        if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            updateAppWidget(context, appWidgetManager, appWidgetId)
-        } else {
-            val ids = appWidgetManager.getAppWidgetIds(
-                ComponentName(context, ScheduleAdaptiveWidgetProvider::class.java)
+        if (intent.action == ACTION_REFRESH) {
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val appWidgetId = intent.getIntExtra(
+                AppWidgetManager.EXTRA_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID
             )
-            onUpdate(context, appWidgetManager, ids)
+            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                updateAppWidget(context, appWidgetManager, appWidgetId)
+            } else {
+                val ids = appWidgetManager.getAppWidgetIds(
+                    ComponentName(context, ScheduleAdaptiveWidgetProvider::class.java)
+                )
+                onUpdate(context, appWidgetManager, ids)
+            }
+        }
+    }
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WidgetUpdateScheduler.scheduleNext(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        // Only cancel if no other widgets need it? 
+        // Actually Scheduler handles updates for BOTH, so if one is disabled but other is active, we shouldn't cancel globally.
+        // But for simplicity, if this provider is disabled (last widget removed), we might cancel.
+        // However, ScheduleAppWidgetReceiver also manages it. 
+        // A safer approach: Scheduler runs if EITHER is active. 
+        // But Scheduler.cancel() cancels the pending intent which is shared.
+        // We should check if any widgets exist.
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        val glanceIds = appWidgetManager.getAppWidgetIds(ComponentName(context, ScheduleAppWidgetReceiver::class.java))
+        if (glanceIds.isEmpty()) {
+             WidgetUpdateScheduler.cancel(context)
         }
     }
 
@@ -95,18 +114,13 @@ class ScheduleAdaptiveWidgetProvider : AppWidgetProvider() {
         } else {
             R.id.adaptive_test_items_small
         }
-        val teachWeek = runCatching {
-            runBlocking { JwxtApi.API.getCurrentTeachWeek() }
-        }.getOrNull()
-        teachWeek?.let { AHUCache.saveSchoolTerm(it.currentSemester) }
-        val currentWeek = teachWeek?.weekIndex ?: 1
-        val weekDay =
-            (Calendar.getInstance(Locale.CHINA)[Calendar.DAY_OF_WEEK] - 1).takeIf { it != 0 } ?: 7
+        val scheduleConfig = runBlocking { CurrentWeekResolver.resolveLocalFirst().config }
+        val currentWeek = scheduleConfig.week
+        val weekDay = scheduleConfig.weekDay
         val schedule = runCatching {
             runBlocking { AHURepository.getSchedule(false) }
         }.getOrNull()?.getOrNull().orEmpty()
-        val calendar = Calendar.getInstance(Locale.CHINA)
-        val currentMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+        val currentMinutes = DebugClock.currentMinutes()
         val todayCourses = schedule
             .filter { currentWeek in it.startWeek..it.endWeek }
             .filter { it.weekday == weekDay }
@@ -122,24 +136,16 @@ class ScheduleAdaptiveWidgetProvider : AppWidgetProvider() {
             currentMinutes <= ScheduleViewModel.getCourseTimeRangeInMinutes(it).last
         }
 
-        val displayCourses = when {
-            remainingCourses.size >= 3 -> remainingCourses.take(3)
-            todayCourses.size >= 3 -> todayCourses.take(3)
-            else -> todayCourses
-        }
+        val displayCourses = remainingCourses
         val widgetColors = resolve(context)
         val titleText: String
         val subtitleText: String
         if (displayCourses.isEmpty()) {
-            titleText = "今天没课啦"
-            subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(Date())
+            titleText = "没课啦🎉"
+            subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(DebugClock.nowDate())
         } else {
-            titleText = if (remainingCourses.isEmpty()) {
-                "今日课程${todayCourses.size}节"
-            } else {
-                "还剩${remainingCourses.size}节"
-            }
-            subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(Date())
+            titleText = "还剩 ${remainingCourses.size} 节"
+            subtitleText = SimpleDateFormat("MM-dd/EE", Locale.CHINA).format(DebugClock.nowDate())
         }
         val remoteViews = RemoteViews(context.packageName, layoutRes)
         remoteViews.setOnClickPendingIntent(

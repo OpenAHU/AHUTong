@@ -97,5 +97,6 @@
     <string name="current_week">当前周</string>
 
     <string name="school_calendar">校历</string>
+    <string name="free_classroom">空闲教室</string>
     <string name="preferences">偏好设置</string>
 </resources>

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.ahu.ahutong.data.debug.DebugClock
 import com.ahu.ahutong.ui.screen.main.home.AtAGlance
 import com.ahu.ahutong.ui.screen.main.home.BathroomOpening
 import com.ahu.ahutong.ui.screen.main.home.CampusCard
@@ -27,8 +28,6 @@ import com.ahu.ahutong.ui.screen.main.home.ElectricityCard
 import com.ahu.ahutong.ui.screen.main.home.TodayCourseList
 import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
-import java.util.Calendar
-import java.util.Locale
 import kotlinx.coroutines.delay
 
 @Composable
@@ -51,10 +50,7 @@ fun Home(
             }
         }
         .sortedBy { it.startTime }
-    val calendar = Calendar.getInstance(Locale.CHINA)
-    val currentMinutes = calendar.time.let {
-        calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
-    }
+    val currentMinutes = DebugClock.currentMinutes()
     LaunchedEffect(Unit) {
         discoveryViewModel.loadActivityBean()
 

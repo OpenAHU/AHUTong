@@ -11,6 +11,7 @@ import com.ahu.ahutong.sdk.RustSDK;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.ahu.ahutong.data.AHURepository;
 import com.ahu.ahutong.data.dao.AHUCache;
+import com.ahu.ahutong.notification.CourseReminderScheduler;
 
 import org.json.JSONObject;
 
@@ -44,6 +45,8 @@ public class AHUApplication extends Application {
         super.onCreate();
 
         CrashReport.initCrashReport(this, "2c2ccadcad", BuildConfig.DEBUG);
+        CourseReminderScheduler.INSTANCE.createNotificationChannel(this);
+        CourseReminderScheduler.INSTANCE.reschedule(this);
 
         // 初始化数据源（根据 Mock 开关）
         if(AHUCache.INSTANCE.getMockData()){

@@ -1,5 +1,8 @@
 package com.ahu.ahutong.ui.screen.main
 
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -67,7 +70,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-import androidx.compose.runtime.LaunchedEffect
 import android.widget.Toast
 
 @Composable
@@ -76,13 +78,33 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
     val currentWeekday = scheduleConfig?.weekDay ?: 1
     var currentWeek by rememberSaveable { mutableStateOf(scheduleConfig?.week ?: 1) }
+    val pagerState = rememberPagerState(
+        initialPage = (currentWeek - 1).coerceAtLeast(0),
+        pageCount = { 20 }
+    )
     val state = rememberLazyListState(
         initialFirstVisibleItemIndex = (currentWeek - 3).coerceAtLeast(0)
     )
     val scheduleResult = scheduleViewModel.schedule.observeAsState().value
     val schedule = scheduleResult?.getOrNull() ?: emptyList()
     val context = LocalContext.current
-    
+
+    LaunchedEffect(pagerState.isScrollInProgress) {
+        if (!pagerState.isScrollInProgress) {
+            state.animateScrollToItem(
+                (currentWeek - 3).coerceAtLeast(0)
+            )
+        }
+    }
+
+    LaunchedEffect(scheduleConfig?.week) {
+        scheduleConfig?.week?.let { currentWeek = it }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        currentWeek = pagerState.currentPage + 1
+    }
+
     LaunchedEffect(scheduleResult) {
         scheduleResult?.exceptionOrNull()?.let {
             Toast.makeText(context, "加载课表失败: ${it.message}", Toast.LENGTH_LONG).show()
@@ -116,7 +138,6 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
     ) {
         Row(
             modifier = Modifier.padding(end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
         ) {
             // week selector
             LazyRow(
@@ -150,7 +171,11 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                                         }
                                     ).value
                                 )
-                                .clickable { currentWeek = week }
+                                .clickable {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(week - 1)
+                                    }
+                                }
                                 .padding(16.dp, 8.dp),
                             color = animateColorAsState(
                                 targetValue = if (isSelected) {
@@ -173,9 +198,11 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
             ) {
                 IconButton(
                     onClick = {
-                        currentWeek = scheduleConfig?.week ?: 1
                         scope.launch {
                             state.animateScrollToItem((currentWeek - 3).coerceAtLeast(0))
+                        }
+                        scope.launch {
+                            pagerState.animateScrollToPage((scheduleConfig?.week ?: 1) - 1)
                         }
                     }
                 ) {
@@ -199,6 +226,10 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                         CourseCardSpec.cellSpacing * 9
                 ) / 7
         val cellHeight = 48.dp
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) {
         Box(
             modifier = with(CourseCardSpec) {
                 Modifier
@@ -288,18 +319,17 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                 ) {
                     key(course.hashCode()) {
 
-                        CourseCard(
-                            course = course,
-                            color = courseColors.getOrElse(course.name) { 50.a1 },
-                            cellWidth = cellWidth,
-                            cellHeight = cellHeight,
-                            isCurrentWeek = isCurrentWeek,
-                            onClick = { detailedCourse = it }
-                        )
+                            CourseCard(
+                                course = course,
+                                color = courseColors.getOrElse(course.name) { 50.a1 },
+                                cellWidth = cellWidth,
+                                cellHeight = cellHeight,
+                                isCurrentWeek = isCurrentWeek,
+                                onClick = { detailedCourse = it }
+                            )
+                        }
                     }
                 }
-
-
             }
         }
     }

@@ -20,13 +20,16 @@ import com.kyant.monet.toSrgb
 
 @Composable
 fun AHUTheme(content: @Composable () -> Unit) {
-    val keyColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
+    val themeColorHex = preferencesViewModel.themeColor.collectAsState().value
+    
+    val keyColor = if (themeColorHex != null) {
+        Color(android.graphics.Color.parseColor(themeColorHex))
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         colorResource(id = android.R.color.system_accent1_500)
     } else {
         Color(0xFF007FAC)
     }
-
-    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
 
     MaterialTheme {
         CompositionLocalProvider(

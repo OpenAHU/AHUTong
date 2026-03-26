@@ -3,6 +3,10 @@ package com.ahu.ahutong.data.crawler.api.jwxt
 import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.model.jwxt.CourseTable
 import com.ahu.ahutong.data.crawler.model.jwxt.CurrentTeachWeek
+import com.ahu.ahutong.data.crawler.model.jwxt.GetBuildingsResponse
+import com.ahu.ahutong.data.crawler.model.jwxt.GetFreeRoomsRequest
+import com.ahu.ahutong.data.crawler.model.jwxt.GetFreeRoomsResponse
+import com.ahu.ahutong.data.crawler.model.jwxt.GetRoomsResponse
 import com.ahu.ahutong.data.crawler.model.jwxt.GradeResponse
 import com.ahu.ahutong.data.crawler.net.AutoLoginInterceptor
 import com.ahu.ahutong.data.crawler.net.TokenAuthenticator
@@ -12,6 +16,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -74,6 +79,20 @@ interface JwxtApi {
         @Field("execution") execution: String = "e1s1",
         @Field("_eventId") eventId: String = "submit"
     ): Response<ResponseBody>
+
+
+    @GET("/student/ws/room/get-buildings")
+    suspend fun getBuildings(@Query("campusId") campusId: Int,
+                             @Query("hasDataPermission") hasDataPermission: Boolean = false): GetBuildingsResponse
+
+    @GET("/student/ws/room/get-rooms")
+    suspend fun getRooms(@Query("buildingId") buildingId: Int,
+                         @Query("hasDataPermission") hasDataPermission: Boolean = false,
+                         @Query("hasUsableDepartPermission") hasUsableDepartPermission: Boolean = false): GetRoomsResponse
+
+    @POST("/student/ws/room-borrow/free-list")
+    suspend fun getFreeRooms(@Body body: GetFreeRoomsRequest): GetFreeRoomsResponse
+
 
     companion object {
         private val BASE_URL = "https://jw.ahu.edu.cn/"
