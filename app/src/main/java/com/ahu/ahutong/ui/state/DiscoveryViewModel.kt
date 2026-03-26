@@ -49,19 +49,13 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
     fun loadActivityBean() {
         // 优先加载缓存
         AHUCache.getCardBalance()?.let {
-            if (it > 0.0) {
-                balance = it
-            }
+            balance = it
         }
 
         viewModelScope.launchSafe {
 
             AHURepository.getCardMoney().onSuccess {
-                val newBalance = it.balance ?: 0.0
-                if (newBalance > 0.0) {
-                    balance = newBalance
-                    AHUCache.saveCardBalance(newBalance)
-                }
+                applyCardBalance(it.balance, it.transitionBalance)
             }
 
             AHURepository.getBathRooms().onSuccess {
@@ -72,6 +66,25 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
 
 
         }
+    }
+
+    fun refreshCardBalance() {
+        AHUCache.getCardBalance()?.let {
+            balance = it
+        }
+
+        viewModelScope.launchSafe {
+            AHURepository.getCardMoney().onSuccess {
+                applyCardBalance(it.balance, it.transitionBalance)
+            }
+        }
+    }
+
+    private fun applyCardBalance(balanceValue: Double?, transitionBalanceValue: Double?) {
+        val newBalance = balanceValue ?: 0.0
+        balance = newBalance
+        AHUCache.saveCardBalance(newBalance)
+        transitionBalance = transitionBalanceValue ?: transitionBalance
     }
 
     fun loadQrCode() {

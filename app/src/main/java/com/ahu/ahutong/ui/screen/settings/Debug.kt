@@ -318,21 +318,21 @@ fun Debug(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 DebugActionButton(
-                    text = "1 分钟后模拟提醒",
+                    text = "10 秒后模拟提醒",
                     modifier = Modifier.weight(1f),
                     primary = true,
                     containerColor = primaryButtonColor,
                     onClick = {
                         CourseReminderScheduler.scheduleDebugReminder(context, 1)
-                        Toast.makeText(context, "已预约 1 分钟后测试通知", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "已预约 10 秒后测试通知", Toast.LENGTH_SHORT).show()
                     }
                 )
                 DebugActionButton(
-                    text = "5 分钟后模拟提醒",
+                    text = "50 秒后模拟提醒",
                     modifier = Modifier.weight(1f),
                     onClick = {
                         CourseReminderScheduler.scheduleDebugReminder(context, 5)
-                        Toast.makeText(context, "已预约 5 分钟后测试通知", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "已预约 50 秒后测试通知", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -341,26 +341,26 @@ fun Debug(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 DebugActionButton(
-                    text = "1 分钟后模拟岛卡",
+                    text = "10 秒后模拟岛卡",
                     modifier = Modifier.weight(1f),
                     containerColor = primaryButtonColor,
                     onClick = {
                         CourseReminderScheduler.scheduleDebugLiveUpdateReminder(context, 1)
                         Toast.makeText(
                             context,
-                            "已预约岛卡测试；满足条件时会显示 Live Update",
+                            "已预约岛卡测试，10 秒后触发并显示 3 分钟倒计时",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                 )
                 DebugActionButton(
-                    text = "5 分钟后模拟岛卡",
+                    text = "50 秒后模拟岛卡",
                     modifier = Modifier.weight(1f),
                     onClick = {
                         CourseReminderScheduler.scheduleDebugLiveUpdateReminder(context, 5)
                         Toast.makeText(
                             context,
-                            "已预约岛卡测试；满足条件时会显示 Live Update",
+                            "已预约岛卡测试，50 秒后触发并显示 3 分钟倒计时",
                             Toast.LENGTH_SHORT
                         ).show()
                     }

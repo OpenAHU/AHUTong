@@ -28,6 +28,7 @@ object CourseReminderScheduler {
     private const val CHANNEL_DESCRIPTION = "上课前 10 分钟提醒下一节课"
     private const val REQUEST_CODE = 2001
     private const val DEBUG_REQUEST_CODE_BASE = 2100
+    private const val DEBUG_LIVE_COUNTDOWN_MINUTES = 3L
     private const val SCAN_DAYS = 21L
     private const val REMINDER_MINUTES = 10L
 
@@ -71,6 +72,7 @@ object CourseReminderScheduler {
     fun scheduleDebugReminder(context: Context, delayMinutes: Int) {
         createNotificationChannel(context)
         val triggerAtMillis = System.currentTimeMillis() + delayMinutes * 10_000L
+        val triggerDelaySeconds = delayMinutes * 10
         val payload = CourseReminderPayload(
             courseName = "课前提醒测试",
             location = "预计 $delayMinutes 分钟后触发",

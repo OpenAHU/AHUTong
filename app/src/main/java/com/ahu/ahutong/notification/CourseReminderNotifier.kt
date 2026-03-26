@@ -18,20 +18,23 @@ object CourseReminderNotifier {
     fun showReminder(
         context: Context,
         payload: CourseReminderPayload
-    ) {
-        if (!canPostNotifications(context)) return
+    ): Boolean {
+        if (!canPostNotifications(context)) return false
 
         if (CourseReminderCapability.shouldTryLiveCountdown(context, payload)) {
             val shown = CourseLiveUpdateHelper.showLiveUpdate(context, payload)
-            if (shown) return
+            if (shown) return true
         }
 
         CourseLiveUpdateHelper.cancel(context)
+        CourseLiveUpdateHelper.cancelScheduledUpdate(context)
         showStandardReminder(context, payload)
+        return false
     }
 
     fun cancelActiveReminder(context: Context) {
         CourseLiveUpdateHelper.cancel(context)
+        CourseLiveUpdateHelper.cancelScheduledUpdate(context)
     }
 
     private fun showStandardReminder(
