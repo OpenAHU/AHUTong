@@ -75,7 +75,7 @@ object CourseReminderScheduler {
         val triggerDelaySeconds = delayMinutes * 10
         val payload = CourseReminderPayload(
             courseName = "课前提醒测试",
-            location = "预计 $delayMinutes 分钟后触发",
+            location = "预计 $triggerDelaySeconds 秒后触发",
             timeText = "调试通知",
             notificationId = DEBUG_REQUEST_CODE_BASE + delayMinutes,
             allowLiveCountdown = false
@@ -98,8 +98,8 @@ object CourseReminderScheduler {
         val payload = CourseReminderPayload(
             courseName = "课前岛卡测试",
             location = "调试入口",
-            timeText = "1 分钟后开始",
-            courseStartAtMillis = triggerAtMillis + 60_000L,
+            timeText = "${DEBUG_LIVE_COUNTDOWN_MINUTES} 分钟后开始",
+            courseStartAtMillis = triggerAtMillis + DEBUG_LIVE_COUNTDOWN_MINUTES * 60_000L,
             notificationId = DEBUG_REQUEST_CODE_BASE + 100 + delayMinutes,
             allowLiveCountdown = true
         )
@@ -113,6 +113,36 @@ object CourseReminderScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         scheduleAlarm(context, triggerAtMillis, pendingIntent)
+    }
+
+    fun scheduleDebugNextCourseInThreeMinutes(context: Context): String? {
+        createNotificationChannel(context)
+
+        val nextReminder = findNextReminder() ?: return null
+        val course = nextReminder.course
+        val startRange = ScheduleViewModel.getCourseTimeRangeInMinutes(course)
+        val startMinutes = startRange.first
+        val startTimeText = "%02d:%02d".format(startMinutes / 60, startMinutes % 60)
+        val sections = "${course.startTime}-${course.startTime + course.length - 1}节"
+        val payload = CourseReminderPayload(
+            courseName = course.name,
+            location = course.location,
+            timeText = "$sections $startTimeText",
+            courseStartAtMillis = System.currentTimeMillis() + DEBUG_LIVE_COUNTDOWN_MINUTES * 60_000L,
+            notificationId = DEBUG_REQUEST_CODE_BASE + 300,
+            allowLiveCountdown = true
+        )
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            DEBUG_REQUEST_CODE_BASE + 300,
+            Intent(context, CourseReminderReceiver::class.java).apply {
+                action = CourseReminderReceiver.ACTION_REMIND
+                payload.writeToIntent(this)
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        scheduleAlarm(context, System.currentTimeMillis() + 1_000L, pendingIntent)
+        return course.name
     }
 
     private fun cancelScheduledReminder(context: Context) {

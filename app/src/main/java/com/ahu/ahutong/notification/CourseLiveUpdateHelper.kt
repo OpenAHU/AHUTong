@@ -31,11 +31,12 @@ object CourseLiveUpdateHelper {
         }
 
         val countdownText = buildCountdownText(remainingMinutes)
+        val collapsedText = buildCollapsedText(payload, countdownText)
         val expandedText = buildExpandedText(payload, countdownText)
         val notification = NotificationCompat.Builder(context, CourseReminderScheduler.CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher_round)
             .setContentTitle(payload.courseName)
-            .setContentText(countdownText)
+            .setContentText(collapsedText)
             .setStyle(NotificationCompat.BigTextStyle().bigText(expandedText))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_EVENT)
@@ -80,7 +81,17 @@ object CourseLiveUpdateHelper {
 
     fun cancelScheduledUpdate(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
-        alarmManager.cancel(buildUpdatePendingIntent(context, null))
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            LIVE_UPDATE_REQUEST_CODE,
+            Intent(context, CourseReminderReceiver::class.java).apply {
+                action = CourseReminderReceiver.ACTION_UPDATE_LIVE_COUNTDOWN
+            },
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        if (pendingIntent != null) {
+            alarmManager.cancel(pendingIntent)
+        }
     }
 
     private fun buildContentIntent(
@@ -159,5 +170,13 @@ object CourseLiveUpdateHelper {
             }
             append(countdownText)
         }
+    }
+
+    private fun buildCollapsedText(
+        payload: CourseReminderPayload,
+        countdownText: String
+    ): String {
+        val location = payload.location?.takeIf { it.isNotBlank() } ?: return countdownText
+        return "$location · $countdownText"
     }
 }

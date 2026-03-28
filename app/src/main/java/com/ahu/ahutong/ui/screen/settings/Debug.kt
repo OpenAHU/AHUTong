@@ -341,16 +341,25 @@ fun Debug(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 DebugActionButton(
-                    text = "10 秒后模拟岛卡",
+                    text = "模拟3分钟岛卡",
                     modifier = Modifier.weight(1f),
                     containerColor = primaryButtonColor,
                     onClick = {
-                        CourseReminderScheduler.scheduleDebugLiveUpdateReminder(context, 1)
-                        Toast.makeText(
-                            context,
-                            "已预约岛卡测试，10 秒后触发并显示 3 分钟倒计时",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        val nextCourseName =
+                            CourseReminderScheduler.scheduleDebugNextCourseInThreeMinutes(context)
+                        if (nextCourseName == null) {
+                            Toast.makeText(
+                                context,
+                                "未找到下一节课，请先刷新课表并确认当前周有课",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "已预约：3分钟后上《$nextCourseName》",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 )
                 DebugActionButton(
