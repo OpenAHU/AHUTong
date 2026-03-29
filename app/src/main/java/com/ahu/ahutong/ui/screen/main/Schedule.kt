@@ -89,12 +89,10 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
     val schedule = scheduleResult?.getOrNull() ?: emptyList()
     val context = LocalContext.current
 
-    LaunchedEffect(pagerState.isScrollInProgress) {
-        if (!pagerState.isScrollInProgress) {
-            state.animateScrollToItem(
-                (currentWeek - 3).coerceAtLeast(0)
-            )
-        }
+    LaunchedEffect(currentWeek) {
+        state.animateScrollToItem(
+            (currentWeek - 3).coerceAtLeast(0)
+        )
     }
 
     LaunchedEffect(scheduleConfig?.week) {
