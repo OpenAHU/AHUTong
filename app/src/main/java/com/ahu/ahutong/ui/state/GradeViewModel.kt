@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.state
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,8 +9,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.model.GpaRankInfo
 import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.ext.getSchoolYears
+import com.google.gson.Gson
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import kotlinx.coroutines.flow.launchIn
@@ -25,7 +28,27 @@ class GradeViewModel : ViewModel() {
     var schoolTerm by mutableStateOf(terms.keys.firstOrNull())
     var errorMessage by mutableStateOf<String?>(null)
     var isLoading by mutableStateOf(false)
+    // ===================== 【GPA 排名数据】 =====================
+    var gpaRankInfo by mutableStateOf<GpaRankInfo?>(null)
+    var rankLoading by mutableStateOf(false)
 
+    // ===================== 【加载 GPA 排名】 =====================
+    fun getGpaRank() = viewModelScope.launch {
+        rankLoading = true
+        try {
+            val result = AHURepository.getGpaRankInfo()
+            if (result.code == 0) {
+                gpaRankInfo = result.data
+                errorMessage = null
+            } else {
+                errorMessage = result.msg
+            }
+        } catch (t: Throwable) {
+            errorMessage = t.message ?: "获取GPA排名失败"
+        } finally {
+            rankLoading = false
+        }
+    }
     fun getGarde(isRefresh: Boolean = false) = viewModelScope.launch {
         isLoading = true
         try {

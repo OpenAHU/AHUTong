@@ -1,7 +1,9 @@
 package com.ahu.ahutong.data.mock
 
+import androidx.compose.ui.graphics.GraphicsLayerScope
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
+import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.RequestBody
 import com.ahu.ahutong.data.model.BathRoom
@@ -9,7 +11,9 @@ import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Exam
+import com.ahu.ahutong.data.model.GpaRankInfo
 import com.ahu.ahutong.data.model.Grade
+import com.google.gson.Gson
 import okhttp3.ResponseBody
 import retrofit2.Response
 import java.time.LocalDate
@@ -107,6 +111,11 @@ class MockDataSource : BaseDataSource {
 
     override suspend fun pay(request: RequestBody): AHUResponse<Response<ResponseBody>> {
         return AHUResponse<Response<ResponseBody>>().apply { code = 0; data = null }
+    }
+
+
+    override suspend fun getGpaRankFromHtml(): AHUResponse<GpaRankInfo> {
+        return AHUResponse<GpaRankInfo>().apply { code=0; data = GpaRankInfo() }
     }
 
     override suspend fun getSchoolCalendar(): AHUResponse<Response<ResponseBody>> {

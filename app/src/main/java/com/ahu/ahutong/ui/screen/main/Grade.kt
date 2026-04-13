@@ -1,5 +1,6 @@
 package com.ahu.ahutong.ui.screen.main
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,10 +51,12 @@ import com.kyant.monet.n1
 import com.kyant.monet.withNight
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import com.google.gson.Gson
 
 @Composable
 fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
     val grade = gradeViewModel.grade
+    val gpaRankInfo = gradeViewModel.gpaRankInfo
     val errorMessage = gradeViewModel.errorMessage
     val context = LocalContext.current
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
@@ -63,6 +66,9 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
     LaunchedEffect(Unit) {
         if (grade == null) {
             gradeViewModel.getGarde()
+        }
+        if(gpaRankInfo == null) {
+            gradeViewModel.getGpaRank()
         }
     }
 
@@ -80,7 +86,8 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
             term.schoolYear == gradeViewModel.schoolYear && term.term == gradeViewModel.schoolTerm
         }
     }
-
+    val rankindex = (gradeViewModel.gpaRankInfo?.gpaSemesterSubs?.size?:0) - (gradeViewModel.grade?.termGradeList?.indexOf(gradeData) ?: -1) - 1//通过grade索引获取当前学期排名索引
+    val currentRank = gradeViewModel.gpaRankInfo?.gpaSemesterSubs?.getOrNull(rankindex)
     val trimmedQuery = if (searchExpanded) searchQuery.trim() else ""
     fun fuzzyContains(text: String, query: String): Boolean {
         if (query.isBlank()) return false
@@ -313,6 +320,54 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                         )
                         Text(
                             text = gradeViewModel.totalGradePointAverage,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "全程专业排名",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = (gpaRankInfo?.majorRank?.toString() ?: "暂无") + "/" + (gpaRankInfo?.majorHeadCount?.toString() ?: "暂无") ,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "该学期专业排名",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = (currentRank?.majorRank?.toString() ?: "暂无") + "/" + (gpaRankInfo?.majorHeadCount?.toString() ?: "暂无"),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "最后更新时间",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = gpaRankInfo?.updatedDateTimeStr ?: "暂无",
                             style = MaterialTheme.typography.titleMedium
                         )
                     }

@@ -16,6 +16,7 @@ import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Exam
+import com.ahu.ahutong.data.model.GpaRankInfo
 import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.data.server.AhuTong
 import com.google.gson.Gson
@@ -201,6 +202,53 @@ class CrawlerDataSource : BaseDataSource {
 
         return response
     }
+
+    override suspend fun getGpaRankFromHtml(): AHUResponse<GpaRankInfo> {
+        Log.e("TEST", "========= 我是新代码 =========")
+        val response = AHUResponse<GpaRankInfo>()
+        try {
+            val htmlResponse = JwxtApi.API.getGrade()
+            if(!htmlResponse.isSuccessful||htmlResponse.body() == null){
+                response.code = -1
+                response.msg = "获取成绩页面失败"
+                return response
+            }
+
+            val html = htmlResponse.body()!!.string()
+            val pattern = Regex(
+                "var gpaSemesterModel\\s*=\\s*(\\{.*?\\});",
+                RegexOption.DOT_MATCHES_ALL
+            )
+
+            val match = pattern.find(html)
+                ?: throw Exception("未找到 gpaSemesterModel 变量")
+            val jsObject = match.groupValues[1]
+
+            val json = convertJsToJson(jsObject)
+            val gpaRankInfo = Gson().fromJson(json, GpaRankInfo::class.java)
+
+
+            response.code = 0
+            response.msg = "success"
+            response.data = gpaRankInfo
+            return response
+
+        }catch (e: Exception){
+            e.printStackTrace()
+            response.code = -1
+            response.msg = "解析失败：${e.message}"
+            return response
+        }
+    }
+
+    /**
+     * 将 JS 对象字符串 转换为 标准 JSON 字符串
+     */
+    private fun convertJsToJson(js: String): String {
+        return js
+            .replace(Regex("'"), "\"")                // 单引号 → 双引号
+    }
+
 
     override suspend fun getCardMoney(): AHUResponse<Card> {
         val card = Card()
