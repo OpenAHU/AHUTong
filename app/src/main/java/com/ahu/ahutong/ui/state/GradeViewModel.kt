@@ -39,6 +39,7 @@ class GradeViewModel : ViewModel() {
             val result = AHURepository.getGpaRankInfo()
             if (result.code == 0) {
                 gpaRankInfo = result.data
+                AHUCache.saveGpaRankInfo(result.data)
                 errorMessage = null
             } else {
                 errorMessage = result.msg
@@ -91,6 +92,7 @@ class GradeViewModel : ViewModel() {
                 }
             }
             .launchIn(viewModelScope)
+        gpaRankInfo = AHUCache.getGpaRankInfo()
     }
 
     private fun calGPA(schoolYear: String, schoolTerm: String, grade: Grade) {

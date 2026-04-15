@@ -5,6 +5,7 @@ import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.ElectricityChargeInfo
 import com.ahu.ahutong.data.model.ElectricityDepositHistoryItem
 import com.ahu.ahutong.data.model.Exam
+import com.ahu.ahutong.data.model.GpaRankInfo
 import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.data.model.RoomSelectionInfo
 import com.ahu.ahutong.data.model.User
@@ -384,5 +385,26 @@ object AHUCache {
 
     fun clearMockCurrentTimeMillis() {
         kv.removeValueForKey("mock_current_time_millis")
+    }
+
+    /**
+     * 保存 GPA 排名信息
+     */
+    fun saveGpaRankInfo(gpaRankInfo: GpaRankInfo) {
+        val data = Gson().toJson(gpaRankInfo)
+        kv.encode("gpa_rank_info", data)
+    }
+    /**
+     * 获取缓存的 GPA 排名信息
+     */
+    fun getGpaRankInfo(): GpaRankInfo? {
+        val data = kv.decodeString("gpa_rank_info") ?: ""
+        return data.fromJson(GpaRankInfo::class.java)
+    }
+    /**
+     * 清除 GPA 排名缓存
+     */
+    fun clearGpaRankInfo() {
+        kv.removeValueForKey("gpa_rank_info")
     }
 }
