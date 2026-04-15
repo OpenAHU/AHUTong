@@ -176,8 +176,6 @@ class SdkDataSource : BaseDataSource {
     private fun convertJsToJson(js: String): String {
         return js
             .replace(Regex("'"), "\"")                // 单引号 → 双引号
-            .replace(Regex("""(\w+)\s*:"""), """ "$1":" """) // 无引号 key → 加双引号
-            .replace(Regex(",\\s*}"), "}")            // 去除尾逗号
     }
 
 

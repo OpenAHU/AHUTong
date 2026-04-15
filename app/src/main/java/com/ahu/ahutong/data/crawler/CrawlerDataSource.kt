@@ -204,7 +204,6 @@ class CrawlerDataSource : BaseDataSource {
     }
 
     override suspend fun getGpaRankFromHtml(): AHUResponse<GpaRankInfo> {
-        Log.e("TEST", "========= 我是新代码 =========")
         val response = AHUResponse<GpaRankInfo>()
         try {
             val htmlResponse = JwxtApi.API.getGrade()
