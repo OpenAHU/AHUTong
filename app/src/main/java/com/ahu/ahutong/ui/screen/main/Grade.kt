@@ -52,6 +52,7 @@ import com.kyant.monet.withNight
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import com.google.gson.Gson
+import androidx.compose.material.icons.filled.Refresh
 
 @Composable
 fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
@@ -86,8 +87,8 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
             term.schoolYear == gradeViewModel.schoolYear && term.term == gradeViewModel.schoolTerm
         }
     }
-    val rankindex = (gradeViewModel.gpaRankInfo?.gpaSemesterSubs?.size?:0) - (gradeViewModel.grade?.termGradeList?.indexOf(gradeData) ?: -1) - 1//通过grade索引获取当前学期排名索引
-    val currentRank = gradeViewModel.gpaRankInfo?.gpaSemesterSubs?.getOrNull(rankindex)
+    val rankIndex = (gradeViewModel.gpaRankInfo?.gpaSemesterSubs?.size?:0) - (gradeViewModel.grade?.termGradeList?.indexOf(gradeData) ?: -1) - 1//通过grade索引获取当前学期排名索引
+    val currentRank = gradeViewModel.gpaRankInfo?.gpaSemesterSubs?.getOrNull(rankIndex)
     val trimmedQuery = if (searchExpanded) searchQuery.trim() else ""
     fun fuzzyContains(text: String, query: String): Boolean {
         if (query.isBlank()) return false
@@ -144,6 +145,16 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                             .clip(ContinuousCapsule)
                             .background(100.n1 withNight 30.n1)
                     ) {
+                        IconButton(
+                            onClick = {
+                                gradeViewModel.refreshGrade()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "刷新成绩"
+                            )
+                        }
                         IconButton(
                             onClick = {
                                 searchExpanded = !searchExpanded

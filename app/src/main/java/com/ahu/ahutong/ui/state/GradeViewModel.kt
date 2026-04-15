@@ -18,6 +18,7 @@ import java.text.DecimalFormat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 class GradeViewModel : ViewModel() {
     var totalGradePointAverage by mutableStateOf("暂无")
@@ -64,6 +65,21 @@ class GradeViewModel : ViewModel() {
             errorMessage = t.message ?: "获取成绩失败"
         } finally {
             isLoading = false
+        }
+    }
+
+    var isRefreshing by mutableStateOf(false)
+        private set
+
+    fun refreshGrade() {
+        viewModelScope.launch {
+            isRefreshing = true
+            try {
+                getGarde()
+                getGpaRank()
+            } finally {
+                isRefreshing = false
+            }
         }
     }
 
