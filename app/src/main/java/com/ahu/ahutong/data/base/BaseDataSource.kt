@@ -8,6 +8,7 @@ import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Exam
+import com.ahu.ahutong.data.model.GpaRankInfo
 import com.ahu.ahutong.data.model.Grade
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -33,6 +34,8 @@ interface BaseDataSource {
     suspend fun getSchedule() : AHUResponse<List<Course>>
 
     suspend fun getGrade(): AHUResponse<Grade>
+
+    suspend fun getGpaRankFromHtml(): AHUResponse<GpaRankInfo>
 
     suspend fun getCardMoney(): AHUResponse<Card>
 

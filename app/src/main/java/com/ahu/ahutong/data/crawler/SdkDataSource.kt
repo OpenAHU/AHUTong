@@ -23,6 +23,7 @@ import okhttp3.FormBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import com.ahu.ahutong.data.crawler.model.adwnh.Balance
+import com.ahu.ahutong.data.model.GpaRankInfo
 
 class SdkDataSource : BaseDataSource {
 
@@ -132,6 +133,51 @@ class SdkDataSource : BaseDataSource {
 
         return convertGradeResponse(result.getOrThrow())
     }
+
+
+    override suspend fun getGpaRankFromHtml(): AHUResponse<GpaRankInfo> {
+        val response = AHUResponse<GpaRankInfo>()
+        try {
+            val htmlResponse = JwxtApi.API.getGrade()
+            if(!htmlResponse.isSuccessful||htmlResponse.body() == null){
+                response.code = -1
+                response.msg = "获取成绩页面失败"
+                return response
+            }
+
+            val html = htmlResponse.body()!!.string()
+            val pattern = Regex(
+                "var gpaSemesterModel\\s*=\\s*(\\{.*?\\});",
+                RegexOption.DOT_MATCHES_ALL
+            )
+
+            val match = pattern.find(html)
+                ?: throw Exception("未找到 gpaSemesterModel 变量")
+
+            val jsObject = match.groupValues[1]
+
+            val json = convertJsToJson(jsObject)
+
+            val gpaRankInfo = Gson().fromJson(json, GpaRankInfo::class.java)
+
+            response.code = 0
+            response.msg = "success"
+            response.data = gpaRankInfo
+            return response
+
+        }catch (e: Exception){
+            e.printStackTrace()
+            response.code = -1
+            response.msg = "解析失败：${e.message}"
+            return response
+        }
+    }
+
+    private fun convertJsToJson(js: String): String {
+        return js
+            .replace(Regex("'"), "\"")                // 单引号 → 双引号
+    }
+
 
     /**
      * 转换 GradeResponse 为 Grade

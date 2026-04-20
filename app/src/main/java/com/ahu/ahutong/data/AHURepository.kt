@@ -14,6 +14,7 @@ import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.data.mock.MockDataSource
+import com.ahu.ahutong.data.model.GpaRankInfo
 import com.ahu.ahutong.data.server.AhuTong
 import com.ahu.ahutong.sdk.LocalServiceClient
 import com.ahu.ahutong.sdk.RustSDK
@@ -344,4 +345,8 @@ object AHURepository {
             dataSource.getSchoolCalendar()
         }
 
+    suspend fun getGpaRankInfo(): AHUResponse<GpaRankInfo> =
+        withContext(Dispatchers.IO) {
+            dataSource.getGpaRankFromHtml()
+        }
 }
