@@ -310,7 +310,7 @@ fun Debug(
 
         DebugSection(
             title = "通知测试",
-            subtitle = "独立预约一条测试通知，不影响正式的下一次课前提醒",
+            subtitle = "独立预约测试通知，不影响正式的下一次课前提醒；岛卡测试需先在设置页开启实验开关",
             cardColor = cardColor
         ) {
             Row(
@@ -318,21 +318,60 @@ fun Debug(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 DebugActionButton(
-                    text = "1 分钟后模拟提醒",
+                    text = "10 秒后模拟提醒",
                     modifier = Modifier.weight(1f),
                     primary = true,
                     containerColor = primaryButtonColor,
                     onClick = {
                         CourseReminderScheduler.scheduleDebugReminder(context, 1)
-                        Toast.makeText(context, "已预约 1 分钟后测试通知", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "已预约 10 秒后测试通知", Toast.LENGTH_SHORT).show()
                     }
                 )
                 DebugActionButton(
-                    text = "5 分钟后模拟提醒",
+                    text = "50 秒后模拟提醒",
                     modifier = Modifier.weight(1f),
                     onClick = {
                         CourseReminderScheduler.scheduleDebugReminder(context, 5)
-                        Toast.makeText(context, "已预约 5 分钟后测试通知", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "已预约 50 秒后测试通知", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                DebugActionButton(
+                    text = "模拟3分钟岛卡",
+                    modifier = Modifier.weight(1f),
+                    containerColor = primaryButtonColor,
+                    onClick = {
+                        val nextCourseName =
+                            CourseReminderScheduler.scheduleDebugNextCourseInThreeMinutes(context)
+                        if (nextCourseName == null) {
+                            Toast.makeText(
+                                context,
+                                "未找到下一节课，请先刷新课表并确认当前周有课",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "已预约：3分钟后上《$nextCourseName》",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                )
+                DebugActionButton(
+                    text = "50 秒后模拟岛卡",
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        CourseReminderScheduler.scheduleDebugLiveUpdateReminder(context, 5)
+                        Toast.makeText(
+                            context,
+                            "已预约岛卡测试，50 秒后触发并显示 3 分钟倒计时",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 )
             }

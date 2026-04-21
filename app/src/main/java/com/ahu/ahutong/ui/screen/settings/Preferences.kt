@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ahu.ahutong.R
+import com.ahu.ahutong.notification.CourseReminderCapability
+import com.ahu.ahutong.notification.CourseReminderNotifier
 import com.ahu.ahutong.notification.CourseReminderScheduler
 import com.ahu.ahutong.ui.components.LiquidToggle
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
@@ -72,6 +74,7 @@ fun Preferences() {
     val isShowAllCourse by preferencesViewModel.isShowAllCourse.collectAsState()
     val useLiquidGlass by preferencesViewModel.useLiquidGlass.collectAsState()
     val courseReminderEnabled by preferencesViewModel.courseReminderEnabled.collectAsState()
+    val courseReminderLiveCountdownEnabled by preferencesViewModel.courseReminderLiveCountdownEnabled.collectAsState()
 
     val cardColor = 100.n1 withNight 20.n1
     val backdrop = rememberCanvasBackdrop { drawRect(cardColor) }
@@ -203,6 +206,82 @@ fun Preferences() {
                     },
                     backdrop = backdrop
                 )
+            }
+        }
+
+        Column(
+            modifier =
+                Modifier
+                    .clip(SmoothRoundedCornerShape(16.dp))
+                    .background(cardColor)
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(text = "通知增强", style = MaterialTheme.typography.headlineSmall)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(SmoothRoundedCornerShape(8.dp))
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(text = "课前倒计时岛卡提醒（实验性）")
+                    Text(
+                        text = "仅部分系统支持 需同时开启课前提醒",
+                        color = 50.n1 withNight 80.n1,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                LiquidToggle(
+                    selected = {
+                        courseReminderLiveCountdownEnabled && Build.VERSION.SDK_INT >= 36
+                    },
+                    onSelect = { enabled ->
+                        if (enabled && Build.VERSION.SDK_INT < 36) {
+                            Toast.makeText(
+                                context,
+                                "当前 Android 版本暂不支持岛卡提醒",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            preferencesViewModel.setCourseReminderLiveCountdownEnabled(false)
+                        } else {
+                            preferencesViewModel.setCourseReminderLiveCountdownEnabled(enabled)
+                            if (!enabled) {
+                                CourseReminderNotifier.cancelActiveReminder(context)
+                            }
+                        }
+                    },
+                    backdrop = backdrop
+                )
+            }
+            TextButton(
+                onClick = {
+                    if (Build.VERSION.SDK_INT < 36) {
+                        Toast.makeText(
+                            context,
+                            "当前 Android 版本暂不支持岛卡提醒",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        val promotionIntent =
+                            CourseReminderCapability.createPromotionSettingsIntent(context)
+                        val fallbackIntent =
+                            CourseReminderCapability.createNotificationSettingsIntent(context)
+                        runCatching {
+                            context.startActivity(promotionIntent)
+                        }.getOrElse {
+                            context.startActivity(fallbackIntent)
+                        }
+                    }
+                },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(text = "管理系统岛卡权限")
             }
         }
 

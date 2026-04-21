@@ -28,6 +28,10 @@ class PreferencesViewModel @Inject constructor(private val preferencesManager: P
     private val _courseReminderEnabled = MutableStateFlow(false)
     val courseReminderEnabled: StateFlow<Boolean> = _courseReminderEnabled.asStateFlow()
 
+    private val _courseReminderLiveCountdownEnabled = MutableStateFlow(false)
+    val courseReminderLiveCountdownEnabled: StateFlow<Boolean> =
+        _courseReminderLiveCountdownEnabled.asStateFlow()
+
     init {
         viewModelScope.launch {
             preferencesManager.themeColor.collect {
@@ -54,6 +58,11 @@ class PreferencesViewModel @Inject constructor(private val preferencesManager: P
                 _courseReminderEnabled.value = it
             }
         }
+        viewModelScope.launch {
+            preferencesManager.courseReminderLiveCountdownEnabled.collect {
+                _courseReminderLiveCountdownEnabled.value = it
+            }
+        }
     }
 
     fun setShowQRCode(value: Boolean) {
@@ -77,6 +86,12 @@ class PreferencesViewModel @Inject constructor(private val preferencesManager: P
     fun setCourseReminderEnabled(value: Boolean) {
         viewModelScope.launch {
             preferencesManager.setCourseReminderEnabled(value)
+        }
+    }
+
+    fun setCourseReminderLiveCountdownEnabled(value: Boolean) {
+        viewModelScope.launch {
+            preferencesManager.setCourseReminderLiveCountdownEnabled(value)
         }
     }
 

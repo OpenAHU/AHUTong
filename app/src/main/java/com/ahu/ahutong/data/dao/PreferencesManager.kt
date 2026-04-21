@@ -15,6 +15,8 @@ object PreferencesKeys {
     val IS_SHOW_ALL_COURSE = booleanPreferencesKey("is_show_all_course")
     val USE_LIQUID_GLASS = booleanPreferencesKey("use_liquid_glass")
     val COURSE_REMINDER_ENABLED = booleanPreferencesKey("course_reminder_enabled")
+    val COURSE_REMINDER_LIVE_COUNTDOWN_ENABLED =
+        booleanPreferencesKey("course_reminder_live_countdown_enabled")
     val THEME_COLOR = stringPreferencesKey("theme_color_hex")
 }
 
@@ -73,6 +75,16 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
     suspend fun setCourseReminderEnabled(value: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[PreferencesKeys.COURSE_REMINDER_ENABLED] = value
+        }
+    }
+
+    val courseReminderLiveCountdownEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[PreferencesKeys.COURSE_REMINDER_LIVE_COUNTDOWN_ENABLED] ?: false
+    }
+
+    suspend fun setCourseReminderLiveCountdownEnabled(value: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[PreferencesKeys.COURSE_REMINDER_LIVE_COUNTDOWN_ENABLED] = value
         }
     }
 

@@ -63,9 +63,9 @@ import com.kyant.monet.withNight
 fun RowScope.CampusCard(
     balance: Double,
     transitionBalance: Double,
+    onRefreshBalance: () -> Unit,
     navController: NavController
 ) {
-
     val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context = context) }
 
@@ -75,6 +75,12 @@ fun RowScope.CampusCard(
 
     LaunchedEffect(pref) {
         isQrcode = pref
+    }
+
+    LaunchedEffect(isQrcode) {
+        if (AHUCache.isLogin() && isQrcode) {
+            onRefreshBalance()
+        }
     }
 
 

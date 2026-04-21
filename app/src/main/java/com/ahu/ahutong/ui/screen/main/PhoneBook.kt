@@ -89,7 +89,6 @@ fun PhoneBook() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 80.dp)
             .systemBarsPadding()
     ) {
         if (isSearchActive) {
