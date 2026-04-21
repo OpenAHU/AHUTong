@@ -87,8 +87,9 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
             term.schoolYear == gradeViewModel.schoolYear && term.term == gradeViewModel.schoolTerm
         }
     }
-    val rankIndex = (gradeViewModel.gpaRankInfo?.gpaSemesterSubs?.size?:0) - (gradeViewModel.grade?.termGradeList?.indexOf(gradeData) ?: -1) - 1//通过grade索引获取当前学期排名索引
-    val currentRank = gradeViewModel.gpaRankInfo?.gpaSemesterSubs?.getOrNull(rankIndex)
+    val currentRank = gpaRankInfo?.gpaSemesterSubs?.find { gpaSemesterSub ->
+        gpaSemesterSub.semesterId == gradeData?.gradeList?.first()?.semesterId
+    }
     val trimmedQuery = if (searchExpanded) searchQuery.trim() else ""
     fun fuzzyContains(text: String, query: String): Boolean {
         if (query.isBlank()) return false
