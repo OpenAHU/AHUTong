@@ -28,8 +28,13 @@ android {
         applicationId = "com.ahu.ahutong"
         minSdk = 26
         targetSdk = 36
+<<<<<<< schedule-swipe-week-switch
+        versionCode = 312
+        versionName = "3.1.2"
+=======
         versionCode = 309
         versionName = "3.0.9"
+>>>>>>> master
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("arm64-v8a")
