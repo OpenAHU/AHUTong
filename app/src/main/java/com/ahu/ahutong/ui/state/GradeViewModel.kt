@@ -75,7 +75,7 @@ class GradeViewModel : ViewModel() {
         viewModelScope.launch {
             isRefreshing = true
             try {
-                getGarde()
+                getGarde(true)
                 getGpaRank()
             } finally {
                 isRefreshing = false
