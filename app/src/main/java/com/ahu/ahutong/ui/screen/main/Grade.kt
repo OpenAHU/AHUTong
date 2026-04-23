@@ -1,6 +1,7 @@
 package com.ahu.ahutong.ui.screen.main
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -63,6 +64,11 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val scrollState = rememberScrollState()
+
+    BackHandler(enabled = searchExpanded) {
+        searchExpanded = false
+        searchQuery = ""
+    }
 
     LaunchedEffect(Unit) {
         if (grade == null) {
