@@ -14,6 +14,9 @@ import okhttp3.FormBody
 import android.util.Log
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.dao.AHUCache.saveRoomSelection
+import com.ahu.ahutong.data.crawler.utils.generateNonce
+import com.ahu.ahutong.data.crawler.utils.getTimestamp
+import com.ahu.ahutong.data.crawler.utils.sha256
 import com.ahu.ahutong.data.model.ElectricityChargeInfo
 import com.ahu.ahutong.data.model.ElectricityDepositHistoryItem
 import com.ahu.ahutong.data.model.RoomSelectionInfo
@@ -81,6 +84,7 @@ data class PaymentData(
     val area: String,
     val buildingName: String,
     val areaName: String,
+    val extdata: String = "",
     val floorName: String,
     val floor: String,
     val aid: String,
@@ -107,6 +111,17 @@ data class FinalPayResponse(
     val success: Boolean,
     val data: String?,
     val msg: String
+)
+
+data class AccountPayInfoResponse(
+    val code: Int,
+    val success: Boolean,
+    val data: AccountPayInfoData?,
+    val msg: String
+)
+
+data class AccountPayInfoData(
+    val passwordMap: Map<String, String>?
 )
 
 class ElectricityDepositViewModel: ViewModel() {
@@ -674,15 +689,18 @@ class ElectricityDepositViewModel: ViewModel() {
             myCustomInfo = "房间：${fullDetails.areaName} ${fullDetails.buildingName} ${fullDetails.floorName} ${fullDetails.roomName}"
         )
         val thirdPartyJson = Gson().toJson(paymentData)
-        val formBody = FormBody.Builder()
-            .add("feeitemid", "488")
-            .add("tranamt", amount)
-            .add("flag", "choose")
-            .add("source", "app")
-            .add("paystep", "0")
-            .add("abstracts", "")
-            .add("third_party", thirdPartyJson)
-            .build()
+        val formBody = buildSignedFormBody(
+            linkedMapOf(
+                "feeitemid" to "488",
+                "tranamt" to amount,
+                "flag" to "choose",
+                "source" to "app",
+                "paystep" to "0",
+                "abstracts" to "",
+                "redirect_url" to "https://ycard.ahu.edu.cn/plat",
+                "third_party" to thirdPartyJson
+            )
+        )
         Log.d("ElectricityDepositViewModel", "getPaymentOrder请求体: ${formBody.asString()}")
         try {
             val res = YcardApi.API.pay(formBody)
@@ -697,6 +715,50 @@ class ElectricityDepositViewModel: ViewModel() {
                 }
                 val parsedResponse = Gson().fromJson(responseBody, OrderResponse::class.java)
                 if (parsedResponse.code == 200 && parsedResponse.data != null) {
+                    responseWrapper.code = 0
+                    responseWrapper.msg = "success"
+                    responseWrapper.data = parsedResponse.data
+                } else {
+                    responseWrapper.code = -1
+                    responseWrapper.msg = parsedResponse.msg
+                }
+            } else {
+                responseWrapper.code = res.code()
+                responseWrapper.msg = "请求接口失败: ${res.message()}"
+            }
+        } catch (e: Exception) {
+            responseWrapper.code = -1
+            responseWrapper.msg = "发生未知错误: ${e.message}"
+            e.printStackTrace()
+        }
+        return responseWrapper
+    }
+
+    private suspend fun getAccountPayInfo(orderId: String): AHUResponse<AccountPayInfoData> {
+        val responseWrapper = AHUResponse<AccountPayInfoData>()
+        val formBody = buildSignedFormBody(
+            linkedMapOf(
+                "paytypeid" to "64",
+                "paytype" to "ACCOUNTTSM",
+                "paystep" to "2",
+                "orderid" to orderId
+            )
+        )
+
+        Log.d("ElectricityDepositViewModel", "getAccountPayInfo请求体: ${formBody.asString()}")
+        try {
+            val res = YcardApi.API.pay(formBody)
+            Log.d("ElectricityDepositViewModel", "getAccountPayInfo响应码: ${res.code()}")
+            val responseBody = res.body()?.string()
+            Log.d("ElectricityDepositViewModel", "getAccountPayInfo响应体: $responseBody")
+            if (res.isSuccessful) {
+                if (responseBody.isNullOrEmpty()) {
+                    responseWrapper.code = -1
+                    responseWrapper.msg = "服务器返回内容为空"
+                    return responseWrapper
+                }
+                val parsedResponse = Gson().fromJson(responseBody, AccountPayInfoResponse::class.java)
+                if (parsedResponse.code == 200 && parsedResponse.data?.passwordMap?.isNotEmpty() == true) {
                     responseWrapper.code = 0
                     responseWrapper.msg = "success"
                     responseWrapper.data = parsedResponse.data
@@ -745,8 +807,17 @@ class ElectricityDepositViewModel: ViewModel() {
                 val orderId = orderResult.data.orderid
                 Log.d("ElectricityDepositViewModel", "订单创建成功，orderId: $orderId")
 
-                val uuid = "344790713e534a4bb8971fe9d5ec6029"
-                val mapString = "7896502314"
+                val accountPayInfoResult = getAccountPayInfo(orderId)
+                val passwordMap = accountPayInfoResult.data?.passwordMap
+                if (accountPayInfoResult.code != 0 || passwordMap.isNullOrEmpty()) {
+                    val msg = accountPayInfoResult.msg ?: "获取支付信息失败"
+                    _errorMessage.value = msg
+                    _payState.value = PayState.Failed(msg)
+                    Log.e("ElectricityDepositViewModel", "获取支付信息失败: $msg")
+                    return@launch
+                }
+
+                val (uuid, mapString) = passwordMap.entries.first()
                 val plainDigits = "0123456789"
 
                 val keymap = mapString.mapIndexed { index, c ->
@@ -759,17 +830,19 @@ class ElectricityDepositViewModel: ViewModel() {
                 }.joinToString("")
                 Log.d("ElectricityDepositViewModel", "加密后密码: $cipherText")
 
-                val finalFormBody = FormBody.Builder()
-                    .add("orderid", orderId)
-                    .add("paystep", "2")
-                    .add("paytype", "ACCOUNTTSM")
-                    .add("paytypeid", "64")
-                    .add("userAgent", "h5")
-                    .add("ccctype", "000")
-                    .add("password", cipherText)
-                    .add("uuid", uuid)
-                    .add("isWX", "0")
-                    .build()
+                val finalFormBody = buildSignedFormBody(
+                    linkedMapOf(
+                        "orderid" to orderId,
+                        "paystep" to "2",
+                        "paytype" to "ACCOUNTTSM",
+                        "paytypeid" to "64",
+                        "userAgent" to "h5",
+                        "ccctype" to "000",
+                        "password" to cipherText,
+                        "uuid" to uuid,
+                        "isWX" to "0"
+                    )
+                )
 
                 Log.d("ElectricityDepositViewModel", "开始执行最终支付请求...")
                 Log.d("ElectricityDepositViewModel", "最终支付请求体: ${finalFormBody.asString()}")
@@ -857,6 +930,35 @@ class ElectricityDepositViewModel: ViewModel() {
                 }
             }
         }
+    }
+
+    private fun buildSignedFormBody(params: LinkedHashMap<String, String>): FormBody {
+        val appId = "56321"
+        val timestamp = getTimestamp()
+        val signType = "SHA256"
+        val nonce = generateNonce()
+        val signParams = linkedMapOf(
+            "APP_ID" to appId,
+            "NONCE" to nonce,
+            "SIGN_TYPE" to signType,
+            "TIMESTAMP" to timestamp
+        ).apply {
+            params.filterValues { it.isNotEmpty() }
+                .toSortedMap()
+                .forEach { (key, value) -> put(key, value) }
+        }
+        val signSource = signParams.entries.joinToString("&") { (key, value) -> "$key=$value" } +
+                "&SECRET_KEY=0osTIhce7uPvDKHz6aa67bhCukaKoYl4"
+        val sign = sha256(signSource).uppercase()
+
+        val builder = FormBody.Builder()
+        params.forEach { (key, value) -> builder.add(key, value) }
+        builder.add("APP_ID", appId)
+        builder.add("TIMESTAMP", timestamp)
+        builder.add("SIGN_TYPE", signType)
+        builder.add("NONCE", nonce)
+        builder.add("SIGN", sign)
+        return builder.build()
     }
 
     private fun selectionKey(selection: RoomSelectionInfo): String {
