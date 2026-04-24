@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -71,6 +72,7 @@ class MainActivity : ComponentActivity() {
 //                    )
 //                }
                 if (mainViewModel.showApkUpdateDialog.value && mainViewModel.apkUpdateInfo.value != null) {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
                     ApkUpdateDialog(
                         info = mainViewModel.apkUpdateInfo.value!!,
                         downloading = mainViewModel.apkDownloading.value,
@@ -78,7 +80,10 @@ class MainActivity : ComponentActivity() {
                         errorText = mainViewModel.apkErrorText.value,
                         apkLocalReady = mainViewModel.apkLocalReady.value,
                         onConfirm = {
-                            mainViewModel.startApkDownload(this@MainActivity)
+                            mainViewModel.startApkDownload(
+                                this@MainActivity,
+                                installAfterDownload = true
+                            )
                         },
                         onInstallLocal = {
                             mainViewModel.installLocalApk(this@MainActivity)
@@ -125,30 +130,10 @@ class MainActivity : ComponentActivity() {
         }
         WidgetUpdateScheduler.scheduleNext(this@MainActivity)
 
-        var hotUpdateApplied = java.util.concurrent.atomic.AtomicBoolean(false)
-
-//        RustSDK.loadLibrary(
-//            context = this,
-//            onHotUpdateFound = {
-//                isHotUpdateDownloading = true
-//                showHotUpdateDialog = true
-//            },
-//            onHotUpdateSuccess = {
-//                hotUpdateApplied.set(true)
-//                isHotUpdateDownloading = false
-//                showHotUpdateDialog = true
-//            },
-//            onHotUpdateFinished = {
-//                if (!hotUpdateApplied.get()) {
-//                    showHotUpdateDialog = false
-//                    isHotUpdateDownloading = false
-//                    checkApkUpdateOnStartup()
-//                }
-//            }
-//        )
+        RustSDK.loadLibrary(context = applicationContext)
 
         // 在 native library 加载后启动本地 HTTP 服务
-//        startLocalService()
+        startLocalService()
 
 
 

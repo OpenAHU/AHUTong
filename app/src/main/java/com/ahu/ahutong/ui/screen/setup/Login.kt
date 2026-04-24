@@ -92,6 +92,7 @@ fun Login(
     }
     var focusIndex by rememberSaveable { mutableStateOf(0) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    val activity = LocalActivity.current
     LaunchedEffect(loginViewModel.state) {
         if (loginViewModel.state == LoginState.Failed) {
             delay(1000)
@@ -99,10 +100,10 @@ fun Login(
         } else if (loginViewModel.state == LoginState.Succeeded) {
             delay(500)
             loginViewModel.state = LoginState.Idle
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
             onLoggedIn()
         }
     }
-    val activity = LocalActivity.current
     DisposableEffect(Unit) {
         val window = activity?.window
         window?.setFlags(
