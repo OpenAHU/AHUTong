@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ahu.ahutong.R
@@ -246,6 +248,9 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
     val discoveryViewModel: DiscoveryViewModel = hiltViewModel()
     val qrcodeBitmap by discoveryViewModel.qrcode.collectAsState()
     val finished by discoveryViewModel.state.collectAsState()
+    var showFullScreen by remember {
+        mutableStateOf(false)
+    }
 
     if (AHUCache.isLogin()) {
         LaunchedEffect(Unit) {
@@ -290,10 +295,56 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
 
         Spacer(Modifier.height(24.dp))
 
-        Box(modifier = Modifier.clickable {
-            onBack()
-        }) {
-            Text("返回")
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            Box(
+                modifier = Modifier.clickable {
+                    showFullScreen = true
+                }
+            ) {
+                Text("放大")
+            }
+
+            Box(
+                modifier = Modifier.clickable {
+                    onBack()
+                }
+            ) {
+                Text("返回")
+            }
+        }
+        if (showFullScreen) {
+            Dialog(
+                onDismissRequest = {
+                    showFullScreen = false
+                }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            showFullScreen = false
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    qrcodeBitmap?.let {
+                        Box(
+                            modifier = Modifier
+                                .size(360.dp)
+                                .clip(SmoothRoundedCornerShape(24.dp))
+                                .background(Color.White)
+                                .padding(20.dp)
+                        ) {
+                            Image(
+                                bitmap = it.asImageBitmap(),
+                                contentDescription = "Full QR Code",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
