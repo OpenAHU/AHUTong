@@ -10,6 +10,8 @@ import com.ahu.ahutong.data.server.AhuTong
 import com.ahu.ahutong.data.server.model.ApkUpdateInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.util.Log
@@ -20,6 +22,10 @@ import java.io.InputStream
 import java.security.MessageDigest
 
 class MainViewModel : ViewModel() {
+
+    companion object {
+        private val apkDownloadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    }
 
     // App update UI states
     var showApkUpdateDialog = mutableStateOf(false)
@@ -32,6 +38,7 @@ class MainViewModel : ViewModel() {
     var apkLocalReady = mutableStateOf(false)
 
     private var apkDownloadJob: Job? = null
+    private var installAfterApkDownload = false
 
     private val apkFileRegex = Regex("""^update-(\d+)\.apk$""")
 
@@ -82,6 +89,9 @@ class MainViewModel : ViewModel() {
             apkErrorText.value = null
             apkLocalReady.value = localReady
             showApkUpdateDialog.value = true
+            if (!localReady && !apkDownloading.value) {
+                startApkDownload(context.applicationContext, installAfterDownload = false)
+            }
         }
     }
 
@@ -134,14 +144,20 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun startApkDownload(context: Context, forceRedownload: Boolean = false) {
+    fun startApkDownload(
+        context: Context,
+        forceRedownload: Boolean = false,
+        installAfterDownload: Boolean = false
+    ) {
         val info = apkUpdateInfo.value ?: return
         if (apkDownloading.value) return
+        installAfterApkDownload = installAfterDownload
+        val appContext = context.applicationContext
 
         if (!forceRedownload) {
             // 检查本地是否已存在该版本 APK 并校验完整性（IO 安全）
-            viewModelScope.launch(Dispatchers.IO) {
-                val dir = context.getExternalFilesDir(null) ?: context.filesDir
+            apkDownloadScope.launch {
+                val dir = appContext.getExternalFilesDir(null) ?: appContext.filesDir
                 val existingApk = File(dir, "update-${info.versionCode}.apk")
                 if (existingApk.exists() && existingApk.length() > 0) {
                     // 校验 sha256
@@ -152,7 +168,7 @@ class MainViewModel : ViewModel() {
                             existingApk.delete()
                             withContext(Dispatchers.Main) {
                                 apkLocalReady.value = false
-                                doApkDownload(context, info)
+                                doApkDownload(appContext, info)
                             }
                             return@launch
                         }
@@ -160,21 +176,23 @@ class MainViewModel : ViewModel() {
                     Log.i("ApkUpdate", "APK already exists locally: ${existingApk.absolutePath}")
                     withContext(Dispatchers.Main) {
                         apkLocalReady.value = true
-                        downloadedApkFile.value = existingApk
+                        if (installAfterApkDownload) {
+                            downloadedApkFile.value = existingApk
+                        }
                     }
                     return@launch
                 }
-                withContext(Dispatchers.Main) { doApkDownload(context, info) }
+                withContext(Dispatchers.Main) { doApkDownload(appContext, info) }
             }
         } else {
             // 强制重新下载：先删除本地缓存
-            viewModelScope.launch(Dispatchers.IO) {
-                val dir = context.getExternalFilesDir(null) ?: context.filesDir
+            apkDownloadScope.launch {
+                val dir = appContext.getExternalFilesDir(null) ?: appContext.filesDir
                 val existingApk = File(dir, "update-${info.versionCode}.apk")
                 existingApk.delete()
                 withContext(Dispatchers.Main) {
                     apkLocalReady.value = false
-                    doApkDownload(context, info)
+                    doApkDownload(appContext, info)
                 }
             }
         }
@@ -189,7 +207,7 @@ class MainViewModel : ViewModel() {
         apkErrorText.value = null
         apkProgress.value = null
 
-        apkDownloadJob = viewModelScope.launch(Dispatchers.IO) {
+        apkDownloadJob = apkDownloadScope.launch {
             try {
                 val body = AhuTong.API.downloadByUrl(info.url!!)
                 val total = body.contentLength()
@@ -255,7 +273,9 @@ class MainViewModel : ViewModel() {
                     apkDownloading.value = false
                     apkProgress.value = null
                     apkLocalReady.value = true
-                    downloadedApkFile.value = outFile
+                    if (installAfterApkDownload) {
+                        downloadedApkFile.value = outFile
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {

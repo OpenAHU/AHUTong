@@ -9,6 +9,7 @@ import com.ahu.ahutong.data.crawler.api.ycard.YcardApi
 import com.ahu.ahutong.data.crawler.model.jwxt.CurrentSemester
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.RequestBody
+import com.ahu.ahutong.data.crawler.utils.GpaRankHtmlParser
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.mock_server.MockServer
 import com.ahu.ahutong.data.model.BathRoom
@@ -215,14 +216,7 @@ class CrawlerDataSource : BaseDataSource {
             }
 
             val html = htmlResponse.body()!!.string()
-            val pattern = Regex(
-                "var gpaSemesterModel\\s*=\\s*(\\{.*?\\});",
-                RegexOption.DOT_MATCHES_ALL
-            )
-
-            val match = pattern.find(html)
-                ?: throw Exception("未找到 gpaSemesterModel 变量")
-            val jsObject = match.groupValues[1]
+            val jsObject = GpaRankHtmlParser.extractModelObject(html)
 
             val json = convertJsToJson(jsObject)
             val gpaRankInfo = Gson().fromJson(json, GpaRankInfo::class.java)

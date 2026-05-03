@@ -43,10 +43,10 @@ class GradeViewModel : ViewModel() {
                 AHUCache.saveGpaRankInfo(result.data)
                 errorMessage = null
             } else {
-                errorMessage = result.msg
+                Log.w("GradeViewModel", "getGpaRank failed: ${result.msg}")
             }
         } catch (t: Throwable) {
-            errorMessage = t.message ?: "获取GPA排名失败"
+            Log.w("GradeViewModel", "getGpaRank failed", t)
         } finally {
             rankLoading = false
         }

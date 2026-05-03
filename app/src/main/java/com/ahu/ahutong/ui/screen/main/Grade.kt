@@ -1,6 +1,7 @@
 package com.ahu.ahutong.ui.screen.main
 
 import android.util.Log
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +54,7 @@ import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import com.google.gson.Gson
 import androidx.compose.material.icons.filled.Refresh
+import kotlinx.coroutines.flow.collect
 
 @Composable
 fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
@@ -63,6 +65,12 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val scrollState = rememberScrollState()
+
+    PredictiveBackHandler(enabled = searchExpanded) { progress ->
+        progress.collect { }
+        searchExpanded = false
+        searchQuery = ""
+    }
 
     LaunchedEffect(Unit) {
         if (grade == null) {
