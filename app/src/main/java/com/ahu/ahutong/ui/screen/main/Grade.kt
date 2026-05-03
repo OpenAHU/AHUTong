@@ -1,84 +1,53 @@
 package com.ahu.ahutong.ui.screen.main
 
-import android.util.Log
-import androidx.activity.compose.PredictiveBackHandler
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
-import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.crawler.model.jwxt.CourseGrade
+import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.GradeViewModel
 import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-import com.google.gson.Gson
-import androidx.compose.material.icons.filled.Refresh
-import kotlinx.coroutines.flow.collect
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
     val grade = gradeViewModel.grade
     val gpaRankInfo = gradeViewModel.gpaRankInfo
     val errorMessage = gradeViewModel.errorMessage
     val context = LocalContext.current
-    var searchExpanded by rememberSaveable { mutableStateOf(false) }
-    var searchQuery by rememberSaveable { mutableStateOf("") }
     val scrollState = rememberScrollState()
 
-    PredictiveBackHandler(enabled = searchExpanded) { progress ->
-        progress.collect { }
-        searchExpanded = false
-        searchQuery = ""
-    }
+    var searchExpanded by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var termMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if (grade == null) {
-            gradeViewModel.getGarde()
-        }
-        if(gpaRankInfo == null) {
-            gradeViewModel.getGpaRank()
-        }
+        if (grade == null) gradeViewModel.getGarde()
+        if (gpaRankInfo == null) gradeViewModel.getGpaRank()
     }
 
     LaunchedEffect(errorMessage) {
@@ -88,17 +57,17 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
         }
     }
 
-    val schoolYears = GradeViewModel.schoolYears
-    val schoolTerms = GradeViewModel.terms.keys.toTypedArray()
-    val gradeData = gradeViewModel.grade?.let { grade1 ->
-        grade1.termGradeList?.find { term ->
-            term.schoolYear == gradeViewModel.schoolYear && term.term == gradeViewModel.schoolTerm
-        }
+    val gradeData = gradeViewModel.grade?.termGradeList?.find {
+        it.schoolYear == gradeViewModel.schoolYear &&
+                it.term == gradeViewModel.schoolTerm
     }
-    val currentRank = gpaRankInfo?.gpaSemesterSubs?.find { gpaSemesterSub ->
-        gpaSemesterSub.semesterId == gradeData?.gradeList?.first()?.semesterId
+
+    val currentRank = gpaRankInfo?.gpaSemesterSubs?.find {
+        it.semesterId == gradeData?.gradeList?.firstOrNull()?.semesterId
     }
+
     val trimmedQuery = if (searchExpanded) searchQuery.trim() else ""
+
     fun fuzzyContains(text: String, query: String): Boolean {
         if (query.isBlank()) return false
         val q = query.filterNot { it.isWhitespace() }
@@ -106,6 +75,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
         val pattern = q.map { Regex.escape(it.toString()) }.joinToString(".*")
         return Regex(pattern, RegexOption.IGNORE_CASE).containsMatchIn(text)
     }
+
     val searchResultsByTerm = gradeViewModel.grade?.termGradeList
         ?.mapNotNull { term ->
             val matches = term.gradeList
@@ -149,21 +119,21 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                         text = stringResource(id = R.string.grade),
                         style = MaterialTheme.typography.headlineMedium
                     )
+
                     Row(
                         modifier = Modifier
                             .clip(ContinuousCapsule)
                             .background(100.n1 withNight 30.n1)
                     ) {
                         IconButton(
-                            onClick = {
-                                gradeViewModel.refreshGrade()
-                            }
+                            onClick = { gradeViewModel.refreshGrade() }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
                                 contentDescription = "刷新成绩"
                             )
                         }
+
                         IconButton(
                             onClick = {
                                 searchExpanded = !searchExpanded
@@ -171,7 +141,10 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                             }
                         ) {
                             Icon(
-                                imageVector = if (searchExpanded) Icons.Default.Close else Icons.Default.Search,
+                                imageVector = if (searchExpanded)
+                                    Icons.Default.Close
+                                else
+                                    Icons.Default.Search,
                                 contentDescription = null
                             )
                         }
@@ -185,296 +158,115 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = ContinuousCapsule,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = 10.n1 withNight 90.n1,
-                            unfocusedTextColor = 10.n1 withNight 90.n1,
-                            focusedBorderColor = 20.n1 withNight 80.n1,
-                            unfocusedBorderColor = 30.n1 withNight 70.n1,
-                            cursorColor = 10.n1 withNight 90.n1,
-                            focusedLeadingIconColor = 20.n1 withNight 80.n1,
-                            unfocusedLeadingIconColor = 20.n1 withNight 80.n1,
-                            focusedTrailingIconColor = 20.n1 withNight 80.n1,
-                            unfocusedTrailingIconColor = 20.n1 withNight 80.n1
-                        ),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null
-                            )
-                        },
-                        trailingIcon = {
-                            if (searchQuery.isNotBlank()) {
-                                IconButton(onClick = { searchQuery = "" }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        },
-                        placeholder = { Text(text = "搜索课程", color = 40.n1 withNight 60.n1) }
+                        placeholder = {
+                            Text("搜索课程")
+                        }
                     )
                 }
             }
 
+            // 改成学期下拉选择（替代原来的学年+学期双筛选）
             if (!searchExpanded) {
-                LazyRow(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .clip(ContinuousCapsule)
-                        .background(100.n1 withNight 20.n1),
-                    contentPadding = PaddingValues(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                val allTerms = gradeViewModel.grade?.termGradeList.orEmpty()
+                val selectedTermText =
+                    "${gradeViewModel.schoolYear} 第${gradeViewModel.schoolTerm}学期"
+
+                ExposedDropdownMenuBox(
+                    expanded = termMenuExpanded,
+                    onExpandedChange = {
+                        termMenuExpanded = !termMenuExpanded
+                    },
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    items(schoolYears.toList()) {
-                        val isSelected = it == gradeViewModel.schoolYear
-                        Text(
-                            text = it,
-                            modifier = Modifier
-                                .clip(ContinuousCapsule)
-                                .background(if (isSelected) 90.a1 else Color.Unspecified)
-                                .clickable {
-                                    gradeViewModel.schoolYear = it
-                                    gradeViewModel.schoolTerm = schoolTerms.firstOrNull()
-                                }
-                                .padding(16.dp, 8.dp),
-                            color = if (isSelected) 0.n1 else Color.Unspecified,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
-                LazyRow(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .clip(ContinuousCapsule)
-                        .background(100.n1 withNight 20.n1),
-                    contentPadding = PaddingValues(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(arrayOf("1", "2")) {
-                        val isSelected = it == gradeViewModel.schoolTerm
-                        Text(
-                            text = it,
-                            modifier = Modifier
-                                .clip(ContinuousCapsule)
-                                .background(if (isSelected) 90.a1 else Color.Unspecified)
-                                .clickable { gradeViewModel.schoolTerm = it }
-                                .padding(16.dp, 8.dp),
-                            color = if (isSelected) 0.n1 else Color.Unspecified,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
-            } else {
-                if (trimmedQuery.isNotBlank()) {
-                    Column(
+                    OutlinedTextField(
+                        value = selectedTermText,
+                        onValueChange = {},
+                        readOnly = true,
                         modifier = Modifier
-                            .padding(horizontal = 24.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            .menuAnchor()
+                            .fillMaxWidth(),
+                        shape = ContinuousCapsule,
+                        label = { Text("选择学期") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = termMenuExpanded
+                            )
+                        }
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = termMenuExpanded,
+                        onDismissRequest = {
+                            termMenuExpanded = false
+                        }
                     ) {
-                        Text(
-                            text = "搜索结果：${searchResultsByTerm.sumOf { it.second.size }}",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        if (searchResultsByTerm.isEmpty()) {
-                            Text(
-                                text = "未找到匹配课程",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = 50.n1 withNight 80.n1
+                        allTerms.forEach { term ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        "${term.schoolYear} 第${term.term}学期"
+                                    )
+                                },
+                                onClick = {
+                                    gradeViewModel.schoolYear = term.schoolYear
+                                    gradeViewModel.schoolTerm = term.term
+                                    termMenuExpanded = false
+                                }
                             )
                         }
                     }
-                } else {
-                    Text(
-                        text = "输入课程名或课程号开始搜索",
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = 50.n1 withNight 80.n1
-                    )
                 }
             }
+
             if (!searchExpanded) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "本学期平均绩点",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = gradeViewModel.termGradePointAverage,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "本学年平均绩点",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = gradeViewModel.yearGradePointAverage,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "全程平均绩点",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = gradeViewModel.totalGradePointAverage,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "全程专业排名",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = (gpaRankInfo?.majorRank?.toString() ?: "暂无") + "/" + (gpaRankInfo?.majorHeadCount?.toString() ?: "暂无") ,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "该学期专业排名",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = (currentRank?.majorRank?.toString() ?: "暂无") + "/" + (gpaRankInfo?.majorHeadCount?.toString() ?: "暂无"),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "最后更新时间",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = gpaRankInfo?.updatedDateTimeStr ?: "暂无",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                    val infoList = listOf(
+                        "本学期平均绩点" to gradeViewModel.termGradePointAverage,
+                        "本学年平均绩点" to gradeViewModel.yearGradePointAverage,
+                        "全程平均绩点" to gradeViewModel.totalGradePointAverage,
+                        "全程专业排名" to ((gpaRankInfo?.majorRank ?: "暂无").toString() + "/" + (gpaRankInfo?.majorHeadCount ?: "暂无")),
+                        "该学期专业排名" to ((currentRank?.majorRank ?: "暂无").toString() + "/" + (gpaRankInfo?.majorHeadCount ?: "暂无")),
+                        "最后更新时间" to (gpaRankInfo?.updatedDateTimeStr ?: "暂无")
+                    )
+
+                    infoList.forEach { (title, value) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(title, style = MaterialTheme.typography.titleMedium)
+                            Text(value, style = MaterialTheme.typography.titleMedium)
+                        }
                     }
                 }
             }
+
             if (searchExpanded && trimmedQuery.isNotBlank()) {
                 Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .clip(SmoothRoundedCornerShape(32.dp)),
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     searchResultsByTerm.forEach { (term, items) ->
                         Text(
                             text = "${term.schoolYear} 第${term.term}学期",
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = 30.n1 withNight 90.n1
+                            style = MaterialTheme.typography.titleMedium
                         )
-                        Column(
-                            modifier = Modifier
-                                .clip(SmoothRoundedCornerShape(32.dp)),
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            items.forEach { item ->
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(SmoothRoundedCornerShape(4.dp))
-                                        .background(100.n1 withNight 20.n1)
-                                        .clickable {}
-                                        .padding(24.dp, 16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = item.course,
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Text(
-                                        text = "成绩: ${item.grade}    绩点: ${item.gradePoint}    学分: ${item.credit}",
-                                        color = 30.n1 withNight 90.n1,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        text = "${item.courseNature ?: ""} (${item.courseNum})",
-                                        color = 50.n1 withNight 80.n1,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                            }
+
+                        items.forEach { item ->
+                            GradeCard(item)
                         }
                     }
                 }
             } else if (!searchExpanded && gradeData != null && gradeData.gradeList.isNotEmpty()) {
                 Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .clip(SmoothRoundedCornerShape(32.dp)),
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     gradeData.gradeList.forEach {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(SmoothRoundedCornerShape(4.dp))
-                                .background(100.n1 withNight 20.n1)
-                                .clickable {}
-                                .padding(24.dp, 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = it.course,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "成绩: ${it.grade}    绩点: ${it.gradePoint}    学分: ${it.credit}",
-                                color = 30.n1 withNight 90.n1,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = "${it.courseNature ?: ""} (${it.courseNum})",
-                                color = 50.n1 withNight 80.n1,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
+                        GradeCard(it)
                     }
                 }
             } else if (!searchExpanded) {
@@ -485,5 +277,37 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun GradeCard(
+    item: Grade.TermGradeListBean.GradeListBean
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SmoothRoundedCornerShape(4.dp))
+            .background(100.n1 withNight 20.n1)
+            .padding(24.dp, 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = item.course ?: "",
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Text(
+            text = "成绩: ${item.grade}    绩点: ${item.gradePoint}    学分: ${item.credit}",
+            color = 30.n1 withNight 90.n1,
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Text(
+            text = "${item.courseNature ?: ""} (${item.courseNum ?: ""})",
+            color = 50.n1 withNight 80.n1,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
