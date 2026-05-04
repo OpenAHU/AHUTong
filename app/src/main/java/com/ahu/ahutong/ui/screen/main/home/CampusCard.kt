@@ -32,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -252,11 +253,35 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
         mutableStateOf(false)
     }
 
+    val activity = androidx.activity.compose.LocalActivity.current
+
     if (AHUCache.isLogin()) {
         LaunchedEffect(Unit) {
             discoveryViewModel.loadQrCode()
         }
     }
+
+    // 放大二维码时亮度拉满，关闭时恢复
+    if (showFullScreen) {
+        DisposableEffect(Unit) {
+            val window = activity?.window
+            val layoutParams = window?.attributes
+
+            // 保存原始亮度
+            val originalBrightness = layoutParams?.screenBrightness ?: -1f
+
+            // 设置最高亮度
+            layoutParams?.screenBrightness = 1f
+            window?.attributes = layoutParams
+
+            onDispose {
+                // 恢复原始亮度
+                layoutParams?.screenBrightness = originalBrightness
+                window?.attributes = layoutParams
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .clip(SmoothRoundedCornerShape(24.dp))
@@ -273,6 +298,7 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
                     modifier = Modifier
                         .clickable {
                             discoveryViewModel.loadQrCode()
+                            discoveryViewModel.refreshCardBalance()
                         }
                         .clip(SmoothRoundedCornerShape(8.dp))
                 ) {
@@ -281,7 +307,11 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
                         contentDescription = "QR Code",
                         modifier = Modifier
                             .size(200.dp)
-                            .border(1.dp, Color.Gray, SmoothRoundedCornerShape(8.dp)),
+                            .border(
+                                1.dp,
+                                Color.Gray,
+                                SmoothRoundedCornerShape(8.dp)
+                            ),
                     )
                 }
             } ?: Text(
@@ -292,7 +322,6 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
             CircularProgressIndicator()
         }
 
-
         Spacer(Modifier.height(24.dp))
 
         Row(
@@ -300,6 +329,7 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
         ) {
             Box(
                 modifier = Modifier.clickable {
+                    discoveryViewModel.loadQrCode()
                     showFullScreen = true
                 }
             ) {
@@ -314,6 +344,7 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
                 Text("返回")
             }
         }
+
         if (showFullScreen) {
             Dialog(
                 onDismissRequest = {
