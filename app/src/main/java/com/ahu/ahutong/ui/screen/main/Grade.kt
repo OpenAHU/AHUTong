@@ -167,7 +167,16 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
 
             // 改成学期下拉选择（替代原来的学年+学期双筛选）
             if (!searchExpanded) {
-                val allTerms = gradeViewModel.grade?.termGradeList.orEmpty()
+                val allTerms = gradeViewModel.grade?.termGradeList
+                    ?.sortedWith(
+                        compareByDescending<Grade.TermGradeListBean> {
+                            // 提取学年起始值，例如 "2023-2024" -> 2023
+                            it.schoolYear.substringBefore("-").toIntOrNull() ?: 0
+                        }.thenByDescending {
+                            it.term.toIntOrNull() ?: 0
+                        }
+                    )
+                    .orEmpty()
                 val selectedTermText =
                     "${gradeViewModel.schoolYear} 第${gradeViewModel.schoolTerm}学期"
 
