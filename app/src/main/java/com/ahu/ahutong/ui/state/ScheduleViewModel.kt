@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 class ScheduleViewModel () : ViewModel() {
     val TAG = "ScheduleViewModel"
     val schedule = MutableLiveData<Result<List<Course>>>()
+    val nextSchedule = MutableLiveData<Result<List<Course>>>()
 
     val schoolYear: String
         get() = CurrentWeekResolver.getCachedSemesterKey()?.schoolYear
@@ -64,6 +65,19 @@ class ScheduleViewModel () : ViewModel() {
                 }
             }
 
+        }
+    }
+
+    fun refreshNextSchedule(isRefresh: Boolean = false) {
+        viewModelScope.launchSafe {
+            withContext(Dispatchers.Main) {
+                if (!AHUCache.isLogin()) {
+                    nextSchedule.value = Result.failure(Throwable("请先登录"))
+                    return@withContext
+                }
+
+                nextSchedule.value = AHURepository.getNextSchedule(isRefresh = isRefresh)
+            }
         }
     }
 

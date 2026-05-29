@@ -1,6 +1,9 @@
 package com.ahu.ahutong.data.dao
 
 import com.ahu.ahutong.AHUApplication
+import com.ahu.ahutong.data.crawler.model.adwnh.CampusItem
+import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundItem
+import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundTypeItem
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.ElectricityChargeInfo
 import com.ahu.ahutong.data.model.ElectricityDepositHistoryItem
@@ -122,6 +125,16 @@ object AHUCache {
 
     fun getSchedule(schoolTerm: String): List<Course>? {
         val data = kv.getString("$schoolTerm.schedule", "") ?: ""
+        return data.fromJson(object : TypeToken<List<Course>>() {}.type)
+    }
+
+    fun saveNextSchedule(schedule: List<Course>) {
+        val data = Gson().toJson(schedule)
+        kv.putString("next.schedule", data)
+    }
+
+    fun getNextSchedule(): List<Course>? {
+        val data = kv.getString("next.schedule", "") ?: ""
         return data.fromJson(object : TypeToken<List<Course>>() {}.type)
     }
 
@@ -406,5 +419,123 @@ object AHUCache {
      */
     fun clearGpaRankInfo() {
         kv.removeValueForKey("gpa_rank_info")
+    }
+    /**
+     * 保存失物招领校区缓存
+     */
+    fun saveLostFoundCampus(campus: List<CampusItem>) {
+        kv.encode(
+            "lost_found_campus",
+            Gson().toJson(campus)
+        )
+    }
+
+    /**
+     * 获取失物招领校区缓存
+     */
+    fun getLostFoundCampus(): List<CampusItem> {
+        val data =
+            kv.decodeString("lost_found_campus") ?: ""
+
+        if (data.isEmpty()) return emptyList()
+
+        return data.fromJson(
+            object : TypeToken<List<CampusItem>>() {}.type
+        ) ?: emptyList()
+    }
+
+    /**
+     * 保存失物招领类型缓存
+     */
+    fun saveLostFoundType(types: List<LostFoundTypeItem>) {
+        kv.encode(
+            "lost_found_type",
+            Gson().toJson(types)
+        )
+    }
+
+    /**
+     * 获取失物招领类型缓存
+     */
+    fun getLostFoundType(): List<LostFoundTypeItem> {
+        val data =
+            kv.decodeString("lost_found_type") ?: ""
+
+        if (data.isEmpty()) return emptyList()
+
+        return data.fromJson(
+            object : TypeToken<List<LostFoundTypeItem>>() {}.type
+        ) ?: emptyList()
+    }
+
+    /**
+     * 保存失物招领帖子缓存（按状态）
+     */
+    fun saveLostFoundList(
+        state: Int,
+        items: List<LostFoundItem>
+    ) {
+        kv.encode(
+            "lost_found_list_$state",
+            Gson().toJson(items)
+        )
+    }
+
+    /**
+     * 获取失物招领帖子缓存（按状态）
+     */
+    fun getLostFoundList(
+        state: Int
+    ): List<LostFoundItem> {
+        val data =
+            kv.decodeString(
+                "lost_found_list_$state"
+            ) ?: ""
+
+        if (data.isEmpty()) return emptyList()
+
+        return data.fromJson(
+            object : TypeToken<List<LostFoundItem>>() {}.type
+        ) ?: emptyList()
+    }
+
+    /**
+     * 追加失物招领帖子缓存（分页）
+     */
+    fun appendLostFoundList(
+        state: Int,
+        newItems: List<LostFoundItem>
+    ) {
+        val oldList =
+            getLostFoundList(state)
+
+        val merged =
+            oldList + newItems
+
+        saveLostFoundList(
+            state,
+            merged
+        )
+    }
+
+    /**
+     * 清除指定状态帖子缓存
+     */
+    fun clearLostFoundList(
+        state: Int
+    ) {
+        kv.removeValueForKey(
+            "lost_found_list_$state"
+        )
+    }
+
+    /**
+     * 清除全部失物招领缓存
+     */
+    fun clearLostFoundCache() {
+        kv.removeValueForKey("lost_found_campus")
+        kv.removeValueForKey("lost_found_type")
+        kv.removeValueForKey("lost_found_list_1")
+        kv.removeValueForKey("lost_found_list_2")
     }
 }

@@ -1,6 +1,11 @@
 package com.ahu.ahutong.data.base
 
 import com.ahu.ahutong.data.AHUResponse
+import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
+import com.ahu.ahutong.data.crawler.model.adwnh.AllCampus
+import com.ahu.ahutong.data.crawler.model.adwnh.AllLostFoundType
+import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundPublishRequest
+import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundResponse
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.RequestBody
 import com.ahu.ahutong.data.model.BathRoom
@@ -33,10 +38,31 @@ interface BaseDataSource {
      */
     suspend fun getSchedule() : AHUResponse<List<Course>>
 
+    /**
+     * getSchedule (auto get schedule of next semester)
+     */
+    suspend fun getNextSchedule() : AHUResponse<List<Course>>
+
     suspend fun getGrade(): AHUResponse<Grade>
 
     suspend fun getGpaRankFromHtml(): AHUResponse<GpaRankInfo>
 
+    suspend fun getAllCampus(): AHUResponse<AllCampus>
+    suspend fun getAllLostFoundType(): AHUResponse<AllLostFoundType>
+
+    suspend fun getLostFoundList(
+        pageNo: Int = 1,
+        pageSize: Int = 20,
+        state: Int = 1
+    ): AHUResponse<LostFoundResponse>
+
+    suspend fun publishLostFound(
+        request: LostFoundPublishRequest
+    ): AHUResponse<Any>
+
+    suspend fun deleteLostFound(
+        id: String
+    ): AHUResponse<Any>
     suspend fun getCardMoney(): AHUResponse<Card>
 
     suspend fun getBathRooms(): AHUResponse<List<BathRoom>>

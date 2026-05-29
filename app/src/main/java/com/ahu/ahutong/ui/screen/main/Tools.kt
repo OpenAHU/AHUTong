@@ -136,6 +136,12 @@ fun Tools(navController: NavHostController) {
                 tint = Color(0xFF03A9F4),
                 onClick = { navController.navigate("free_classroom") }
             )
+            ToolItem(
+                stringId = R.string.lost_found,
+                iconId = R.drawable.lost_and_found,
+                tint = Color(0xFF1976D2),
+                onClick = { navController.navigate("lost_found") }
+            )
         }
         Column(
             modifier = Modifier

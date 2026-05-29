@@ -30,6 +30,7 @@ import com.ahu.ahutong.ui.screen.main.Exam
 import com.ahu.ahutong.ui.screen.main.FreeClassroom
 import com.ahu.ahutong.ui.screen.main.Grade
 import com.ahu.ahutong.ui.screen.main.Home
+import com.ahu.ahutong.ui.screen.main.LostFound
 import com.ahu.ahutong.ui.screen.main.PhoneBook
 import com.ahu.ahutong.ui.screen.main.Schedule
 import com.ahu.ahutong.ui.screen.main.SchoolCalendar
@@ -143,6 +144,9 @@ fun Main(
             }
             animatedComposable("free_classroom") {
                 FreeClassroom()
+            }
+            animatedComposable("lost_found") {
+                LostFound()
             }
             animatedComposable("settings") {
                 Settings(

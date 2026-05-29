@@ -23,14 +23,22 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,6 +56,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ahu.ahutong.R
@@ -247,27 +256,93 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
     val qrcodeBitmap by discoveryViewModel.qrcode.collectAsState()
     val finished by discoveryViewModel.state.collectAsState()
 
+    var showFullScreen by remember {
+        mutableStateOf(false)
+    }
+
+    val activity = androidx.activity.compose.LocalActivity.current
+
     if (AHUCache.isLogin()) {
         LaunchedEffect(Unit) {
             discoveryViewModel.loadQrCode()
         }
     }
+
+    // 放大二维码时亮度拉满，关闭时恢复
+    if (showFullScreen) {
+        DisposableEffect(Unit) {
+            val window = activity?.window
+            val layoutParams = window?.attributes
+
+            // 保存原始亮度
+            val originalBrightness =
+                layoutParams?.screenBrightness ?: -1f
+
+            // 设置最高亮度
+            layoutParams?.screenBrightness = 1f
+            window?.attributes = layoutParams
+
+            onDispose {
+                // 恢复原始亮度
+                layoutParams?.screenBrightness =
+                    originalBrightness
+                window?.attributes = layoutParams
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .clip(SmoothRoundedCornerShape(24.dp))
             .background(100.n1 withNight 20.n1)
-            .padding(24.dp),
+            .padding(
+                start = 20.dp,
+                top = 12.dp,
+                end = 20.dp,
+                bottom = 20.dp
+                ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("¥ $balance")
-        Spacer(Modifier.height(16.dp))
 
+        // 顶部工具栏：左返回，右放大
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            // 左侧返回
+            IconButton(
+                onClick = {
+                    onBack()
+                },
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "返回"
+                )
+            }
+
+            // 右侧全屏
+            IconButton(
+                onClick = {
+                    discoveryViewModel.loadQrCode()
+                    showFullScreen = true
+                },
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Fullscreen,
+                    contentDescription = "放大"
+                )
+            }
+        }
         if (finished) {
             qrcodeBitmap?.let {
                 Box(
                     modifier = Modifier
                         .clickable {
                             discoveryViewModel.loadQrCode()
+                            discoveryViewModel.refreshCardBalance()
                         }
                         .clip(SmoothRoundedCornerShape(8.dp))
                 ) {
@@ -276,24 +351,64 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
                         contentDescription = "QR Code",
                         modifier = Modifier
                             .size(200.dp)
-                            .border(1.dp, Color.Gray, SmoothRoundedCornerShape(8.dp)),
+                            .border(
+                                1.dp,
+                                Color.Gray,
+                                SmoothRoundedCornerShape(8.dp)
+                            )
                     )
                 }
             } ?: Text(
                 text = "加载失败"
             )
-
         } else {
             CircularProgressIndicator()
         }
 
+        Text(
+            text = "¥ $balance",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 12.dp)
+        )
 
-        Spacer(Modifier.height(24.dp))
-
-        Box(modifier = Modifier.clickable {
-            onBack()
-        }) {
-            Text("返回")
+        if (showFullScreen) {
+            Dialog(
+                onDismissRequest = {
+                    showFullScreen = false
+                }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            showFullScreen = false
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    qrcodeBitmap?.let {
+                        Box(
+                            modifier = Modifier
+                                .size(360.dp)
+                                .clip(
+                                    SmoothRoundedCornerShape(
+                                        24.dp
+                                    )
+                                )
+                                .background(Color.White)
+                                .padding(20.dp)
+                        ) {
+                            Image(
+                                bitmap = it.asImageBitmap(),
+                                contentDescription =
+                                    "Full QR Code",
+                                modifier =
+                                    Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

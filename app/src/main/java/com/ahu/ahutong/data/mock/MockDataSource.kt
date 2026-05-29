@@ -1,9 +1,12 @@
 package com.ahu.ahutong.data.mock
 
-import androidx.compose.ui.graphics.GraphicsLayerScope
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
-import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
+import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
+import com.ahu.ahutong.data.crawler.model.adwnh.AllCampus
+import com.ahu.ahutong.data.crawler.model.adwnh.AllLostFoundType
+import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundPublishRequest
+import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundResponse
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.RequestBody
 import com.ahu.ahutong.data.model.BathRoom
@@ -13,19 +16,26 @@ import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.Exam
 import com.ahu.ahutong.data.model.GpaRankInfo
 import com.ahu.ahutong.data.model.Grade
-import com.google.gson.Gson
 import okhttp3.ResponseBody
 import retrofit2.Response
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import kotlin.contracts.Returns
 
 class MockDataSource : BaseDataSource {
-    override suspend fun getSchedule(schoolYear: String, schoolTerm: String): AHUResponse<List<Course>> {
+    override suspend fun getSchedule(
+        schoolYear: String,
+        schoolTerm: String
+    ): AHUResponse<List<Course>> {
         return AHUResponse<List<Course>>().apply { code = 0; data = emptyList() }
     }
 
     override suspend fun getSchedule(): AHUResponse<List<Course>> {
+        return AHUResponse<List<Course>>().apply { code = 0; data = emptyList() }
+    }
+
+    override suspend fun getNextSchedule(): AHUResponse<List<Course>> {
         return AHUResponse<List<Course>>().apply { code = 0; data = emptyList() }
     }
 
@@ -41,19 +51,24 @@ class MockDataSource : BaseDataSource {
         return AHUResponse<List<BathRoom>>().apply { code = 0; data = emptyList() }
     }
 
-    override suspend fun getExamInfo(studentID: String, studentName: String): AHUResponse<List<Exam>> {
+    override suspend fun getExamInfo(
+        studentID: String,
+        studentName: String
+    ): AHUResponse<List<Exam>> {
         val today = LocalDate.now()
         val fmtDate = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val fmtTime = DateTimeFormatter.ofPattern("HH:mm")
         fun timeStr(date: LocalDate, start: LocalTime, end: LocalTime): String {
             return "${date.format(fmtDate)} ${start.format(fmtTime)}~${end.format(fmtTime)}"
         }
+
         val list = mutableListOf<Exam>()
         run {
             val e = Exam()
             e.course = "高等数学（进行中示例）"
             e.location = "教学楼A-101"
-            e.time = timeStr(today, LocalTime.now().minusMinutes(30), LocalTime.now().plusMinutes(90))
+            e.time =
+                timeStr(today, LocalTime.now().minusMinutes(30), LocalTime.now().plusMinutes(90))
             e.seatNum = "12"
             e.finished = false
             list.add(e)
@@ -97,7 +112,10 @@ class MockDataSource : BaseDataSource {
         return AHUResponse<List<Exam>>().apply { code = 0; data = list }
     }
 
-    override suspend fun getBathroomTelInfo(bathroom: String, tel: String): AHUResponse<BathroomTelInfo> {
+    override suspend fun getBathroomTelInfo(
+        bathroom: String,
+        tel: String
+    ): AHUResponse<BathroomTelInfo> {
         return AHUResponse<BathroomTelInfo>().apply { code = -1; data = null }
     }
 
@@ -115,10 +133,45 @@ class MockDataSource : BaseDataSource {
 
 
     override suspend fun getGpaRankFromHtml(): AHUResponse<GpaRankInfo> {
-        return AHUResponse<GpaRankInfo>().apply { code=0; data = GpaRankInfo() }
+        return AHUResponse<GpaRankInfo>().apply { code = 0; data = GpaRankInfo() }
+    }
+
+    override suspend fun getAllCampus(): AHUResponse<AllCampus> {
+        return AHUResponse<AllCampus>().apply { code = 0; data = null }
+    }
+
+    override suspend fun getAllLostFoundType(): AHUResponse<AllLostFoundType> {
+        return AHUResponse<AllLostFoundType>().apply { code = 0; data = null }
+    }
+
+    override suspend fun getLostFoundList(
+        pageNo: Int,
+        pageSize: Int,
+        state: Int
+    ): AHUResponse<LostFoundResponse> {
+        return AHUResponse<LostFoundResponse>().apply { code = 0; data = null }
     }
 
     override suspend fun getSchoolCalendar(): AHUResponse<Response<ResponseBody>> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun publishLostFound(
+        request: LostFoundPublishRequest
+    ): AHUResponse<Any> {
+        return AHUResponse<Any>().apply {
+            code = 0
+            msg = "发布成功（Mock）"
+            data = Any()
+        }
+    }
+    override suspend fun deleteLostFound(
+        id: String
+    ): AHUResponse<Any> {
+        return AHUResponse<Any>().apply {
+            code = 0
+            msg = "删除成功（Mock）"
+            data = null
+        }
     }
 }

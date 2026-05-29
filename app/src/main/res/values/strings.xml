@@ -98,5 +98,6 @@
 
     <string name="school_calendar">校历</string>
     <string name="free_classroom">空闲教室</string>
+    <string name="lost_found">失物招领</string>
     <string name="preferences">偏好设置</string>
 </resources>

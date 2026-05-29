@@ -26,14 +26,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
@@ -48,10 +51,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ahu.ahutong.data.dao.PreferencesManager
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.ui.screen.main.schedule.CourseCard
 import com.ahu.ahutong.ui.screen.main.schedule.CourseCardSpec
@@ -60,8 +67,12 @@ import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.Hct.Companion.toHct
+import com.kyant.monet.LocalTonalPalettes
+import com.kyant.monet.PaletteStyle
+import com.kyant.monet.TonalPalettes.Companion.toTonalPalettes
 import com.kyant.monet.a1
 import com.kyant.monet.n1
+import com.kyant.monet.n2
 import com.kyant.monet.toColor
 import com.kyant.monet.toSrgb
 import com.kyant.monet.withNight
@@ -71,6 +82,7 @@ import java.util.Calendar
 import java.util.Locale
 
 import android.widget.Toast
+import com.ahu.ahutong.ui.screen.main.schedule.CourseCardSpec.cellSpacing
 
 @Composable
 fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
@@ -86,7 +98,12 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
         initialFirstVisibleItemIndex = (currentWeek - 3).coerceAtLeast(0)
     )
     val scheduleResult = scheduleViewModel.schedule.observeAsState().value
-    val schedule = scheduleResult?.getOrNull() ?: emptyList()
+    val nextScheduleResult = scheduleViewModel.nextSchedule.observeAsState().value
+    var isPreviewNextSemester by rememberSaveable { mutableStateOf(false) }
+    var isOverviewSchedule by rememberSaveable { mutableStateOf(false) }
+    var isSettingsVisible by rememberSaveable { mutableStateOf(false) }
+    val activeScheduleResult = if (isPreviewNextSemester) nextScheduleResult else scheduleResult
+    val schedule = activeScheduleResult?.getOrNull() ?: emptyList()
     val context = LocalContext.current
 
     LaunchedEffect(currentWeek) {
@@ -96,7 +113,9 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
     }
 
     LaunchedEffect(scheduleConfig?.week) {
-        scheduleConfig?.week?.let { currentWeek = it }
+        if (!isPreviewNextSemester) {
+            scheduleConfig?.week?.let { currentWeek = it }
+        }
     }
 
     LaunchedEffect(pagerState.currentPage) {
@@ -109,23 +128,39 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
         }
     }
 
+    LaunchedEffect(nextScheduleResult) {
+        nextScheduleResult?.exceptionOrNull()?.let {
+            Toast.makeText(context, "加载下学期课表失败: ${it.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    LaunchedEffect(isPreviewNextSemester) {
+        if (isPreviewNextSemester && nextScheduleResult == null) {
+            scheduleViewModel.refreshNextSchedule()
+        }
+        val targetWeek = if (isPreviewNextSemester) 1 else scheduleConfig?.week ?: 1
+        currentWeek = targetWeek
+        pagerState.animateScrollToPage((targetWeek - 1).coerceAtLeast(0))
+    }
+
     val baseColor = 50.a1.toSrgb().toHct()
-    val courseColors by remember(Unit) {
+    val courseColors by remember(schedule) {
         mutableStateOf(
             schedule.map { it.name }.distinct()
                 .mapIndexed { index, name ->
-                    name to baseColor.copy(h = 360.0 * index / schedule.map { it.name }.distinct().size).toSrgb()
+                    name to baseColor.copy(
+                        h = 360.0 * index / schedule.map { it.name }
+                            .distinct().size.coerceAtLeast(1)
+                    ).toSrgb()
                         .toColor()
                 }.toMap()
         )
     }
 
-    val preferencesManager = remember { PreferencesManager(context = context) }
-
-    val isShowAllCourse by preferencesManager.isShowAllCourse.collectAsState(initial = false)
     val currentWeekCourses = schedule
 
     var detailedCourse by rememberSaveable { mutableStateOf<Course?>(null) }
+    val settingsCardColor = 100.n1 withNight 20.n1
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -193,9 +228,15 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                 modifier = Modifier
                     .clip(ContinuousCapsule)
                     .background(100.n1 withNight 30.n1)
+                    .padding(horizontal = 2.dp, vertical = 2.dp)
             ) {
+
                 IconButton(
+                    modifier = Modifier.size(38.dp),
                     onClick = {
+                        if (isPreviewNextSemester) {
+                            isPreviewNextSemester = false
+                        }
                         scope.launch {
                             state.animateScrollToItem((currentWeek - 3).coerceAtLeast(0))
                         }
@@ -206,13 +247,34 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.MyLocation,
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-                IconButton(onClick = { scheduleViewModel.refreshSchedule(true) }) {
+                IconButton(
+                    modifier = Modifier.size(38.dp),
+                    onClick = { isSettingsVisible = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                IconButton(
+                    modifier = Modifier.size(38.dp),
+                    onClick = {
+                        if (isPreviewNextSemester) {
+                            scheduleViewModel.refreshNextSchedule(true)
+                        } else {
+                            scheduleViewModel.refreshSchedule(true)
+                        }
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -228,114 +290,354 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
             state = pagerState,
             modifier = Modifier.fillMaxWidth()
         ) {
-        Box(
-            modifier = with(CourseCardSpec) {
-                Modifier
-                    .fillMaxWidth()
-                    .height(mainRowHeight + (cellHeight + cellSpacing) * 13 + 24.dp)
-                    .clip(SmoothRoundedCornerShape(32.dp))
-                    .background(99.n1 withNight 20.n1)
-                    .padding(top = 8.dp)
-                    .padding(cellSpacing)
-            }
-        ) {
-            // TODO: current time indicator
-            // weekday tags
+            Box(
+                modifier = with(CourseCardSpec) {
+                    Modifier
+                        .fillMaxWidth()
+                        .height(mainRowHeight + (cellHeight + cellSpacing) * 13 + 24.dp)
+                        .clip(SmoothRoundedCornerShape(32.dp))
+                        .background(99.n1 withNight 20.n1)
+                        .padding(top = 8.dp)
+                        .padding(cellSpacing)
+                }
+            ) {
+                // TODO: current time indicator
+                // weekday tags
 
-            val weekDates by remember(currentWeek, scheduleConfig?.startTime) {
-                mutableStateOf(
-                    List(7) { index ->
-                        Calendar.getInstance().apply {
-                            time = scheduleConfig?.startTime
-                                ?: SimpleDateFormat("MM-dd", Locale.CHINA).parse("09-01")
-                            add(Calendar.DATE, ((currentWeek - 1) * 7) + index)
+                val weekDates by remember(currentWeek, scheduleConfig?.startTime) {
+                    mutableStateOf(
+                        List(7) { index ->
+                            Calendar.getInstance().apply {
+                                time = scheduleConfig?.startTime
+                                    ?: SimpleDateFormat("MM-dd", Locale.CHINA).parse("09-01")
+                                add(Calendar.DATE, ((currentWeek - 1) * 7) + index)
+                            }
                         }
+                    )
+                }
+
+                weekDates.forEachIndexed { index, date ->
+                    val isCurrentWeekday =
+                        !isPreviewNextSemester && currentWeek == scheduleConfig?.week && index + 1 == currentWeekday
+                    Column(
+                        modifier = with(CourseCardSpec) {
+                            Modifier
+                                .size(cellWidth, mainRowHeight)
+                                .offset(
+                                    x = mainColumnWidth + (cellWidth + cellSpacing) * index + cellSpacing
+                                )
+                                .clip(SmoothRoundedCornerShape(8.dp))
+                                .background(if (isCurrentWeekday) 90.a1 else Color.Unspecified)
+                        },
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = arrayOf(
+                                "周一",
+                                "周二",
+                                "周三",
+                                "周四",
+                                "周五",
+                                "周六",
+                                "周日"
+                            )[index],
+                            color = if (isCurrentWeekday) 0.n1 else Color.Unspecified,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        Text(
+                            text = SimpleDateFormat("MM-dd", Locale.CHINA).format(date.time),
+                            color = if (isCurrentWeekday) 0.n1 else 50.n1 withNight 80.n1,
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
-                )
-            }
-
-            weekDates.forEachIndexed { index, date ->
-                val isCurrentWeekday = currentWeek == scheduleConfig?.week && index + 1 == currentWeekday
-                Column(
-                    modifier = with(CourseCardSpec) {
-                        Modifier
-                            .size(cellWidth, mainRowHeight)
-                            .offset(
-                                x = mainColumnWidth + (cellWidth + cellSpacing) * index + cellSpacing
-                            )
-                            .clip(SmoothRoundedCornerShape(8.dp))
-                            .background(if (isCurrentWeekday) 90.a1 else Color.Unspecified)
-                    },
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = arrayOf("周一", "周二", "周三", "周四", "周五", "周六", "周日")[index],
-                        color = if (isCurrentWeekday) 0.n1 else Color.Unspecified,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    Text(
-                        text = SimpleDateFormat("MM-dd", Locale.CHINA).format(date.time),
-                        color = if (isCurrentWeekday) 0.n1 else 50.n1 withNight 80.n1,
-                        style = MaterialTheme.typography.labelSmall
-                    )
                 }
-            }
 
-            // time tags
-            ScheduleViewModel.timetable.forEach { (index, time) ->
-                Column(
-                    modifier = with(CourseCardSpec) {
-                        Modifier
-                            .size(mainColumnWidth, cellHeight)
-                            .offset(
-                                y = mainRowHeight + (cellHeight + cellSpacing) * (index - 1) + cellSpacing
-                            )
-                            .clip(SmoothRoundedCornerShape(8.dp))
-                    },
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = index.toString(),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    Text(
-                        text = time.substringBefore("-"),
-                        color = 50.n1 withNight 80.n1,
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                // time tags
+                ScheduleViewModel.timetable.forEach { (index, time) ->
+                    Column(
+                        modifier = with(CourseCardSpec) {
+                            Modifier
+                                .size(mainColumnWidth, cellHeight)
+                                .offset(
+                                    y = mainRowHeight + (cellHeight + cellSpacing) * (index - 1) + cellSpacing
+                                )
+                                .clip(SmoothRoundedCornerShape(8.dp))
+                        },
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = index.toString(),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        Text(
+                            text = time.substringBefore("-"),
+                            color = 50.n1 withNight 80.n1,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
-            }
-            // courses
-            currentWeekCourses.forEach { course ->
+                // courses
+                if (isOverviewSchedule) {
+                    currentWeekCourses
+                        .groupBy { "${it.weekday}-${it.startTime}-${it.length}" }
+                        .values
+                        .forEach { sameTimeCourses ->
+                            key(sameTimeCourses.joinToString("-") { it.hashCode().toString() }) {
+                                OverviewCourseGroupCard(
+                                    courses = sameTimeCourses,
+                                    colors = courseColors,
+                                    cellWidth = cellWidth,
+                                    cellHeight = cellHeight,
+                                    currentWeek = currentWeek,
+                                    onClick = { detailedCourse = it }
+                                )
+                            }
+                        }
+                } else {
+                    currentWeekCourses.forEach { course ->
+                        val isCurrentWeek = currentWeek in course.weekIndexes
+                        if (isCurrentWeek) {
+                            key(course.hashCode()) {
 
-                val isCurrentWeek = currentWeek in course.weekIndexes
-
-                if ((currentWeek >= 1 && currentWeek <= course.weekIndexes.last() && isShowAllCourse)
-                     || isCurrentWeek
-                ) {
-                    key(course.hashCode()) {
-
-                            CourseCard(
-                                course = course,
-                                color = courseColors.getOrElse(course.name) { 50.a1 },
-                                cellWidth = cellWidth,
-                                cellHeight = cellHeight,
-                                isCurrentWeek = isCurrentWeek,
-                                onClick = { detailedCourse = it }
-                            )
+                                CourseCard(
+                                    course = course,
+                                    color = courseColors.getOrElse(course.name) { 50.a1 },
+                                    cellWidth = cellWidth,
+                                    cellHeight = cellHeight,
+                                    isCurrentWeek = isCurrentWeek,
+                                    onClick = { detailedCourse = it }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+        if (isSettingsVisible) {
+            ScheduleSettingsDialog(
+                isOverviewSchedule = isOverviewSchedule,
+                isPreviewNextSemester = isPreviewNextSemester,
+                backdropColor = settingsCardColor,
+                onOverviewChange = { isOverviewSchedule = it },
+                onPreviewNextSemesterChange = { isPreviewNextSemester = it },
+                onDismiss = { isSettingsVisible = false }
+            )
+        }
+        // course dialog
+        detailedCourse?.let {
+            CourseDetailDialog(
+                course = it,
+                onDismiss = { detailedCourse = null }
+            )
+        }
     }
-    // course dialog
-    detailedCourse?.let {
-        CourseDetailDialog(
-            course = it,
-            onDismiss = { detailedCourse = null }
+}
+
+@Composable
+private fun ScheduleSettingsDialog(
+        isOverviewSchedule: Boolean,
+        isPreviewNextSemester: Boolean,
+        backdropColor: Color,
+        onOverviewChange: (Boolean) -> Unit,
+        onPreviewNextSemesterChange: (Boolean) -> Unit,
+        onDismiss: () -> Unit
+    ) {
+        AlertDialog(
+            containerColor = backdropColor,
+            onDismissRequest = onDismiss,
+            title = {
+                Text(
+                    text = "课表设置",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ScheduleSettingRow(
+                        title = "总览课表",
+                        description = "显示全部周次的课程，重叠课程会平分同一块时间区域",
+                        selected = isOverviewSchedule,
+                        onSelect = onOverviewChange
+                    )
+                    ScheduleSettingRow(
+                        title = "预览下学期课表",
+                        description = "切换到教务系统中的下学期课表",
+                        selected = isPreviewNextSemester,
+                        onSelect = onPreviewNextSemesterChange
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(text = "完成")
+                }
+            }
         )
     }
+
+
+    @Composable
+    private fun ScheduleSettingRow(
+        title: String,
+        description: String,
+        selected: Boolean,
+        onSelect: (Boolean) -> Unit
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(SmoothRoundedCornerShape(12.dp))
+                .clickable { onSelect(!selected) }
+                .padding(vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = description,
+                    color = 50.n1 withNight 80.n1,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Switch(
+                checked = selected,
+                onCheckedChange = onSelect,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+    }
+
+@Composable
+private fun OverviewCourseGroupCard(
+    courses: List<Course>,
+    colors: Map<String, Color>,
+    cellWidth: Dp,
+    cellHeight: Dp,
+    currentWeek: Int,
+    onClick: (Course) -> Unit
+) {
+    val course = courses.firstOrNull() ?: return
+    val fullHeight = cellHeight * course.length + cellSpacing * (course.length - 1)
+    Box(
+        modifier = with(CourseCardSpec) {
+            Modifier
+                .size(
+                    cellWidth,
+                    fullHeight
+                )
+                .offset(
+                    x = mainColumnWidth +
+                                (cellWidth + cellSpacing) * (course.weekday - 1) +
+                                cellSpacing,
+                    y = mainRowHeight +
+                            (cellHeight + cellSpacing) * (course.startTime - 1) +
+                                cellSpacing
+                )
+                .clip(SmoothRoundedCornerShape(8.dp))
+                .background(95.a1 withNight 30.n1)
+        }
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            courses.forEachIndexed { index, item ->
+                val isCurrentWeek = currentWeek in item.weekIndexes
+                val color = colors.getOrElse(item.name) { 50.a1 }
+                CompositionLocalProvider(
+                    LocalTonalPalettes provides color.toTonalPalettes(
+                        style = PaletteStyle.Vibrant,
+                        tonalValues = doubleArrayOf()
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .background(if (isCurrentWeek) color else color.copy(alpha = 0.45f))
+                            .clickable { onClick(item) }
+                            .padding(4.dp)
+                    ) {
+                        Text(
+                            text = item.name,
+                            modifier = Modifier.padding(bottom = 38.dp),
+                            color = 100.n1,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = if (courses.size <= 2) 3 else 2,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "${item.startWeek}-${item.endWeek}",
+                                color = 100.n1,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center,
+                                style = TextStyle(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            Text(
+                                text = item.location.shortLocation(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(SmoothRoundedCornerShape(6.dp))
+                                    .background(95.a1 withNight 30.n2)
+                                    .padding(2.dp),
+                                textAlign = TextAlign.Center,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 2,
+                                style = TextStyle(
+                                    fontSize = 11.sp,
+                                    color = 10.n1 withNight 90.n1,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+                    }
+                }
+                if (index != courses.lastIndex) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(100.n1.copy(alpha = 0.65f) withNight 0.n1.copy(alpha = 0.35f))
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun String?.shortLocation(): String {
+    val location = this
+        ?.replace("博学北楼", "博北")
+        ?.replace("博学南楼", "博南")
+        ?.replace("笃行南楼", "笃南")
+        ?.replace("笃行北楼", "笃北")
+        ?.replace("互联大楼", "互楼")
+        ?.replace("体育场", "体")
+    val labRoom = location
+        ?.trim()
+        ?.let { Regex("(?<![A-Za-z0-9])([A-Za-z]\\d{3})\\s*\\[").
+
+
+        find(it)?.groupValues?.get(1) }
+    return labRoom ?: location.takeIf { !it.isNullOrBlank() } ?: "未知"
 }
