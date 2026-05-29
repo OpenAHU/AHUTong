@@ -57,11 +57,18 @@ interface AhuTong {
             }
             .build()
 
+        private val apkDownloadOkHttpClient = okHttpClient.newBuilder()
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .build()
 
-        val API = Retrofit.Builder()
+        private fun createApi(client: OkHttpClient) = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient)
+            .client(client)
             .baseUrl(BASE_URL)
             .build().create(AhuTong::class.java)
+
+        val API = createApi(okHttpClient)
+        val APK_DOWNLOAD_API = createApi(apkDownloadOkHttpClient)
     }
 }

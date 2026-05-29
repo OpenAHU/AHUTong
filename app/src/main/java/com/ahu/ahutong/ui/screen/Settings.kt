@@ -90,7 +90,11 @@ fun Settings(
             aboutViewModel.tipState.value = null;
         }
 
-        runCatching { AhuTong.API.getApkUpdateInfo().changelog }
+        runCatching {
+            AhuTong.API.getApkUpdateInfo().changelog
+                ?.ifBlank { "暂无更新说明" }
+                ?: "暂无更新说明"
+        }
             .onSuccess { updateLog = it }
             .onFailure {
                 updateLog = "获取失败"

@@ -5,6 +5,7 @@ import java.net.URI
 
 object ApkUpdatePolicy {
     const val MAX_APK_BYTES: Long = 200L * 1024L * 1024L
+    const val MAX_DOWNLOAD_REDIRECTS: Int = 5
     private const val ERROR_NO_UPDATE = "No APK update is available"
     private const val ERROR_NOT_NEWER = "Remote APK version is not newer"
 
@@ -23,9 +24,18 @@ object ApkUpdatePolicy {
             return Result.failure(IllegalArgumentException(ERROR_NO_UPDATE))
         }
 
+        if (info.versionCode <= 0) {
+            return Result.failure(IllegalArgumentException("Remote APK version is invalid"))
+        }
+
         if (info.versionCode <= currentVersionCode) {
             return Result.failure(IllegalArgumentException(ERROR_NOT_NEWER))
         }
+
+        val versionName = info.versionName?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?: info.versionCode.toString()
+        val changelog = info.changelog?.trim().orEmpty()
 
         val sha256 = normalizeSha256(info.sha256).getOrElse {
             return Result.failure(it)
@@ -37,17 +47,32 @@ object ApkUpdatePolicy {
 
         return Result.success(
             ValidatedUpdate(
-                info = info.copy(url = downloadUrl, sha256 = sha256),
+                info = info.copy(
+                    versionName = versionName,
+                    changelog = changelog,
+                    url = downloadUrl,
+                    sha256 = sha256
+                ),
                 downloadUrl = downloadUrl,
                 sha256 = sha256
             )
         )
     }
 
-    fun validateDownloadUrl(rawUrl: String?): Result<String> {
+    fun validateDownloadUrl(rawUrl: String?, baseUrl: String? = null): Result<String> {
         val url = rawUrl?.trim()
         if (url.isNullOrEmpty()) {
             return Result.failure(IllegalArgumentException("APK download URL is empty"))
+        }
+
+        val baseUri = if (baseUrl.isNullOrBlank()) {
+            baseDownloadUri
+        } else {
+            try {
+                URI(baseUrl)
+            } catch (e: Exception) {
+                return Result.failure(IllegalArgumentException("APK download base URL is invalid", e))
+            }
         }
 
         val parsedUri = try {
@@ -55,7 +80,7 @@ object ApkUpdatePolicy {
         } catch (e: Exception) {
             return Result.failure(IllegalArgumentException("APK download URL is invalid", e))
         }
-        val uri = if (parsedUri.isAbsolute) parsedUri else baseDownloadUri.resolve(parsedUri)
+        val uri = if (parsedUri.isAbsolute) parsedUri else baseUri.resolve(parsedUri)
 
         if (!uri.scheme.equals("https", ignoreCase = true)) {
             return Result.failure(IllegalArgumentException("APK download URL must use HTTPS"))

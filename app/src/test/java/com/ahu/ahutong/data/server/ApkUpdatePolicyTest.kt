@@ -32,8 +32,27 @@ class ApkUpdatePolicyTest {
     }
 
     @Test
+    fun validateNormalizesMissingDisplayFields() {
+        val result = ApkUpdatePolicy.validate(
+            updateInfo(versionName = null, changelog = null),
+            currentVersionCode = 1
+        )
+
+        assertTrue(result.isSuccess)
+        assertEquals("2", result.getOrThrow().info.versionName)
+        assertEquals("", result.getOrThrow().info.changelog)
+    }
+
+    @Test
     fun validateRejectsExplicitDisabledUpdate() {
         val result = ApkUpdatePolicy.validate(updateInfo(update = false), currentVersionCode = 1)
+
+        assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun validateRejectsInvalidRemoteVersion() {
+        val result = ApkUpdatePolicy.validate(updateInfo(versionCode = 0), currentVersionCode = 1)
 
         assertTrue(result.isFailure)
     }
@@ -70,6 +89,27 @@ class ApkUpdatePolicyTest {
     }
 
     @Test
+    fun validateResolvesRedirectLocationAgainstCurrentDownloadUrl() {
+        val result = ApkUpdatePolicy.validateDownloadUrl(
+            rawUrl = "next.apk",
+            baseUrl = "https://openahu.org/download/ahutong.apk"
+        )
+
+        assertTrue(result.isSuccess)
+        assertEquals("https://openahu.org/download/next.apk", result.getOrThrow())
+    }
+
+    @Test
+    fun validateRejectsRedirectLocationToUntrustedHost() {
+        val result = ApkUpdatePolicy.validateDownloadUrl(
+            rawUrl = "//example.com/download/app.apk",
+            baseUrl = "https://openahu.org/download/ahutong.apk"
+        )
+
+        assertTrue(result.isFailure)
+    }
+
+    @Test
     fun validateRejectsNonNewerVersion() {
         val result = ApkUpdatePolicy.validate(updateInfo(versionCode = 1), currentVersionCode = 1)
 
@@ -79,14 +119,16 @@ class ApkUpdatePolicyTest {
     private fun updateInfo(
         update: Boolean? = true,
         versionCode: Int = 2,
+        versionName: String? = "2.0.0",
+        changelog: String? = "Fixes",
         url: String? = "https://openahu.org/download/app.apk",
         sha256: String? = this.sha256
     ) = ApkUpdateInfo(
         update = update,
         force = false,
         versionCode = versionCode,
-        versionName = "2.0.0",
-        changelog = "Fixes",
+        versionName = versionName,
+        changelog = changelog,
         url = url,
         sha256 = sha256,
         signature = null,

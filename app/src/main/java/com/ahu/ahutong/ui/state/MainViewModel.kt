@@ -17,6 +17,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import okhttp3.ResponseBody
+import retrofit2.Response
 import java.io.File
 import java.io.BufferedOutputStream
 import java.io.FileOutputStream
@@ -205,19 +207,20 @@ class MainViewModel : ViewModel() {
         apkDownloadJob = apkDownloadScope.launch {
             var tempFile: File? = null
             try {
-                val response = AhuTong.API.downloadByUrl(update.downloadUrl)
-                val finalUrl = response.raw().request.url.toString()
-                ApkUpdatePolicy.validateDownloadUrl(finalUrl).getOrElse {
-                    throw SecurityException("下载重定向到不受信任地址")
-                }
-
+                val response = openApkDownloadResponse(update.downloadUrl)
                 if (!response.isSuccessful) {
+                    closeDownloadResponse(response)
                     throw IOException("下载失败：HTTP ${response.code()}")
                 }
 
-                val body = response.body() ?: throw IOException("下载内容为空")
+                val body = response.body() ?: run {
+                    closeDownloadResponse(response)
+                    throw IOException("下载内容为空")
+                }
+
                 val total = body.contentLength()
                 if (total > ApkUpdatePolicy.MAX_APK_BYTES) {
+                    body.close()
                     throw IOException("安装包过大，请稍后重试")
                 }
 
@@ -237,33 +240,35 @@ class MainViewModel : ViewModel() {
                 if (total > 0) {
                     emitApkProgress(0f)
                 }
-                body.byteStream().use { input: InputStream ->
-                    BufferedOutputStream(FileOutputStream(partFile), DOWNLOAD_BUFFER_SIZE).use { output ->
-                        val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
-                        var read = input.read(buffer)
-                        while (read >= 0) {
-                            output.write(buffer, 0, read)
-                            completed += read
-                            if (completed > ApkUpdatePolicy.MAX_APK_BYTES) {
-                                throw IOException("安装包超过大小限制")
-                            }
-                            if (total > 0) {
-                                val now = System.currentTimeMillis()
-                                val prog = (completed.toDouble() / total.toDouble())
-                                    .coerceIn(0.0, 1.0)
-                                    .toFloat()
-                                if (prog - lastProgress >= PROGRESS_MIN_DELTA ||
-                                    now - lastEmit >= PROGRESS_MIN_INTERVAL_MS ||
-                                    completed == total
-                                ) {
-                                    emitApkProgress(prog)
-                                    lastProgress = prog
-                                    lastEmit = now
+                body.use { responseBody ->
+                    responseBody.byteStream().use { input: InputStream ->
+                        BufferedOutputStream(FileOutputStream(partFile), DOWNLOAD_BUFFER_SIZE).use { output ->
+                            val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
+                            var read = input.read(buffer)
+                            while (read >= 0) {
+                                output.write(buffer, 0, read)
+                                completed += read
+                                if (completed > ApkUpdatePolicy.MAX_APK_BYTES) {
+                                    throw IOException("安装包超过大小限制")
                                 }
+                                if (total > 0) {
+                                    val now = System.currentTimeMillis()
+                                    val prog = (completed.toDouble() / total.toDouble())
+                                        .coerceIn(0.0, 1.0)
+                                        .toFloat()
+                                    if (prog - lastProgress >= PROGRESS_MIN_DELTA ||
+                                        now - lastEmit >= PROGRESS_MIN_INTERVAL_MS ||
+                                        completed == total
+                                    ) {
+                                        emitApkProgress(prog)
+                                        lastProgress = prog
+                                        lastEmit = now
+                                    }
+                                }
+                                read = input.read(buffer)
                             }
-                            read = input.read(buffer)
+                            output.flush()
                         }
-                        output.flush()
                     }
                 }
 
@@ -284,18 +289,7 @@ class MainViewModel : ViewModel() {
                     throw SecurityException("文件校验失败，请重试")
                 }
 
-                if (outFile.exists() && !outFile.delete()) {
-                    throw IOException("无法替换旧安装包")
-                }
-
-                if (!downloadedFile.renameTo(outFile)) {
-                    downloadedFile.inputStream().use { input ->
-                        FileOutputStream(outFile).use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-                    downloadedFile.delete()
-                }
+                replaceDownloadedApk(downloadedFile, outFile, update.sha256)
 
                 withContext(Dispatchers.Main) {
                     apkDownloading.value = false
@@ -320,6 +314,63 @@ class MainViewModel : ViewModel() {
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun openApkDownloadResponse(initialUrl: String): Response<ResponseBody> {
+        var currentUrl = initialUrl
+        repeat(ApkUpdatePolicy.MAX_DOWNLOAD_REDIRECTS + 1) { redirectCount ->
+            val response = AhuTong.APK_DOWNLOAD_API.downloadByUrl(currentUrl)
+            val finalUrl = response.raw().request.url.toString()
+            ApkUpdatePolicy.validateDownloadUrl(finalUrl).getOrElse {
+                closeDownloadResponse(response)
+                throw SecurityException("下载地址不受信任")
+            }
+
+            val code = response.code()
+            if (code in 300..399) {
+                val location = response.headers()["Location"]
+                closeDownloadResponse(response)
+                if (location.isNullOrBlank()) {
+                    throw IOException("下载重定向地址为空")
+                }
+                if (redirectCount >= ApkUpdatePolicy.MAX_DOWNLOAD_REDIRECTS) {
+                    throw IOException("下载重定向次数过多")
+                }
+                currentUrl = ApkUpdatePolicy.validateDownloadUrl(location, finalUrl).getOrElse {
+                    throw SecurityException("下载重定向到不受信任地址")
+                }
+                return@repeat
+            }
+
+            return response
+        }
+        throw IOException("下载重定向次数过多")
+    }
+
+    private fun closeDownloadResponse(response: Response<ResponseBody>) {
+        response.body()?.close()
+        response.errorBody()?.close()
+    }
+
+    private fun replaceDownloadedApk(partFile: File, outFile: File, expectedSha256: String) {
+        if (outFile.exists() && !outFile.delete()) {
+            throw IOException("无法替换旧安装包")
+        }
+
+        if (!partFile.renameTo(outFile)) {
+            partFile.inputStream().use { input ->
+                FileOutputStream(outFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            if (!partFile.delete()) {
+                Log.w("ApkUpdate", "failed to delete temporary APK: ${partFile.name}")
+            }
+        }
+
+        if (!verifyCachedApk(outFile, expectedSha256, "downloaded APK")) {
+            throw SecurityException("文件校验失败，请重试")
         }
     }
 

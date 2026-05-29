@@ -61,7 +61,7 @@ fun ApkUpdateDialog(
         },
         title = {
             Text(
-                text = "发现新版本 ${info.versionName}",
+                text = "发现新版本 ${info.versionName ?: info.versionCode}",
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.headlineSmall,
                 color = contentColor
@@ -85,7 +85,7 @@ fun ApkUpdateDialog(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = info.changelog.ifBlank { "暂无更新说明" },
+                    text = info.changelog?.ifBlank { "暂无更新说明" } ?: "暂无更新说明",
                     style = MaterialTheme.typography.bodyMedium,
                     color = contentColor
                 )
