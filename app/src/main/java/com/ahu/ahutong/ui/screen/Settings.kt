@@ -9,7 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +27,7 @@ import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Login
 import androidx.compose.material.icons.outlined.PeopleOutline
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -109,6 +111,30 @@ fun Settings(
             modifier = Modifier.padding(24.dp, 32.dp),
             style = MaterialTheme.typography.headlineLarge
         )
+        var count by remember { mutableStateOf(0) }
+        var lastClickTime by remember { mutableStateOf(0L) }
+        val clickTimes: Int = 8
+        val interval: Long = 1000
+        val checkUpdate = {
+            mainViewModel.checkApkUpdateManually(context) { message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+        val onAppCardClick = {
+            val now = System.currentTimeMillis()
+            if (now - lastClickTime > interval) {
+                count = 1
+            } else {
+                count++
+            }
+            lastClickTime = now
+
+            if (count >= clickTimes) {
+                count = 0
+                navController.navigate("debug")
+            }
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -118,30 +144,11 @@ fun Settings(
                 .padding(24.dp, 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            var count by remember { mutableStateOf(0) }
-            var lastClickTime by remember { mutableStateOf(0L) }
-            val clickTimes: Int = 8
-            val interval: Long = 1000
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
-                    val now = System.currentTimeMillis()
-                    if (now - lastClickTime > interval) {
-                        count = 1
-                    } else {
-                        count++
-                    }
-                    lastClickTime = now
-
-                    if (count >= clickTimes) {
-                        count = 0
-                        navController.navigate("debug")
-                    }
+                modifier = Modifier.pointerInput(onAppCardClick) {
+                    detectTapGestures { onAppCardClick() }
                 }
             ) {
                 Image(
@@ -321,15 +328,15 @@ fun Settings(
                 onClick = { isClearCacheDialogShown = true }
             )
             SettingItem(
+                label = stringResource(id = R.string.check_update),
+                icon = Icons.Outlined.Update,
+                onClick = { checkUpdate() }
+            )
+            SettingItem(
                 label = stringResource(id = R.string.update_intro),
                 icon = Icons.Outlined.Article,
                 onClick = { isUpdateLogDialogShown = true }
             )
-//            SettingItem(
-//                label = stringResource(id = R.string.check_update),
-//                icon = Icons.Outlined.Update,
-//                onClick = { aboutViewModel.checkForUpdates() }
-//            )
         }
     }
     if (isClearCacheDialogShown) {

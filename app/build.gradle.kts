@@ -114,6 +114,7 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.androidx.core.ktx)
+    testImplementation(kotlin("test-junit"))
 
     implementation(libs.zxing.android.embedded)
     implementation(libs.hilt.android)

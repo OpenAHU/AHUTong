@@ -41,6 +41,7 @@ object RustSDK {
 
     private const val TAG_HOTUPDATE = "HotUpdate"
     private const val LIB_NAME = "libahutong_rs.so"
+    private val SHA256_HEX_REGEX = Regex("^[0-9a-fA-F]{64}$")
     private var isLoaded = false
     private val scope = kotlinx.coroutines.CoroutineScope(Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
 
@@ -65,7 +66,10 @@ object RustSDK {
         onHotUpdateSuccess: (() -> Unit)? = null,
         onHotUpdateFinished: (() -> Unit)? = null
     ){
-        if (isLoaded) return
+        if (isLoaded) {
+            onHotUpdateFinished?.invoke()
+            return
+        }
 
         try {
             // Check for App Update to prevent using outdated hot-update lib
@@ -314,6 +318,19 @@ object RustSDK {
         expectSha256Hex: String,
         signatureBase64: String
     ): Boolean {
+        if (!isHttpsUrl(urlStr)) {
+            Log.w(TAG_HOTUPDATE, "reject hotUpdate download: non-HTTPS url")
+            return false
+        }
+        if (!SHA256_HEX_REGEX.matches(expectSha256Hex)) {
+            Log.w(TAG_HOTUPDATE, "reject hotUpdate download: invalid sha256")
+            return false
+        }
+        if (signatureBase64.isBlank()) {
+            Log.w(TAG_HOTUPDATE, "reject hotUpdate download: empty signature")
+            return false
+        }
+
         // 使用与 loadLibrary 一致的路径获取方式
         val libDir = context.getDir("jniLibs", Context.MODE_PRIVATE)
         val tempFile = File(libDir, "$LIB_NAME.tmp")
@@ -364,8 +381,8 @@ object RustSDK {
                 return false
             }
 
-            targetFile.setReadable(true, false)
-            targetFile.setExecutable(true, false)
+            targetFile.setReadable(true, true)
+            targetFile.setExecutable(true, true)
 
             Log.i(TAG_HOTUPDATE, "hotUpdate success! Saved to: ${targetFile.absolutePath}. take effect on the next startup")
             return true
@@ -374,6 +391,12 @@ object RustSDK {
             tempFile.delete()
             return false
         }
+    }
+
+    private fun isHttpsUrl(urlStr: String): Boolean {
+        return runCatching {
+            URL(urlStr).protocol.equals("https", ignoreCase = true)
+        }.getOrDefault(false)
     }
 
     /**
@@ -548,6 +571,9 @@ object RustSDK {
         val urlStr = "https://$serverIp/download/xiaoli.jpg"
         return try {
             val conn = URL(urlStr).openConnection()
+            conn.connectTimeout = 10_000
+            conn.readTimeout = 10_000
+            conn.useCaches = false
             if (conn is javax.net.ssl.HttpsURLConnection) {
                 conn.hostnameVerifier = javax.net.ssl.HostnameVerifier { hostname, session ->
                     if (hostname == serverIp) true else javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)

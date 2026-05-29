@@ -7,6 +7,11 @@ import com.ahu.ahutong.notification.model.CourseReminderPayload
 
 class CourseReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == ACTION_LIVE_COUNTDOWN_DISMISSED) {
+            CourseLiveUpdateHelper.cancelScheduledUpdate(context)
+            return
+        }
+
         val payload = CourseReminderPayload.fromIntent(intent) ?: return
         when (intent.action) {
             ACTION_REMIND -> {
@@ -37,5 +42,7 @@ class CourseReminderReceiver : BroadcastReceiver() {
         const val ACTION_REMIND = "com.ahu.ahutong.notification.ACTION_REMIND_COURSE"
         const val ACTION_UPDATE_LIVE_COUNTDOWN =
             "com.ahu.ahutong.notification.ACTION_UPDATE_LIVE_COUNTDOWN"
+        const val ACTION_LIVE_COUNTDOWN_DISMISSED =
+            "com.ahu.ahutong.notification.ACTION_LIVE_COUNTDOWN_DISMISSED"
     }
 }

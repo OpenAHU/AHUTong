@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 
 @Keep
 data class ApkUpdateInfo(
-    val update: Boolean = false,
+    val update: Boolean? = null,
     val force: Boolean,
     val versionCode: Int,
     val versionName: String,
