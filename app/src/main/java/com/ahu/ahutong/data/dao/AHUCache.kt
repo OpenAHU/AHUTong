@@ -128,6 +128,16 @@ object AHUCache {
         return data.fromJson(object : TypeToken<List<Course>>() {}.type)
     }
 
+    fun saveNextSchedule(schedule: List<Course>) {
+        val data = Gson().toJson(schedule)
+        kv.putString("next.schedule", data)
+    }
+
+    fun getNextSchedule(): List<Course>? {
+        val data = kv.getString("next.schedule", "") ?: ""
+        return data.fromJson(object : TypeToken<List<Course>>() {}.type)
+    }
+
     /**
      * 保存成绩
      * @param grade Grade

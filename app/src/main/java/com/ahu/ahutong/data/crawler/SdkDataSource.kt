@@ -90,6 +90,10 @@ class SdkDataSource : BaseDataSource {
         return response
     }
 
+    override suspend fun getNextSchedule(): AHUResponse<List<Course>> {
+        return CrawlerDataSource().getNextSchedule()
+    }
+
     override suspend fun getGrade(): AHUResponse<Grade> {
         // 优先使用 HTTP 客户端
         val httpClient = getHttpClient()

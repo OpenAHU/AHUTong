@@ -35,6 +35,10 @@ class MockDataSource : BaseDataSource {
         return AHUResponse<List<Course>>().apply { code = 0; data = emptyList() }
     }
 
+    override suspend fun getNextSchedule(): AHUResponse<List<Course>> {
+        return AHUResponse<List<Course>>().apply { code = 0; data = emptyList() }
+    }
+
     override suspend fun getGrade(): AHUResponse<Grade> {
         return AHUResponse<Grade>().apply { code = 0; data = Grade() }
     }

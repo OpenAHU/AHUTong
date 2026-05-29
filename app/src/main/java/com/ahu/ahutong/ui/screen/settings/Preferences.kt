@@ -71,7 +71,6 @@ fun Preferences() {
     var isRequestingPermission by remember { mutableStateOf(false) }
 
     val showQRCode by preferencesViewModel.showQRCode.collectAsState()
-    val isShowAllCourse by preferencesViewModel.isShowAllCourse.collectAsState()
     val useLiquidGlass by preferencesViewModel.useLiquidGlass.collectAsState()
     val courseReminderEnabled by preferencesViewModel.courseReminderEnabled.collectAsState()
     val courseReminderLiveCountdownEnabled by preferencesViewModel.courseReminderLiveCountdownEnabled.collectAsState()
@@ -105,6 +104,7 @@ fun Preferences() {
             modifier = Modifier.padding(24.dp, 32.dp),
             style = MaterialTheme.typography.headlineLarge
         )
+        /*
         Column(
             modifier =
                 Modifier
@@ -131,6 +131,7 @@ fun Preferences() {
                 )
             }
         }
+        */
 
         Column(
             modifier =
@@ -282,33 +283,6 @@ fun Preferences() {
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(text = "管理系统岛卡权限")
-            }
-        }
-
-        Column(
-            modifier =
-                Modifier
-                    .clip(SmoothRoundedCornerShape(16.dp))
-                    .background(cardColor)
-                    .clickable { preferencesViewModel.setIsShowAllCourse(!preferencesViewModel.isShowAllCourse.value) }
-                    .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(text = "课表", style = MaterialTheme.typography.headlineSmall)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(SmoothRoundedCornerShape(8.dp))
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "显示非本周课程")
-                LiquidToggle(
-                    selected = { isShowAllCourse },
-                    onSelect = { preferencesViewModel.setIsShowAllCourse(!preferencesViewModel.isShowAllCourse.value) },
-                    backdrop = backdrop
-                )
             }
         }
 

@@ -196,6 +196,17 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                             .fillMaxWidth(),
                         shape = ContinuousCapsule,
                         label = { Text("选择学期") },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = 10.n1 withNight 90.n1,
+                            unfocusedTextColor = 10.n1 withNight 90.n1,
+                            focusedLabelColor = 40.a1 withNight 80.a1,
+                            unfocusedLabelColor = 50.n1 withNight 70.n1,
+                            focusedBorderColor = 40.a1 withNight 80.a1,
+                            unfocusedBorderColor = 70.n1 withNight 50.n1,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            cursorColor = 40.a1 withNight 80.a1
+                        ),
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(
                                 expanded = termMenuExpanded
@@ -207,15 +218,20 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                         expanded = termMenuExpanded,
                         onDismissRequest = {
                             termMenuExpanded = false
-                        }
+                        },
+                        modifier = Modifier.background(99.n1 withNight 10.n1)
                     ) {
                         allTerms.forEach { term ->
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        "${term.schoolYear} 第${term.term}学期"
+                                        text = "${term.schoolYear} 第${term.term}学期",
+                                        color = 10.n1 withNight 90.n1
                                     )
                                 },
+                                colors = MenuDefaults.itemColors(
+                                    textColor = 10.n1 withNight 90.n1
+                                ),
                                 onClick = {
                                     gradeViewModel.schoolYear = term.schoolYear
                                     gradeViewModel.schoolTerm = term.term

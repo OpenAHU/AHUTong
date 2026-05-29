@@ -86,6 +86,27 @@ object AHURepository {
         }
     }
 
+    suspend fun getNextSchedule(isRefresh: Boolean = false): Result<List<Course>> = withContext(Dispatchers.IO) {
+        if (!isRefresh) {
+            AHUCache.getNextSchedule()?.let {
+                Log.e(TAG, "getNextSchedule: 本地获取")
+                return@withContext Result.success(it)
+            }
+        }
+
+        try {
+            val response = dataSource.getNextSchedule()
+            if (response.isSuccessful) {
+                AHUCache.saveNextSchedule(response.data)
+                Result.success(response.data)
+            } else {
+                Result.failure(Throwable(response.msg))
+            }
+        } catch (e: Throwable) {
+            Result.failure(e)
+        }
+    }
+
     /**
      * 查询成绩 本地优先
      * @param isRefresh Boolean 是否直接获取服务器上的

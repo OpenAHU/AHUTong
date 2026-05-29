@@ -38,6 +38,11 @@ interface BaseDataSource {
      */
     suspend fun getSchedule() : AHUResponse<List<Course>>
 
+    /**
+     * getSchedule (auto get schedule of next semester)
+     */
+    suspend fun getNextSchedule() : AHUResponse<List<Course>>
+
     suspend fun getGrade(): AHUResponse<Grade>
 
     suspend fun getGpaRankFromHtml(): AHUResponse<GpaRankInfo>

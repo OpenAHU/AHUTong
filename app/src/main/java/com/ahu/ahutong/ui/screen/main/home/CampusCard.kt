@@ -304,7 +304,7 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        // 顶部工具栏：左返回，中余额，右放大
+        // 顶部工具栏：左返回，右放大
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -321,14 +321,6 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
                     contentDescription = "返回"
                 )
             }
-
-            // 中间余额（绝对居中）
-            Text(
-                text = "¥ $balance",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Center)
-            )
 
             // 右侧全屏
             IconButton(
@@ -372,6 +364,13 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
         } else {
             CircularProgressIndicator()
         }
+
+        Text(
+            text = "¥ $balance",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 12.dp)
+        )
 
         if (showFullScreen) {
             Dialog(

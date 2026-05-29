@@ -10,6 +10,7 @@ import com.ahu.ahutong.data.crawler.model.adwnh.AllCampus
 import com.ahu.ahutong.data.crawler.model.adwnh.AllLostFoundType
 import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundPublishRequest
 import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundResponse
+import com.ahu.ahutong.data.crawler.model.jwxt.CourseTable
 import com.ahu.ahutong.data.crawler.model.jwxt.CurrentSemester
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.RequestBody
@@ -44,6 +45,30 @@ class CrawlerDataSource : BaseDataSource {
     }
 
     override suspend fun getSchedule(): AHUResponse<List<Course>> {
+        val currentSemesterJson = getCurrentSemester()
+        val courseTable = JwxtApi.API.getCourse(currentSemesterJson.id, currentSemesterJson.id)
+
+        AHUCache.saveSchoolTerm(currentSemesterJson.name)
+
+        return AHUResponse<List<Course>>().apply {
+            data = courseTable.toCourseList()
+            code = 0
+            msg = ""
+        }
+    }
+
+    override suspend fun getNextSchedule(): AHUResponse<List<Course>> {
+        val currentSemesterJson = getCurrentSemester()
+        val nextCourseTable = JwxtApi.API.getCourse(currentSemesterJson.id + 20, currentSemesterJson.id)
+
+        return AHUResponse<List<Course>>().apply {
+            data = nextCourseTable.toCourseList()
+            code = 0
+            msg = ""
+        }
+    }
+
+    private suspend fun getCurrentSemester(): CurrentSemester {
         val basicInfo = JwxtApi.API.fetchCourseTableBasicInfo()
         val doc = Jsoup.parse(basicInfo.body()!!.string())
 
@@ -53,21 +78,11 @@ class CrawlerDataSource : BaseDataSource {
 
 
         if (element == null) {
-
+            throw IllegalStateException("Cannot find current semester script")
         }
-        val semestersPattern: Regex? =
-            Regex(
-                "var\\s+semesters\\s*=\\s*JSON\\.parse\\(\\s*'(.*?)'\\s*\\);",
-                RegexOption.DOT_MATCHES_ALL
-            )
-        val currentSemesterPattern: Regex? =
-            Regex("var\\s+currentSemester\\s*=\\s*(\\{.*?\\});")
-
-        if (currentSemesterPattern == null) {
-            return AHUResponse<List<Course>>()
-        }
-
-        val currentSemester = currentSemesterPattern.find(element.toString())
+        val currentSemesterPattern = Regex("var\\s+currentSemester\\s*=\\s*(\\{.*?\\});")
+        val currentSemester = currentSemesterPattern.find(element)
+            ?: throw IllegalStateException("Cannot parse current semester")
 
 
         val gson = Gson()
@@ -77,40 +92,33 @@ class CrawlerDataSource : BaseDataSource {
             CurrentSemester::class.java
         )
 
-        val courseTable = JwxtApi.API.getCourse(currentSemesterJson.id, currentSemesterJson.id)
+        return currentSemesterJson
+    }
 
-        AHUCache.saveSchoolTerm(currentSemesterJson.name)
-
+    private fun CourseTable.toCourseList(): List<Course> {
         val courseList = ArrayList<Course>()
-
-        courseTable.studentTableVms[0].activities.forEach {
-
+        studentTableVms.firstOrNull()?.activities.orEmpty().forEach {
             val sortedWeekIndexes = it.weekIndexes.sorted()
+            if (sortedWeekIndexes.isEmpty()) {
+                return@forEach
+            }
 
             val course = Course()
             course.name = it.courseName
-            course.setStartWeek(sortedWeekIndexes.get(0).toString())
+            course.setStartWeek(sortedWeekIndexes.first().toString())
             course.setLength((it.endUnit - it.startUnit + 1).toString())
             course.setWeekday(it.weekday.toString())
-            course.setEndWeek(sortedWeekIndexes.get(sortedWeekIndexes.size - 1).toString())
+            course.setEndWeek(sortedWeekIndexes.last().toString())
             course.setStartTime(it.startUnit.toString())
             course.location = it.room ?: "未知"
-            course.teacher = it.teacherNames.toString()
+            course.teacher = it.teacherNames.joinToString(", ")
             course.weekIndexes = sortedWeekIndexes
             course.courseId = it.lessonId.toString()
 
             Log.e(TAG, "getSchedule: $course")
             courseList.add(course)
         }
-
-        val response = AHUResponse<List<Course>>()
-        response.data = courseList
-        response.code = 0
-        response.msg = ""
-
-        return response
-
-
+        return courseList
     }
 
     override suspend fun getGrade(): AHUResponse<Grade> {
