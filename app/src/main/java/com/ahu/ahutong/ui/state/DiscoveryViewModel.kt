@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahu.ahutong.data.AHURepository
 import com.ahu.ahutong.data.dao.AHUCache
-import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.ext.launchSafe
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
@@ -21,7 +20,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import javax.inject.Inject
 
 /**
@@ -92,27 +90,23 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
             withContext(Dispatchers.IO){
                 state.value = false
                 try {
-                    val response = withContext(Dispatchers.IO) {
-                        AdwmhApi.API.getQrcode()
-                    }
-                    if (response.code == 10000) {
+                    val response = AHURepository.getQrcode()
+                    if (response.isSuccess) {
                         val hints = HashMap<EncodeHintType, Any>()
 
                         hints[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.L
                         hints[EncodeHintType.MARGIN] = 1
                         val encoder = BarcodeEncoder()
                         qrcode.value = encoder.encodeBitmap(
-                            response.`object`,
+                            response.getOrThrow(),
                             BarcodeFormat.QR_CODE,
                             400,
                             400,
                             hints
                         )
                     } else {
-                        Log.e("QR", "接口返回错误: ${response.msg}")
+                        Log.e("QR", "接口返回错误", response.exceptionOrNull())
                     }
-                } catch (e: IOException) {
-                    Log.e("QR", "网络异常", e)
                 } catch (e: Exception) {
                     Log.e("QR", "未知异常", e)
                 }

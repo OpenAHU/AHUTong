@@ -1,0 +1,7 @@
+[submodule "sdk"]
+	path = sdk
+	url = https://github.com/OpenAHU/AHUTong-sdk.git
+[submodule "GuiXu-Rust"]
+	path = GuiXu-Rust
+	url = https://github.com/Yukon163/GuiXu.git
+	branch = rust-rewrite

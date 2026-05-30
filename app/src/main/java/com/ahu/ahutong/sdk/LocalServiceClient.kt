@@ -1,6 +1,7 @@
 package com.ahu.ahutong.sdk
 
 import android.util.Log
+import com.ahu.ahutong.data.crawler.model.adwnh.Balance
 import com.ahu.ahutong.data.crawler.model.jwxt.GradeResponse
 import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
@@ -267,7 +268,13 @@ class LocalServiceClient(
                 if (json.contains("\"error\"")) {
                     Result.failure(Exception(extractErrorMessage(json) ?: json))
                 } else {
-                    val card = gson.fromJson(json, Card::class.java)
+                    val balance = gson.fromJson(json, Balance::class.java)
+                    if (balance.code != 10000) {
+                        return@withContext Result.failure(Exception(balance.msg))
+                    }
+                    val card = Card().apply {
+                        this.balance = balance.`object` ?: 0.0
+                    }
                     Result.success(card)
                 }
             }

@@ -83,6 +83,34 @@ android {
     }
 }
 
+val buildRustSdkArm64 by tasks.registering(Exec::class) {
+    group = "build"
+    description = "Build the Rust SDK arm64-v8a shared library into app jniLibs."
+
+    workingDir = rootProject.file("sdk")
+    inputs.dir(rootProject.file("sdk/src"))
+    inputs.file(rootProject.file("sdk/Cargo.toml"))
+    outputs.file(project.file("src/main/jniLibs/arm64-v8a/libahutong_rs.so"))
+
+    commandLine(
+        "cargo",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "-o",
+        project.file("src/main/jniLibs").absolutePath,
+        "build",
+        "--release",
+        "--features",
+        "server"
+    )
+}
+
+tasks.matching { it.name == "mergeDebugJniLibFolders" || it.name == "mergeReleaseJniLibFolders" }
+    .configureEach {
+        dependsOn(buildRustSdkArm64)
+    }
+
 dependencies {
     implementation(libs.crashreport)
     implementation(libs.ads.mobile.sdk)

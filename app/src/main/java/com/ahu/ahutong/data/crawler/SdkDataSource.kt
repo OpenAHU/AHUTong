@@ -1,6 +1,7 @@
 package com.ahu.ahutong.data.crawler
 
 import android.util.Log
+import com.ahu.ahutong.AHUApplication
 import com.ahu.ahutong.data.AHUResponse
 import com.ahu.ahutong.data.base.BaseDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
@@ -12,6 +13,7 @@ import com.ahu.ahutong.data.crawler.model.adwnh.AllLostFoundType
 import com.ahu.ahutong.data.crawler.model.ycard.CardInfo
 import com.ahu.ahutong.data.crawler.model.ycard.RequestBody
 import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.crawler.utils.GpaRankHtmlParser
 import com.ahu.ahutong.data.model.BathRoom
 import com.ahu.ahutong.data.model.BathroomTelInfo
 import com.ahu.ahutong.data.model.Card
@@ -22,16 +24,22 @@ import com.ahu.ahutong.sdk.LocalServiceClient
 import com.ahu.ahutong.sdk.RustSDK
 import com.google.gson.Gson
 import okhttp3.FormBody
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.asResponseBody
+import okio.buffer
+import okio.source
 import retrofit2.Response
 import com.ahu.ahutong.data.crawler.model.adwnh.Balance
 import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundPublishRequest
 import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundResponse
 import com.ahu.ahutong.data.model.GpaRankInfo
+import java.io.File
 
 class SdkDataSource : BaseDataSource {
 
     val TAG = this::class.java.simpleName
+    private val crawlerFallback = CrawlerDataSource()
 
     /**
      * 获取 HTTP 客户端，如果不可用则返回 null（fallback 到 JNI）
@@ -42,12 +50,10 @@ class SdkDataSource : BaseDataSource {
         schoolYear: String,
         schoolTerm: String
     ): AHUResponse<List<Course>> {
-        return AHUResponse<List<Course>>()
+        return crawlerFallback.getSchedule(schoolYear, schoolTerm)
     }
 
     override suspend fun getSchedule(): AHUResponse<List<Course>> {
-        val response = AHUResponse<List<Course>>()
-
         // 优先使用 HTTP 客户端
         val httpClient = getHttpClient()
         if (httpClient != null) {
@@ -55,19 +61,14 @@ class SdkDataSource : BaseDataSource {
             val result = httpClient.getSchedule()
             if (result.isSuccess) {
                 val data = result.getOrNull()
-                if (data != null) {
-                    response.code = 0
-                    response.data = data
-                    response.msg = "Success"
-                } else {
-                    response.code = -1
-                    response.msg = "课表数据为空，可能登录已过期"
+                if (data != null) return AHUResponse<List<Course>>().apply {
+                    code = 0
+                    this.data = data
+                    msg = "Success"
                 }
-            } else {
-                response.code = -1
-                response.msg = result.exceptionOrNull()?.message ?: "获取课表失败"
             }
-            return response
+
+            Log.w("LocalServiceClient", "[getSchedule] HTTP failed, fallback to JNI: ${result.exceptionOrNull()?.message}")
         }
 
         // Fallback: 直接 JNI 调用
@@ -76,18 +77,19 @@ class SdkDataSource : BaseDataSource {
         if (result.isSuccess) {
             val data = result.getOrNull()
             if (data != null) {
-                response.code = 0
-                response.data = data
-                response.msg = "Success"
+                return AHUResponse<List<Course>>().apply {
+                    code = 0
+                    this.data = data
+                    msg = "Success"
+                }
             } else {
-                response.code = -1
-                response.msg = "课表数据为空，可能登录已过期"
+                Log.w("LocalServiceClient", "[getSchedule] JNI returned null, fallback to Android crawler")
             }
         } else {
-            response.code = -1
-            response.msg = result.exceptionOrNull()?.message ?: "获取课表失败"
+            Log.w("LocalServiceClient", "[getSchedule] JNI failed, fallback to Android crawler: ${result.exceptionOrNull()?.message}")
         }
-        return response
+
+        return crawlerFallback.getSchedule()
     }
 
     override suspend fun getNextSchedule(): AHUResponse<List<Course>> {
@@ -111,35 +113,31 @@ class SdkDataSource : BaseDataSource {
                 return convertGradeResponse(jniResult.getOrThrow())
             }
 
+            Log.w("LocalServiceClient", "[getGrade] JNI failed, fallback to Android crawler: ${jniResult.exceptionOrNull()?.message}")
+            return crawlerFallback.getGrade()
+        }
+
+        // Fallback: 直接 JNI 调用
+        Log.d("LocalServiceClient", "[getGrade] Fallback to JNI")
+        val result = RustSDK.getGradeSafe()
+        if (result.isSuccess) {
+            return convertGradeResponse(result.getOrThrow())
+        }
+
+        return try {
+            crawlerFallback.getGrade()
+        } catch (e: Exception) {
             val response = AHUResponse<Grade>()
             response.code = -1
             val msg = result.exceptionOrNull()?.message
-                ?: jniResult.exceptionOrNull()?.message
                 ?: "获取成绩失败"
             response.msg = if (msg.contains("error decoding response body", ignoreCase = true)) {
                 "教务系统返回异常（可能登录失效），请重新登录后重试"
             } else {
                 msg
             }
-            return response
+            response
         }
-
-        // Fallback: 直接 JNI 调用
-        Log.d("LocalServiceClient", "[getGrade] Fallback to JNI")
-        val result = RustSDK.getGradeSafe()
-        if (result.isFailure) {
-            val response = AHUResponse<Grade>()
-            response.code = -1
-            val msg = result.exceptionOrNull()?.message ?: "获取成绩失败"
-            response.msg = if (msg.contains("error decoding response body", ignoreCase = true)) {
-                "教务系统返回异常（可能登录失效），请重新登录后重试"
-            } else {
-                msg
-            }
-            return response
-        }
-
-        return convertGradeResponse(result.getOrThrow())
     }
 
 
@@ -364,25 +362,30 @@ class SdkDataSource : BaseDataSource {
     }
 
     override suspend fun getCardMoney(): AHUResponse<Card> {
-        val result = AHUResponse<Card>()
-        try {
-            val cardInfo = YcardApi.API.loadCardRecharge()
-            if (cardInfo.success) {
-                val balanceFen = cardInfo.data.card.firstOrNull()?.accinfo?.firstOrNull()?.balance ?: 0
-                val card = Card()
-                card.balance = balanceFen / 100.0
-                result.data = card
-                result.code = 0
-            } else {
-                result.code = -1
-                result.msg = "一卡通接口返回失败"
+        getHttpClient()?.let { httpClient ->
+            Log.d("LocalServiceClient", "[getCardMoney] Using HTTP client")
+            val result = httpClient.getBalance()
+            if (result.isSuccess) {
+                return AHUResponse<Card>().apply {
+                    code = 0
+                    data = result.getOrThrow()
+                    msg = "Success"
+                }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            result.code = -1
-            result.msg = "获取一卡通余额失败: ${e.message}"
+            Log.w("LocalServiceClient", "[getCardMoney] HTTP failed, fallback to JNI: ${result.exceptionOrNull()?.message}")
         }
-        return result
+
+        val jniResult = RustSDK.getBalanceSafe()
+        if (jniResult.isSuccess) {
+            return AHUResponse<Card>().apply {
+                code = 0
+                data = jniResult.getOrThrow()
+                msg = "Success"
+            }
+        }
+
+        Log.w("LocalServiceClient", "[getCardMoney] JNI failed, fallback to Android crawler: ${jniResult.exceptionOrNull()?.message}")
+        return crawlerFallback.getCardMoney()
     }
 
     override suspend fun getBathRooms(): AHUResponse<List<BathRoom>> {
@@ -404,12 +407,12 @@ class SdkDataSource : BaseDataSource {
                 response.code = 0
                 response.data = result.getOrNull()
             } else {
-                response.code = -1
-                response.msg = result.exceptionOrNull()?.message ?: "获取考试信息失败"
+                Log.w("LocalServiceClient", "[getExamInfo] Rust failed, fallback to Android crawler: ${result.exceptionOrNull()?.message}")
+                return crawlerFallback.getExamInfo(studentID, studentName)
             }
         } catch (e: Exception) {
-            response.code = -1
-            response.msg = "请求错误 $e"
+            Log.w("LocalServiceClient", "[getExamInfo] Rust threw, fallback to Android crawler", e)
+            return crawlerFallback.getExamInfo(studentID, studentName)
         }
         return response
     }
@@ -499,7 +502,33 @@ class SdkDataSource : BaseDataSource {
     }
 
     override suspend fun getSchoolCalendar(): AHUResponse<Response<ResponseBody>> {
-        TODO("Not yet implemented")
+        val response = AHUResponse<Response<ResponseBody>>()
+
+        if (RustSDK.isNativeLoaded()) {
+            try {
+                val context = AHUApplication.getApp()
+                val dir = File(context.filesDir, "images")
+                if (!dir.exists()) dir.mkdirs()
+                val file = File(dir, "xiaoli-rust-download.jpg")
+                if (file.exists()) file.delete()
+
+                val ok = RustSDK.downloadSchoolCalendar(file.absolutePath)
+                if (ok && file.exists() && file.length() > 0L) {
+                    response.code = 0
+                    response.msg = "success"
+                    response.data = Response.success(
+                        file.inputStream().source().buffer()
+                            .asResponseBody("image/jpeg".toMediaType(), file.length())
+                    )
+                    return response
+                }
+                Log.w(TAG, "downloadSchoolCalendar returned false or empty file, fallback to Android API")
+            } catch (e: Throwable) {
+                Log.w(TAG, "downloadSchoolCalendar native failed, fallback to Android API", e)
+            }
+        }
+
+        return crawlerFallback.getSchoolCalendar()
     }
 
 

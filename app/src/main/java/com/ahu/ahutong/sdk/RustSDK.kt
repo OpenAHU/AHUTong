@@ -2,6 +2,7 @@ package com.ahu.ahutong.sdk
 
 import android.content.Context
 import android.util.Log
+import com.ahu.ahutong.data.model.Card
 import com.ahu.ahutong.data.model.Course
 import com.ahu.ahutong.data.model.User
 import com.google.gson.Gson
@@ -14,6 +15,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
 import androidx.core.content.edit
+import com.ahu.ahutong.data.crawler.model.adwnh.Balance
 import com.ahu.ahutong.data.crawler.model.jwxt.GradeResponse
 import kotlinx.coroutines.withContext
 import android.content.Intent
@@ -499,6 +501,22 @@ object RustSDK {
     external fun startServer(port: Int): String
 
     /**
+     * 启动本地 HTTP 服务，并在启动前初始化 Rust 侧持久化。
+     * @param storagePath Rust 可写入的私有目录
+     * @param seedCookiesJson 旧版本由 Android/MMKV 保存的 cookie，用于首次迁移
+     */
+    external fun startServerWithStorage(
+        port: Int,
+        storagePath: String,
+        seedCookiesJson: String
+    ): String
+
+    private external fun kvPutString(boxName: String, key: String, value: String): Boolean
+    private external fun kvGetString(boxName: String, key: String): String?
+    private external fun kvRemove(boxName: String, key: String): Boolean
+    private external fun kvClearBox(boxName: String): Boolean
+
+    /**
      * 停止本地 HTTP 服务
      */
     external fun stopServer()
@@ -822,6 +840,71 @@ object RustSDK {
         }
     }
 
+    fun getBalanceSafe(): Result<Card> {
+        if (!isLoaded) {
+            Log.e(TAG_HOTUPDATE, "getBalanceSafe: Native library not loaded")
+            return Result.failure(IllegalStateException("Native library not loaded"))
+        }
+        val json = try {
+            getBalance() ?: return Result.failure(Exception("empty balance response"))
+        } catch (t: Throwable) {
+            Log.e(TAG_HOTUPDATE, "getBalanceSafe: Native call failed", t)
+            return Result.failure(t)
+        }
+
+        if (json.contains("\"error\"")) {
+            Log.e(TAG_HOTUPDATE, "getBalanceSafe: Server returned error: $json")
+            return Result.failure(Exception(json))
+        }
+
+        return try {
+            val balance = Gson().fromJson(json, Balance::class.java)
+            if (balance.code != 10000) {
+                Result.failure(Exception(balance.msg))
+            } else {
+                Result.success(Card().apply {
+                    this.balance = balance.`object` ?: 0.0
+                })
+            }
+        } catch (e: Exception) {
+            Log.e(TAG_HOTUPDATE, "getBalanceSafe: JSON parse failed. JSON: $json", e)
+            Result.failure(e)
+        }
+    }
+
+    fun getQrcodeSafe(): Result<String> {
+        if (!isLoaded) {
+            Log.e(TAG_HOTUPDATE, "getQrcodeSafe: Native library not loaded")
+            return Result.failure(IllegalStateException("Native library not loaded"))
+        }
+        val json = try {
+            getQrcode() ?: return Result.failure(Exception("empty qrcode response"))
+        } catch (t: Throwable) {
+            Log.e(TAG_HOTUPDATE, "getQrcodeSafe: Native call failed", t)
+            return Result.failure(t)
+        }
+
+        if (json.contains("\"error\"")) {
+            Log.e(TAG_HOTUPDATE, "getQrcodeSafe: Server returned error: $json")
+            return Result.failure(Exception(json))
+        }
+
+        return try {
+            val obj = com.google.gson.JsonParser.parseString(json).asJsonObject
+            val code = obj.get("code")?.asInt ?: -1
+            val msg = obj.get("msg")?.asString ?: "获取二维码失败"
+            val value = obj.get("object")?.asString.orEmpty()
+            if (code == 10000 && value.isNotEmpty()) {
+                Result.success(value)
+            } else {
+                Result.failure(Exception(msg))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG_HOTUPDATE, "getQrcodeSafe: JSON parse failed. JSON: $json", e)
+            Result.failure(e)
+        }
+    }
+
     fun initSafe(cookiesJson: String) {
         if (!isLoaded) return
         try {
@@ -837,6 +920,46 @@ object RustSDK {
             getCookiesList()
         } catch (t: Throwable) {
             "[]"
+        }
+    }
+
+    fun kvPutStringSafe(boxName: String, key: String, value: String): Boolean {
+        if (!isLoaded) return false
+        return try {
+            kvPutString(boxName, key, value)
+        } catch (t: Throwable) {
+            Log.w(TAG_HOTUPDATE, "kvPutString failed: box=$boxName key=$key", t)
+            false
+        }
+    }
+
+    fun kvGetStringSafe(boxName: String, key: String): String? {
+        if (!isLoaded) return null
+        return try {
+            kvGetString(boxName, key)
+        } catch (t: Throwable) {
+            Log.w(TAG_HOTUPDATE, "kvGetString failed: box=$boxName key=$key", t)
+            null
+        }
+    }
+
+    fun kvRemoveSafe(boxName: String, key: String): Boolean {
+        if (!isLoaded) return false
+        return try {
+            kvRemove(boxName, key)
+        } catch (t: Throwable) {
+            Log.w(TAG_HOTUPDATE, "kvRemove failed: box=$boxName key=$key", t)
+            false
+        }
+    }
+
+    fun kvClearBoxSafe(boxName: String): Boolean {
+        if (!isLoaded) return false
+        return try {
+            kvClearBox(boxName)
+        } catch (t: Throwable) {
+            Log.w(TAG_HOTUPDATE, "kvClearBox failed: box=$boxName", t)
+            false
         }
     }
 

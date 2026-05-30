@@ -133,20 +133,21 @@ class MainActivity : ComponentActivity() {
         RustSDK.loadLibrary(context = applicationContext)
 
         // 在 native library 加载后启动本地 HTTP 服务
-        startLocalService()
+        val storageInitialized = startLocalService()
 
+        lifecycleScope.launchSafe {
+            if (!storageInitialized) {
+                restoreRustCookies()
+            }
 
+            if (AHUCache.isLogin()) {
+//                val user = AHUCache.getCurrentUser()
+//                val pwd = AHUCache.getWisdomPassword()
 
-        if (AHUCache.isLogin()) {
-//            val user = AHUCache.getCurrentUser()
-//            val pwd = AHUCache.getWisdomPassword()
-
-
-            discoveryViewModel.loadActivityBean()
-            scheduleViewModel.loadConfig()
-            scheduleViewModel.refreshSchedule()
-
-
+                discoveryViewModel.loadActivityBean()
+                scheduleViewModel.loadConfig()
+                scheduleViewModel.refreshSchedule()
+            }
         }
     }
 //    private fun checkApkUpdateOnStartup() {
@@ -254,19 +255,28 @@ class MainActivity : ComponentActivity() {
     /**
      * 启动 Rust 本地 HTTP 服务
      */
-    private fun startLocalService() {
+    private fun startLocalService(): Boolean {
         if (!RustSDK.isNativeLoaded()) {
             Log.w("MainActivity", "Native library not loaded, skipping local service start")
-            return
+            return false
         }
 
         try {
-            val result = RustSDK.startServer(0)
+            val storagePath = File(filesDir, "rust-sdk").absolutePath
+            val seedCookies = AHUCache.getRustCookies()
+            var usedStorageStartup = true
+            val result = try {
+                RustSDK.startServerWithStorage(0, storagePath, seedCookies)
+            } catch (e: UnsatisfiedLinkError) {
+                Log.w("MainActivity", "startServerWithStorage missing, fallback to startServer", e)
+                usedStorageStartup = false
+                RustSDK.startServer(0)
+            }
             Log.i("MainActivity", "startServer result: $result")
 
             if (result.contains("\"error\"")) {
                 Log.e("MainActivity", "Failed to start local server: $result")
-                return
+                return false
             }
 
             val json = org.json.JSONObject(result)
@@ -275,9 +285,34 @@ class MainActivity : ComponentActivity() {
 
             LocalServiceClient.initialize(port, token)
             Log.i("MainActivity", "Local service started on port: $port")
+            return usedStorageStartup
         } catch (e: Exception) {
             Log.e("MainActivity", "Failed to start local service", e)
+            return false
         }
+    }
+
+    private suspend fun restoreRustCookies() {
+        val cookies = AHUCache.getRustCookies()
+        if (cookies.isEmpty()) {
+            Log.i("MainActivity", "No persisted Rust cookies to restore")
+            return
+        }
+
+        val client = LocalServiceClient.getInstance()
+        if (client == null) {
+            Log.w("MainActivity", "Local service client missing, skip Rust cookie restore")
+            return
+        }
+
+        val result = client.init(cookies)
+        result
+            .onSuccess {
+                Log.i("MainActivity", "Restored Rust cookies: ${cookies.length} bytes")
+            }
+            .onFailure {
+                Log.w("MainActivity", "Failed to restore Rust cookies", it)
+            }
     }
 
     // update check moved into MainViewModel

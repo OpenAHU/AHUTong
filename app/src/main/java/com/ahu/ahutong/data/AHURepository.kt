@@ -2,7 +2,7 @@ package com.ahu.ahutong.data
 
 import android.util.Log
 import com.ahu.ahutong.data.base.BaseDataSource
-import com.ahu.ahutong.data.crawler.CrawlerDataSource
+import com.ahu.ahutong.data.crawler.SdkDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.crawler.configs.Constants
@@ -42,9 +42,9 @@ object AHURepository {
 
     val TAG = this::class.java.simpleName
 
-    private var dataSource: BaseDataSource = CrawlerDataSource()
+    private var dataSource: BaseDataSource = SdkDataSource()
     fun initializeDataSource(useMock: Boolean = AHUCache.getMockData()) {
-        dataSource = if (useMock) MockDataSource() else CrawlerDataSource()
+        dataSource = if (useMock) MockDataSource() else SdkDataSource()
     }
     
     /**
@@ -194,6 +194,54 @@ object AHURepository {
      */
     suspend fun loginWithCrawler(username: String, password: String): AHUResponse<User> =
         withContext(Dispatchers.IO) {
+            getHttpClient()?.let { httpClient ->
+                val result = AHUResponse<User>()
+                try {
+                    httpClient.init("")
+                    AHUCache.saveRustCookies("")
+
+                    val loginResult = httpClient.login(username, password)
+                    if (loginResult.isSuccess) {
+                        val user = loginResult.getOrThrow()
+                        result.code = 0
+                        result.data = user
+                        result.msg = "登录成功"
+
+                        persistRustCookies(httpClient)
+                        syncCookies()
+                        return@withContext result
+                    }
+
+                    Log.w(TAG, "Rust login failed, fallback to Android crawler", loginResult.exceptionOrNull())
+                } catch (e: Throwable) {
+                    Log.w(TAG, "Rust login threw, fallback to Android crawler", e)
+                }
+            }
+
+            if (RustSDK.isNativeLoaded()) {
+                val result = AHUResponse<User>()
+                try {
+                    RustSDK.initSafe("")
+                    AHUCache.saveRustCookies("")
+
+                    val loginResult = RustSDK.loginSafe(username, password)
+                    if (loginResult.isSuccess) {
+                        val user = loginResult.getOrThrow()
+                        result.code = 0
+                        result.data = user
+                        result.msg = "登录成功"
+
+                        persistRustCookiesFromNative()
+                        syncCookies()
+                        return@withContext result
+                    }
+
+                    Log.w(TAG, "Rust JNI login failed, fallback to Android crawler", loginResult.exceptionOrNull())
+                } catch (e: Throwable) {
+                    Log.w(TAG, "Rust JNI login threw, fallback to Android crawler", e)
+                }
+            }
+
             val adwmhLogin = async(Dispatchers.IO) {
 
                 var failedTimes = 0
@@ -292,6 +340,26 @@ object AHURepository {
             result.msg = "登录失败"
             return@withContext result
         }
+
+    private suspend fun persistRustCookies(httpClient: LocalServiceClient) {
+        val cookies = httpClient.dumpCookies().getOrElse {
+            Log.w(TAG, "Failed to persist Rust cookies", it)
+            return
+        }
+        AHUCache.saveRustCookies(cookies)
+        Log.d(TAG, "Persisted Rust cookies: ${cookies.length} bytes")
+    }
+
+    private fun persistRustCookiesFromNative() {
+        if (!RustSDK.isNativeLoaded()) return
+        try {
+            val cookies = RustSDK.dumpCookies().orEmpty()
+            AHUCache.saveRustCookies(cookies)
+            Log.d(TAG, "Persisted Rust JNI cookies: ${cookies.length} bytes")
+        } catch (t: Throwable) {
+            Log.w(TAG, "Failed to persist Rust JNI cookies", t)
+        }
+    }
 
     private fun syncCookies() {
         try {
@@ -412,4 +480,48 @@ object AHURepository {
         withContext(Dispatchers.IO) {
             dataSource.deleteLostFound(id)
         }
+
+    suspend fun getQrcode(): Result<String> =
+        withContext(Dispatchers.IO) {
+            getHttpClient()?.let { httpClient ->
+                val httpResult = httpClient.getQrcode()
+                if (httpResult.isSuccess) {
+                    return@withContext parseQrcodeResponse(httpResult.getOrThrow())
+                }
+                Log.w(TAG, "Rust HTTP qrcode failed, fallback to JNI", httpResult.exceptionOrNull())
+            }
+
+            val jniResult = RustSDK.getQrcodeSafe()
+            if (jniResult.isSuccess) {
+                return@withContext jniResult
+            }
+
+            Log.w(TAG, "Rust JNI qrcode failed, fallback to Android crawler", jniResult.exceptionOrNull())
+            try {
+                val response = AdwmhApi.API.getQrcode()
+                if (response.code == 10000 && response.`object`.isNotEmpty()) {
+                    Result.success(response.`object`)
+                } else {
+                    Result.failure(Throwable(response.msg))
+                }
+            } catch (e: Throwable) {
+                Result.failure(e)
+            }
+        }
+
+    private fun parseQrcodeResponse(json: String): Result<String> {
+        return try {
+            val obj = com.google.gson.JsonParser.parseString(json).asJsonObject
+            val code = obj.get("code")?.asInt ?: -1
+            val msg = obj.get("msg")?.asString ?: "获取二维码失败"
+            val value = obj.get("object")?.asString.orEmpty()
+            if (code == 10000 && value.isNotEmpty()) {
+                Result.success(value)
+            } else {
+                Result.failure(Throwable(msg))
+            }
+        } catch (e: Throwable) {
+            Result.failure(e)
+        }
+    }
 }

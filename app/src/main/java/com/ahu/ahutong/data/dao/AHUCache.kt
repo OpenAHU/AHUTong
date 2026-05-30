@@ -13,6 +13,7 @@ import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.data.model.RoomSelectionInfo
 import com.ahu.ahutong.data.model.User
 import com.ahu.ahutong.ext.fromJson
+import com.ahu.ahutong.sdk.RustSDK
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
@@ -39,12 +40,67 @@ object AHUCache {
             }
         }
 
+    private const val INIT_BOX = "init"
+
+    private fun sanitizeBoxPart(value: String): String {
+        return value.replace(Regex("[^A-Za-z0-9_.-]"), "_")
+    }
+
+    private fun userBoxName(): String {
+        val userId = getCurrentUser()?.xh?.takeIf { it.isNotEmpty() } ?: "guest"
+        return "user_${sanitizeBoxPart(userId)}"
+    }
+
+    private fun initPutString(key: String, value: String) {
+        RustSDK.kvPutStringSafe(INIT_BOX, key, value)
+    }
+
+    private fun initGetString(key: String): String? {
+        return RustSDK.kvGetStringSafe(INIT_BOX, key)
+    }
+
+    private fun initGetStringOrMigrate(key: String, fallback: () -> String?): String? {
+        initGetString(key)?.let { return it }
+        return fallback()?.also {
+            if (it.isNotEmpty()) initPutString(key, it)
+        }
+    }
+
+    private fun initRemove(key: String) {
+        RustSDK.kvRemoveSafe(INIT_BOX, key)
+    }
+
+    private fun userPutString(key: String, value: String) {
+        RustSDK.kvPutStringSafe(userBoxName(), key, value)
+    }
+
+    private fun userGetString(key: String): String? {
+        return RustSDK.kvGetStringSafe(userBoxName(), key)
+    }
+
+    private fun userGetStringOrMigrate(key: String, fallback: () -> String?): String? {
+        userGetString(key)?.let { return it }
+        return fallback()?.also {
+            if (it.isNotEmpty()) userPutString(key, it)
+        }
+    }
+
+    private fun userRemove(key: String) {
+        RustSDK.kvRemoveSafe(userBoxName(), key)
+    }
+
     /**
      * 清除全部数据
      */
     fun clearAll() {
+        val boxName = userBoxName()
+        val currentKv = kv
+        RustSDK.kvClearBoxSafe(INIT_BOX)
+        RustSDK.kvClearBoxSafe(boxName)
+        RustSDK.kvClearBoxSafe("user_guest")
         kv_init.clearAll()
-        kv.clearAll()
+        currentKv.clearAll()
+        MMKV.mmkvWithID("ahu_guest").clearAll()
     }
 
     /**
@@ -53,6 +109,7 @@ object AHUCache {
      */
     fun saveCurrentUser(user: User) {
         val data = Gson().toJson(user)
+        initPutString("current_user", data)
         kv_init.encode("current_user", data)
     }
 
@@ -60,6 +117,7 @@ object AHUCache {
      * 清除本地登陆状态
      */
     fun clearCurrentUser() {
+        initPutString("current_user", "")
         kv_init.encode("current_user", "")
     }
 
@@ -68,7 +126,7 @@ object AHUCache {
      * @return User?
      */
     fun getCurrentUser(): User? {
-        val data = kv_init.decodeString("current_user") ?: ""
+        val data = initGetStringOrMigrate("current_user") { kv_init.decodeString("current_user") } ?: ""
         return data.fromJson(User::class.java)
     }
 
@@ -85,6 +143,7 @@ object AHUCache {
      * @param password String
      */
     fun saveWisdomPassword(password: String) {
+        initPutString("password_wisdom", password)
         kv_init.encode("password_wisdom", password)
     }
 
@@ -93,7 +152,7 @@ object AHUCache {
      * @return String?
      */
     fun getWisdomPassword(): String? {
-        return kv_init.decodeString("password_wisdom")
+        return initGetStringOrMigrate("password_wisdom") { kv_init.decodeString("password_wisdom") }
     }
 
     /**
@@ -104,11 +163,13 @@ object AHUCache {
      */
     fun saveSchedule(schoolYear: String, schoolTerm: String, schedule: List<Course>) {
         val data = Gson().toJson(schedule)
+        userPutString("$schoolYear-$schoolTerm.schedule", data)
         kv.putString("$schoolYear-$schoolTerm.schedule", data)
     }
 
     fun saveSchedule(schoolTerm: String,schedule: List<Course>) {
         val data = Gson().toJson(schedule)
+        userPutString("$schoolTerm.schedule", data)
         kv.putString("$schoolTerm.schedule", data) // 2025-2026-1
     }
 
@@ -119,12 +180,14 @@ object AHUCache {
      * @return List<Course>
      */
     fun getSchedule(schoolYear: String, schoolTerm: String): List<Course>? {
-        val data = kv.getString("$schoolYear-$schoolTerm.schedule", "") ?: ""
+        val key = "$schoolYear-$schoolTerm.schedule"
+        val data = userGetStringOrMigrate(key) { kv.getString(key, "") } ?: ""
         return data.fromJson(object : TypeToken<List<Course>>() {}.type)
     }
 
     fun getSchedule(schoolTerm: String): List<Course>? {
-        val data = kv.getString("$schoolTerm.schedule", "") ?: ""
+        val key = "$schoolTerm.schedule"
+        val data = userGetStringOrMigrate(key) { kv.getString(key, "") } ?: ""
         return data.fromJson(object : TypeToken<List<Course>>() {}.type)
     }
 
@@ -144,6 +207,7 @@ object AHUCache {
      */
     fun saveGrade(grade: Grade) {
         val data = Gson().toJson(grade)
+        userPutString("grade", data)
         kv.encode("grade", data)
     }
 
@@ -152,7 +216,7 @@ object AHUCache {
      * @return Grade
      */
     fun getGrade(): Grade? {
-        val data = kv.decodeString("grade") ?: ""
+        val data = userGetStringOrMigrate("grade") { kv.decodeString("grade") } ?: ""
         return data.fromJson(Grade::class.java)
     }
 
@@ -162,6 +226,7 @@ object AHUCache {
      */
     fun saveExamInfo(exams: List<Exam>) {
         val data = Gson().toJson(exams)
+        userPutString("exams", data)
         kv.encode("exams", data)
     }
 
@@ -170,7 +235,7 @@ object AHUCache {
      * @return List<Exam>?
      */
     fun getExamInfo(): List<Exam>? {
-        val data = kv.decodeString("exams") ?: ""
+        val data = userGetStringOrMigrate("exams") { kv.decodeString("exams") } ?: ""
         return data.fromJson(object : TypeToken<List<Exam>>() {}.type)
     }
 
@@ -181,7 +246,8 @@ object AHUCache {
      * @return String? yyyy-MM-dd
      */
     fun getSchoolTermStartTime(schoolYear: String, schoolTerm: String): String? {
-        return kv.decodeString("startTime-$schoolYear-$schoolTerm")
+        val key = "startTime-$schoolYear-$schoolTerm"
+        return userGetStringOrMigrate(key) { kv.decodeString(key) }
     }
 
     /**
@@ -191,6 +257,7 @@ object AHUCache {
      * @param startTime String yyyy-MM-dd
      */
     fun saveSchoolTermStartTime(schoolYear: String, schoolTerm: String, startTime: String) {
+        userPutString("startTime-$schoolYear-$schoolTerm", startTime)
         kv.encode("startTime-$schoolYear-$schoolTerm", startTime)
     }
 
@@ -199,7 +266,10 @@ object AHUCache {
      * @return String?
      */
     fun getSchoolYear(): String? {
-        return kv.decodeString("defaultSchoolYear") ?: kv_init.decodeString("defaultSchoolYear")
+        return userGetStringOrMigrate("defaultSchoolYear") {
+            kv.decodeString("defaultSchoolYear")
+                ?: initGetStringOrMigrate("defaultSchoolYear") { kv_init.decodeString("defaultSchoolYear") }
+        }
     }
 
     /**
@@ -207,6 +277,7 @@ object AHUCache {
      * @param schoolYear String
      */
     fun saveSchoolYear(schoolYear: String) {
+        userPutString("defaultSchoolYear", schoolYear)
         kv.encode("defaultSchoolYear", schoolYear)
     }
 
@@ -215,7 +286,12 @@ object AHUCache {
      * @return String?
      */
     fun getSchoolTerm(): String? {
-        return kv.getString("defaultSchoolTerm", kv_init.getString("defaultSchoolTerm", null))
+        return userGetStringOrMigrate("defaultSchoolTerm") {
+            kv.getString(
+                "defaultSchoolTerm",
+                initGetStringOrMigrate("defaultSchoolTerm") { kv_init.getString("defaultSchoolTerm", null) }
+            )
+        }
     }
 
     /**
@@ -223,6 +299,7 @@ object AHUCache {
      * @param schoolTerm String
      */
     fun saveSchoolTerm(schoolTerm: String) {
+        userPutString("defaultSchoolTerm", schoolTerm)
         kv.putString("defaultSchoolTerm", schoolTerm)
     }
 
@@ -231,7 +308,10 @@ object AHUCache {
      * @return Boolean
      */
     fun isShowAllCourse(): Boolean {
-        return kv.getBoolean("isShowAllCourse", false)
+        userGetString("isShowAllCourse")?.toBooleanStrictOrNull()?.let { return it }
+        val value = kv.getBoolean("isShowAllCourse", false)
+        if (kv.containsKey("isShowAllCourse")) userPutString("isShowAllCourse", value.toString())
+        return value
     }
 
     /**
@@ -239,67 +319,108 @@ object AHUCache {
      * @param isCourse Boolean
      */
     fun saveIsShowAllCourse(isCourse: Boolean) {
+        userPutString("isShowAllCourse", isCourse.toString())
         kv.putBoolean("isShowAllCourse", isCourse)
     }
 
     fun isShowWidgetTip(): Boolean {
-        return kv.getBoolean("is_show_widget_dialog", true)
+        userGetString("is_show_widget_dialog")?.toBooleanStrictOrNull()?.let { return it }
+        val value = kv.getBoolean("is_show_widget_dialog", true)
+        if (kv.containsKey("is_show_widget_dialog")) userPutString("is_show_widget_dialog", value.toString())
+        return value
     }
 
     fun ignoreWidgetTip() {
+        userPutString("is_show_widget_dialog", false.toString())
         kv.putBoolean("is_show_widget_dialog", false)
     }
 
     fun logout() {
         clearCurrentUser()
         saveWisdomPassword("")
+        saveRustCookies("")
     }
 
 
     fun savePhone(phone:String){
+        userPutString("phone", phone)
         kv.putString("phone",phone)
     }
 
     fun getPhone() : String?{
-        return kv.getString("phone",null)
+        return userGetStringOrMigrate("phone") { kv.getString("phone",null) }
     }
 
 
     fun setJwxtStudentId(id: String){
+        userPutString("jwxt_stu_id", id)
         kv.putString("jwxt_stu_id",id)
     }
 
     fun getJwxtStudentId() : String?{
-        return kv.getString("jwxt_stu_id", kv_init.getString("jwxt_stu_id", null))
+        return userGetStringOrMigrate("jwxt_stu_id") {
+            kv.getString(
+                "jwxt_stu_id",
+                initGetStringOrMigrate("jwxt_stu_id") { kv_init.getString("jwxt_stu_id", null) }
+            )
+        }
     }
 
 
     fun saveString(key: String ,value : String){
+        userPutString(key, value)
         kv.putString(key,value)
+    }
+
+    fun saveRustCookies(cookiesJson: String) {
+        if (cookiesJson.isEmpty()) {
+            initRemove("rust_cookies_json")
+        } else {
+            initPutString("rust_cookies_json", cookiesJson)
+        }
+        kv_init.putString("rust_cookies_json", cookiesJson)
+    }
+
+    fun getRustCookies(): String {
+        return initGetStringOrMigrate("rust_cookies_json") {
+            kv_init.getString("rust_cookies_json", "")
+        } ?: ""
     }
 
 
     fun isAgreementAccepted(): Boolean{
-        return kv.getBoolean("agreementAccepted",false)
+        userGetString("agreementAccepted")?.toBooleanStrictOrNull()?.let { return it }
+        val value = kv.getBoolean("agreementAccepted",false)
+        if (kv.containsKey("agreementAccepted")) userPutString("agreementAccepted", value.toString())
+        return value
     }
 
     fun setAgreementAccepted(){
+        userPutString("agreementAccepted", true.toString())
         kv.putBoolean("agreementAccepted",true)
     }
 
     fun isPrivacyAccepted(): Boolean{
-        return kv.getBoolean("privacyAccepted",false)
+        userGetString("privacyAccepted")?.toBooleanStrictOrNull()?.let { return it }
+        val value = kv.getBoolean("privacyAccepted",false)
+        if (kv.containsKey("privacyAccepted")) userPutString("privacyAccepted", value.toString())
+        return value
     }
 
     fun setPrivacyAccepted(){
+        userPutString("privacyAccepted", true.toString())
         kv.putBoolean("privacyAccepted",true)
     }
 
     fun isBusinessAccepted(): Boolean{
-        return kv.getBoolean("businessAccepted",false)
+        userGetString("businessAccepted")?.toBooleanStrictOrNull()?.let { return it }
+        val value = kv.getBoolean("businessAccepted",false)
+        if (kv.containsKey("businessAccepted")) userPutString("businessAccepted", value.toString())
+        return value
     }
 
     fun setBusinessAccepted(){
+        userPutString("businessAccepted", true.toString())
         kv.putBoolean("businessAccepted",true)
     }
 
@@ -308,18 +429,25 @@ object AHUCache {
      * @return RoomSelectionInfo?
      */
     fun getRoomSelection(): RoomSelectionInfo? {
-        val data = kv.decodeString("room_selection_info") ?: ""
+        val data = userGetStringOrMigrate("room_selection_info") {
+            kv.decodeString("room_selection_info")
+        } ?: ""
         return data.fromJson(RoomSelectionInfo::class.java)
     }
 
     fun saveElectricityDepositHistory(history: List<ElectricityDepositHistoryItem>) {
-        kv.encode("electricity_room_history", Gson().toJson(history))
+        val data = Gson().toJson(history)
+        userPutString("electricity_room_history", data)
+        kv.encode("electricity_room_history", data)
     }
 
     fun getElectricityDepositHistory(): List<ElectricityDepositHistoryItem> {
-        val data = kv.decodeString("electricity_room_history")
-            ?: kv_init.decodeString("electricity_room_history")
-            ?: ""
+        val data = userGetStringOrMigrate("electricity_room_history") {
+            kv.decodeString("electricity_room_history")
+                ?: initGetStringOrMigrate("electricity_room_history") {
+                    kv_init.decodeString("electricity_room_history")
+                }
+        } ?: ""
         if (data.isEmpty()) return emptyList()
         return data.fromJson(object : TypeToken<List<ElectricityDepositHistoryItem>>() {}.type) ?: emptyList()
     }
@@ -330,6 +458,7 @@ object AHUCache {
      */
     fun saveElectricityChargeInfo(info: ElectricityChargeInfo) {
         val data = Gson().toJson(info)
+        userPutString("electricity_charge_acl", data)
         kv.encode("electricity_charge_acl", data)
     }
 
@@ -338,7 +467,12 @@ object AHUCache {
      * @return ElectricityChargeInfo?
      */
     fun getElectricityChargeInfo(): ElectricityChargeInfo? {
-        val data = kv.decodeString("electricity_charge_acl") ?: kv_init.decodeString("electricity_charge_acl") ?: ""
+        val data = userGetStringOrMigrate("electricity_charge_acl") {
+            kv.decodeString("electricity_charge_acl")
+                ?: initGetStringOrMigrate("electricity_charge_acl") {
+                    kv_init.decodeString("electricity_charge_acl")
+                }
+        } ?: ""
         if (data.isEmpty()) {
             return null
         }
@@ -349,6 +483,7 @@ object AHUCache {
      * 清除电费累计充值信息
      */
     fun clearElectricityChargeInfo() {
+        userRemove("electricity_charge_acl")
         kv.removeValueForKey("electricity_charge_acl")
     }
 
@@ -358,6 +493,7 @@ object AHUCache {
      */
     fun saveRoomSelection(info: RoomSelectionInfo) {
         val data = Gson().toJson(info)
+        userPutString("room_selection_info", data)
         kv.encode("room_selection_info", data)
     }
 
@@ -366,6 +502,7 @@ object AHUCache {
      * @param balance Double
      */
     fun saveCardBalance(balance: Double) {
+        userPutString("card_balance", balance.toString())
         kv.encode("card_balance", balance)
     }
 
@@ -374,29 +511,41 @@ object AHUCache {
      * @return Double?
      */
     fun getCardBalance(): Double? {
+        userGetString("card_balance")?.toDoubleOrNull()?.let { return it }
         if (!kv.containsKey("card_balance")) return null
-        return kv.decodeDouble("card_balance")
+        return kv.decodeDouble("card_balance").also {
+            userPutString("card_balance", it.toString())
+        }
     }
 
     fun getMockData(): Boolean {
+        initGetString("mock_data")?.toBooleanStrictOrNull()?.let { return it }
         if (!kv.containsKey("mock_data")) return false
-        return kv.decodeBool("mock_data")
+        return kv.decodeBool("mock_data").also {
+            initPutString("mock_data", it.toString())
+        }
     }
 
     fun setMockData(enable: Boolean) {
+        initPutString("mock_data", enable.toString())
         kv.encode("mock_data", enable)
     }
 
     fun saveMockCurrentTimeMillis(value: Long) {
+        initPutString("mock_current_time_millis", value.toString())
         kv.encode("mock_current_time_millis", value)
     }
 
     fun getMockCurrentTimeMillis(): Long? {
+        initGetString("mock_current_time_millis")?.toLongOrNull()?.let { return it }
         if (!kv.containsKey("mock_current_time_millis")) return null
-        return kv.decodeLong("mock_current_time_millis")
+        return kv.decodeLong("mock_current_time_millis").also {
+            initPutString("mock_current_time_millis", it.toString())
+        }
     }
 
     fun clearMockCurrentTimeMillis() {
+        initRemove("mock_current_time_millis")
         kv.removeValueForKey("mock_current_time_millis")
     }
 
@@ -405,19 +554,21 @@ object AHUCache {
      */
     fun saveGpaRankInfo(gpaRankInfo: GpaRankInfo) {
         val data = Gson().toJson(gpaRankInfo)
+        userPutString("gpa_rank_info", data)
         kv.encode("gpa_rank_info", data)
     }
     /**
      * 获取缓存的 GPA 排名信息
      */
     fun getGpaRankInfo(): GpaRankInfo? {
-        val data = kv.decodeString("gpa_rank_info") ?: ""
+        val data = userGetStringOrMigrate("gpa_rank_info") { kv.decodeString("gpa_rank_info") } ?: ""
         return data.fromJson(GpaRankInfo::class.java)
     }
     /**
      * 清除 GPA 排名缓存
      */
     fun clearGpaRankInfo() {
+        userRemove("gpa_rank_info")
         kv.removeValueForKey("gpa_rank_info")
     }
     /**
