@@ -15,8 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -249,40 +248,41 @@ private fun HomeWidgetSlot(
     }
 
     val dragModifier = if (isEditing) {
-        Modifier.pointerInput(spec.id, slotIndex) {
-            awaitEachGesture {
-                val down = awaitFirstDown(requireUnconsumed = false)
-                down.consume()
-                val upBeforeLongPress = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
-                    waitForUpOrCancellation()
-                }
-
-                if (upBeforeLongPress != null) {
-                    upBeforeLongPress.consume()
-                    onClick(slotIndex)
-                    return@awaitEachGesture
-                }
-
-                val itemBounds = bounds ?: return@awaitEachGesture
-                onDragStarted(spec.id, slotIndex, itemBounds)
-
-                var dragging = true
-                while (dragging) {
-                    val event = awaitPointerEvent()
-                    val change = event.changes.firstOrNull { it.id == down.id }
-                    if (change == null || !change.pressed) {
-                        dragging = false
-                    } else {
-                        val dragAmount = change.positionChange()
-                        if (dragAmount != Offset.Zero) {
+        Modifier
+            .combinedClickable(
+                onClick = { onClick(slotIndex) },
+                onLongClick = {}
+            )
+            .pointerInput(spec.id, slotIndex) {
+                var dragStarted = false
+                detectDragGesturesAfterLongPress(
+                    onDragStart = {
+                        val itemBounds = bounds
+                        if (itemBounds != null) {
+                            dragStarted = true
+                            onDragStarted(spec.id, slotIndex, itemBounds)
+                        }
+                    },
+                    onDragEnd = {
+                        if (dragStarted) {
+                            onDragStopped()
+                            dragStarted = false
+                        }
+                    },
+                    onDragCancel = {
+                        if (dragStarted) {
+                            onDragStopped()
+                            dragStarted = false
+                        }
+                    },
+                    onDrag = { change, dragAmount ->
+                        if (dragStarted) {
                             change.consume()
                             onDragged(dragAmount)
                         }
                     }
-                }
-                onDragStopped()
+                )
             }
-        }
     } else {
         Modifier.combinedClickable(
             onClick = { onNavigate(spec.route) },

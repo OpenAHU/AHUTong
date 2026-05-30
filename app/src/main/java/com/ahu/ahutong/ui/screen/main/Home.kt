@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
@@ -23,11 +25,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -86,7 +88,7 @@ fun Home(
         }
         .sortedBy { it.startTime }
     var currentMinutes by remember { mutableIntStateOf(DebugClock.currentMinutes()) }
-    var isEditingHome by rememberSaveable { mutableStateOf(false) }
+    var isEditingHome by remember { mutableStateOf(false) }
     var homeWidgetSlots by remember {
         mutableStateOf(normalizeHomeWidgetSlots(AHUCache.getHomeWidgetSlots()))
     }
@@ -198,13 +200,6 @@ fun Home(
             discoveryViewModel.refreshCardBalance()
         }
     }
-    LaunchedEffect(navController) {
-        navController.currentBackStackEntryFlow.collect {
-            if (it.destination.route != "home") {
-                exitHomeEditMode()
-            }
-        }
-    }
     DisposableEffect(Unit) {
         onDispose {
             exitHomeEditMode()
@@ -215,14 +210,42 @@ fun Home(
             .fillMaxSize()
             .onGloballyPositioned { rootTopLeft = it.boundsInRoot().topLeft }
             .pointerInput(isEditingHome) {
-                detectTapGestures(
-                    onLongPress = { isEditingHome = true },
-                    onTap = {
-                        if (isEditingHome && activeDrag == null) {
+                if (isEditingHome) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(
+                            requireUnconsumed = false,
+                            pass = PointerEventPass.Final
+                        )
+                        val start = down.position
+                        var shouldExit = !down.isConsumed
+                        var waitingForUp = true
+                        while (waitingForUp) {
+                            val event = awaitPointerEvent(PointerEventPass.Final)
+                            val change = event.changes.firstOrNull { it.id == down.id }
+                            if (change == null) {
+                                waitingForUp = false
+                            } else {
+                                if (change.isConsumed ||
+                                    (change.position - start).getDistance() > viewConfiguration.touchSlop
+                                ) {
+                                    shouldExit = false
+                                }
+                                if (!change.pressed) {
+                                    waitingForUp = false
+                                }
+                            }
+                        }
+                        if (shouldExit) {
                             exitHomeEditMode()
                         }
                     }
-                )
+                } else {
+                    detectTapGestures(
+                        onLongPress = {
+                            isEditingHome = true
+                        }
+                    )
+                }
             }
     ) {
         Column(
