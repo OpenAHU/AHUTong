@@ -519,11 +519,13 @@ private fun LibraryWidgetItem(
             .pointerInput(spec.id) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
+                    down.consume()
                     val upBeforeLongPress = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
                         waitForUpOrCancellation()
                     }
 
                     if (upBeforeLongPress != null) {
+                        upBeforeLongPress.consume()
                         onClick()
                         return@awaitEachGesture
                     }
