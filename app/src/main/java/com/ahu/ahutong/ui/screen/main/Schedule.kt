@@ -289,7 +289,8 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxWidth()
-        ) {
+        ) { page ->
+            val pageWeek = page + 1
             Box(
                 modifier = with(CourseCardSpec) {
                     Modifier
@@ -304,13 +305,13 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                 // TODO: current time indicator
                 // weekday tags
 
-                val weekDates by remember(currentWeek, scheduleConfig?.startTime) {
+                val weekDates by remember(pageWeek, scheduleConfig?.startTime) {
                     mutableStateOf(
                         List(7) { index ->
                             Calendar.getInstance().apply {
                                 time = scheduleConfig?.startTime
                                     ?: SimpleDateFormat("MM-dd", Locale.CHINA).parse("09-01")
-                                add(Calendar.DATE, ((currentWeek - 1) * 7) + index)
+                                add(Calendar.DATE, ((pageWeek - 1) * 7) + index)
                             }
                         }
                     )
@@ -318,7 +319,7 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
 
                 weekDates.forEachIndexed { index, date ->
                     val isCurrentWeekday =
-                        !isPreviewNextSemester && currentWeek == scheduleConfig?.week && index + 1 == currentWeekday
+                        !isPreviewNextSemester && pageWeek == scheduleConfig?.week && index + 1 == currentWeekday
                     Column(
                         modifier = with(CourseCardSpec) {
                             Modifier
@@ -390,14 +391,14 @@ fun Schedule(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
                                     colors = courseColors,
                                     cellWidth = cellWidth,
                                     cellHeight = cellHeight,
-                                    currentWeek = currentWeek,
+                                    currentWeek = pageWeek,
                                     onClick = { detailedCourse = it }
                                 )
                             }
                         }
                 } else {
                     currentWeekCourses.forEach { course ->
-                        val isCurrentWeek = currentWeek in course.weekIndexes
+                        val isCurrentWeek = pageWeek in course.weekIndexes
                         if (isCurrentWeek) {
                             key(course.hashCode()) {
 
