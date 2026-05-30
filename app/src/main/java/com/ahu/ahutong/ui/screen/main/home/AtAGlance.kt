@@ -33,7 +33,8 @@ import java.util.Locale
 fun AtAGlance(
     todayCourses: List<Course>,
     currentMinutes: Int,
-    navController: NavHostController
+    navController: NavHostController,
+    enabled: Boolean = true
 ) {
     val currentCourse = todayCourses.find {
         currentMinutes in ScheduleViewModel.getCourseTimeRangeInMinutes(it)
@@ -72,7 +73,13 @@ fun AtAGlance(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmoothRoundedCornerShape(32.dp))
-                .clickable { navController.navigate("schedule") }
+                .then(
+                    if (enabled) {
+                        Modifier.clickable { navController.navigate("schedule") }
+                    } else {
+                        Modifier
+                    }
+                )
                 .padding(horizontal = 32.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {

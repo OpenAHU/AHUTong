@@ -335,6 +335,44 @@ object AHUCache {
         kv.putBoolean("is_show_widget_dialog", false)
     }
 
+    private const val HOME_WIDGET_SLOTS_KEY = "home_widget_slots"
+    private const val HOME_WIDGET_SLOT_COUNT = 8
+
+    private fun defaultHomeWidgetSlots(): List<String?> {
+        return listOf("bathroom", "electricity") + List(HOME_WIDGET_SLOT_COUNT - 2) { null }
+    }
+
+    private fun normalizeHomeWidgetSlots(slots: List<String?>): List<String?> {
+        val seen = mutableSetOf<String>()
+        return List(HOME_WIDGET_SLOT_COUNT) { index ->
+            val id = slots.getOrNull(index)?.takeIf { it.isNotBlank() }
+            if (id != null && seen.add(id)) id else null
+        }
+    }
+
+    fun getHomeWidgetSlots(): List<String?> {
+        val data = userGetStringOrMigrate(HOME_WIDGET_SLOTS_KEY) {
+            kv.decodeString(HOME_WIDGET_SLOTS_KEY)
+        } ?: ""
+        if (data.isBlank()) return defaultHomeWidgetSlots()
+
+        return runCatching {
+            Gson().fromJson<List<String?>>(
+                data,
+                object : TypeToken<List<String?>>() {}.type
+            )
+        }.getOrNull()
+            ?.let(::normalizeHomeWidgetSlots)
+            ?: defaultHomeWidgetSlots()
+    }
+
+    fun saveHomeWidgetSlots(slots: List<String?>) {
+        val normalizedSlots = normalizeHomeWidgetSlots(slots)
+        val data = Gson().toJson(normalizedSlots)
+        userPutString(HOME_WIDGET_SLOTS_KEY, data)
+        kv.encode(HOME_WIDGET_SLOTS_KEY, data)
+    }
+
     fun logout() {
         clearCurrentUser()
         saveWisdomPassword("")

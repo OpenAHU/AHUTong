@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +64,7 @@ import android.util.Log
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.utils.FileUtils
 import com.ahu.ahutong.R
 import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
@@ -81,7 +83,22 @@ import java.io.File
 fun Tools(navController: NavHostController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var homeWidgetIds by remember {
+        mutableStateOf(AHUCache.getHomeWidgetSlots().filterNotNull().toSet())
+    }
 
+    fun refreshHomeWidgetIds() {
+        homeWidgetIds = AHUCache.getHomeWidgetSlots().filterNotNull().toSet()
+    }
+
+    LaunchedEffect(navController) {
+        refreshHomeWidgetIds()
+        navController.currentBackStackEntryFlow.collect { backStackEntry ->
+            if (backStackEntry.destination.route == "tools") {
+                refreshHomeWidgetIds()
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -104,44 +121,56 @@ fun Tools(navController: NavHostController) {
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ToolItem(
-                stringId = R.string.grade,
-                iconId = R.drawable.ic_grade,
-                tint = Color(0xFFFFC107),
-                onClick = { navController.navigate("grade") }
-            )
-            ToolItem(
-                stringId = R.string.phone_book,
-                iconId = R.drawable.ic_phonebook,
-                tint = Color(0xFF009688),
-                onClick = { navController.navigate("phone_book") }
-            )
-            ToolItem(
-                stringId = R.string.exam,
-                iconId = R.drawable.ic_exam,
-                tint = Color(0xFF4CAF50),
-                onClick = { navController.navigate("exam") }
-            )
-            ToolItem(
-                stringId = R.string.school_calendar,
-                iconId = R.drawable.ic_schedule,
-                tint = Color(0xFF9C27B0),
-                onClick = {
-                    navController.navigate("school_calendar")
-                }
-            )
-            ToolItem(
-                stringId = R.string.free_classroom,
-                iconId = R.drawable.ic_round_business_24,
-                tint = Color(0xFF03A9F4),
-                onClick = { navController.navigate("free_classroom") }
-            )
-            ToolItem(
-                stringId = R.string.lost_found,
-                iconId = R.drawable.lost_and_found,
-                tint = Color(0xFF1976D2),
-                onClick = { navController.navigate("lost_found") }
-            )
+            if ("grade" !in homeWidgetIds) {
+                ToolItem(
+                    stringId = R.string.grade,
+                    iconId = R.drawable.ic_grade,
+                    tint = Color(0xFFFFC107),
+                    onClick = { navController.navigate("grade") }
+                )
+            }
+            if ("phone_book" !in homeWidgetIds) {
+                ToolItem(
+                    stringId = R.string.phone_book,
+                    iconId = R.drawable.ic_phonebook,
+                    tint = Color(0xFF009688),
+                    onClick = { navController.navigate("phone_book") }
+                )
+            }
+            if ("exam" !in homeWidgetIds) {
+                ToolItem(
+                    stringId = R.string.exam,
+                    iconId = R.drawable.ic_exam,
+                    tint = Color(0xFF4CAF50),
+                    onClick = { navController.navigate("exam") }
+                )
+            }
+            if ("school_calendar" !in homeWidgetIds) {
+                ToolItem(
+                    stringId = R.string.school_calendar,
+                    iconId = R.drawable.ic_schedule,
+                    tint = Color(0xFF9C27B0),
+                    onClick = {
+                        navController.navigate("school_calendar")
+                    }
+                )
+            }
+            if ("free_classroom" !in homeWidgetIds) {
+                ToolItem(
+                    stringId = R.string.free_classroom,
+                    iconId = R.drawable.ic_round_business_24,
+                    tint = Color(0xFF03A9F4),
+                    onClick = { navController.navigate("free_classroom") }
+                )
+            }
+            if ("lost_found" !in homeWidgetIds) {
+                ToolItem(
+                    stringId = R.string.lost_found,
+                    iconId = R.drawable.lost_and_found,
+                    tint = Color(0xFF1976D2),
+                    onClick = { navController.navigate("lost_found") }
+                )
+            }
         }
         Column(
             modifier = Modifier

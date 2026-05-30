@@ -3,14 +3,6 @@ package com.ahu.ahutong.ui.screen.main.home
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -57,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ahu.ahutong.R
@@ -73,7 +65,8 @@ fun RowScope.CampusCard(
     balance: Double,
     transitionBalance: Double,
     onRefreshBalance: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    enabled: Boolean = true
 ) {
     val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context = context) }
@@ -96,54 +89,27 @@ fun RowScope.CampusCard(
     Box(
         modifier = Modifier
             .weight(1f)
-            .height(IntrinsicSize.Min)
     ) {
-        AnimatedContent(
-            targetState = isQrcode,
-            transitionSpec = {
-                if (targetState) {
-                    (fadeIn(animationSpec = tween(500)) + scaleIn(
-                        animationSpec = tween(500, easing = FastOutSlowInEasing),
-                        initialScale = 0.5f
-                    )).togetherWith(
-                        fadeOut(animationSpec = tween(300)) + scaleOut(
-                            animationSpec = tween(300, easing = FastOutSlowInEasing),
-                            targetScale = 0.5f
-                        )
-                    )
-                } else {
-                    (fadeIn(animationSpec = tween(500)) + scaleIn(
-                        animationSpec = tween(500, easing = FastOutSlowInEasing),
-                        initialScale = 0.5f
-                    )).togetherWith(
-                        fadeOut(animationSpec = tween(300)) + scaleOut(
-                            animationSpec = tween(300, easing = FastOutSlowInEasing),
-                            targetScale = 0.5f
-                        )
-                    )
-                }.using(
-                    SizeTransform(clip = false)
-                )
-            }
-
-        ) { showQr ->
-            if (!showQr) {
-                CardView(
-                    balance = balance,
-                    transitionBalance = transitionBalance,
-                    onClick = {
-                        isQrcode = true
-                    },
-                    navController
-                )
-            } else {
-                QRcodeView(
-                    balance = balance,
-                    onBack = {
-                        isQrcode = false
-                    }
-                )
-            }
+        if (isQrcode) {
+            QRcodeView(
+                balance = balance,
+                onBack = {
+                    isQrcode = false
+                }
+            )
+        } else {
+            CardView(
+                balance = balance,
+                transitionBalance = transitionBalance,
+                onClick = {
+                    isQrcode = true
+                },
+                navController = navController,
+                enabled = enabled,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+            )
         }
     }
 
@@ -156,13 +122,14 @@ private fun CardView(
     balance: Double,
     transitionBalance: Double,
     onClick: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    enabled: Boolean,
+    modifier: Modifier = Modifier
 ) {
 
 
     Row(
-        modifier = Modifier
-            .height(IntrinsicSize.Min)
+        modifier = modifier
             .clip(SmoothRoundedCornerShape(24.dp))
             .background(100.n1 withNight 20.n1),
         verticalAlignment = Alignment.CenterVertically
@@ -172,9 +139,13 @@ private fun CardView(
             modifier = Modifier
                 .fillMaxHeight()
                 .weight(1f)
-                .clickable {
-                    onClick()
-                },
+                .then(
+                    if (enabled) {
+                        Modifier.clickable { onClick() }
+                    } else {
+                        Modifier
+                    }
+                ),
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(18.dp),
@@ -184,7 +155,7 @@ private fun CardView(
                     text = stringResource(id = R.string.card_money),
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(vertical = 5.dp)
+                    modifier = Modifier.padding(vertical = 15.dp)
                 )
                 AnimatedContent(targetState = balance to transitionBalance) { (balance, transitionBalance) ->
                     Text(
@@ -218,7 +189,9 @@ private fun CardView(
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .clickable {
+                .then(
+                    if (enabled) {
+                        Modifier.clickable {
 //                    try {
 //                        context.startActivity(
 //                            Intent(
@@ -234,9 +207,12 @@ private fun CardView(
 //                        Toast.makeText(context, "请安装支付宝", Toast.LENGTH_SHORT).show()
 //                    }
 
-                    navController.navigate("card_balance_deposit")
-
-                }
+                            navController.navigate("card_balance_deposit")
+                        }
+                    } else {
+                        Modifier
+                    }
+                )
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -336,33 +312,34 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
                 )
             }
         }
-        if (finished) {
-            qrcodeBitmap?.let {
-                Box(
-                    modifier = Modifier
-                        .clickable {
-                            discoveryViewModel.loadQrCode()
-                            discoveryViewModel.refreshCardBalance()
-                        }
-                        .clip(SmoothRoundedCornerShape(8.dp))
-                ) {
+        Box(
+            modifier = Modifier.size(200.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (finished) {
+                qrcodeBitmap?.let {
                     Image(
                         bitmap = it.asImageBitmap(),
                         contentDescription = "QR Code",
                         modifier = Modifier
-                            .size(200.dp)
+                            .fillMaxSize()
+                            .clickable {
+                                discoveryViewModel.loadQrCode()
+                                discoveryViewModel.refreshCardBalance()
+                            }
+                            .clip(SmoothRoundedCornerShape(8.dp))
                             .border(
                                 1.dp,
                                 Color.Gray,
                                 SmoothRoundedCornerShape(8.dp)
                             )
                     )
-                }
-            } ?: Text(
-                text = "加载失败"
-            )
-        } else {
-            CircularProgressIndicator()
+                } ?: Text(
+                    text = "加载失败"
+                )
+            } else {
+                CircularProgressIndicator()
+            }
         }
 
         Text(
@@ -376,7 +353,8 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
             Dialog(
                 onDismissRequest = {
                     showFullScreen = false
-                }
+                },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
             ) {
                 Box(
                     modifier = Modifier
@@ -396,6 +374,10 @@ private fun QRcodeView(balance: Double, onBack: () -> Unit) {
                                     )
                                 )
                                 .background(Color.White)
+                                .clickable {
+                                    discoveryViewModel.loadQrCode()
+                                    discoveryViewModel.refreshCardBalance()
+                                }
                                 .padding(20.dp)
                         ) {
                             Image(
