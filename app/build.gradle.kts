@@ -89,6 +89,9 @@ val buildRustSdkArm64 by tasks.registering(Exec::class) {
 
     workingDir = rootProject.file("sdk")
     inputs.dir(rootProject.file("sdk/src"))
+    inputs.dir(rootProject.file("GuiXu-Rust/src"))
+    inputs.file(rootProject.file("GuiXu-Rust/Cargo.toml"))
+    inputs.file(rootProject.file("GuiXu-Rust/Cargo.lock"))
     inputs.file(rootProject.file("sdk/Cargo.toml"))
     outputs.file(project.file("src/main/jniLibs/arm64-v8a/libahutong_rs.so"))
 
