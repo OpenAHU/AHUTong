@@ -19,14 +19,14 @@ object HomeWidgetRegistry {
             id = "bathroom",
             title = "浴室缴费",
             route = "bathroom_deposit",
-            iconId = R.drawable.ic_round_business_24,
+            iconId = R.drawable.ic_bathroom_pay,
             tint = Color(0xFF26A69A)
         ),
         HomeWidgetSpec(
             id = "electricity",
             title = "电控缴费",
             route = "electricity_pay",
-            iconId = R.drawable.ic_round_business_24,
+            iconId = R.drawable.ic_electricity_pay,
             tint = Color(0xFFFFB300)
         ),
         HomeWidgetSpec(

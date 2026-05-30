@@ -47,7 +47,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -68,6 +67,7 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.utils.FileUtils
 import com.ahu.ahutong.R
 import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
+import com.ahu.ahutong.ui.screen.main.home.HomeWidgetRegistry
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.kyant.capsule.ContinuousCapsule
 import com.kyant.monet.a1
@@ -121,56 +121,16 @@ fun Tools(navController: NavHostController) {
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if ("grade" !in homeWidgetIds) {
-                ToolItem(
-                    stringId = R.string.grade,
-                    iconId = R.drawable.ic_grade,
-                    tint = Color(0xFFFFC107),
-                    onClick = { navController.navigate("grade") }
-                )
-            }
-            if ("phone_book" !in homeWidgetIds) {
-                ToolItem(
-                    stringId = R.string.phone_book,
-                    iconId = R.drawable.ic_phonebook,
-                    tint = Color(0xFF009688),
-                    onClick = { navController.navigate("phone_book") }
-                )
-            }
-            if ("exam" !in homeWidgetIds) {
-                ToolItem(
-                    stringId = R.string.exam,
-                    iconId = R.drawable.ic_exam,
-                    tint = Color(0xFF4CAF50),
-                    onClick = { navController.navigate("exam") }
-                )
-            }
-            if ("school_calendar" !in homeWidgetIds) {
-                ToolItem(
-                    stringId = R.string.school_calendar,
-                    iconId = R.drawable.ic_schedule,
-                    tint = Color(0xFF9C27B0),
-                    onClick = {
-                        navController.navigate("school_calendar")
-                    }
-                )
-            }
-            if ("free_classroom" !in homeWidgetIds) {
-                ToolItem(
-                    stringId = R.string.free_classroom,
-                    iconId = R.drawable.ic_round_business_24,
-                    tint = Color(0xFF03A9F4),
-                    onClick = { navController.navigate("free_classroom") }
-                )
-            }
-            if ("lost_found" !in homeWidgetIds) {
-                ToolItem(
-                    stringId = R.string.lost_found,
-                    iconId = R.drawable.lost_and_found,
-                    tint = Color(0xFF1976D2),
-                    onClick = { navController.navigate("lost_found") }
-                )
-            }
+            HomeWidgetRegistry.widgets
+                .filter { it.id !in homeWidgetIds }
+                .forEach { widget ->
+                    ToolItem(
+                        title = widget.title,
+                        iconId = widget.iconId,
+                        tint = widget.tint,
+                        onClick = { navController.navigate(widget.route) }
+                    )
+                }
         }
         Column(
             modifier = Modifier
@@ -213,7 +173,7 @@ fun Tools(navController: NavHostController) {
 
 @Composable
 private fun ToolItem(
-    stringId: Int,
+    title: String,
     iconId: Int,
     tint: Color,
     onClick: () -> Unit
@@ -237,7 +197,7 @@ private fun ToolItem(
             tint = tint
         )
         Text(
-            text = stringResource(id = stringId),
+            text = title,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.labelLarge
         )
