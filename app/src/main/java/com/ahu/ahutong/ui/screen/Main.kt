@@ -179,7 +179,10 @@ fun Main(
             }
 
             animatedComposable("debug") {
-                Debug(scheduleViewModel = scheduleViewModel)
+                Debug(
+                    scheduleViewModel = scheduleViewModel,
+                    discoveryViewModel = discoveryViewModel
+                )
             }
 
             animatedComposable("splash") {

@@ -68,7 +68,7 @@ class LostFoundViewModel : ViewModel() {
 
         try {
             // 非强制刷新先读缓存
-            if (!forceRefresh) {
+            if (!forceRefresh && !AHUCache.getMockData()) {
                 val cache =
                     AHUCache.getLostFoundCampus()
 
@@ -122,7 +122,7 @@ class LostFoundViewModel : ViewModel() {
 
         try {
             // 非强制刷新先读缓存
-            if (!forceRefresh) {
+            if (!forceRefresh && !AHUCache.getMockData()) {
                 val cache =
                     AHUCache.getLostFoundType()
 
@@ -177,7 +177,11 @@ class LostFoundViewModel : ViewModel() {
         totalPages = 1
 
         // 先读缓存
-        lostFoundList = AHUCache.getLostFoundList(state)
+        lostFoundList = if (AHUCache.getMockData()) {
+            emptyList()
+        } else {
+            AHUCache.getLostFoundList(state)
+        }
 
         // 再请求最新数据
         fetchFirstPage()
@@ -376,7 +380,11 @@ class LostFoundViewModel : ViewModel() {
         getAllLostFoundType()
 
         // 初始化先读缓存
-        lostFoundList = AHUCache.getLostFoundList(currentState)
+        lostFoundList = if (AHUCache.getMockData()) {
+            emptyList()
+        } else {
+            AHUCache.getLostFoundList(currentState)
+        }
 
         // 自动联网更新第一页
         fetchFirstPage()

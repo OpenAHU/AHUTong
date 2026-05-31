@@ -16,14 +16,18 @@ class ExamViewModel : ViewModel() {
 
     fun loadExam(isRefresh: Boolean = false) = viewModelScope.launchSafe {
         val user = AHUCache.getCurrentUser()
-        if (user == null) {
+        if (user == null && !AHUCache.getMockData()) {
             data.value = Result.failure(Throwable("账户未登录"))
             errorMessage.value = "账户未登录"
             return@launchSafe
         }
         isLoading.value = true
         errorMessage.value = null
-        val result = AHURepository.getExamInfo(isRefresh, user.xh, user.name)
+        val result = AHURepository.getExamInfo(
+            isRefresh = isRefresh,
+            studentID = user?.xh ?: "mock-student",
+            studentName = user?.name ?: "Mock 用户"
+        )
         data.value = result
         if (result.isFailure) {
             errorMessage.value = result.exceptionOrNull()?.message ?: "获取考试信息失败"

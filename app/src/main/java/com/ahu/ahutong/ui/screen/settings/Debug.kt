@@ -38,9 +38,11 @@ import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.debug.DebugClock
+import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.notification.CourseReminderScheduler
 import com.ahu.ahutong.ui.components.LiquidToggle
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
+import com.ahu.ahutong.ui.state.DiscoveryViewModel
 import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.kyant.backdrop.backdrops.rememberCanvasBackdrop
 import com.kyant.monet.a1
@@ -53,7 +55,8 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun Debug(
-    scheduleViewModel: ScheduleViewModel = viewModel()
+    scheduleViewModel: ScheduleViewModel = viewModel(),
+    discoveryViewModel: DiscoveryViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val formatter = remember { DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") }
@@ -61,9 +64,23 @@ fun Debug(
     val subCardColor = 96.n1 withNight 16.n1
     val primaryButtonColor = 90.a1 withNight 85.a1
     val secondaryTextColor = 50.n1 withNight 78.n1
+    val jsonEditorTextColor = Color.Black withNight Color.White
     val backdrop = rememberCanvasBackdrop { drawRect(cardColor) }
 
     var mockedData by remember { mutableStateOf(AHUCache.getMockData()) }
+    val mockScenarios = remember { MockScenarioController.scenarios() }
+    val editableEndpoints = remember { MockScenarioController.editableEndpoints() }
+    var activeScenarioId by remember { mutableStateOf(MockScenarioController.activeScenarioId()) }
+    var scenarioDiagnostics by remember { mutableStateOf(MockScenarioController.activeDiagnostics()) }
+    var scenarioIssues by remember { mutableStateOf(MockScenarioController.activeValidationIssues()) }
+    var selectedEndpointKey by remember {
+        mutableStateOf(editableEndpoints.firstOrNull()?.key.orEmpty())
+    }
+    var endpointText by remember(selectedEndpointKey) {
+        mutableStateOf(MockScenarioController.endpointText(selectedEndpointKey))
+    }
+    var endpointError by remember { mutableStateOf<String?>(null) }
+    var overrideCount by remember { mutableStateOf(MockScenarioController.overriddenEndpointCount()) }
     var mockTimeEnabled by remember { mutableStateOf(DebugClock.isMocked()) }
     var effectiveTimeText by remember { mutableStateOf(formatter.format(DebugClock.nowLocalDateTime())) }
     var mockTimeInput by remember {
@@ -99,6 +116,28 @@ fun Debug(
         applyEffectiveTime(shiftedMillis)
         Toast.makeText(context, "已调整 mock 时间", Toast.LENGTH_SHORT).show()
     }
+    val refreshMockEndpoint: (String?) -> Unit = { endpointKey ->
+        val refreshSchedule = {
+            scheduleViewModel.loadConfig()
+            scheduleViewModel.refreshSchedule(isRefresh = true)
+        }
+        val refreshNextSchedule = {
+            scheduleViewModel.refreshNextSchedule(isRefresh = true)
+        }
+        val refreshHome = {
+            discoveryViewModel.loadActivityBean()
+        }
+        when (endpointKey) {
+            null -> {
+                refreshSchedule()
+                refreshNextSchedule()
+                refreshHome()
+            }
+            "current_schedule" -> refreshSchedule()
+            "next_schedule" -> refreshNextSchedule()
+            "card_money", "bathrooms" -> refreshHome()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -126,7 +165,7 @@ fun Debug(
 
         DebugSection(
             title = "数据源",
-            subtitle = "切换课程和考试等本地 mock 数据",
+            subtitle = "切换本地 mock 数据源和业务场景",
             cardColor = cardColor
         ) {
             DebugToggleRow(
@@ -139,6 +178,9 @@ fun Debug(
                     AHUCache.setMockData(it)
                     AHURepository.initializeDataSource(it)
                     AHUCache.clearMockCurrentTimeMillis()
+                    if (it) {
+                        refreshMockEndpoint(null)
+                    }
                     Toast.makeText(
                         context,
                         if (it) "已开启 mock 数据" else "已关闭 mock 数据",
@@ -146,6 +188,203 @@ fun Debug(
                     ).show()
                 }
             )
+            if (mockedData) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(SmoothRoundedCornerShape(20.dp))
+                        .background(subCardColor)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Mock 场景",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = mockScenarios.firstOrNull { it.id == activeScenarioId }?.subtitle
+                            ?: "选择一个调试场景",
+                        color = secondaryTextColor,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "已手动覆盖 $overrideCount 个数据端点",
+                        color = secondaryTextColor,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                mockScenarios.forEach { scenario ->
+                    DebugActionRow(
+                        title = "${scenario.title} · ${scenario.badge}",
+                        subtitle = scenario.subtitle,
+                        selected = scenario.id == activeScenarioId,
+                        onClick = {
+                            val selected = MockScenarioController.selectScenario(scenario.id)
+                            activeScenarioId = selected.id
+                            scenarioDiagnostics = MockScenarioController.activeDiagnostics()
+                            scenarioIssues = MockScenarioController.activeValidationIssues()
+                            endpointText = MockScenarioController.endpointText(selectedEndpointKey)
+                            endpointError = null
+                            mockedData = true
+                            AHUCache.setMockData(true)
+                            AHURepository.initializeDataSource(true)
+                            refreshMockEndpoint(null)
+                            Toast.makeText(
+                                context,
+                                "已切换 Mock 场景：${selected.title}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
+                }
+                DebugActionRow(
+                    title = "恢复默认场景",
+                    subtitle = "切回标准在校生，并继续使用 mock 数据源",
+                    onClick = {
+                        val selected = MockScenarioController.resetScenario()
+                        activeScenarioId = selected.id
+                        scenarioDiagnostics = MockScenarioController.activeDiagnostics()
+                        scenarioIssues = MockScenarioController.activeValidationIssues()
+                        endpointText = MockScenarioController.endpointText(selectedEndpointKey)
+                        endpointError = null
+                        mockedData = true
+                        AHUCache.setMockData(true)
+                        AHURepository.initializeDataSource(true)
+                        refreshMockEndpoint(null)
+                        Toast.makeText(context, "已恢复默认 Mock 场景", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+
+        if (mockedData) {
+            DebugSection(
+                title = "爬虫数据编辑",
+                subtitle = "选择一个爬虫数据端点，手动编辑 JSON；未保存时默认使用当前场景模板数据",
+                cardColor = cardColor
+            ) {
+                editableEndpoints.forEach { endpoint ->
+                    DebugActionRow(
+                        title = endpoint.title + if (MockScenarioController.endpointHasOverride(endpoint.key)) " · 已覆盖" else "",
+                        subtitle = endpoint.subtitle,
+                        selected = selectedEndpointKey == endpoint.key,
+                        onClick = {
+                            selectedEndpointKey = endpoint.key
+                            endpointText = MockScenarioController.endpointText(endpoint.key)
+                            endpointError = null
+                        }
+                    )
+                }
+                OutlinedTextField(
+                    value = endpointText,
+                    onValueChange = {
+                        endpointText = it
+                        endpointError = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text(
+                            editableEndpoints.firstOrNull { it.key == selectedEndpointKey }?.title
+                                ?: "Mock 数据"
+                        )
+                    },
+                    minLines = 8,
+                    maxLines = 18,
+                    textStyle = MaterialTheme.typography.bodySmall.copy(
+                        color = jsonEditorTextColor
+                    ),
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = jsonEditorTextColor,
+                        unfocusedTextColor = jsonEditorTextColor,
+                        disabledTextColor = jsonEditorTextColor.copy(alpha = 0.38f),
+                        errorTextColor = MaterialTheme.colorScheme.onErrorContainer,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                        errorLabelColor = MaterialTheme.colorScheme.error,
+                        focusedContainerColor = 98.n1 withNight 12.n1,
+                        unfocusedContainerColor = 98.n1 withNight 12.n1,
+                        disabledContainerColor = 96.n1 withNight 16.n1,
+                        errorContainerColor = MaterialTheme.colorScheme.errorContainer,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        errorCursorColor = MaterialTheme.colorScheme.error,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
+                        disabledIndicatorColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.38f),
+                        errorIndicatorColor = MaterialTheme.colorScheme.error
+                    )
+                )
+                endpointError?.let {
+                    DebugInfoRow(text = it, warning = true)
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    DebugActionButton(
+                        text = "保存覆盖",
+                        modifier = Modifier.weight(1f),
+                        primary = true,
+                        containerColor = primaryButtonColor,
+                        onClick = {
+                            val error = MockScenarioController.saveEndpointText(
+                                selectedEndpointKey,
+                                endpointText
+                            )
+                            if (error == null) {
+                                endpointError = null
+                                overrideCount = MockScenarioController.overriddenEndpointCount()
+                                scenarioDiagnostics = MockScenarioController.activeDiagnostics()
+                                scenarioIssues = MockScenarioController.activeValidationIssues()
+                                refreshMockEndpoint(selectedEndpointKey)
+                                Toast.makeText(context, "已保存 Mock 数据覆盖", Toast.LENGTH_SHORT).show()
+                            } else {
+                                endpointError = error
+                            }
+                        }
+                    )
+                    DebugActionButton(
+                        text = "重置此项",
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            endpointText = MockScenarioController.resetEndpointText(selectedEndpointKey)
+                            endpointError = null
+                            overrideCount = MockScenarioController.overriddenEndpointCount()
+                            refreshMockEndpoint(selectedEndpointKey)
+                            Toast.makeText(context, "已恢复此项默认数据", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                    DebugActionButton(
+                        text = "清空全部覆盖",
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            MockScenarioController.resetAllEndpointText()
+                            endpointText = MockScenarioController.endpointText(selectedEndpointKey)
+                            endpointError = null
+                            overrideCount = MockScenarioController.overriddenEndpointCount()
+                            refreshMockEndpoint(null)
+                            Toast.makeText(context, "已清空全部 Mock 覆盖", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            }
+
+            DebugSection(
+                title = "场景诊断",
+                subtitle = "当前 Mock 场景的数据覆盖、边界和校验结果",
+                cardColor = cardColor
+            ) {
+                scenarioDiagnostics.forEach {
+                    DebugInfoRow(text = it)
+                }
+                if (scenarioIssues.isEmpty()) {
+                    DebugInfoRow(text = "校验：未发现场景数据问题")
+                } else {
+                    scenarioIssues.forEach {
+                        DebugInfoRow(text = "校验：$it", warning = true)
+                    }
+                }
+            }
         }
 
         DebugSection(
@@ -478,13 +717,14 @@ private fun DebugActionButton(
 private fun DebugActionRow(
     title: String,
     subtitle: String,
+    selected: Boolean = false,
     onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmoothRoundedCornerShape(20.dp))
-            .background(96.n1 withNight 16.n1)
+            .background(if (selected) 88.a1 withNight 35.a1 else 96.n1 withNight 16.n1)
             .clickable(onClick = onClick)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -499,4 +739,21 @@ private fun DebugActionRow(
             style = MaterialTheme.typography.bodyMedium
         )
     }
+}
+
+@Composable
+private fun DebugInfoRow(
+    text: String,
+    warning: Boolean = false
+) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SmoothRoundedCornerShape(16.dp))
+            .background(if (warning) 90.a1 withNight 35.a1 else 96.n1 withNight 16.n1)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        color = if (warning) 0.n1 else Color.Unspecified,
+        style = MaterialTheme.typography.bodyMedium
+    )
 }

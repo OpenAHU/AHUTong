@@ -140,7 +140,7 @@ class MainActivity : ComponentActivity() {
                 restoreRustCookies()
             }
 
-            if (AHUCache.isLogin()) {
+            if (AHUCache.isLogin() || AHUCache.getMockData()) {
 //                val user = AHUCache.getCurrentUser()
 //                val pwd = AHUCache.getWisdomPassword()
 
