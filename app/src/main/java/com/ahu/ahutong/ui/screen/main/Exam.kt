@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.ExamViewModel
 import com.kyant.monet.n1
@@ -55,6 +57,13 @@ fun Exam(
     val isLoading by examViewModel.isLoading.collectAsState()
     val errorMessage by examViewModel.errorMessage.collectAsState()
     val context = LocalContext.current
+    val mockRefreshRevision by MockScenarioController.refreshRevisions().collectAsState()
+
+    LaunchedEffect(mockRefreshRevision) {
+        if (mockRefreshRevision > 0 && AHUCache.getMockData()) {
+            examViewModel.loadExam(isRefresh = true)
+        }
+    }
 
     LaunchedEffect(errorMessage) {
         errorMessage?.let {

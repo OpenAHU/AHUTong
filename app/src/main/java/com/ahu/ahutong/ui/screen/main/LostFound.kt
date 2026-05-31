@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.data.crawler.model.adwnh.LostFoundItem
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.LostFoundViewModel
@@ -45,6 +47,7 @@ fun LostFound(
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
+    val mockRefreshRevision by MockScenarioController.refreshRevisions().collectAsState()
 
     val allCampus =
         lostFoundViewModel.allCampus?.`object`.orEmpty()
@@ -79,6 +82,12 @@ fun LostFound(
 
     var selectedItem by remember {
         mutableStateOf<LostFoundItem?>(null)
+    }
+
+    LaunchedEffect(mockRefreshRevision) {
+        if (mockRefreshRevision > 0 && AHUCache.getMockData()) {
+            lostFoundViewModel.refreshList()
+        }
     }
 
     /**

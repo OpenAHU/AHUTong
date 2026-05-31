@@ -46,8 +46,10 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
 
     fun loadActivityBean() {
         // 优先加载缓存
-        AHUCache.getCardBalance()?.let {
-            balance = it
+        if (!AHUCache.getMockData()) {
+            AHUCache.getCardBalance()?.let {
+                balance = it
+            }
         }
 
         viewModelScope.launchSafe {
@@ -57,8 +59,9 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
             }
 
             AHURepository.getBathRooms().onSuccess {
-                it.stream().forEach {
-                    bathroom += it.bathroom to it.openStatus
+                bathroom.clear()
+                it.forEach { room ->
+                    bathroom += room.bathroom to room.openStatus
                 }
             }
 
@@ -67,8 +70,10 @@ class DiscoveryViewModel @Inject constructor() : ViewModel() {
     }
 
     fun refreshCardBalance() {
-        AHUCache.getCardBalance()?.let {
-            balance = it
+        if (!AHUCache.getMockData()) {
+            AHUCache.getCardBalance()?.let {
+                balance = it
+            }
         }
 
         viewModelScope.launchSafe {

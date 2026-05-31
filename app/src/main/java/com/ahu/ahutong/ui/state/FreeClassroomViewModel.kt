@@ -7,6 +7,8 @@ import com.ahu.ahutong.data.crawler.model.jwxt.DateTimeSegmentCmd
 import com.ahu.ahutong.data.crawler.model.jwxt.FreeRoom
 import com.ahu.ahutong.data.crawler.model.jwxt.GetBuildingsResponseItem
 import com.ahu.ahutong.data.crawler.model.jwxt.GetFreeRoomsRequest
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.mock.MockCampusData
 import com.ahu.ahutong.ext.launchSafe
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
@@ -38,6 +40,17 @@ class FreeClassroomViewModel : ViewModel() {
         selectedBuildingIds.value = emptySet()
         freeRooms.value = emptyList()
         loadBuildings(campusId)
+    }
+
+    fun refreshMockData() = viewModelScope.launchSafe {
+        if (!AHUCache.getMockData()) return@launchSafe
+        buildingsCache.clear()
+        selectedCampusId.value?.let { campusId ->
+            loadBuildings(campusId)
+            if (freeRooms.value.isNotEmpty()) {
+                searchFreeRooms()
+            }
+        }
     }
 
     fun toggleBuilding(buildingId: Int) {
@@ -102,20 +115,25 @@ class FreeClassroomViewModel : ViewModel() {
         isSearching.value = true
         errorMessage.value = null
         runCatching {
-            val allRooms = mutableListOf<FreeRoom>()
-            buildingIds.forEach { buildingId ->
-                val response = JwxtApi.API.getFreeRooms(
-                    GetFreeRoomsRequest(
-                        buildingId = buildingId.toString(),
-                        campusId = campusId.toString(),
-                        dateTimeSegmentCmd = DateTimeSegmentCmd(
-                            startDateTime = start,
-                            endDateTime = end,
-                            units = units
+            val allRooms = if (AHUCache.getMockData()) {
+                MockCampusData.freeRooms(campusId, buildingIds)
+            } else {
+                val remoteRooms = mutableListOf<FreeRoom>()
+                buildingIds.forEach { buildingId ->
+                    val response = JwxtApi.API.getFreeRooms(
+                        GetFreeRoomsRequest(
+                            buildingId = buildingId.toString(),
+                            campusId = campusId.toString(),
+                            dateTimeSegmentCmd = DateTimeSegmentCmd(
+                                startDateTime = start,
+                                endDateTime = end,
+                                units = units
+                            )
                         )
                     )
-                )
-                allRooms += response.roomList
+                    remoteRooms += response.roomList
+                }
+                remoteRooms
             }
             freeRooms.value = allRooms
                 .distinctBy { "${it.id}-${it.building.id}" }
@@ -127,13 +145,17 @@ class FreeClassroomViewModel : ViewModel() {
     }
 
     private suspend fun loadBuildings(campusId: Int) {
-        if (buildingsCache.containsKey(campusId)) {
+        if (!AHUCache.getMockData() && buildingsCache.containsKey(campusId)) {
             buildings.value = buildingsCache[campusId] ?: emptyList()
             return
         }
         isLoadingBuildings.value = true
         runCatching {
-            val data = JwxtApi.API.getBuildings(campusId = campusId)
+            val data = if (AHUCache.getMockData()) {
+                MockCampusData.buildings(campusId)
+            } else {
+                JwxtApi.API.getBuildings(campusId = campusId)
+            }
             val sortedData = data.sortedBy { it.nameZh }
             buildingsCache[campusId] = sortedData
             buildings.value = sortedData

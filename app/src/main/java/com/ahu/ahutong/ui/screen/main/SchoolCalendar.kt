@@ -33,6 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +58,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.AHURepository
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.utils.FileUtils
 import com.kyant.capsule.ContinuousCapsule
@@ -77,6 +80,7 @@ fun SchoolCalendar(navController: NavHostController) {
     var calendarFile by remember { mutableStateOf<File?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(0f) }
+    val mockRefreshRevision by MockScenarioController.refreshRevisions().collectAsState()
 
     val fetchCalendar = {
         scope.launch(Dispatchers.IO) {
@@ -137,9 +141,15 @@ fun SchoolCalendar(navController: NavHostController) {
 
     LaunchedEffect(Unit) {
         val cached = FileUtils.getImageFile(context, "xiaoli.jpg")
-        if (cached.exists()) {
+        if (!AHUCache.getMockData() && cached.exists()) {
             calendarFile = cached
         } else {
+            fetchCalendar()
+        }
+    }
+
+    LaunchedEffect(mockRefreshRevision) {
+        if (mockRefreshRevision > 0 && AHUCache.getMockData()) {
             fetchCalendar()
         }
     }

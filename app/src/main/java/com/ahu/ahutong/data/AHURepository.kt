@@ -59,7 +59,7 @@ object AHURepository {
      */
     suspend fun getSchedule(isRefresh: Boolean = false): Result<List<Course>> = withContext(Dispatchers.IO) {
 
-        if (!isRefresh) {
+        if (!isRefresh && !AHUCache.getMockData()) {
             AHUCache.getSchoolTerm()?.let{
                 AHUCache.getSchedule(it)?.let{
                     Log.e(TAG, "getSchedule: 本地获取", )
@@ -87,7 +87,7 @@ object AHURepository {
     }
 
     suspend fun getNextSchedule(isRefresh: Boolean = false): Result<List<Course>> = withContext(Dispatchers.IO) {
-        if (!isRefresh) {
+        if (!isRefresh && !AHUCache.getMockData()) {
             AHUCache.getNextSchedule()?.let {
                 Log.e(TAG, "getNextSchedule: 本地获取")
                 return@withContext Result.success(it)
@@ -113,7 +113,7 @@ object AHURepository {
      * @return Result<List<News>>
      */
     suspend fun getGrade(isRefresh: Boolean = false) = withContext(Dispatchers.IO) {
-        if (!isRefresh) {
+        if (!isRefresh && !AHUCache.getMockData()) {
             val localData = AHUCache.getGrade()
             if (localData != null) {
                 return@withContext Result.success(localData)
@@ -139,7 +139,7 @@ object AHURepository {
      */
     suspend fun getExamInfo(isRefresh: Boolean = false, studentID: String, studentName: String) =
         withContext(Dispatchers.IO) {
-            if (!isRefresh) {
+            if (!isRefresh && !AHUCache.getMockData()) {
                 val localData = AHUCache.getExamInfo().orEmpty()
                 if (localData.isNotEmpty()) {
                     return@withContext Result.success(localData)

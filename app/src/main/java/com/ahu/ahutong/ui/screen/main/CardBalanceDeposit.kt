@@ -54,6 +54,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.CardBalanceDepositViewModel
 import com.ahu.ahutong.ui.state.PaymentState
@@ -77,9 +79,16 @@ fun CardBalanceDeposit(
     var showConfirmDialog by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
+    val mockRefreshRevision by MockScenarioController.refreshRevisions().collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.load()
+    }
+
+    LaunchedEffect(mockRefreshRevision) {
+        if (mockRefreshRevision > 0 && AHUCache.getMockData()) {
+            viewModel.load()
+        }
     }
 
     Column(

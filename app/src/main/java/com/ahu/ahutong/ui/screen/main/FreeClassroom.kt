@@ -47,6 +47,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.FreeClassroomViewModel
 import com.kyant.capsule.ContinuousCapsule
@@ -75,9 +77,16 @@ fun FreeClassroom(
     val rooms by freeClassroomViewModel.freeRooms.collectAsState()
     val errorMessage by freeClassroomViewModel.errorMessage.collectAsState()
     val context = LocalContext.current
+    val mockRefreshRevision by MockScenarioController.refreshRevisions().collectAsState()
     var isFilterCollapsed by rememberSaveable { mutableStateOf(false) }
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
+
+    LaunchedEffect(mockRefreshRevision) {
+        if (mockRefreshRevision > 0 && AHUCache.getMockData()) {
+            freeClassroomViewModel.refreshMockData()
+        }
+    }
 
     LaunchedEffect(errorMessage) {
         errorMessage?.let {

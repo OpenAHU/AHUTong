@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.R
 import com.ahu.ahutong.data.crawler.model.jwxt.CourseGrade
+import com.ahu.ahutong.data.dao.AHUCache
+import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.data.model.Grade
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.GradeViewModel
@@ -41,6 +43,7 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
     val errorMessage = gradeViewModel.errorMessage
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val mockRefreshRevision by MockScenarioController.refreshRevisions().collectAsState()
 
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -54,6 +57,13 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
     LaunchedEffect(Unit) {
         if (grade == null) gradeViewModel.getGarde()
         if (gpaRankInfo == null) gradeViewModel.getGpaRank()
+    }
+
+    LaunchedEffect(mockRefreshRevision) {
+        if (mockRefreshRevision > 0 && AHUCache.getMockData()) {
+            gradeViewModel.getGarde(isRefresh = true)
+            gradeViewModel.getGpaRank()
+        }
     }
 
     LaunchedEffect(errorMessage) {

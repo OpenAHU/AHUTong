@@ -84,9 +84,13 @@ class GradeViewModel : ViewModel() {
     }
 
     companion object {
-        val schoolYears by lazy {
-            (AHUCache.getCurrentUser()
-                ?: throw IllegalStateException("未登录，无法打开成绩界面！")).getSchoolYears()
+        val schoolYears: List<String> by lazy {
+            AHUCache.getCurrentUser()?.getSchoolYears()?.toList()
+                ?: if (AHUCache.getMockData()) {
+                    listOf("2024-2025", "2023-2024", "2022-2023")
+                } else {
+                    throw IllegalStateException("未登录，无法打开成绩界面！")
+                }
         }
         val terms = mutableMapOf("1" to "0", "2" to "1")
     }
@@ -108,7 +112,7 @@ class GradeViewModel : ViewModel() {
                 }
             }
             .launchIn(viewModelScope)
-        gpaRankInfo = AHUCache.getGpaRankInfo()
+        gpaRankInfo = if (AHUCache.getMockData()) null else AHUCache.getGpaRankInfo()
     }
 
     private fun calGPA(schoolYear: String, schoolTerm: String, grade: Grade) {

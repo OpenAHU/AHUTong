@@ -53,7 +53,7 @@ class ScheduleViewModel () : ViewModel() {
     fun refreshSchedule(isRefresh:Boolean = false) {
         viewModelScope.launchSafe {
             withContext(Dispatchers.Main){
-                if (!AHUCache.isLogin()) {
+                if (!AHUCache.isLogin() && !AHUCache.getMockData()) {
                     schedule.value = Result.failure(Throwable("请先登录！"))
                     return@withContext
                 }
@@ -71,7 +71,7 @@ class ScheduleViewModel () : ViewModel() {
     fun refreshNextSchedule(isRefresh: Boolean = false) {
         viewModelScope.launchSafe {
             withContext(Dispatchers.Main) {
-                if (!AHUCache.isLogin()) {
+                if (!AHUCache.isLogin() && !AHUCache.getMockData()) {
                     nextSchedule.value = Result.failure(Throwable("请先登录"))
                     return@withContext
                 }

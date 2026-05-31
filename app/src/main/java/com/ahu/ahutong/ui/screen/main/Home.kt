@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -41,6 +42,7 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.schedule.CurrentWeekResolver
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.data.debug.DebugClock
+import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.ui.screen.main.home.AtAGlance
 import com.ahu.ahutong.ui.screen.main.home.HomeWidgetDragOverlay
 import com.ahu.ahutong.ui.screen.main.home.HomeWidgetLibrarySheet
@@ -76,6 +78,7 @@ fun Home(
     val scheduleConfig by scheduleViewModel.scheduleConfig.observeAsState()
     val effectiveScheduleConfig = CurrentWeekResolver.resolveLocalConfig()?.config ?: scheduleConfig
     val currentWeek = effectiveScheduleConfig?.week ?: 1
+    val mockRefreshRevision by MockScenarioController.refreshRevisions().collectAsState()
     val todayCourses = schedule
         .filter { effectiveScheduleConfig?.week in it.startWeek..it.endWeek }
         .filter { it.weekday == (effectiveScheduleConfig?.weekDay ?: 1) }
@@ -191,6 +194,13 @@ fun Home(
         repeat(2 - discoveryViewModel.visibilities.size) {
             delay(100)
             discoveryViewModel.visibilities += discoveryViewModel.visibilities.lastIndex + 1
+        }
+    }
+    LaunchedEffect(mockRefreshRevision) {
+        if (mockRefreshRevision > 0 && AHUCache.getMockData()) {
+            discoveryViewModel.loadActivityBean()
+            scheduleViewModel.loadConfig()
+            scheduleViewModel.refreshSchedule(isRefresh = true)
         }
     }
     LaunchedEffect(Unit) {
