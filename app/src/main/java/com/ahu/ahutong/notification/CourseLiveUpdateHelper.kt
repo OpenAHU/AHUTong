@@ -1,6 +1,7 @@
 package com.ahu.ahutong.notification
 
 import android.app.AlarmManager
+import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -15,12 +16,15 @@ import com.ahu.ahutong.notification.model.CourseReminderPayload
 object CourseLiveUpdateHelper {
     private const val LIVE_NOTIFICATION_ID = 4096
     private const val LIVE_UPDATE_REQUEST_CODE = 4097
+    private const val LIVE_DISMISS_REQUEST_CODE = 4098
     private const val ONE_MINUTE_MS = 60_000L
 
     fun showLiveUpdate(
         context: Context,
         payload: CourseReminderPayload
     ): Boolean {
+        if (!CourseReminderCapability.isAndroid16Plus()) return false
+
         val courseStartAtMillis = payload.courseStartAtMillis ?: return false
         val remainingDurationMs = courseStartAtMillis - System.currentTimeMillis()
         val remainingMinutes = calculateRemainingMinutes(remainingDurationMs)
@@ -33,6 +37,7 @@ object CourseLiveUpdateHelper {
         val countdownText = buildCountdownText(remainingMinutes)
         val collapsedText = buildCollapsedText(payload, countdownText)
         val expandedText = buildExpandedText(payload, countdownText)
+        CourseReminderScheduler.createNotificationChannel(context)
         val notification = NotificationCompat.Builder(context, CourseReminderScheduler.CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher_round)
             .setContentTitle(payload.courseName)
@@ -50,7 +55,10 @@ object CourseLiveUpdateHelper {
             .setRequestPromotedOngoing(true)
             .setShortCriticalText(buildChipText(remainingMinutes))
             .setContentIntent(buildContentIntent(context, payload.notificationId))
+            .setDeleteIntent(buildDismissPendingIntent(context))
             .build()
+
+        if (!hasPromotableCharacteristics(notification)) return false
 
         NotificationManagerCompat.from(context).notify(LIVE_NOTIFICATION_ID, notification)
         return true
@@ -107,6 +115,18 @@ object CourseLiveUpdateHelper {
             )
     }
 
+    private fun buildDismissPendingIntent(context: Context): PendingIntent {
+        val intent = Intent(context, CourseReminderReceiver::class.java).apply {
+            action = CourseReminderReceiver.ACTION_LIVE_COUNTDOWN_DISMISSED
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            LIVE_DISMISS_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
     private fun buildUpdatePendingIntent(
         context: Context,
         payload: CourseReminderPayload?
@@ -142,6 +162,11 @@ object CourseLiveUpdateHelper {
                 pendingIntent
             )
         }
+    }
+
+    private fun hasPromotableCharacteristics(notification: Notification): Boolean {
+        if (Build.VERSION.SDK_INT < 36) return false
+        return notification.hasPromotableCharacteristics()
     }
 
     private fun calculateRemainingMinutes(

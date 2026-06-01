@@ -1,6 +1,8 @@
 package com.ahu.ahutong
 
 import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -37,6 +39,7 @@ import com.ahu.ahutong.ui.state.ScheduleViewModel
 import com.ahu.ahutong.ui.theme.AHUTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import java.security.MessageDigest
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -95,7 +98,7 @@ class MainActivity : ComponentActivity() {
                             mainViewModel.showApkUpdateDialog.value = false
                         },
                         onCancel = {
-                            mainViewModel.showApkUpdateDialog.value = false
+                            mainViewModel.continueApkDownloadInBackground()
                             Toast.makeText(this@MainActivity, "已转到后台下载", Toast.LENGTH_SHORT).show()
                         }
                     )
@@ -231,6 +234,14 @@ class MainActivity : ComponentActivity() {
     private fun installApk(apkFile: File) {
         Log.i("ApkUpdate", "installApk called, file=${apkFile.absolutePath}")
 
+        validateApkBeforeInstall(apkFile)?.let { error ->
+            Log.w("ApkUpdate", "blocked APK install: $error")
+            mainViewModel.reportApkInstallError(error)
+            Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+            apkFile.delete()
+            return
+        }
+
         val uri = FileProvider.getUriForFile(
             this,
             "${packageName}.fileprovider",
@@ -249,6 +260,110 @@ class MainActivity : ComponentActivity() {
         } catch (e: Exception) {
             Log.e("ApkUpdate", "start install activity failed", e)
             throw e
+        }
+    }
+
+    private fun validateApkBeforeInstall(apkFile: File): String? {
+        if (!apkFile.exists() || apkFile.length() <= 0L) {
+            return "安装包不存在或为空"
+        }
+
+        val canonicalApk = runCatching { apkFile.canonicalFile }.getOrElse {
+            return "安装包路径无效"
+        }
+        val trustedDirs = listOfNotNull(getExternalFilesDir(null), filesDir).mapNotNull {
+            runCatching { it.canonicalFile }.getOrNull()
+        }
+        val isInTrustedDir = trustedDirs.any { dir ->
+            canonicalApk.path == dir.path || canonicalApk.path.startsWith(dir.path + File.separator)
+        }
+        if (!isInTrustedDir) {
+            return "安装包位置不可信"
+        }
+
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            PackageManager.GET_SIGNING_CERTIFICATES
+        } else {
+            @Suppress("DEPRECATION")
+            PackageManager.GET_SIGNATURES
+        }
+
+        val archiveInfo = packageManager.getPackageArchiveInfo(canonicalApk.absolutePath, flags)
+            ?: return "安装包解析失败"
+        if (archiveInfo.packageName != packageName) {
+            return "安装包包名不匹配"
+        }
+
+        if (versionCodeOf(archiveInfo) <= currentVersionCode()) {
+            return "安装包版本不高于当前版本"
+        }
+
+        if (!hasMatchingSigningCertificate(archiveInfo, flags)) {
+            return "安装包签名与当前应用不一致"
+        }
+
+        return null
+    }
+
+    private fun hasMatchingSigningCertificate(archiveInfo: PackageInfo, flags: Int): Boolean {
+        val installedInfo = try {
+            packageManager.getPackageInfo(packageName, flags)
+        } catch (e: Exception) {
+            Log.w("ApkUpdate", "failed to read installed package signatures", e)
+            return false
+        }
+
+        val archiveSigners = signatureDigests(archiveInfo, includeHistory = false)
+        val installedSigners = signatureDigests(installedInfo, includeHistory = false)
+        if (archiveSigners.isEmpty() || installedSigners.isEmpty()) return false
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            return archiveSigners == installedSigners
+        }
+
+        val archiveSigningInfo = archiveInfo.signingInfo ?: return false
+        val installedSigningInfo = installedInfo.signingInfo ?: return false
+        if (archiveSigningInfo.hasMultipleSigners() || installedSigningInfo.hasMultipleSigners()) {
+            return archiveSigners == installedSigners
+        }
+
+        val archiveHistory = signatureDigests(archiveInfo, includeHistory = true)
+        val installedHistory = signatureDigests(installedInfo, includeHistory = true)
+        return archiveSigners.any { it in installedHistory } ||
+            installedSigners.any { it in archiveHistory }
+    }
+
+    private fun signatureDigests(info: PackageInfo, includeHistory: Boolean): Set<String> {
+        val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val signingInfo = info.signingInfo ?: return emptySet()
+            if (includeHistory && !signingInfo.hasMultipleSigners()) {
+                signingInfo.signingCertificateHistory ?: signingInfo.apkContentsSigners
+            } else {
+                signingInfo.apkContentsSigners
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            info.signatures
+        } ?: return emptySet()
+
+        return signatures.map { signature ->
+            MessageDigest.getInstance("SHA-256")
+                .digest(signature.toByteArray())
+                .joinToString("") { "%02x".format(it) }
+        }.toSet()
+    }
+
+    private fun currentVersionCode(): Long {
+        val packageInfo = packageManager.getPackageInfo(packageName, 0)
+        return versionCodeOf(packageInfo)
+    }
+
+    private fun versionCodeOf(info: PackageInfo): Long {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            info.longVersionCode
+        } else {
+            @Suppress("DEPRECATION")
+            info.versionCode.toLong()
         }
     }
 
