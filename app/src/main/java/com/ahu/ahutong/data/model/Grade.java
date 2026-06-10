@@ -181,6 +181,8 @@ public class Grade implements Serializable {
             private String courseNature;
             @SerializedName("semesterId")
             private int semesterId;
+            @SerializedName("gradeDetail")
+            private String gradeDetail;
 
             public String getCourseNum() {
                 return courseNum;
@@ -235,6 +237,12 @@ public class Grade implements Serializable {
             public void setSemesterId(int semesterId) {
                 this.semesterId = semesterId;
             }
+            public String getGradeDetail() {
+                return gradeDetail;
+            }
+            public void setGradeDetail(String gradeDetail) {
+                this.gradeDetail = gradeDetail;
+            }
             @NonNull
             @Override
             public String toString() {
@@ -246,6 +254,7 @@ public class Grade implements Serializable {
                         ", grade='" + grade + '\'' +
                         ", courseNature='" + courseNature + '\'' +
                         ", semesterId=" + semesterId +
+                        ", gradeDetail='" + gradeDetail + '\'' +
                         '}';
             }
         }

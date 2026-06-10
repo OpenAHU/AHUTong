@@ -350,5 +350,14 @@ private fun GradeCard(
             color = 50.n1 withNight 80.n1,
             style = MaterialTheme.typography.bodyMedium
         )
+
+        val gradeDetail = item.gradeDetail?.replace(Regex("<[^>]*>"), "")?.trim()
+        if (!gradeDetail.isNullOrBlank()) {
+            Text(
+                text = gradeDetail,
+                color = 40.a1 withNight 80.a1,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
     }
 }

@@ -289,6 +289,8 @@ class SdkDataSource : BaseDataSource {
                 grade.gradePoint = (it.gp ?: 0.0).toString()
                 grade.courseNature = it.courseType ?: ""
                 grade.courseNum = it.courseCode ?: ""
+                grade.gradeDetail = it.gradeDetail ?: ""
+                grade.semesterId = it.semesterId ?: 0
                 newGradeList.add(grade)
             }
 

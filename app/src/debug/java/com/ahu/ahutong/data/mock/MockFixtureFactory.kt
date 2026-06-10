@@ -513,7 +513,8 @@ object MockFixtureFactory {
         gradePoint: String,
         grade: String,
         courseNature: String,
-        semesterId: Int
+        semesterId: Int,
+        gradeDetail: String = ""
     ): Grade.TermGradeListBean.GradeListBean = Grade.TermGradeListBean.GradeListBean().apply {
         this.courseNum = courseNum
         this.course = course
@@ -522,6 +523,7 @@ object MockFixtureFactory {
         this.grade = grade
         this.courseNature = courseNature
         this.semesterId = semesterId
+        this.gradeDetail = gradeDetail
     }
 
     private fun gpaRank(
