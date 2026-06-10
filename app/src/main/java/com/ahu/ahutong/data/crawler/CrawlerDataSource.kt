@@ -143,6 +143,7 @@ class CrawlerDataSource : BaseDataSource {
                 grade.courseNature = it.courseType
                 grade.courseNum = it.courseCode
                 grade.semesterId = it.semesterId!!
+                grade.gradeDetail = it.gradeDetail
                 newGradeList.add(grade)
             }
 
