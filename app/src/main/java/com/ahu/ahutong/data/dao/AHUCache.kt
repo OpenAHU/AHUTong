@@ -587,6 +587,18 @@ object AHUCache {
         kv.removeValueForKey("mock_current_time_millis")
     }
 
+    fun getGrayOverride(key: String): String? {
+        return initGetString("gray_override_$key")?.takeIf { it.isNotBlank() }
+    }
+
+    fun setGrayOverride(key: String, value: String) {
+        initPutString("gray_override_$key", value)
+    }
+
+    fun clearGrayOverride(key: String) {
+        initRemove("gray_override_$key")
+    }
+
     /**
      * 保存 GPA 排名信息
      */

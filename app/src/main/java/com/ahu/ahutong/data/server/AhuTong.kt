@@ -4,6 +4,7 @@ package com.ahu.ahutong.data.server
 import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.server.model.ApkUpdateInfo
 import com.ahu.ahutong.data.server.model.Captcha
+import com.ahu.ahutong.data.server.model.GrayFeatureDecision
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -14,6 +15,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 import retrofit2.http.Streaming
 import retrofit2.http.Url
 import java.util.concurrent.TimeUnit
@@ -26,6 +28,14 @@ interface AhuTong {
 
     @GET("/api/check_apk_update")
     suspend fun getApkUpdateInfo(): ApkUpdateInfo
+
+    @GET("/api/gray/check")
+    suspend fun getGrayFeatureDecision(
+        @Query("feature") feature: String,
+        @Query("subject") subject: String,
+        @Query("versionCode") versionCode: Int,
+        @Query("versionName") versionName: String
+    ): GrayFeatureDecision
 
     @GET("/download/{filename}")
     suspend fun downloadFile(@Path(value = "filename", encoded = true) filename: String): retrofit2.Response<ResponseBody>
@@ -62,6 +72,13 @@ interface AhuTong {
             .followSslRedirects(false)
             .build()
 
+        private val grayOkHttpClient = okHttpClient.newBuilder()
+            .connectTimeout(2, TimeUnit.SECONDS)
+            .readTimeout(3, TimeUnit.SECONDS)
+            .writeTimeout(3, TimeUnit.SECONDS)
+            .callTimeout(5, TimeUnit.SECONDS)
+            .build()
+
         private fun createApi(client: OkHttpClient) = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
@@ -70,5 +87,6 @@ interface AhuTong {
 
         val API = createApi(okHttpClient)
         val APK_DOWNLOAD_API = createApi(apkDownloadOkHttpClient)
+        val GRAY_API = createApi(grayOkHttpClient)
     }
 }

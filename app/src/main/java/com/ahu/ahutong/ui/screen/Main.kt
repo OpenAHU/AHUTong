@@ -11,7 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +28,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
+import com.ahu.ahutong.data.gray.GrayFeatures
+import com.ahu.ahutong.data.gray.GrayReleaseManager
 import com.ahu.ahutong.ui.screen.main.BathroomDeposit
 import com.ahu.ahutong.ui.screen.main.CardBalanceDeposit
 import com.ahu.ahutong.ui.screen.main.ElectricityDeposit
@@ -68,6 +75,17 @@ fun Main(
     isReLoginShown: Boolean,
     onReLoginDismiss: () -> Unit
 ) {
+    var shouldEnterHomeEdit by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var homeEditGrayState by remember {
+        mutableStateOf(GrayReleaseManager.localState(GrayFeatures.HomeEdit, context))
+    }
+
+    LaunchedEffect(Unit) {
+        homeEditGrayState = GrayReleaseManager.state(GrayFeatures.HomeEdit, context)
+    }
+
     Box {
         val backdrop = rememberLayerBackdrop()
         NavHost(
@@ -82,12 +100,15 @@ fun Main(
                 Home(
                     discoveryViewModel = discoveryViewModel,
                     scheduleViewModel = scheduleViewModel,
-                    navController = navController
+                    navController = navController,
+                    homeEditEnabled = homeEditGrayState.enabled,
+                    enterEditModeRequest = shouldEnterHomeEdit,
+                    onEnterEditModeRequestConsumed = {
+                        shouldEnterHomeEdit = false
+                    }
                 )
             }
             animatedComposable("setup") {
-                val context = LocalContext.current
-                val scope = rememberCoroutineScope()
                 Setup(
                     scheduleViewModel = scheduleViewModel,
                     aboutViewModel = aboutViewModel,
@@ -109,6 +130,12 @@ fun Main(
                     loginViewModel = loginViewModel,
                     onLoggedIn = {
                         scheduleViewModel.clear()
+                        scope.launch {
+                            homeEditGrayState = GrayReleaseManager.state(
+                                GrayFeatures.HomeEdit,
+                                context
+                            )
+                        }
                         navController.navigate("home") {
                             popUpTo("login") { inclusive = true }
                         }
@@ -128,7 +155,13 @@ fun Main(
                 Schedule(scheduleViewModel = scheduleViewModel)
             }
             animatedComposable("tools") {
-                Tools(navController = navController)
+                Tools(
+                    navController = navController,
+                    homeEditEnabled = homeEditGrayState.enabled,
+                    onEditHome = {
+                        shouldEnterHomeEdit = true
+                    }
+                )
             }
             animatedComposable("school_calendar") {
                 SchoolCalendar(navController = navController)
@@ -181,7 +214,15 @@ fun Main(
             animatedComposable("debug") {
                 Debug(
                     scheduleViewModel = scheduleViewModel,
-                    discoveryViewModel = discoveryViewModel
+                    discoveryViewModel = discoveryViewModel,
+                    onGrayStateChanged = {
+                        scope.launch {
+                            homeEditGrayState = GrayReleaseManager.state(
+                                GrayFeatures.HomeEdit,
+                                context
+                            )
+                        }
+                    }
                 )
             }
 

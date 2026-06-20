@@ -22,7 +22,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -80,7 +83,11 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 @Composable
-fun Tools(navController: NavHostController) {
+fun Tools(
+    navController: NavHostController,
+    homeEditEnabled: Boolean = false,
+    onEditHome: () -> Unit = {}
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var homeWidgetIds by remember {
@@ -108,13 +115,36 @@ fun Tools(navController: NavHostController) {
             .padding(bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Text(
-            text = "小工具",
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp, 32.dp),
-            style = MaterialTheme.typography.headlineMedium
-        )
+                .padding(start = 24.dp, top = 32.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "小工具",
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.headlineMedium
+            )
+            if (homeEditEnabled) {
+                IconButton(
+                    onClick = {
+                        onEditHome()
+                        navController.navigate("home") {
+                            popUpTo("home") {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "编辑首页"
+                    )
+                }
+            }
+        }
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()

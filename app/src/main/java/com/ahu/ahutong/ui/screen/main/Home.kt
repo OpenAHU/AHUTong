@@ -71,7 +71,10 @@ private data class ActiveHomeWidgetDrag(
 fun Home(
     discoveryViewModel: DiscoveryViewModel = viewModel(),
     scheduleViewModel: ScheduleViewModel = viewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    homeEditEnabled: Boolean = false,
+    enterEditModeRequest: Boolean = false,
+    onEnterEditModeRequestConsumed: () -> Unit = {}
 ) {
     val density = LocalDensity.current
     val schedule = scheduleViewModel.schedule.observeAsState().value?.getOrNull() ?: emptyList()
@@ -115,8 +118,15 @@ fun Home(
         AHUCache.saveHomeWidgetSlots(normalizedSlots)
     }
 
+    fun enterHomeEditMode() {
+        if (homeEditEnabled) {
+            isEditingHome = true
+        }
+    }
+
     fun startDrag(widgetId: String, sourceSlot: Int?, bounds: Rect) {
-        isEditingHome = true
+        if (!homeEditEnabled) return
+        enterHomeEditMode()
         activeDrag = ActiveHomeWidgetDrag(
             widgetId = widgetId,
             sourceSlot = sourceSlot,
@@ -188,12 +198,26 @@ fun Home(
     }
 
     LaunchedEffect(Unit) {
-        exitHomeEditMode()
+        if (!enterEditModeRequest) {
+            exitHomeEditMode()
+        }
         discoveryViewModel.loadActivityBean()
 
         repeat(2 - discoveryViewModel.visibilities.size) {
             delay(100)
             discoveryViewModel.visibilities += discoveryViewModel.visibilities.lastIndex + 1
+        }
+    }
+    LaunchedEffect(enterEditModeRequest) {
+        if (enterEditModeRequest) {
+            activeDrag = null
+            enterHomeEditMode()
+            onEnterEditModeRequestConsumed()
+        }
+    }
+    LaunchedEffect(homeEditEnabled) {
+        if (!homeEditEnabled) {
+            exitHomeEditMode()
         }
     }
     LaunchedEffect(mockRefreshRevision) {
@@ -219,7 +243,7 @@ fun Home(
         modifier = Modifier
             .fillMaxSize()
             .onGloballyPositioned { rootTopLeft = it.boundsInRoot().topLeft }
-            .pointerInput(isEditingHome) {
+            .pointerInput(isEditingHome, homeEditEnabled) {
                 if (isEditingHome) {
                     awaitEachGesture {
                         val down = awaitFirstDown(
@@ -252,7 +276,7 @@ fun Home(
                 } else {
                     detectTapGestures(
                         onLongPress = {
-                            isEditingHome = true
+                            enterHomeEditMode()
                         }
                     )
                 }
@@ -292,7 +316,7 @@ fun Home(
                     isEditing = isEditingHome,
                     highlightedSlot = highlightedSlot,
                     draggingWidgetId = activeDrag?.widgetId,
-                    onEnterEdit = { isEditingHome = true },
+                    onEnterEdit = ::enterHomeEditMode,
                     onHomeWidgetClick = ::removeHomeWidget,
                     onSlotPositioned = { slotIndex, bounds ->
                         slotBounds[slotIndex] = bounds

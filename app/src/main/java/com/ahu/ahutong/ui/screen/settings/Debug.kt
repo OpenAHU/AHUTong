@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -20,9 +21,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +41,9 @@ import com.ahu.ahutong.data.crawler.manager.CookieManager
 import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.debug.DebugClock
+import com.ahu.ahutong.data.gray.GrayFeatureState
+import com.ahu.ahutong.data.gray.GrayOverride
+import com.ahu.ahutong.data.gray.GrayReleaseManager
 import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.notification.CourseReminderScheduler
 import com.ahu.ahutong.ui.components.LiquidToggle
@@ -52,13 +58,16 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.launch
 
 @Composable
 fun Debug(
     scheduleViewModel: ScheduleViewModel = viewModel(),
-    discoveryViewModel: DiscoveryViewModel = viewModel()
+    discoveryViewModel: DiscoveryViewModel = viewModel(),
+    onGrayStateChanged: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val formatter = remember { DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") }
     val cardColor = 100.n1 withNight 20.n1
     val subCardColor = 96.n1 withNight 16.n1
@@ -83,6 +92,9 @@ fun Debug(
     var overrideCount by remember { mutableStateOf(MockScenarioController.overriddenEndpointCount()) }
     var mockTimeEnabled by remember { mutableStateOf(DebugClock.isMocked()) }
     var effectiveTimeText by remember { mutableStateOf(formatter.format(DebugClock.nowLocalDateTime())) }
+    var graySectionUnlockTapCount by remember { mutableStateOf(0) }
+    val graySectionVisible = graySectionUnlockTapCount >= 8
+    var grayStates by remember { mutableStateOf(GrayReleaseManager.localStates(context)) }
     var mockTimeInput by remember {
         mutableStateOf(
             AHUCache.getMockCurrentTimeMillis()?.let {
@@ -94,6 +106,17 @@ fun Debug(
                 )
             }.orEmpty()
         )
+    }
+    val refreshGrayStates = {
+        scope.launch {
+            grayStates = GrayReleaseManager.states(context)
+        }
+    }
+
+    LaunchedEffect(graySectionVisible) {
+        if (graySectionVisible) {
+            refreshGrayStates()
+        }
     }
 
     val applyEffectiveTime: (Long?) -> Unit = { millis ->
@@ -149,7 +172,16 @@ fun Debug(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp),
+            modifier = Modifier
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    if (!graySectionVisible) {
+                        graySectionUnlockTapCount += 1
+                    }
+                }
+                .padding(horizontal = 8.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
@@ -161,6 +193,33 @@ fun Debug(
                 color = secondaryTextColor,
                 style = MaterialTheme.typography.bodyLarge
             )
+        }
+
+        if (graySectionVisible) {
+            DebugSection(
+                title = "灰度测试",
+                subtitle = "优先读取服务端配置，失败时按账号或设备本地兜底；Debug 可覆盖单个灰度的启用状态",
+                cardColor = cardColor
+            ) {
+                grayStates.forEach { state ->
+                    DebugGrayFeatureCard(
+                        state = state,
+                        subCardColor = subCardColor,
+                        primaryButtonColor = primaryButtonColor,
+                        secondaryTextColor = secondaryTextColor,
+                        onOverrideSelected = { override ->
+                            GrayReleaseManager.setOverride(state.feature, override)
+                            refreshGrayStates()
+                            onGrayStateChanged()
+                            Toast.makeText(
+                                context,
+                                "${state.feature.title}：${override.label}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
+                }
+            }
         }
 
         DebugSection(
@@ -542,6 +601,8 @@ fun Debug(
                     applyEffectiveTime(null)
                     mockTimeInput = ""
                     mockedData = false
+                    refreshGrayStates()
+                    onGrayStateChanged()
                     Toast.makeText(context, "已清除缓存", Toast.LENGTH_SHORT).show()
                 }
             )
@@ -616,6 +677,89 @@ fun Debug(
             }
         }
     }
+}
+
+@Composable
+private fun DebugGrayFeatureCard(
+    state: GrayFeatureState,
+    subCardColor: Color,
+    primaryButtonColor: Color,
+    secondaryTextColor: Color,
+    onOverrideSelected: (GrayOverride) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SmoothRoundedCornerShape(20.dp))
+            .background(subCardColor)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = state.feature.title,
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = state.feature.description,
+            color = secondaryTextColor,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+            text = "当前：${if (state.enabled) "开启" else "关闭"} · ${state.reason} · ${state.sourceLabel()} · 比例 ${state.rolloutPercentage}% · 分桶 ${state.bucket}",
+            color = secondaryTextColor,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            GrayOverrideButton(
+                text = "跟随",
+                selected = state.override == GrayOverride.FollowRollout,
+                primaryButtonColor = primaryButtonColor,
+                onClick = { onOverrideSelected(GrayOverride.FollowRollout) },
+                modifier = Modifier.weight(1f)
+            )
+            GrayOverrideButton(
+                text = "强开",
+                selected = state.override == GrayOverride.ForceEnabled,
+                primaryButtonColor = primaryButtonColor,
+                onClick = { onOverrideSelected(GrayOverride.ForceEnabled) },
+                modifier = Modifier.weight(1f)
+            )
+            GrayOverrideButton(
+                text = "强关",
+                selected = state.override == GrayOverride.ForceDisabled,
+                primaryButtonColor = primaryButtonColor,
+                onClick = { onOverrideSelected(GrayOverride.ForceDisabled) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+private fun GrayFeatureState.sourceLabel(): String =
+    when (source) {
+        GrayFeatureState.REMOTE_SOURCE -> "服务端"
+        GrayFeatureState.DEBUG_SOURCE -> "Debug"
+        else -> "本地兜底"
+    }
+
+@Composable
+private fun GrayOverrideButton(
+    text: String,
+    selected: Boolean,
+    primaryButtonColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    DebugActionButton(
+        text = text,
+        modifier = modifier,
+        primary = selected,
+        containerColor = if (selected) primaryButtonColor else (92.n1 withNight 24.n1),
+        onClick = onClick
+    )
 }
 
 @Composable
