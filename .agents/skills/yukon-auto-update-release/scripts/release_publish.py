@@ -482,6 +482,16 @@ def git_ref_exists(repo: Path, ref: str) -> bool:
     return result.returncode == 0
 
 
+def git_is_ancestor(repo: Path, ancestor: str, descendant: str) -> bool:
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+        cwd=str(repo),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    return result.returncode == 0
+
+
 def release_branch(version_name: str) -> str:
     return f"release/{version_name}"
 
@@ -512,6 +522,16 @@ def ensure_release_branch(repo: Path, version_name: str, fallback_ref: str) -> s
     return branch
 
 
+def ensure_forward_release_branch(repo: Path, version_name: str, base_branch: str) -> str:
+    branch = ensure_release_branch(repo, version_name, base_branch)
+    if not git_is_ancestor(repo, base_branch, branch):
+        raise ReleaseError(
+            f"{branch} already exists but does not contain {base_branch}. "
+            f"Refusing to publish from a release branch that was not created from current {base_branch}."
+        )
+    return branch
+
+
 def release_branch_available(repo: Path, version_name: str) -> bool:
     branch = release_branch(version_name)
     return git_ref_exists(repo, f"refs/heads/{branch}") or git_ref_exists(repo, f"refs/remotes/origin/{branch}")
@@ -533,23 +553,59 @@ def ensure_existing_release_branch(repo: Path, version_name: str) -> str:
     )
 
 
+def ensure_base_branch(repo: Path, base_branch: str) -> str:
+    local_ref = f"refs/heads/{base_branch}"
+    remote_ref = f"refs/remotes/origin/{base_branch}"
+    if git_ref_exists(repo, local_ref):
+        return base_branch
+    if git_ref_exists(repo, remote_ref):
+        git_run(repo, ["branch", "--track", base_branch, f"origin/{base_branch}"])
+        return base_branch
+    raise ReleaseError(f"Base branch does not exist locally or on origin: {base_branch}")
+
+
+def integrate_current_branch_into_base(repo: Path, base_branch: str) -> str:
+    source_branch = git_capture(repo, ["branch", "--show-current"])
+    if not source_branch:
+        raise ReleaseError("Cannot publish from detached HEAD; checkout a named work branch first.")
+
+    ensure_base_branch(repo, base_branch)
+    if source_branch != base_branch:
+        git_run(repo, ["checkout", base_branch])
+        if git_ref_exists(repo, f"refs/remotes/origin/{base_branch}"):
+            git_run(repo, ["merge", "--ff-only", f"origin/{base_branch}"])
+        git_run(repo, ["merge", "--ff-only", source_branch])
+    else:
+        if git_ref_exists(repo, f"refs/remotes/origin/{base_branch}"):
+            git_run(repo, ["merge", "--ff-only", f"origin/{base_branch}"])
+
+    if git_remote_exists(repo, "origin"):
+        git_run(repo, ["push", "origin", base_branch])
+    return base_branch
+
+
 def prepare_release_branches(
     repo: Path,
     previous_version: str | None,
     target_version: str,
     previous_release_ref: str,
     rollback: bool = False,
+    base_branch: str = "master",
 ) -> tuple[str | None, str]:
     require_clean_worktree(repo)
     fetch_origin(repo)
     previous_branch = None
+    if rollback:
+        target_branch = ensure_existing_release_branch(repo, target_version)
+        current_branch = git_capture(repo, ["branch", "--show-current"])
+        if current_branch != target_branch:
+            git_run(repo, ["checkout", target_branch])
+        return None, target_branch
+
+    base_ref = integrate_current_branch_into_base(repo, base_branch)
     if previous_version and previous_version != target_version and not rollback:
         previous_branch = ensure_release_branch(repo, previous_version, previous_release_ref)
-    target_branch = (
-        ensure_existing_release_branch(repo, target_version)
-        if rollback
-        else ensure_release_branch(repo, target_version, "HEAD")
-    )
+    target_branch = ensure_forward_release_branch(repo, target_version, base_ref)
     current_branch = git_capture(repo, ["branch", "--show-current"])
     if current_branch != target_branch:
         git_run(repo, ["checkout", target_branch])
@@ -739,6 +795,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--version-name", default=None)
     parser.add_argument("--changelog", action="append", default=[])
     parser.add_argument("--previous-release-ref", default="HEAD~1")
+    parser.add_argument("--base-branch", default="master")
     parser.add_argument("--on-version-mismatch", choices=["ask", "upgrade", "abort"], default="ask")
     parser.add_argument("--print-config-fields", action="store_true")
     return parser.parse_args()
@@ -784,6 +841,10 @@ def main() -> int:
                     f"Rollback publish requires existing {target_branch} locally or on origin; "
                     "refusing to create it from the current branch."
                 )
+            if not version_plan.rollback:
+                source_branch = git_capture(repo, ["branch", "--show-current"])
+                print(f"[DRY-RUN] Would fast-forward merge {source_branch} into {args.base_branch}.")
+                print(f"[DRY-RUN] Would create or validate {target_branch} from {args.base_branch}.")
             print(f"[DRY-RUN] Would ensure previous release branch: {previous_branch or '(none)'}")
             print(f"[DRY-RUN] Would switch to or create target release branch: {target_branch}")
         else:
@@ -793,6 +854,7 @@ def main() -> int:
                 target_version=target_name,
                 previous_release_ref=args.previous_release_ref,
                 rollback=version_plan.rollback,
+                base_branch=args.base_branch,
             )
 
         changelog = collect_changelog(
