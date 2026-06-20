@@ -482,14 +482,8 @@ def git_ref_exists(repo: Path, ref: str) -> bool:
     return result.returncode == 0
 
 
-def git_is_ancestor(repo: Path, ancestor: str, descendant: str) -> bool:
-    result = subprocess.run(
-        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
-        cwd=str(repo),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    return result.returncode == 0
+def git_resolve_ref(repo: Path, ref: str) -> str:
+    return git_capture(repo, ["rev-parse", ref])
 
 
 def release_branch(version_name: str) -> str:
@@ -524,10 +518,13 @@ def ensure_release_branch(repo: Path, version_name: str, fallback_ref: str) -> s
 
 def ensure_forward_release_branch(repo: Path, version_name: str, base_branch: str) -> str:
     branch = ensure_release_branch(repo, version_name, base_branch)
-    if not git_is_ancestor(repo, base_branch, branch):
+    base_commit = git_resolve_ref(repo, base_branch)
+    branch_commit = git_resolve_ref(repo, branch)
+    if branch_commit != base_commit:
         raise ReleaseError(
-            f"{branch} already exists but does not contain {base_branch}. "
-            f"Refusing to publish from a release branch that was not created from current {base_branch}."
+            f"{branch} points to {branch_commit[:7]}, but normal releases must be created "
+            f"from current {base_branch} ({base_commit[:7]}). "
+            "Repair the release branch or choose a new target version before publishing."
         )
     return branch
 
@@ -584,10 +581,30 @@ def integrate_current_branch_into_base(repo: Path, base_branch: str) -> str:
     return base_branch
 
 
+def commit_base_version_bump(repo: Path, base_branch: str, version_code: int, version_name: str) -> str:
+    current_branch = git_capture(repo, ["branch", "--show-current"])
+    if current_branch != base_branch:
+        git_run(repo, ["checkout", base_branch])
+    require_clean_worktree(repo)
+
+    update_local_versions(repo, version_code, version_name)
+    changed = git_capture(repo, ["status", "--porcelain", "--", "app/build.gradle.kts"])
+    if changed:
+        git_run(repo, ["add", "app/build.gradle.kts"])
+        git_run(repo, ["commit", "-m", f"chore(release): bump version to {version_name}"])
+    else:
+        print(f"{base_branch} already records versionCode={version_code}, versionName={version_name}.")
+
+    if git_remote_exists(repo, "origin"):
+        git_run(repo, ["push", "origin", base_branch])
+    return git_resolve_ref(repo, base_branch)
+
+
 def prepare_release_branches(
     repo: Path,
     previous_version: str | None,
     target_version: str,
+    target_code: int | None,
     previous_release_ref: str,
     rollback: bool = False,
     base_branch: str = "master",
@@ -602,13 +619,19 @@ def prepare_release_branches(
             git_run(repo, ["checkout", target_branch])
         return None, target_branch
 
-    base_ref = integrate_current_branch_into_base(repo, base_branch)
+    if target_code is None:
+        raise ReleaseError("Normal releases require a target versionCode before preparing release branches.")
+
+    integrate_current_branch_into_base(repo, base_branch)
+    commit_base_version_bump(repo, base_branch, target_code, target_version)
     if previous_version and previous_version != target_version and not rollback:
         previous_branch = ensure_release_branch(repo, previous_version, previous_release_ref)
-    target_branch = ensure_forward_release_branch(repo, target_version, base_ref)
+    target_branch = ensure_forward_release_branch(repo, target_version, base_branch)
     current_branch = git_capture(repo, ["branch", "--show-current"])
     if current_branch != target_branch:
         git_run(repo, ["checkout", target_branch])
+    if git_remote_exists(repo, "origin"):
+        git_run(repo, ["push", "-u", "origin", target_branch])
     return previous_branch, target_branch
 
 
@@ -844,7 +867,11 @@ def main() -> int:
             if not version_plan.rollback:
                 source_branch = git_capture(repo, ["branch", "--show-current"])
                 print(f"[DRY-RUN] Would fast-forward merge {source_branch} into {args.base_branch}.")
-                print(f"[DRY-RUN] Would create or validate {target_branch} from {args.base_branch}.")
+                print(
+                    f"[DRY-RUN] Would update app/build.gradle.kts on {args.base_branch}, "
+                    f"commit versionCode={target_code}, versionName={target_name}, and push {args.base_branch}."
+                )
+                print(f"[DRY-RUN] Would create or validate {target_branch} at current {args.base_branch}.")
             print(f"[DRY-RUN] Would ensure previous release branch: {previous_branch or '(none)'}")
             print(f"[DRY-RUN] Would switch to or create target release branch: {target_branch}")
         else:
@@ -852,6 +879,7 @@ def main() -> int:
                 repo=repo,
                 previous_version=previous_release_name,
                 target_version=target_name,
+                target_code=target_code,
                 previous_release_ref=args.previous_release_ref,
                 rollback=version_plan.rollback,
                 base_branch=args.base_branch,
@@ -874,12 +902,14 @@ def main() -> int:
         print(f"apksigner: {find_build_tool(repo, 'apksigner')}")
 
         if args.dry_run:
-            print("[DRY-RUN] Would update app/build.gradle.kts.")
+            if version_plan.rollback:
+                print("[DRY-RUN] Would update app/build.gradle.kts on the rollback release branch.")
             print("[DRY-RUN] Would build, zipalign, sign, verify, and upload release APK.")
             print("[DRY-RUN] Would update apk_version.txt, apk_version_name.txt, and apk_changelog.txt.")
             return 0
 
-        update_local_versions(repo, target_code, target_name)
+        if version_plan.rollback:
+            update_local_versions(repo, target_code, target_name)
         signed_apk = build_and_sign(repo, config, target_name)
         backup_version = server_name or str(server_code)
         upload_release(client, signed_apk, target_code, target_name, backup_version, changelog)

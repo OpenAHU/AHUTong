@@ -27,7 +27,7 @@ Do not use this skill for requests such as "打 release 包", "构建 release", 
 
 6. If `config.local.json` is missing, do not merely tell the user to create it. Ask for the exact fields listed in "First-Use Credential Collection" below, preferably with `request_user_input` when that tool is available; otherwise ask a concise direct question with the same field list.
 7. If the script reports a local/server version mismatch, stop and ask the user to choose one of the two options printed by the script. Do not modify versions, build, or upload until the user confirms.
-8. For normal forward releases, first fast-forward merge the current work branch, for example `p/Yukon163/feat`, into `master`, push `master`, then create or validate `release/{target versionName}` from current `master`. For rollback releases where the target `versionName` is lower than the server `versionName`, the target release branch must already exist locally or on `origin`; never create a rollback target branch from the current `HEAD`.
+8. For normal forward releases, first fast-forward merge the current work branch, for example `p/Yukon163/feat`, into `master`; update `app/build.gradle.kts` on `master`; commit `chore(release): bump version to {versionName}`; push `master`; then create or validate `release/{target versionName}` at that exact `master` commit. For rollback releases where the target `versionName` is lower than the server `versionName`, the target release branch must already exist locally or on `origin`; never create a rollback target branch from the current `HEAD`.
 9. Do not ask the user for release notes by default. Normal releases derive `apk_changelog.txt` from the diff between `release/{previous versionName}` and `release/{target versionName}`. Rollback releases always use generic changelog text unless the user explicitly supplies safe generic notes.
 10. After the script succeeds, verify:
 
@@ -35,7 +35,7 @@ Do not use this skill for requests such as "打 release 包", "构建 release", 
    curl https://openahu.org/api/check_apk_update
    ```
 
-11. Commit the local `app/build.gradle.kts` version change if it was modified and the user expects the release version to be recorded in git, then push the `release/{target versionName}` branch.
+11. Confirm the helper pushed `master` and `release/{target versionName}` for normal forward releases. For rollback releases, commit and push only if an explicit branch-policy decision requires recording the rollback publish metadata.
 
 ## First-Use Credential Collection
 
@@ -93,10 +93,10 @@ It performs these actions:
 - Defaults to patch-incrementing `versionName`, for example `3.1.5 -> 3.1.6`.
 - Accepts explicit `--version-code` and `--version-name` when the user explicitly gives a target version.
 - Treats explicit `--version-name` lower than the server `versionName` as rollback publish: build from `release/{versionName}`, keep that display `versionName`, but publish with `versionCode = serverVersionCode + 1` unless a higher explicit `--version-code` is supplied.
-- For normal forward releases, fast-forward merges the current branch into `master`, pushes `master`, and creates missing `release/{target versionName}` from `master`.
-- Rejects an existing normal-release target branch if it does not contain current `master`, preventing release branches from being based on stale feature branch heads.
+- For normal forward releases, fast-forward merges the current branch into `master`, updates and commits the target version on `master`, pushes `master`, and creates missing `release/{target versionName}` at the resulting `master` commit.
+- Rejects an existing normal-release target branch if it does not point to the current `master` commit, preventing release branches from being based on stale feature branch heads or separate release-only version bumps.
 - Ensures `release/{previous versionName}` exists for changelog baselines, creating it when needed from `--previous-release-ref`.
-- Switches to `release/{target versionName}` before updating versions, building, signing, or uploading.
+- For normal forward releases, switches to `release/{target versionName}` only after the version bump has already been committed on `master`; for rollback releases, switches to the existing rollback release branch before updating versions, building, signing, or uploading.
 - Uses `--previous-release-ref` only when the previous release branch is missing; the default is `HEAD~1`, but the agent should pass the actual previous-release baseline if that default is wrong.
 - Derives changelog lines from `git log` and `git diff --name-only` over `release/{previous versionName}..release/{target versionName}`.
 - If the diff is only hidden/internal work such as gray rollout, debug-only controls, or this release skill itself, writes generic notes such as `修复了一些 bug` and `进行了一些体验优化` instead of exposing the hidden feature.
@@ -111,7 +111,7 @@ It performs these actions:
 
 Always publish from `release/{target versionName}`. If the branch exists locally, check it out. If it exists only on `origin`, create a local tracking branch.
 
-For normal forward releases, integrate code in this order: current work branch -> `master` -> `release/{target versionName}`. The helper script uses fast-forward merges only. If the current branch cannot fast-forward into `master`, stop and rebase/sync manually before publishing. Create a missing target release branch from current `master`; if the target release branch already exists but does not contain current `master`, stop instead of publishing from a stale release branch. During the first migration to release branches, also create `release/{previous versionName}` if missing so future changelog diffs have a stable baseline.
+For normal forward releases, integrate code in this order: current work branch -> `master` -> `release/{target versionName}`. The helper script uses fast-forward merges only. If the current branch cannot fast-forward into `master`, stop and rebase/sync manually before publishing. Commit the version bump on `master` before creating the release branch. Create a missing target release branch from current `master`; if the target release branch already exists but does not point to current `master`, stop instead of publishing from a stale or release-only branch. During the first migration to release branches, also create `release/{previous versionName}` if missing so future changelog diffs have a stable baseline.
 
 For rollback releases, where the user explicitly requested a `versionName` lower than the server `versionName`, the target branch must already exist locally or on `origin`. Build the old code from that branch, but keep the published `versionCode` greater than the current server `versionCode`; Android will not install an APK whose `versionCode` is less than or equal to the installed app. Keep the requested `versionName` as display text.
 
