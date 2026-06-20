@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -27,6 +29,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.ahu.ahutong.data.dao.AHUCache
@@ -82,6 +86,14 @@ fun LostFound(
 
     var selectedItem by remember {
         mutableStateOf<LostFoundItem?>(null)
+    }
+
+    var showImageViewer by remember {
+        mutableStateOf(false)
+    }
+
+    var imageViewerIndex by remember {
+        mutableIntStateOf(0)
     }
 
     LaunchedEffect(mockRefreshRevision) {
@@ -766,22 +778,28 @@ fun LostFound(
                                 )
                         ) {
                             items(item.imgs) { img ->
-                                Card(
-                                    modifier =
-                                        Modifier.size(
-                                            180.dp
-                                        )
-                                ) {
-                                    AsyncImage(
-                                        model =
-                                            img.imgPath,
-                                        contentDescription =
-                                            null,
-                                        modifier =
-                                            Modifier.fillMaxSize()
-                                    )
-                                }
-                            }
+                                     val imgIndex = item.imgs.indexOf(img)
+                                     Card(
+                                         modifier =
+                                             Modifier
+                                                 .size(
+                                                     180.dp
+                                                 )
+                                                 .clickable {
+                                                     imageViewerIndex = imgIndex
+                                                     showImageViewer = true
+                                                 }
+                                     ) {
+                                         AsyncImage(
+                                             model =
+                                                 "https://adwmh.ahu.edu.cn${img.imgPath}",
+                                             contentDescription =
+                                                 null,
+                                             modifier =
+                                                 Modifier.fillMaxSize()
+                                         )
+                                     }
+                                 }
                         }
                     }
 
@@ -793,6 +811,76 @@ fun LostFound(
             }
         }
     }
+
+    /**
+     * 全屏图片查看器
+     */
+    if (showImageViewer) {
+        val imgs = selectedItem?.imgs.orEmpty()
+        val pagerState = rememberPagerState(
+            initialPage = imageViewerIndex,
+            pageCount = { imgs.size }
+        )
+
+        Dialog(
+            onDismissRequest = { showImageViewer = false },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+            ) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(
+                            model = "https://adwmh.ahu.edu.cn${imgs[page].imgPath}",
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
+                // 关闭按钮
+                IconButton(
+                    onClick = { showImageViewer = false },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                        .statusBarsPadding()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "关闭",
+                        tint = Color.White
+                    )
+                }
+
+                // 页码指示器
+                if (imgs.size > 1) {
+                    Text(
+                        text = "${pagerState.currentPage + 1} / ${imgs.size}",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(24.dp)
+                    )
+                }
+            }
+        }
+    }
+
     if (showMyPostSheet) {
         val myPosts = lostFoundList.filter {
             it.pubuser?.idNumber ==
@@ -933,16 +1021,19 @@ fun LostFound(
                     .verticalScroll(rememberScrollState()),
             ){
                 Text(
-                    text = "*目前智慧安大图片功能有时无法使用，请大家文字描述尽量详尽",
-                    modifier = Modifier.padding(16.dp),
-                    color = Color.Gray.copy(alpha = 0.6f)
-                )
-                Text(
-                    text = "发布帖子",
-                    style =
-                        MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
+                     text = "*目前智慧安大图片功能有时无法使用，请大家文字描述尽量详尽",
+                     modifier = Modifier.padding(16.dp),
+                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                     fontSize = 14.sp
+                 )
+                 Text(
+                     text = "发布帖子",
+                     style =
+                         MaterialTheme.typography.headlineSmall,
+                     fontWeight = FontWeight.Bold
+                 )
+
+                 Spacer(modifier = Modifier.height(4.dp))
 
                 OutlinedTextField(
                     value = linkman,
@@ -988,7 +1079,12 @@ fun LostFound(
                     }
                 )
 
-                Text("选择校区")
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    "选择校区",
+                    style = MaterialTheme.typography.titleSmall
+                )
 
                 LazyRow(
                     horizontalArrangement =
@@ -1008,7 +1104,12 @@ fun LostFound(
                     }
                 }
 
-                Text("选择类型")
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    "选择类型",
+                    style = MaterialTheme.typography.titleSmall
+                )
 
                 LazyRow(
                     horizontalArrangement =
@@ -1028,7 +1129,12 @@ fun LostFound(
                     }
                 }
 
-                Text("选择事件类型")
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    "选择事件类型",
+                    style = MaterialTheme.typography.titleSmall
+                )
 
                 Row(
                     horizontalArrangement =
