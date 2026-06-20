@@ -11,6 +11,12 @@
 3. 开始工作前建议先同步目标基线分支，避免在过期代码上开发。
 4. 一个分支尽量只处理一个明确目标，避免把无关功能、重构和格式化混在一起。
 
+## 项目本地 Skills
+
+1. Session start 时应检查 `.agents/skills/*/SKILL.md` 的 frontmatter，了解项目本地可用 skill。
+2. `.agents/skills/yukon-auto-update-release/` 是生产发版 skill；只有当用户请求中显式包含“发版”两个字时才允许触发或执行。
+3. 未包含“发版”的构建、打包、上传、版本检查或 release 相关请求，都不得使用 `yukon-auto-update-release`。
+
 ## 提交规范
 
 1. 提交信息必须符合 Conventional Commits 规范。

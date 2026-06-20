@@ -17,3 +17,5 @@ app/map.txt
 *.txt
 .vscode/settings.json
 star.md
+.agents/skills/yukon-auto-update-release/config.local.json
+.agents/skills/yukon-auto-update-release/.work/

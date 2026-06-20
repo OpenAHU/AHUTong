@@ -1,0 +1,6 @@
+interface:
+  display_name: "Yukon Auto Update Release"
+  short_description: "自动构建并发布 AHUTong release APK"
+  default_prompt: "Use $yukon-auto-update-release to perform an AHUTong 发版."
+policy:
+  allow_implicit_invocation: false
