@@ -48,7 +48,7 @@ class LostFoundViewModel : ViewModel() {
     var isLoadingMore by mutableStateOf(false)
         private set
     val currentUserName: String
-        get() = AHUCache.getCurrentUser()?.xh?:"null"
+        get() = AHUCache.getCurrentUser()?.xh ?: "null"
 
     var errorMessage by mutableStateOf<String?>(null)
 
@@ -226,20 +226,15 @@ class LostFoundViewModel : ViewModel() {
 
     /**
      * 刷新
-     * 成功后清空缓存并覆盖最新数据
      */
     fun refreshList() {
         viewModelScope.launch {
             isRefreshing = true
 
             try {
-                // 强制刷新校区
                 getAllCampus(true)
-
-                // 强制刷新类型
                 getAllLostFoundType(true)
 
-                // 强制刷新帖子第一页
                 val result =
                     AHURepository.getLostFoundList(
                         pageNo = 1,
@@ -283,7 +278,7 @@ class LostFoundViewModel : ViewModel() {
     }
 
     /**
-     * 加载更多（滑到底触发）
+     * 加载更多
      */
     fun loadMore() {
         if (isLoadingMore || listLoading || !hasMore) return
@@ -307,10 +302,8 @@ class LostFoundViewModel : ViewModel() {
 
                     val newList = pageData.list
 
-                    // 追加到当前列表
                     lostFoundList = lostFoundList + newList
 
-                    // 追加缓存
                     AHUCache.appendLostFoundList(
                         currentState,
                         newList
@@ -327,6 +320,10 @@ class LostFoundViewModel : ViewModel() {
             }
         }
     }
+
+    /**
+     * 发布帖子
+     */
     fun publishLostFound(
         linkman: String,
         phone: String,
@@ -354,6 +351,7 @@ class LostFoundViewModel : ViewModel() {
             refreshList()
         }
     }
+
     fun deleteLostFound(
         id: String
     ) {
@@ -375,18 +373,17 @@ class LostFoundViewModel : ViewModel() {
             }
         }
     }
+
     init {
         getAllCampus()
         getAllLostFoundType()
 
-        // 初始化先读缓存
         lostFoundList = if (AHUCache.getMockData()) {
             emptyList()
         } else {
             AHUCache.getLostFoundList(currentState)
         }
 
-        // 自动联网更新第一页
         fetchFirstPage()
     }
 }

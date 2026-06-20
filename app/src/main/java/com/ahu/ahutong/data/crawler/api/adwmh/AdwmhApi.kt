@@ -97,6 +97,12 @@ interface AdwmhApi {
 
         val okHttpClient = OkHttpClient
             .Builder()
+            .addNetworkInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("X-Requested-With", "XMLHttpRequest")
+                    .build()
+                chain.proceed(request)
+            }
             .addNetworkInterceptor(AutoLoginInterceptor())
             .authenticator(TokenAuthenticator())
             .followRedirects(true)

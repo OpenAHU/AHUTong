@@ -63,6 +63,7 @@ interface BaseDataSource {
     suspend fun deleteLostFound(
         id: String
     ): AHUResponse<Any>
+
     suspend fun getCardMoney(): AHUResponse<Card>
 
     suspend fun getBathRooms(): AHUResponse<List<BathRoom>>

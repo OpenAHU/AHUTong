@@ -183,17 +183,7 @@ class SdkDataSource : BaseDataSource {
         val response = AHUResponse<AllCampus>()
         try {
             // 直接请求 JSON 接口
-            val jsonResponse = AdwmhApi.API.getAllcampus()
-
-            if (jsonResponse == null) {
-                response.code = -1
-                response.msg = "获取校区列表失败"
-                return response
-            }
-
-            val json = jsonResponse.toString()
-            // 直接 Gson 解析成你的 Model
-            val campusList = Gson().fromJson(json, AllCampus::class.java)
+            val campusList = AdwmhApi.API.getAllcampus()
 
             // 封装返回
             response.code = 0
@@ -263,6 +253,7 @@ class SdkDataSource : BaseDataSource {
     ): AHUResponse<Any> {
         return AdwmhApi.API.deleteLostFound(id)
     }
+
     private fun convertJsToJson(js: String): String {
         return js
             .replace(Regex("'"), "\"")                // 单引号 → 双引号
