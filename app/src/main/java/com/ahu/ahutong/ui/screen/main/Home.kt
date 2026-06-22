@@ -44,6 +44,7 @@ import androidx.navigation.NavHostController
 import com.ahu.ahutong.data.debug.DebugClock
 import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.ui.screen.main.home.AtAGlance
+import com.ahu.ahutong.ui.screen.main.home.HomeWeatherWidget
 import com.ahu.ahutong.ui.screen.main.home.HomeWidgetDragOverlay
 import com.ahu.ahutong.ui.screen.main.home.HomeWidgetLibrarySheet
 import com.ahu.ahutong.ui.screen.main.home.HomeWidgetRegistry
@@ -305,6 +306,9 @@ fun Home(
                         enabled = !isEditingHome
                     )
                 }
+            }
+            SlideInContent(visible = !isEditingHome) {
+                HomeWeatherWidget(onClick = { navController.navigate("weather") })
             }
             SlideInContent(visible = 1 in discoveryViewModel.visibilities) {
                 HomeWidgetSlotLayout(
