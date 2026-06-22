@@ -70,6 +70,13 @@ object HomeWidgetRegistry {
             route = "lost_found",
             iconId = R.drawable.lost_and_found,
             tint = Color(0xFF1976D2)
+        ),
+        HomeWidgetSpec(
+            id = "weather",
+            title = "天气",
+            route = "weather",
+            iconId = R.drawable.ic_weather,
+            tint = Color(0xFFFFB300)
         )
     )
 

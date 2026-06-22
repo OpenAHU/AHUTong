@@ -42,6 +42,7 @@ import com.ahu.ahutong.ui.screen.main.PhoneBook
 import com.ahu.ahutong.ui.screen.main.Schedule
 import com.ahu.ahutong.ui.screen.main.SchoolCalendar
 import com.ahu.ahutong.ui.screen.main.Tools
+import com.ahu.ahutong.ui.screen.main.Weather
 import com.ahu.ahutong.ui.screen.settings.Contributors
 import com.ahu.ahutong.ui.screen.settings.Debug
 import com.ahu.ahutong.ui.screen.settings.License
@@ -180,6 +181,9 @@ fun Main(
             }
             animatedComposable("lost_found") {
                 LostFound()
+            }
+            animatedComposable("weather") {
+                Weather()
             }
             animatedComposable("settings") {
                 Settings(

@@ -117,8 +117,8 @@ fun AtAGlance(
                 },
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Clip,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.headlineLarge
             )
             Text(

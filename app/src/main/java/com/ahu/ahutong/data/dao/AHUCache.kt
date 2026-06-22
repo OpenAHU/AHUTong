@@ -739,4 +739,15 @@ object AHUCache {
         kv.removeValueForKey("lost_found_list_1")
         kv.removeValueForKey("lost_found_list_2")
     }
+
+    /**
+     * 天气首页显示设置
+     */
+    fun saveWeatherShowOnHome(enabled: Boolean) {
+        kv.encode("weather_show_on_home", enabled)
+    }
+
+    fun getWeatherShowOnHome(): Boolean {
+        return kv.decodeBool("weather_show_on_home", false)
+    }
 }

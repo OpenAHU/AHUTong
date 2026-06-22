@@ -121,6 +121,9 @@ fun PhoneBook() {
                         disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = 0.n1 withNight 100.n1,
+                        unfocusedTextColor = 0.n1 withNight 100.n1,
+                        cursorColor = 90.a1 withNight 90.a1,
                     ),
                     trailingIcon = if (searchQuery.isNotEmpty()) {
                         {
