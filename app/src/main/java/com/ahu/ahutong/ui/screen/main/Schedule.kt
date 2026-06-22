@@ -452,7 +452,8 @@ private fun ScheduleSettingsDialog(
                 Text(
                     text = "课表设置",
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    color = 0.n1 withNight 100.n1
                 )
             },
             text = {
@@ -503,7 +504,8 @@ private fun ScheduleSettingsDialog(
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = 0.n1 withNight 100.n1
                 )
                 Text(
                     text = description,
