@@ -77,6 +77,13 @@ object HomeWidgetRegistry {
             route = "weather",
             iconId = R.drawable.ic_weather,
             tint = Color(0xFFFFB300)
+        ),
+        HomeWidgetSpec(
+            id = "repository",
+            title = "学习资料",
+            route = "repository",
+            iconId = R.drawable.ic_repository,
+            tint = Color(0xFF8D6E63)
         )
     )
 

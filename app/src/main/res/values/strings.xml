@@ -100,4 +100,6 @@
     <string name="free_classroom">空闲教室</string>
     <string name="lost_found">失物招领</string>
     <string name="preferences">偏好设置</string>
+    <string name="repository">学习资料</string>
+    <string name="repository_downloads">已下载</string>
 </resources>

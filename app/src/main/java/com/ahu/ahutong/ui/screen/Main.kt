@@ -42,6 +42,8 @@ import com.ahu.ahutong.ui.screen.main.PhoneBook
 import com.ahu.ahutong.ui.screen.main.Schedule
 import com.ahu.ahutong.ui.screen.main.SchoolCalendar
 import com.ahu.ahutong.ui.screen.main.Tools
+import com.ahu.ahutong.ui.screen.main.Repository
+import com.ahu.ahutong.ui.screen.main.RepositoryDownloads
 import com.ahu.ahutong.ui.screen.main.Weather
 import com.ahu.ahutong.ui.screen.settings.Contributors
 import com.ahu.ahutong.ui.screen.settings.Debug
@@ -184,6 +186,12 @@ fun Main(
             }
             animatedComposable("weather") {
                 Weather()
+            }
+            animatedComposable("repository") {
+                Repository(navController = navController)
+            }
+            animatedComposable("repository_downloads") {
+                RepositoryDownloads(navController = navController)
             }
             animatedComposable("settings") {
                 Settings(
