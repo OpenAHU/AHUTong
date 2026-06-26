@@ -569,6 +569,19 @@ object AHUCache {
         kv.encode("mock_data", enable)
     }
 
+    // === 天气 adcode 缓存（用于精准到区级） ===
+
+    fun saveWeatherAdcode(adcode: String) {
+        initPutString("weather_adcode", adcode)
+        kv_init.encode("weather_adcode", adcode)
+    }
+
+    fun getWeatherAdcode(): String? {
+        return initGetStringOrMigrate("weather_adcode") {
+            kv_init.decodeString("weather_adcode")
+        }?.takeIf { it.isNotBlank() }
+    }
+
     fun saveMockCurrentTimeMillis(value: Long) {
         initPutString("mock_current_time_millis", value.toString())
         kv.encode("mock_current_time_millis", value)

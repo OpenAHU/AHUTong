@@ -1,6 +1,9 @@
 package com.ahu.ahutong.ui.screen.main
 
+import android.Manifest
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -39,13 +42,31 @@ fun Weather(
 ) {
     val context = LocalContext.current
     val weather = weatherViewModel.weather
+    val hasSearched = rememberSaveable { mutableStateOf(false) }
 
     var searchCity by rememberSaveable { mutableStateOf("") }
     var showSearch by rememberSaveable { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
 
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            weatherViewModel.fetchWeatherByLocation(context)
+        } else {
+            weatherViewModel.fetchWeather()
+        }
+    }
+
     LaunchedEffect(Unit) {
-        if (weather == null) weatherViewModel.fetchWeather()
+        if (weather == null && !hasSearched.value) {
+            hasSearched.value = true
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            } else {
+                weatherViewModel.fetchWeatherByLocation(context)
+            }
+        }
     }
 
     Column(
