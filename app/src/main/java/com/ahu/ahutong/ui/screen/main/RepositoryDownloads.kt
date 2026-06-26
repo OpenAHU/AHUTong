@@ -19,12 +19,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +49,7 @@ import androidx.navigation.NavHostController
 import com.ahu.ahutong.data.repository.DownloadedFile
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.RepositoryViewModel
+import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
@@ -57,10 +62,15 @@ fun RepositoryDownloads(
     val viewModel: RepositoryViewModel = viewModel(viewModelStoreOwner = activity)
     var files by remember { mutableStateOf(viewModel.getDownloadedFiles()) }
     var deleteConfirmPath by remember { mutableStateOf<String?>(null) }
+    var batchDeleteTargets by remember { mutableStateOf<List<String>?>(null) }
+    var isManaging by remember { mutableStateOf(false) }
+    var selectedPaths by remember { mutableStateOf(setOf<String>()) }
 
-    LaunchedEffect(Unit) {
+    fun refreshFiles() {
         files = viewModel.getDownloadedFiles()
     }
+
+    LaunchedEffect(Unit) { refreshFiles() }
 
     Column(
         modifier = Modifier
@@ -68,6 +78,7 @@ fun RepositoryDownloads(
             .systemBarsPadding()
             .background(96.n1 withNight 10.n1)
     ) {
+        // 顶栏
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -81,10 +92,18 @@ fun RepositoryDownloads(
                 )
             }
             Text(
-                text = "已下载文件",
+                text = if (isManaging) "已选择 ${selectedPaths.size} 项" else "已下载文件",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f)
             )
+            if (files.isNotEmpty()) {
+                TextButton(onClick = {
+                    isManaging = !isManaging
+                    if (!isManaging) selectedPaths = emptySet()
+                }) {
+                    Text(if (isManaging) "完成" else "管理")
+                }
+            }
         }
 
         if (files.isEmpty()) {
@@ -93,80 +112,140 @@ fun RepositoryDownloads(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        "暂无下载文件",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("暂无下载文件", style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "浏览学习资料时可下载文件",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("浏览学习资料时可下载文件", style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 items(files, key = { it.path }) { file ->
+                    val isSelected = file.path in selectedPaths
                     DownloadedFileRow(
                         file = file,
-                        onClick = { viewModel.openDownloadedFile(file) },
+                        isManaging = isManaging,
+                        isSelected = isSelected,
+                        onClick = {
+                            if (isManaging) {
+                                selectedPaths = if (isSelected) selectedPaths - file.path
+                                else selectedPaths + file.path
+                            } else {
+                                viewModel.openDownloadedFile(file)
+                            }
+                        },
                         onDelete = { deleteConfirmPath = file.path }
                     )
+                }
+            }
+
+            // 管理模式底部栏
+            if (isManaging && files.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                        .clip(SmoothRoundedCornerShape(16.dp))
+                        .background(100.n1 withNight 30.n1)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    TextButton(onClick = {
+                        selectedPaths = if (selectedPaths.size == files.size) emptySet()
+                        else files.map { it.path }.toSet()
+                    }) {
+                        Text(if (selectedPaths.size == files.size) "取消全选" else "全选")
+                    }
+                    TextButton(
+                        onClick = {
+                            if (selectedPaths.isNotEmpty()) {
+                                batchDeleteTargets = selectedPaths.toList()
+                            }
+                        },
+                        enabled = selectedPaths.isNotEmpty()
+                    ) {
+                        Text(
+                            "删除选中 (${selectedPaths.size})",
+                            color = if (selectedPaths.isNotEmpty()) Color(0xFFFF5252)
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
     }
 
-    // 删除确认
+    // 单个删除确认
     deleteConfirmPath?.let { path ->
-        Dialog(
-            onDismissRequest = { deleteConfirmPath = null }
+        ConfirmDialog(
+            title = "确认删除",
+            message = "确定要删除此文件吗？",
+            onCancel = { deleteConfirmPath = null },
+            onConfirm = {
+                viewModel.deleteFile(path)
+                refreshFiles()
+                selectedPaths = selectedPaths - path
+                deleteConfirmPath = null
+            }
+        )
+    }
+
+    // 批量删除确认
+    batchDeleteTargets?.let { targets ->
+        ConfirmDialog(
+            title = "批量删除",
+            message = "确定要删除选中的 ${targets.size} 个文件吗？",
+            onCancel = { batchDeleteTargets = null },
+            onConfirm = {
+                targets.forEach { viewModel.deleteFile(it) }
+                refreshFiles()
+                selectedPaths = emptySet()
+                batchDeleteTargets = null
+            }
+        )
+    }
+}
+
+@Composable
+private fun ConfirmDialog(
+    title: String,
+    message: String,
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    Dialog(onDismissRequest = onCancel) {
+        Column(
+            modifier = Modifier
+                .clip(SmoothRoundedCornerShape(24.dp))
+                .background(96.n1 withNight 10.n1)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .clip(SmoothRoundedCornerShape(24.dp))
-                    .background(96.n1 withNight 10.n1)
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(message, style = MaterialTheme.typography.bodyMedium)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
             ) {
                 Text(
-                    text = "确认删除",
-                    style = MaterialTheme.typography.titleMedium
+                    text = "取消",
+                    modifier = Modifier.clickable { onCancel() }.padding(horizontal = 12.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelLarge
                 )
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = "确定要删除此文件吗？",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "删除",
+                    modifier = Modifier.clickable { onConfirm() }.padding(horizontal = 12.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color(0xFFFF5252)
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Text(
-                        text = "取消",
-                        modifier = Modifier
-                            .clickable { deleteConfirmPath = null }
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = "删除",
-                        modifier = Modifier
-                            .clickable {
-                                viewModel.deleteFile(path)
-                                files = viewModel.getDownloadedFiles()
-                                deleteConfirmPath = null
-                            }
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color(0xFFFF5252)
-                    )
-                }
             }
         }
     }
@@ -175,6 +254,8 @@ fun RepositoryDownloads(
 @Composable
 private fun DownloadedFileRow(
     file: DownloadedFile,
+    isManaging: Boolean,
+    isSelected: Boolean,
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -190,6 +271,17 @@ private fun DownloadedFileRow(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // 管理模式：复选框
+        if (isManaging) {
+            Icon(
+                imageVector = if (isSelected) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+                contentDescription = if (isSelected) "已选择" else "未选择",
+                tint = if (isSelected) 90.a1 withNight 90.a1 else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
         // 类型标签
         Box(
             modifier = Modifier
@@ -232,20 +324,22 @@ private fun DownloadedFileRow(
             )
         }
 
-        IconButton(onClick = { onClick() }, modifier = Modifier.padding(start = 4.dp)) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
-                contentDescription = "打开",
-                modifier = Modifier.size(22.dp)
-            )
-        }
-        IconButton(onClick = onDelete, modifier = Modifier.padding(start = 4.dp)) {
-            Icon(
-                imageVector = Icons.Outlined.Delete,
-                contentDescription = "删除",
-                tint = Color(0xFFFF5252),
-                modifier = Modifier.size(22.dp)
-            )
+        if (!isManaging) {
+            IconButton(onClick = { onClick() }, modifier = Modifier.padding(start = 4.dp)) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
+                    contentDescription = "打开",
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            IconButton(onClick = onDelete, modifier = Modifier.padding(start = 4.dp)) {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "删除",
+                    tint = Color(0xFFFF5252),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
         }
     }
 }
