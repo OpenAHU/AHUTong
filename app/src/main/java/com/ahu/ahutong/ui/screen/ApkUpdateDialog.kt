@@ -186,3 +186,62 @@ fun ApkUpdateDialog(
         }
     )
 }
+
+@Composable
+fun ApkMirrorSourceDialog(
+    onUseMirror: () -> Unit,
+    onKeepOriginal: () -> Unit,
+) {
+    val contentColor = 10.n1 withNight 90.n1
+    val containerColor = 100.n1 withNight 20.n1
+
+    AlertDialog(
+        onDismissRequest = onKeepOriginal,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false,
+        ),
+        title = {
+            Text(
+                text = "下载较慢",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall,
+                color = contentColor
+            )
+        },
+        text = {
+            Text(
+                text = "当前下载超过 5 秒仍未达到 30%，是否切换到镜像源继续下载？文件校验仍使用官方源提供的信息。",
+                style = MaterialTheme.typography.bodyMedium,
+                color = contentColor
+            )
+        },
+        shape = SmoothRoundedCornerShape(32.dp),
+        containerColor = containerColor,
+        confirmButton = {
+            FilledTonalButton(
+                onClick = onUseMirror,
+                modifier = Modifier.height(56.dp),
+                shape = SmoothRoundedCornerShape(16.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = 90.a1 withNight 85.a1,
+                    contentColor = 0.n1
+                )
+            ) {
+                Text(
+                    text = "使用镜像源",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onKeepOriginal,
+                modifier = Modifier.height(56.dp),
+            ) {
+                Text("继续原下载", color = contentColor)
+            }
+        }
+    )
+}
