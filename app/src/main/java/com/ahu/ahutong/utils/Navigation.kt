@@ -34,12 +34,12 @@ fun NavGraphBuilder.animatedComposable(
             scaleOut(targetScale = 0.92f, animationSpec = tween(90, delayMillis = 90))
     },
     popEnterTransition = {
-        fadeIn(animationSpec = tween(220, delayMillis = 90)) +
-            scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 90))
+        fadeIn(animationSpec = tween(220)) +
+            scaleIn(initialScale = 0.92f, animationSpec = tween(220))
     },
     popExitTransition = {
-        fadeOut(animationSpec = tween(90, delayMillis = 90)) +
-            scaleOut(targetScale = 0.92f, animationSpec = tween(90, delayMillis = 90))
+        fadeOut(animationSpec = tween(220)) +
+            scaleOut(targetScale = 0.92f, animationSpec = tween(220))
     },
     content = content
 )
