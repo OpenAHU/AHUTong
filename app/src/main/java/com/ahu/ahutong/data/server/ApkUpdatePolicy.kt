@@ -6,12 +6,13 @@ import java.net.URI
 object ApkUpdatePolicy {
     const val MAX_APK_BYTES: Long = 200L * 1024L * 1024L
     const val MAX_DOWNLOAD_REDIRECTS: Int = 5
+    const val MIRROR_DOWNLOAD_HOST: String = "openahu-ahutong-cn.muxyang.com"
     private const val ERROR_NO_UPDATE = "No APK update is available"
     private const val ERROR_NOT_NEWER = "Remote APK version is not newer"
 
     private val sha256Regex = Regex("^[0-9a-fA-F]{64}$")
     private val baseDownloadUri = URI("https://openahu.org/")
-    private val trustedDownloadHosts = setOf("openahu.org", "www.openahu.org")
+    private val primaryDownloadHosts = setOf("openahu.org", "www.openahu.org")
 
     data class ValidatedUpdate(
         val info: ApkUpdateInfo,
@@ -59,7 +60,11 @@ object ApkUpdatePolicy {
         )
     }
 
-    fun validateDownloadUrl(rawUrl: String?, baseUrl: String? = null): Result<String> {
+    fun validateDownloadUrl(
+        rawUrl: String?,
+        baseUrl: String? = null,
+        allowMirrorHost: Boolean = false
+    ): Result<String> {
         val url = rawUrl?.trim()
         if (url.isNullOrEmpty()) {
             return Result.failure(IllegalArgumentException("APK download URL is empty"))
@@ -94,6 +99,11 @@ object ApkUpdatePolicy {
             return Result.failure(IllegalArgumentException("APK download URL must not contain fragments"))
         }
 
+        val trustedDownloadHosts = if (allowMirrorHost) {
+            primaryDownloadHosts + MIRROR_DOWNLOAD_HOST
+        } else {
+            primaryDownloadHosts
+        }
         val host = uri.host?.lowercase()
         if (host == null || host !in trustedDownloadHosts) {
             return Result.failure(IllegalArgumentException("APK download host is not trusted"))
@@ -105,6 +115,17 @@ object ApkUpdatePolicy {
         }
 
         return Result.success(uri.toASCIIString())
+    }
+
+    fun mirrorDownloadUrl(primaryDownloadUrl: String): Result<String> {
+        val trustedPrimaryUrl = validateDownloadUrl(primaryDownloadUrl).getOrElse {
+            return Result.failure(it)
+        }
+        val uri = URI(trustedPrimaryUrl)
+        val rawPath = uri.rawPath.orEmpty()
+        val rawQuery = uri.rawQuery?.let { "?$it" }.orEmpty()
+        val mirrorUrl = "https://$MIRROR_DOWNLOAD_HOST$rawPath$rawQuery"
+        return validateDownloadUrl(mirrorUrl, allowMirrorHost = true)
     }
 
     fun normalizeSha256(rawSha256: String?): Result<String> {

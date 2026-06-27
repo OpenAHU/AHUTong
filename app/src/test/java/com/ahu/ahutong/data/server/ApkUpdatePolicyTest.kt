@@ -89,6 +89,40 @@ class ApkUpdatePolicyTest {
     }
 
     @Test
+    fun validateRejectsMirrorDownloadHostByDefault() {
+        val result = ApkUpdatePolicy.validate(
+            updateInfo(url = "https://openahu-ahutong-cn.muxyang.com/download/app.apk"),
+            currentVersionCode = 1
+        )
+
+        assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun validateAcceptsMirrorDownloadHostOnlyWhenExplicitlyAllowed() {
+        val result = ApkUpdatePolicy.validateDownloadUrl(
+            rawUrl = "https://openahu-ahutong-cn.muxyang.com/download/app.apk",
+            allowMirrorHost = true
+        )
+
+        assertTrue(result.isSuccess)
+        assertEquals("https://openahu-ahutong-cn.muxyang.com/download/app.apk", result.getOrThrow())
+    }
+
+    @Test
+    fun mirrorDownloadUrlReplacesOnlyHost() {
+        val result = ApkUpdatePolicy.mirrorDownloadUrl(
+            "https://openahu.org/download/app.apk?channel=stable"
+        )
+
+        assertTrue(result.isSuccess)
+        assertEquals(
+            "https://openahu-ahutong-cn.muxyang.com/download/app.apk?channel=stable",
+            result.getOrThrow()
+        )
+    }
+
+    @Test
     fun validateResolvesRedirectLocationAgainstCurrentDownloadUrl() {
         val result = ApkUpdatePolicy.validateDownloadUrl(
             rawUrl = "next.apk",
