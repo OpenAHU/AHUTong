@@ -1,5 +1,12 @@
 package com.ahu.ahutong.ui.screen.main
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -46,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +71,10 @@ import com.kyant.monet.a1
 import com.kyant.monet.n1
 import com.kyant.monet.withNight
 
+private const val ALIPAY_CAMPUS_CARD_SCHEME =
+    "alipays://platformapi/startapp?appId=2019090967125695&page=pages%2Findex%2Findex&chInfo=ch_share__chsub_CopyLink"
+private const val ALIPAY_CAMPUS_CARD_FALLBACK_URL = "https://www.wmslz.com/s/M6KARh485j3"
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,8 +90,12 @@ fun CardBalanceDeposit(
 
     var showConfirmDialog by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val mockRefreshRevision by MockScenarioController.refreshRevisions().collectAsState()
+    val currentUser = remember { AHUCache.getCurrentUser() }
+    val campusCardUserName = currentUser?.name.orEmpty()
+    val campusCardStudentId = currentUser?.xh.orEmpty()
 
     LaunchedEffect(Unit) {
         viewModel.load()
@@ -336,22 +352,63 @@ fun CardBalanceDeposit(
                 onDismissRequest = { showConfirmDialog = false },
                 title = { Text("确认支付") },
                 text = {
-                    Text(
-                        "您即将从绑定的银行卡扣除￥$amount 元，并充值到校园卡余额中。请确认金额无误后继续操作。",
-                        color = 40.n1 withNight 60.n1
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "请选择支付方式。银行卡支付将从绑定的银行卡扣除￥$amount 元；支付宝支付会复制本地校园卡信息并跳转支付宝校园卡小程序。",
+                            color = 40.n1 withNight 60.n1
+                        )
+                        Text(
+                            text = "姓名：${campusCardUserName.ifBlank { "未获取到" }}\n学号：${campusCardStudentId.ifBlank { "未获取到" }}",
+                            color = 10.n1 withNight 90.n1,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = if (campusCardUserName.isBlank() || campusCardStudentId.isBlank()) {
+                                "本地姓名或学号缺失，跳转后请在支付宝中手动填写。"
+                            } else {
+                                "点击支付宝支付后将复制以上信息，跳转后可在支付宝中粘贴填写。"
+                            },
+                            color = 40.n1 withNight 60.n1,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 },
                 confirmButton = {
-                    Text(
-                        text = "支付",
-                        modifier = Modifier
-                            .clickable {
-                                viewModel.charge(amount)
-                                showConfirmDialog = false
-                            }
-                            .padding(8.dp),
-                        color = 10.n1 withNight 90.n1
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            text = "支付宝支付",
+                            modifier = Modifier
+                                .clickable {
+                                    val identityState = copyCampusCardIdentity(
+                                        context = context,
+                                        name = campusCardUserName,
+                                        studentId = campusCardStudentId
+                                    )
+                                    val message = when (identityState) {
+                                        CampusCardIdentityCopyState.Complete -> "已复制姓名和学号"
+                                        CampusCardIdentityCopyState.Partial -> "本地信息不完整，已复制可用信息"
+                                        CampusCardIdentityCopyState.Empty -> "本地未找到姓名和学号，请在支付宝中手动填写"
+                                    }
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                    openAlipayCampusCard(context)
+                                    showConfirmDialog = false
+                                }
+                                .padding(8.dp),
+                            color = 10.n1 withNight 90.n1
+                        )
+                        Text(
+                            text = "银行卡支付",
+                            modifier = Modifier
+                                .clickable {
+                                    viewModel.charge(amount)
+                                    showConfirmDialog = false
+                                }
+                                .padding(8.dp),
+                            color = 10.n1 withNight 90.n1
+                        )
+                    }
                 },
                 dismissButton = {
                     Text(
@@ -367,4 +424,54 @@ fun CardBalanceDeposit(
 
     }
 
+}
+
+private enum class CampusCardIdentityCopyState {
+    Complete,
+    Partial,
+    Empty
+}
+
+private fun copyCampusCardIdentity(
+    context: Context,
+    name: String,
+    studentId: String
+): CampusCardIdentityCopyState {
+    val trimmedName = name.trim()
+    val trimmedStudentId = studentId.trim()
+    if (trimmedName.isEmpty() && trimmedStudentId.isEmpty()) {
+        return CampusCardIdentityCopyState.Empty
+    }
+
+    val clipText = "姓名：$trimmedName\n学号：$trimmedStudentId"
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    clipboard.setPrimaryClip(ClipData.newPlainText("校园卡身份信息", clipText))
+
+    return if (trimmedName.isNotEmpty() && trimmedStudentId.isNotEmpty()) {
+        CampusCardIdentityCopyState.Complete
+    } else {
+        CampusCardIdentityCopyState.Partial
+    }
+}
+
+private fun openAlipayCampusCard(context: Context) {
+    val openedAlipay = runCatching {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse(ALIPAY_CAMPUS_CARD_SCHEME))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+    }.isSuccess
+
+    if (openedAlipay) return
+
+    val openedFallback = runCatching {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse(ALIPAY_CAMPUS_CARD_FALLBACK_URL))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+    }.isSuccess
+
+    if (!openedFallback) {
+        Toast.makeText(context, "无法打开支付宝校园卡，请稍后重试", Toast.LENGTH_SHORT).show()
+    }
 }
