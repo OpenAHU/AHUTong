@@ -39,6 +39,9 @@ class WeatherViewModel : ViewModel() {
     var lastCity by mutableStateOf<String?>(null)
         private set
 
+    var lastAdcode by mutableStateOf<String?>(null)
+        private set
+
     var lastLocationName by mutableStateOf<String?>(null)
         private set
 
@@ -59,6 +62,7 @@ class WeatherViewModel : ViewModel() {
                 val result = WeatherApi.API.getWeather(city = city)
                 weather = result
                 lastCity = city
+                lastAdcode = null
                 Log.d("Weather", "Fetched weather for city=$city, temp=${result.temperature}")
             } catch (e: Exception) {
                 Log.e("Weather", "Failed to fetch weather", e)
@@ -70,7 +74,33 @@ class WeatherViewModel : ViewModel() {
     }
 
     fun refresh() {
-        fetchWeather(lastCity)
+        if (lastAdcode != null) {
+            fetchWeatherByAdcode(lastAdcode!!)
+        } else {
+            fetchWeather(lastCity)
+        }
+    }
+
+    private fun fetchWeatherByAdcode(adcode: String) {
+        if (isLoading) return
+        isLoading = true
+        errorMessage = null
+
+        viewModelScope.launch {
+            try {
+                val result = WeatherApi.API.getWeather(adcode = adcode)
+                weather = result
+                lastAdcode = adcode
+                lastCity = null
+                result.adcode?.let { AHUCache.saveWeatherAdcode(it) }
+                Log.d("Weather", "Fetched weather for adcode=$adcode, temp=${result.temperature}")
+            } catch (e: Exception) {
+                Log.e("Weather", "Failed to fetch weather by adcode", e)
+                errorMessage = e.message ?: "获取天气失败"
+            } finally {
+                isLoading = false
+            }
+        }
     }
 
     /**
@@ -90,7 +120,8 @@ class WeatherViewModel : ViewModel() {
                     Log.d("Weather", "Using cached adcode: $cachedAdcode")
                     val result = WeatherApi.API.getWeather(adcode = cachedAdcode)
                     weather = result
-                    lastCity = result.adcode
+                    lastAdcode = cachedAdcode
+                    lastCity = null
                     // 刷新缓存
                     result.adcode?.let { AHUCache.saveWeatherAdcode(it) }
                     return@launch
@@ -101,6 +132,7 @@ class WeatherViewModel : ViewModel() {
                 if (city != null) {
                     Log.d("Weather", "GPS located city: $city")
                     lastCity = city
+                    lastAdcode = null
                     lastLocationName = city
                     val result = WeatherApi.API.getWeather(city = city)
                     weather = result
