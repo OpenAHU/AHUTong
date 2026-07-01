@@ -65,6 +65,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.mock.MockScenarioController
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
+import com.ahu.ahutong.ui.state.CardAccountState
 import com.ahu.ahutong.ui.state.CardBalanceDepositViewModel
 import com.ahu.ahutong.ui.state.PaymentState
 import com.kyant.monet.a1
@@ -85,6 +86,7 @@ fun CardBalanceDeposit(
     var amount by remember { mutableStateOf("") }
 
     val cardInfo = viewModel.cardInfo.collectAsState()
+    val accountState by viewModel.accountState.collectAsState()
 
     val paymentState by viewModel.paymentState.collectAsState()
 
@@ -128,7 +130,6 @@ fun CardBalanceDeposit(
                 .clip(SmoothRoundedCornerShape(16.dp))
                 .background(100.n1 withNight 20.n1)
         ) {
-            val balance = 10
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -140,17 +141,30 @@ fun CardBalanceDeposit(
                     style = MaterialTheme.typography.titleMedium
                 )
 
-                val accountInfo = cardInfo.value?.data?.card?.getOrNull(0)?.accinfo
-                    ?.getOrNull(0)
+                when (val state = accountState) {
+                    CardAccountState.Loading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = 30.n1 withNight 70.n1
+                        )
+                    }
 
+                    is CardAccountState.Ready -> {
+                        val accountInfo = state.cardInfo.data.card.getOrNull(0)?.accinfo
+                            ?.getOrNull(0)
+                        Text(
+                            text = accountInfo?.let { "${it.name} ${it.type}" } ?: "--"
+                        )
+                    }
 
-                val account = accountInfo?.let {
-                    "${it.name} ${it.type}"
-                } ?: "--"
-
-                Text(
-                    text = account
-                )
+                    is CardAccountState.Error -> {
+                        Text(
+                            text = "加载失败",
+                            color = Color.Red
+                        )
+                    }
+                }
             }
             Row(
                 modifier = Modifier
@@ -402,8 +416,12 @@ fun CardBalanceDeposit(
                             text = "银行卡支付",
                             modifier = Modifier
                                 .clickable {
-                                    viewModel.charge(amount)
-                                    showConfirmDialog = false
+                                    if (accountState is CardAccountState.Ready) {
+                                        viewModel.charge(amount)
+                                        showConfirmDialog = false
+                                    } else {
+                                        Toast.makeText(context, "校园卡账户仍在加载，请稍后重试", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                                 .padding(8.dp),
                             color = 10.n1 withNight 90.n1

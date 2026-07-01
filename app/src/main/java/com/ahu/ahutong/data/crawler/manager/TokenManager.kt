@@ -2,6 +2,9 @@ package com.ahu.ahutong.data.crawler.manager
 
 import android.util.Log
 import com.ahu.ahutong.data.crawler.api.ycard.YcardApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.net.URLDecoder
 
 object TokenManager {
@@ -11,6 +14,7 @@ object TokenManager {
     private var token :String? = null
 
 
+    @Synchronized
     fun getToken():String?{
         if (!token.isNullOrBlank()) return token
 
@@ -43,6 +47,27 @@ object TokenManager {
             e.printStackTrace()
         }
         return null
+    }
+
+    suspend fun awaitToken(
+        timeoutMillis: Long = 8_000L,
+        retryDelayMillis: Long = 500L
+    ): String? {
+        val deadline = System.currentTimeMillis() + timeoutMillis
+
+        while (System.currentTimeMillis() <= deadline) {
+            val currentToken = withContext(Dispatchers.IO) {
+                getToken()
+            }
+            if (!currentToken.isNullOrBlank()) {
+                return currentToken
+            }
+            delay(retryDelayMillis)
+        }
+
+        return withContext(Dispatchers.IO) {
+            getToken()
+        }
     }
 
     fun clear(){
