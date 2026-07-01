@@ -6,6 +6,7 @@ import com.ahu.ahutong.data.crawler.SdkDataSource
 import com.ahu.ahutong.data.crawler.api.adwmh.AdwmhApi
 import com.ahu.ahutong.data.crawler.api.jwxt.JwxtApi
 import com.ahu.ahutong.data.crawler.configs.Constants
+import com.ahu.ahutong.data.crawler.manager.TokenManager
 import com.ahu.ahutong.data.crawler.model.adwnh.AllCampus
 import com.ahu.ahutong.data.crawler.model.adwnh.AllLostFoundType
 import com.ahu.ahutong.data.crawler.model.adwnh.Info
@@ -46,6 +47,17 @@ object AHURepository {
     fun initializeDataSource(useMock: Boolean = AHUCache.getMockData()) {
         dataSource = if (useMock) MockDataSource() else SdkDataSource()
     }
+
+    private suspend fun ensureYcardCredential(): Boolean {
+        if (AHUCache.getMockData()) return true
+        return !TokenManager.awaitToken().isNullOrBlank()
+    }
+
+    private fun <T> ycardCredentialNotReadyResponse(): AHUResponse<T> =
+        AHUResponse<T>().apply {
+            code = -1
+            msg = "校园卡登录凭证暂未就绪，请稍后重试"
+        }
     
     /**
      * 获取 HTTP 客户端
@@ -418,17 +430,26 @@ object AHURepository {
 
     suspend fun getCardInfo(): AHUResponse<CardInfo> =
         withContext(Dispatchers.IO) {
+            if (!ensureYcardCredential()) {
+                return@withContext ycardCredentialNotReadyResponse()
+            }
             dataSource.getCardInfo()
         }
 
 
     suspend fun getOrderThirdData(request: RequestBody): AHUResponse<Response<ResponseBody>> =
         withContext(Dispatchers.IO){
+            if (!ensureYcardCredential()) {
+                return@withContext ycardCredentialNotReadyResponse()
+            }
             dataSource.getOrderThirdData(request)
         }
 
     suspend fun pay(request: RequestBody):AHUResponse<Response<ResponseBody>> =
         withContext(Dispatchers.IO){
+            if (!ensureYcardCredential()) {
+                return@withContext ycardCredentialNotReadyResponse()
+            }
             dataSource.pay(request)
         }
 
