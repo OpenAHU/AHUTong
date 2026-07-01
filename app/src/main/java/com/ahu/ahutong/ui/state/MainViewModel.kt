@@ -9,10 +9,13 @@ import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.data.server.AhuTong
 import com.ahu.ahutong.data.server.ApkUpdatePolicy
 import com.ahu.ahutong.data.server.model.ApkUpdateInfo
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.util.Log
@@ -25,6 +28,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.security.MessageDigest
+import java.util.concurrent.atomic.AtomicLong
 
 class MainViewModel : ViewModel() {
 
@@ -33,6 +37,8 @@ class MainViewModel : ViewModel() {
         private const val DOWNLOAD_BUFFER_SIZE = 64 * 1024
         private const val PROGRESS_MIN_INTERVAL_MS = 1_000L
         private const val PROGRESS_MIN_DELTA = 0.01f
+        private const val MIRROR_PROMPT_DELAY_MS = 5_000L
+        private const val MIRROR_PROMPT_PROGRESS_THRESHOLD = 0.30f
     }
 
     // App update UI states
@@ -43,6 +49,8 @@ class MainViewModel : ViewModel() {
     var apkErrorText = mutableStateOf<String?>(null)
     var downloadedApkFile = mutableStateOf<File?>(null)
     var apkUpdateChecking = mutableStateOf(false)
+    var showApkMirrorPrompt = mutableStateOf(false)
+    private val apkUsingMirrorSource = mutableStateOf(false)
     /** 本地已存在目标版本 APK，可直接安装 */
     var apkLocalReady = mutableStateOf(false)
 
@@ -153,6 +161,8 @@ class MainViewModel : ViewModel() {
         apkDownloading.value = true
         apkErrorText.value = null
         apkProgress.value = null
+        showApkMirrorPrompt.value = false
+        apkUsingMirrorSource.value = false
         installAfterApkDownload = installAfterDownload
         val appContext = context.applicationContext
 
@@ -199,15 +209,54 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun doApkDownload(context: Context, update: ApkUpdatePolicy.ValidatedUpdate) {
+    private fun doApkDownload(
+        context: Context,
+        update: ApkUpdatePolicy.ValidatedUpdate,
+        useMirrorSource: Boolean = false
+    ) {
         apkDownloading.value = true
         apkErrorText.value = null
         apkProgress.value = null
+        showApkMirrorPrompt.value = false
+        apkUsingMirrorSource.value = useMirrorSource
 
         apkDownloadJob = apkDownloadScope.launch {
             var tempFile: File? = null
+            val completedBytes = AtomicLong(0L)
+            val totalBytes = AtomicLong(-1L)
+            var mirrorPromptJob: Job? = null
             try {
-                val response = openApkDownloadResponse(update.downloadUrl)
+                val downloadUrl = if (useMirrorSource) {
+                    ApkUpdatePolicy.mirrorDownloadUrl(update.downloadUrl).getOrElse {
+                        throw SecurityException("镜像下载地址无效")
+                    }
+                } else {
+                    update.downloadUrl
+                }
+
+                if (!useMirrorSource) {
+                    mirrorPromptJob = launch {
+                        delay(MIRROR_PROMPT_DELAY_MS)
+                        val totalForPrompt = totalBytes.get()
+                        val progressForPrompt = if (totalForPrompt > 0L) {
+                            completedBytes.get().toDouble() / totalForPrompt.toDouble()
+                        } else {
+                            0.0
+                        }
+                        if (progressForPrompt < MIRROR_PROMPT_PROGRESS_THRESHOLD) {
+                            withContext(Dispatchers.Main.immediate) {
+                                if (apkDownloading.value &&
+                                    !apkUsingMirrorSource.value &&
+                                    !showApkMirrorPrompt.value
+                                ) {
+                                    showApkMirrorPrompt.value = true
+                                }
+                            }
+                        }
+                    }
+                }
+
+                val response = openApkDownloadResponse(downloadUrl, allowMirrorHost = useMirrorSource)
                 if (!response.isSuccessful) {
                     closeDownloadResponse(response)
                     throw IOException("下载失败：HTTP ${response.code()}")
@@ -219,6 +268,7 @@ class MainViewModel : ViewModel() {
                 }
 
                 val total = body.contentLength()
+                totalBytes.set(total)
                 if (total > ApkUpdatePolicy.MAX_APK_BYTES) {
                     body.close()
                     throw IOException("安装包过大，请稍后重试")
@@ -248,6 +298,7 @@ class MainViewModel : ViewModel() {
                             while (read >= 0) {
                                 output.write(buffer, 0, read)
                                 completed += read
+                                completedBytes.set(completed)
                                 if (completed > ApkUpdatePolicy.MAX_APK_BYTES) {
                                     throw IOException("安装包超过大小限制")
                                 }
@@ -294,6 +345,8 @@ class MainViewModel : ViewModel() {
                 withContext(Dispatchers.Main) {
                     apkDownloading.value = false
                     apkProgress.value = null
+                    showApkMirrorPrompt.value = false
+                    apkUsingMirrorSource.value = false
                     apkLocalReady.value = true
                     if (installAfterApkDownload) {
                         downloadedApkFile.value = outFile
@@ -302,27 +355,37 @@ class MainViewModel : ViewModel() {
                         showApkUpdateDialog.value = true
                     }
                 }
+            } catch (e: CancellationException) {
+                tempFile?.delete()
+                throw e
             } catch (e: Exception) {
                 tempFile?.delete()
                 withContext(Dispatchers.Main) {
                     apkDownloading.value = false
                     apkProgress.value = null
+                    showApkMirrorPrompt.value = false
+                    apkUsingMirrorSource.value = false
                     apkErrorText.value = e.message ?: "下载失败"
                     if (showDialogWhenApkDownloadCompletes) {
                         showDialogWhenApkDownloadCompletes = false
                         showApkUpdateDialog.value = true
                     }
                 }
+            } finally {
+                mirrorPromptJob?.cancel()
             }
         }
     }
 
-    private suspend fun openApkDownloadResponse(initialUrl: String): Response<ResponseBody> {
+    private suspend fun openApkDownloadResponse(
+        initialUrl: String,
+        allowMirrorHost: Boolean
+    ): Response<ResponseBody> {
         var currentUrl = initialUrl
         repeat(ApkUpdatePolicy.MAX_DOWNLOAD_REDIRECTS + 1) { redirectCount ->
             val response = AhuTong.APK_DOWNLOAD_API.downloadByUrl(currentUrl)
             val finalUrl = response.raw().request.url.toString()
-            ApkUpdatePolicy.validateDownloadUrl(finalUrl).getOrElse {
+            ApkUpdatePolicy.validateDownloadUrl(finalUrl, allowMirrorHost = allowMirrorHost).getOrElse {
                 closeDownloadResponse(response)
                 throw SecurityException("下载地址不受信任")
             }
@@ -337,7 +400,11 @@ class MainViewModel : ViewModel() {
                 if (redirectCount >= ApkUpdatePolicy.MAX_DOWNLOAD_REDIRECTS) {
                     throw IOException("下载重定向次数过多")
                 }
-                currentUrl = ApkUpdatePolicy.validateDownloadUrl(location, finalUrl).getOrElse {
+                currentUrl = ApkUpdatePolicy.validateDownloadUrl(
+                    rawUrl = location,
+                    baseUrl = finalUrl,
+                    allowMirrorHost = allowMirrorHost
+                ).getOrElse {
                     throw SecurityException("下载重定向到不受信任地址")
                 }
                 return@repeat
@@ -346,6 +413,30 @@ class MainViewModel : ViewModel() {
             return response
         }
         throw IOException("下载重定向次数过多")
+    }
+
+    fun keepPrimaryApkDownload() {
+        showApkMirrorPrompt.value = false
+    }
+
+    fun switchApkDownloadToMirror(context: Context) {
+        val update = selectedValidatedUpdate() ?: return
+        showApkMirrorPrompt.value = false
+        if (!apkDownloading.value || apkUsingMirrorSource.value) return
+
+        val appContext = context.applicationContext
+        apkDownloadScope.launch {
+            apkDownloadJob?.cancelAndJoin()
+            withContext(Dispatchers.Main) {
+                if (apkLocalReady.value) {
+                    apkDownloading.value = false
+                    apkProgress.value = null
+                    apkUsingMirrorSource.value = false
+                } else {
+                    doApkDownload(appContext, update, useMirrorSource = true)
+                }
+            }
+        }
     }
 
     private fun closeDownloadResponse(response: Response<ResponseBody>) {
