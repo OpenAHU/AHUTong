@@ -256,10 +256,12 @@ private fun RepositoryItemRow(
                 Box(
                     Modifier.size(32.dp).clip(RoundedCornerShape(6.dp)).background(
                         when (typeLabel) {
-                            "PDF" -> Color(0xFFE53935); "DOC" -> Color(0xFF1565C0)
-                            "PPT" -> Color(0xFFE65100); "XLS" -> Color(0xFF2E7D32)
-                            else -> Color(0xFF757575)
-                        }
+                                "PDF" -> Color(0xFFE53935); "DOC" -> Color(0xFF1565C0)
+                                "PPT" -> Color(0xFFE65100); "XLS" -> Color(0xFF2E7D32)
+                                "IMG" -> Color(0xFF8E24AA); "SVG" -> Color(0xFFFF7043)
+                                "ZIP" -> Color(0xFF795548); "APK" -> Color(0xFF009688)
+                                else -> Color(0xFF757575)
+                            }
                     ), contentAlignment = Alignment.Center
                 ) {
                     Text(typeLabel, style = MaterialTheme.typography.labelSmall, color = Color.White, fontWeight = FontWeight.Bold)

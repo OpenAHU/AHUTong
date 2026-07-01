@@ -271,41 +271,51 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
 
     private fun sortDisplayItems(items: List<GitHubContentItem>): List<GitHubContentItem> {
         val dirs = items.filter { it.type == "dir" }.sortedBy { it.name.lowercase() }
-        val files = items.filter { it.type == "file" }
-            .filter { isDocFile(it.name) }
-            .sortedBy { it.name.lowercase() }
+        val files = items.filter { it.type == "file" }.sortedBy { it.name.lowercase() }
         return dirs + files
     }
 
     companion object {
-        fun isDocFile(name: String): Boolean {
-            val lower = name.lowercase()
-            return lower.endsWith(".pdf") || lower.endsWith(".doc") || lower.endsWith(".docx") ||
-                    lower.endsWith(".ppt") || lower.endsWith(".pptx") || lower.endsWith(".xls") ||
-                    lower.endsWith(".xlsx") || lower.endsWith(".txt") || lower.endsWith(".md")
-        }
-
         fun getMimeType(fileName: String): String {
+            val lower = fileName.lowercase()
             return when {
-                fileName.lowercase().endsWith(".pdf") -> "application/pdf"
-                fileName.lowercase().endsWith(".doc") -> "application/msword"
-                fileName.lowercase().endsWith(".docx") -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                fileName.lowercase().endsWith(".ppt") -> "application/vnd.ms-powerpoint"
-                fileName.lowercase().endsWith(".pptx") -> "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                fileName.lowercase().endsWith(".xls") -> "application/vnd.ms-excel"
-                fileName.lowercase().endsWith(".xlsx") -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                lower.endsWith(".pdf") -> "application/pdf"
+                lower.endsWith(".doc") -> "application/msword"
+                lower.endsWith(".docx") -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                lower.endsWith(".ppt") -> "application/vnd.ms-powerpoint"
+                lower.endsWith(".pptx") -> "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                lower.endsWith(".xls") -> "application/vnd.ms-excel"
+                lower.endsWith(".xlsx") -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                lower.endsWith(".txt") -> "text/plain"
+                lower.endsWith(".md") -> "text/plain"
+                lower.endsWith(".png") -> "image/png"
+                lower.endsWith(".jpg") || lower.endsWith(".jpeg") -> "image/jpeg"
+                lower.endsWith(".gif") -> "image/gif"
+                lower.endsWith(".webp") -> "image/webp"
+                lower.endsWith(".bmp") -> "image/bmp"
+                lower.endsWith(".svg") -> "image/svg+xml"
+                lower.endsWith(".zip") -> "application/zip"
+                lower.endsWith(".rar") -> "application/x-rar-compressed"
+                lower.endsWith(".7z") -> "application/x-7z-compressed"
+                lower.endsWith(".apk") -> "application/vnd.android.package-archive"
                 else -> "*/*"
             }
         }
 
         fun getFileTypeIcon(name: String): String {
+            val lower = name.lowercase()
             return when {
-                name.lowercase().endsWith(".pdf") -> "PDF"
-                name.lowercase().endsWith(".doc") || name.lowercase().endsWith(".docx") -> "DOC"
-                name.lowercase().endsWith(".ppt") || name.lowercase().endsWith(".pptx") -> "PPT"
-                name.lowercase().endsWith(".xls") || name.lowercase().endsWith(".xlsx") -> "XLS"
-                name.lowercase().endsWith(".txt") -> "TXT"
-                name.lowercase().endsWith(".md") -> "MD"
+                lower.endsWith(".pdf") -> "PDF"
+                lower.endsWith(".doc") || lower.endsWith(".docx") -> "DOC"
+                lower.endsWith(".ppt") || lower.endsWith(".pptx") -> "PPT"
+                lower.endsWith(".xls") || lower.endsWith(".xlsx") -> "XLS"
+                lower.endsWith(".txt") -> "TXT"
+                lower.endsWith(".md") -> "MD"
+                lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+                    || lower.endsWith(".gif") || lower.endsWith(".webp") || lower.endsWith(".bmp") -> "IMG"
+                lower.endsWith(".svg") -> "SVG"
+                lower.endsWith(".zip") || lower.endsWith(".rar") || lower.endsWith(".7z") -> "ZIP"
+                lower.endsWith(".apk") -> "APK"
                 else -> "?"
             }
         }

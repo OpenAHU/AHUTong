@@ -15,6 +15,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -84,6 +86,12 @@ fun Weather(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (showSearch) {
+                IconButton(onClick = {
+                    showSearch = false
+                    searchCity = ""
+                }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "关闭搜索")
+                }
                 val doSearch = {
                     if (searchCity.isNotBlank()) {
                         weatherViewModel.fetchWeather(searchCity)
@@ -104,8 +112,14 @@ fun Weather(
                     keyboardOptions = KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { doSearch() }),
                     trailingIcon = {
-                        IconButton(onClick = { doSearch() }) {
-                            Icon(Icons.Default.Search, "搜索")
+                        if (searchCity.isNotEmpty()) {
+                            IconButton(onClick = { searchCity = "" }) {
+                                Icon(Icons.Default.Close, "清空")
+                            }
+                        } else {
+                            IconButton(onClick = { doSearch() }) {
+                                Icon(Icons.Default.Search, "搜索")
+                            }
                         }
                     }
                 )
@@ -206,7 +220,11 @@ fun Weather(
 
     if (showSettings) {
         val config = weatherViewModel.homeConfig
-        ModalBottomSheet(onDismissRequest = { showSettings = false }) {
+        ModalBottomSheet(
+            onDismissRequest = { showSettings = false },
+            containerColor = 100.n1 withNight 15.n1,
+            tonalElevation = 0.dp
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -218,7 +236,7 @@ fun Weather(
                     "天气设置",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    color = 0.n1 withNight 100.n1
                 )
                 Text(
                     "选择要在首页卡片上显示的信息：",
@@ -255,7 +273,7 @@ fun Weather(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(item.label, modifier = Modifier.weight(1f))
+                        Text(item.label, modifier = Modifier.weight(1f), color = 0.n1 withNight 100.n1)
                         Switch(checked = item.value, onCheckedChange = item.onChange)
                     }
                 }
@@ -437,10 +455,12 @@ private fun UmbrellaCard(weather: WeatherResponse) {
 
 @Composable
 private fun HourlyCard(h: com.ahu.ahutong.data.weather.HourlyForecast) {
-    // time format: "2026-02-19T17:00:00+0900" → extract MM-DD and HH
-    val datePart = h.time?.substringAfter("-")?.take(5) ?: ""  // "02-19"
-    val hour = h.time?.substringAfter("T")?.take(2) ?: ""       // "17"
-    val label = if (datePart.isNotEmpty() && hour.isNotEmpty()) "${datePart}日${hour}时" else (h.time?.takeLast(11)?.take(5) ?: "")
+    val timeStr = h.time ?: ""
+    // Format: "YYYY-MM-DD HH:MM:SS" or "YYYY-MM-DDTHH:MM:SS+ZZZZ"
+    val sep = if (timeStr.contains("T")) "T" else " "
+    val datePart = timeStr.substringAfter("-").take(5) // "MM-DD"
+    val hour = timeStr.substringAfter(sep).take(2)     // "HH"
+    val label = if (datePart.length == 5 && hour.length == 2) "${datePart}日${hour}时" else timeStr
     Card(
         modifier = Modifier.width(88.dp),
         colors = CardDefaults.cardColors(containerColor = 100.n1 withNight 20.n1)
