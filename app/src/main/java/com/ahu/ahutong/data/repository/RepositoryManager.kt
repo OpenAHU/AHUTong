@@ -16,13 +16,20 @@ import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 object RepositoryManager {
-    private const val REPO_OWNER = "Kaltsit-cell"
-    private const val REPO_NAME = "AHU-CS-Repository"
-    private const val REPO_BRANCH = "master"
-    private const val RAW_BASE = "https://raw.githubusercontent.com/$REPO_OWNER/$REPO_NAME/$REPO_BRANCH"
-    private const val CDN_BASE = "https://cdn.jsdelivr.net/gh/$REPO_OWNER/$REPO_NAME@$REPO_BRANCH"
-    private const val CONTENT_CACHE_PREFIX = "content_cache_"
-    private const val CONTENT_CACHE_TIME_PREFIX = "content_cache_time_"
+
+    val repositories = listOf(
+        RepoConfig("cs", "计算机科学与技术学院", "Kaltsit-cell", "AHU-CS-Repository", branch = "master"),
+        RepoConfig("ai", "人工智能学院", "DylanAo", "AHU-AI-Repository", branch = "main"),
+        RepoConfig("ic", "集成电路学院", "Tonyseth", "AHU-IC-Design-personal-Repository", branch = "main"),
+        RepoConfig("ee", "电子信息工程学院", "HarryWeasley3", "AHU-EE-Repository", branch = "main"),
+        RepoConfig("internet", "互联网学院", "Zeraora-807", "AHU-Internet-Exams-Archive", branch = "main"),
+        RepoConfig("sbi", "石溪学院", "UponNoise", "AHU_SBI_DMT", branch = "main")
+    )
+
+    private val repoById = repositories.associateBy { it.id }
+
+    fun getRepo(repoId: String): RepoConfig = repoById[repoId] ?: repositories.first()
+    fun getRepoUrl(repoId: String): String = getRepo(repoId).githubUrl
 
     private val gson = Gson()
     private val kv: MMKV by lazy {
@@ -37,40 +44,52 @@ object RepositoryManager {
         .followRedirects(true)
         .build()
 
+    // === Prefix helpers (scoped per repo) ===
+
+    private fun contentCachePrefix(repoId: String) = "content_cache_$repoId/"
+    private fun contentCacheTimePrefix(repoId: String) = "content_cache_time_$repoId/"
+    private fun contentCacheKey(repoId: String, path: String) = Base64.encodeToString(
+        path.toByteArray(Charsets.UTF_8), Base64.NO_WRAP or Base64.URL_SAFE
+    )
+
     // === GitHub API ===
 
-    suspend fun getContents(path: String = ""): List<GitHubContentItem> {
+    suspend fun getContents(repoId: String, path: String = ""): List<GitHubContentItem> {
+        val repo = getRepo(repoId)
         return withContext(Dispatchers.IO) {
-            GitHubApi.instance.getContents(REPO_OWNER, REPO_NAME, encodePath(path), REPO_BRANCH).also {
-                saveContentCache(path, it)
+            GitHubApi.instance.getContents(repo.owner, repo.repo, encodePath(path), repo.branch).also {
+                saveContentCache(repoId, path, it)
             }
         }
     }
 
-    fun getCachedContents(path: String = ""): CachedRepositoryContents? {
-        val key = contentCacheKey(path)
-        val json = kv.decodeString("$CONTENT_CACHE_PREFIX$key", null) ?: return null
+    fun getCachedContents(repoId: String, path: String = ""): CachedRepositoryContents? {
+        val key = contentCacheKey(repoId, path)
+        val json = kv.decodeString("${contentCachePrefix(repoId)}$key", null) ?: return null
         return try {
             val type = object : TypeToken<List<GitHubContentItem>>() {}.type
             val items: List<GitHubContentItem> = gson.fromJson(json, type)
             CachedRepositoryContents(
                 items = items,
-                updateTime = kv.decodeLong("$CONTENT_CACHE_TIME_PREFIX$key", 0L)
+                updateTime = kv.decodeLong("${contentCacheTimePrefix(repoId)}$key", 0L)
             )
         } catch (e: Exception) {
             null
         }
     }
 
-    fun getRawUrl(path: String): String = "$RAW_BASE/${encodePath(path)}"
+    fun getRawUrl(repoId: String, path: String): String {
+        val repo = getRepo(repoId)
+        return "${repo.rawBase}/${encodePath(path)}"
+    }
 
-    /**
-     * 获取所有可用的下载 URL（按优先级排列：CDN 优先）
-     */
-    private fun getDownloadUrls(path: String): List<String> = listOf(
-        "$CDN_BASE/${encodePath(path)}",
-        "$RAW_BASE/${encodePath(path)}"
-    )
+    private fun getDownloadUrls(repoId: String, path: String): List<String> {
+        val repo = getRepo(repoId)
+        return listOf(
+            "${repo.cdnBase}/${encodePath(path)}",
+            "${repo.rawBase}/${encodePath(path)}"
+        )
+    }
 
     // === 下载管理 ===
 
@@ -81,9 +100,6 @@ object RepositoryManager {
         return dir
     }
 
-    /**
-     * 获取所有已下载文件列表
-     */
     fun getDownloadedFiles(context: Context): List<DownloadedFile> {
         val files = getDownloadedPaths(context)
         return files.mapNotNull { (path, localName) ->
@@ -97,40 +113,32 @@ object RepositoryManager {
                     downloadTime = file.lastModified()
                 )
             } else {
-                // 文件已被删除，清理记录
                 removeDownloadRecord(path)
                 null
             }
         }
     }
 
-    /**
-     * 检查文件是否已下载
-     */
     fun isDownloaded(path: String, context: Context): Boolean {
         val localName = getDownloadedLocalName(path) ?: return false
         return File(getDownloadDir(context), localName).exists()
     }
 
-    /**
-     * 下载文件
-     */
     suspend fun downloadFile(
+        repoId: String,
         path: String,
         context: Context,
         onProgress: (Float) -> Unit = {}
     ): File? = withContext(Dispatchers.IO) {
         val localName = getLocalFileName(path)
         val outFile = File(getDownloadDir(context), localName)
-        val urls = getDownloadUrls(path)
+        val urls = getDownloadUrls(repoId, path)
 
         for ((index, url) in urls.withIndex()) {
             try {
                 val request = Request.Builder().url(url).build()
                 val response = downloadClient.newCall(request).execute()
-
                 if (!response.isSuccessful) continue
-
                 val body = response.body ?: continue
                 val total = body.contentLength()
 
@@ -142,19 +150,15 @@ object RepositoryManager {
                         while (read >= 0) {
                             output.write(buffer, 0, read)
                             completed += read
-                            if (total > 0) {
-                                onProgress(completed.toFloat() / total.toFloat())
-                            }
+                            if (total > 0) onProgress(completed.toFloat() / total.toFloat())
                             read = input.read(buffer)
                         }
                         output.flush()
                     }
                 }
-
                 saveDownloadRecord(path, localName)
                 return@withContext outFile
             } catch (e: Exception) {
-                // 当前 URL 失败，尝试下一个
                 if (index == urls.lastIndex) {
                     outFile.delete()
                     return@withContext null
@@ -165,24 +169,16 @@ object RepositoryManager {
         null
     }
 
-    /**
-     * 获取文件的本地 File 对象
-     */
     fun getLocalFile(path: String, context: Context): File? {
         val localName = getDownloadedLocalName(path) ?: return null
         val file = File(getDownloadDir(context), localName)
         return if (file.exists()) file else null
     }
 
-    /**
-     * 删除已下载的文件
-     */
     fun deleteFile(path: String, context: Context): Boolean {
         val file = getLocalFile(path, context) ?: return false
         val deleted = file.delete()
-        if (deleted) {
-            removeDownloadRecord(path)
-        }
+        if (deleted) removeDownloadRecord(path)
         return deleted
     }
 
@@ -193,9 +189,7 @@ object RepositoryManager {
         return try {
             val type = object : TypeToken<List<List<String>>>() {}.type
             val list: List<List<String>> = gson.fromJson(json, type)
-            list.mapNotNull { item ->
-                if (item.size >= 2) Pair(item[0], item[1]) else null
-            }
+            list.mapNotNull { item -> if (item.size >= 2) Pair(item[0], item[1]) else null }
         } catch (e: Exception) {
             emptyList()
         }
@@ -208,24 +202,21 @@ object RepositoryManager {
 
     private fun saveDownloadRecord(path: String, localName: String) {
         val files = getDownloadedPaths(AHUApplication.getApp()).toMutableList()
-        // 移除旧记录
         files.removeAll { it.first == path }
         files.add(Pair(path, localName))
-        val json = gson.toJson(files.map { listOf(it.first, it.second) })
-        kv.encode("downloaded_files", json)
+        kv.encode("downloaded_files", gson.toJson(files.map { listOf(it.first, it.second) }))
     }
 
     private fun removeDownloadRecord(path: String) {
         val files = getDownloadedPaths(AHUApplication.getApp()).toMutableList()
         files.removeAll { it.first == path }
-        val json = gson.toJson(files.map { listOf(it.first, it.second) })
-        kv.encode("downloaded_files", json)
+        kv.encode("downloaded_files", gson.toJson(files.map { listOf(it.first, it.second) }))
     }
 
-    private fun saveContentCache(path: String, items: List<GitHubContentItem>) {
-        val key = contentCacheKey(path)
-        kv.encode("$CONTENT_CACHE_PREFIX$key", gson.toJson(items))
-        kv.encode("$CONTENT_CACHE_TIME_PREFIX$key", System.currentTimeMillis())
+    private fun saveContentCache(repoId: String, path: String, items: List<GitHubContentItem>) {
+        val key = contentCacheKey(repoId, path)
+        kv.encode("${contentCachePrefix(repoId)}$key", gson.toJson(items))
+        kv.encode("${contentCacheTimePrefix(repoId)}$key", System.currentTimeMillis())
     }
 
     private fun getLocalFileName(path: String): String {
@@ -240,12 +231,5 @@ object RepositoryManager {
     private fun encodePath(path: String): String {
         if (path.isEmpty()) return ""
         return path.split('/').joinToString("/") { Uri.encode(it) }
-    }
-
-    private fun contentCacheKey(path: String): String {
-        return Base64.encodeToString(
-            path.toByteArray(Charsets.UTF_8),
-            Base64.NO_WRAP or Base64.URL_SAFE
-        )
     }
 }

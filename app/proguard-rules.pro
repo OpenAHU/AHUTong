@@ -109,3 +109,19 @@
 -keep class com.ahu.ahutong.sdk.ProgressCallback { *; }
 -keep class com.ahu.ahutong.sdk.LocalServiceClient { *; }
 -keep class com.ahu.ahutong.data.server.model.** { *; }
+
+# Data source interface + implementations (prevent R8 from stripping abstract methods)
+-keep interface com.ahu.ahutong.data.base.BaseDataSource { *; }
+-keep class com.ahu.ahutong.data.crawler.CrawlerDataSource { *; }
+-keep class com.ahu.ahutong.data.crawler.SdkDataSource { *; }
+-keep class com.ahu.ahutong.data.mock.MockDataSource { *; }
+
+# Weather API + models (prevent R8 from stripping Gson/Retrofit classes)
+-keep class com.ahu.ahutong.data.weather.** { *; }
+-keep interface com.ahu.ahutong.data.weather.WeatherApi { *; }
+
+# Repository / GitHub models
+-keep class com.ahu.ahutong.data.repository.** { *; }
+
+# AHURepository
+-keep class com.ahu.ahutong.data.AHURepository { *; }

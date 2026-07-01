@@ -12,6 +12,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahu.ahutong.data.repository.DownloadedFile
 import com.ahu.ahutong.data.repository.GitHubContentItem
+import com.ahu.ahutong.data.repository.RepoConfig
 import com.ahu.ahutong.data.repository.RepositoryManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 data class RepositoryUiState(
+    val selectedRepoId: String? = null,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val pendingPath: String? = null,
@@ -31,7 +33,7 @@ data class RepositoryUiState(
     val cacheUpdatedAt: Long? = null,
     val downloadedPaths: Set<String> = emptySet(),
     val downloadProgress: Map<String, Float> = emptyMap(),
-    val downloadingPath: String? = null
+    val downloadingPaths: Set<String> = emptySet(),
 )
 
 class RepositoryViewModel(application: Application) : AndroidViewModel(application) {
@@ -41,14 +43,33 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
     private val _uiState = MutableStateFlow(RepositoryUiState())
     val uiState: StateFlow<RepositoryUiState> = _uiState.asStateFlow()
 
+    fun selectRepo(repoId: String) {
+        val state = _uiState.value
+        _uiState.value = state.copy(
+            selectedRepoId = repoId,
+            items = emptyList(),
+            currentPath = "",
+            pathStack = emptyList(),
+            pendingPath = null,
+            error = null
+        )
+        loadContents()
+    }
+
+    fun resetToRepoSelector() {
+        loadRequestId++
+        _uiState.value = RepositoryUiState()
+    }
+
     fun loadContents(
         path: String = "",
         forceRefresh: Boolean = false,
         targetPathStack: List<String>? = null
     ) {
+        val repoId = _uiState.value.selectedRepoId ?: return
         val requestId = ++loadRequestId
         val startState = _uiState.value
-        val cached = if (forceRefresh) null else RepositoryManager.getCachedContents(path)
+        val cached = if (forceRefresh) null else RepositoryManager.getCachedContents(repoId, path)
         val isSameDisplayedPath = startState.currentPath == path
         val hasDisplayedItems = startState.items.isNotEmpty()
         val nextPathStack = targetPathStack ?: startState.pathStack
@@ -77,7 +98,7 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
 
         viewModelScope.launch {
             try {
-                val items = RepositoryManager.getContents(path)
+                val items = RepositoryManager.getContents(repoId, path)
                 val downloads = refreshDownloadedSet()
                 if (requestId != loadRequestId) return@launch
                 _uiState.value = _uiState.value.copy(
@@ -102,17 +123,9 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
                         isLoading = false,
                         isRefreshing = false,
                         pendingPath = null,
-                        isShowingCachedContents = if (failedNavigation) {
-                            currentState.isShowingCachedContents
-                        } else {
-                            true
-                        },
+                        isShowingCachedContents = if (failedNavigation) currentState.isShowingCachedContents else true,
                         cacheUpdatedAt = cached?.updateTime?.takeIf { it > 0L } ?: currentState.cacheUpdatedAt,
-                        error = if (failedNavigation) {
-                            "无法进入 ${path.substringAfterLast('/')}，仍停留在当前目录"
-                        } else {
-                            null
-                        }
+                        error = if (failedNavigation) "无法进入 ${path.substringAfterLast('/')}，仍停留在当前目录" else null
                     )
                 } else {
                     _uiState.value = _uiState.value.copy(
@@ -144,10 +157,7 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
         if (state.pendingPath != null) {
             loadRequestId++
             _uiState.value = state.copy(
-                isLoading = false,
-                isRefreshing = false,
-                pendingPath = null,
-                error = null
+                isLoading = false, isRefreshing = false, pendingPath = null, error = null
             )
             return true
         }
@@ -159,14 +169,15 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun downloadFile(item: GitHubContentItem) {
+        val repoId = _uiState.value.selectedRepoId ?: return
         viewModelScope.launch {
             val path = item.path
             _uiState.value = _uiState.value.copy(
-                downloadingPath = path,
+                downloadingPaths = _uiState.value.downloadingPaths + path,
                 downloadProgress = _uiState.value.downloadProgress + (path to 0f)
             )
             try {
-                val file = RepositoryManager.downloadFile(path, context) { progress ->
+                val file = RepositoryManager.downloadFile(repoId, path, context) { progress ->
                     _uiState.value = _uiState.value.copy(
                         downloadProgress = _uiState.value.downloadProgress + (path to progress)
                     )
@@ -174,21 +185,21 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
                 if (file != null) {
                     val downloads = refreshDownloadedSet()
                     _uiState.value = _uiState.value.copy(
-                        downloadingPath = null,
+                        downloadingPaths = _uiState.value.downloadingPaths - path,
                         downloadedPaths = downloads,
                         downloadProgress = _uiState.value.downloadProgress - path
                     )
                     Toast.makeText(context, "下载完成: ${item.name}", Toast.LENGTH_SHORT).show()
                 } else {
                     _uiState.value = _uiState.value.copy(
-                        downloadingPath = null,
+                        downloadingPaths = _uiState.value.downloadingPaths - path,
                         downloadProgress = _uiState.value.downloadProgress - path,
                         error = "下载失败: ${item.name}"
                     )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    downloadingPath = null,
+                    downloadingPaths = _uiState.value.downloadingPaths - path,
                     downloadProgress = _uiState.value.downloadProgress - path,
                     error = "下载失败: ${e.message}"
                 )
@@ -198,34 +209,23 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
 
     fun openFile(item: GitHubContentItem) {
         val file = RepositoryManager.getLocalFile(item.path, context)
-        if (file != null) {
-            openWithSystemViewer(file)
-        } else {
-            Toast.makeText(context, "文件不存在，请先下载", Toast.LENGTH_SHORT).show()
-        }
+        if (file != null) openWithSystemViewer(file)
+        else Toast.makeText(context, "文件不存在，请先下载", Toast.LENGTH_SHORT).show()
     }
 
     fun deleteFile(path: String) {
         RepositoryManager.deleteFile(path, context)
-        val downloads = refreshDownloadedSet()
-        _uiState.value = _uiState.value.copy(downloadedPaths = downloads)
+        _uiState.value = _uiState.value.copy(downloadedPaths = refreshDownloadedSet())
     }
 
-    fun getRawUrl(path: String): String = RepositoryManager.getRawUrl(path)
+    fun getDownloadedFiles(): List<DownloadedFile> = RepositoryManager.getDownloadedFiles(context)
 
-    fun getDownloadedFiles(): List<DownloadedFile> {
-        return RepositoryManager.getDownloadedFiles(context)
-    }
-
-    fun getLocalFile(path: String): File? {
-        return RepositoryManager.getLocalFile(path, context)
-    }
+    fun getLocalFile(path: String): File? = RepositoryManager.getLocalFile(path, context)
 
     fun openDownloadedFile(file: DownloadedFile) {
         val localFile = File(file.localPath)
-        if (localFile.exists()) {
-            openWithSystemViewer(localFile)
-        } else {
+        if (localFile.exists()) openWithSystemViewer(localFile)
+        else {
             deleteFile(file.path)
             Toast.makeText(context, "文件已被删除", Toast.LENGTH_SHORT).show()
         }
@@ -233,15 +233,8 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
 
     private fun openWithSystemViewer(file: File) {
         try {
-            if (!file.exists()) {
-                Toast.makeText(context, "文件不存在", Toast.LENGTH_SHORT).show()
-                return
-            }
-            val uri = FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                file
-            )
+            if (!file.exists()) { Toast.makeText(context, "文件不存在", Toast.LENGTH_SHORT).show(); return }
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
             val mimeType = getMimeType(file.name)
             if (!startFileViewer(uri, file.name, mimeType) &&
                 (mimeType == "*/*" || !startFileViewer(uri, file.name, "*/*"))
@@ -267,22 +260,13 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-
-        return try {
-            context.startActivity(chooserIntent)
-            true
-        } catch (e: ActivityNotFoundException) {
-            false
-        }
+        return try { context.startActivity(chooserIntent); true } catch (e: ActivityNotFoundException) { false }
     }
 
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
-    }
+    fun clearError() { _uiState.value = _uiState.value.copy(error = null) }
 
     private fun refreshDownloadedSet(): Set<String> {
-        val files = RepositoryManager.getDownloadedFiles(context)
-        return files.map { it.path }.toSet()
+        return RepositoryManager.getDownloadedFiles(context).map { it.path }.toSet()
     }
 
     private fun sortDisplayItems(items: List<GitHubContentItem>): List<GitHubContentItem> {
@@ -296,38 +280,32 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
     companion object {
         fun isDocFile(name: String): Boolean {
             val lower = name.lowercase()
-            return lower.endsWith(".pdf") || lower.endsWith(".doc") ||
-                    lower.endsWith(".docx") || lower.endsWith(".ppt") ||
-                    lower.endsWith(".pptx") || lower.endsWith(".xls") ||
-                    lower.endsWith(".xlsx") || lower.endsWith(".txt") ||
-                    lower.endsWith(".md")
+            return lower.endsWith(".pdf") || lower.endsWith(".doc") || lower.endsWith(".docx") ||
+                    lower.endsWith(".ppt") || lower.endsWith(".pptx") || lower.endsWith(".xls") ||
+                    lower.endsWith(".xlsx") || lower.endsWith(".txt") || lower.endsWith(".md")
         }
 
         fun getMimeType(fileName: String): String {
-            val lower = fileName.lowercase()
             return when {
-                lower.endsWith(".pdf") -> "application/pdf"
-                lower.endsWith(".doc") -> "application/msword"
-                lower.endsWith(".docx") -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                lower.endsWith(".ppt") -> "application/vnd.ms-powerpoint"
-                lower.endsWith(".pptx") -> "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                lower.endsWith(".xls") -> "application/vnd.ms-excel"
-                lower.endsWith(".xlsx") -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                lower.endsWith(".txt") -> "text/plain"
-                lower.endsWith(".md") -> "text/plain"
+                fileName.lowercase().endsWith(".pdf") -> "application/pdf"
+                fileName.lowercase().endsWith(".doc") -> "application/msword"
+                fileName.lowercase().endsWith(".docx") -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                fileName.lowercase().endsWith(".ppt") -> "application/vnd.ms-powerpoint"
+                fileName.lowercase().endsWith(".pptx") -> "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                fileName.lowercase().endsWith(".xls") -> "application/vnd.ms-excel"
+                fileName.lowercase().endsWith(".xlsx") -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 else -> "*/*"
             }
         }
 
         fun getFileTypeIcon(name: String): String {
-            val lower = name.lowercase()
             return when {
-                lower.endsWith(".pdf") -> "PDF"
-                lower.endsWith(".doc") || lower.endsWith(".docx") -> "DOC"
-                lower.endsWith(".ppt") || lower.endsWith(".pptx") -> "PPT"
-                lower.endsWith(".xls") || lower.endsWith(".xlsx") -> "XLS"
-                lower.endsWith(".txt") -> "TXT"
-                lower.endsWith(".md") -> "MD"
+                name.lowercase().endsWith(".pdf") -> "PDF"
+                name.lowercase().endsWith(".doc") || name.lowercase().endsWith(".docx") -> "DOC"
+                name.lowercase().endsWith(".ppt") || name.lowercase().endsWith(".pptx") -> "PPT"
+                name.lowercase().endsWith(".xls") || name.lowercase().endsWith(".xlsx") -> "XLS"
+                name.lowercase().endsWith(".txt") -> "TXT"
+                name.lowercase().endsWith(".md") -> "MD"
                 else -> "?"
             }
         }
