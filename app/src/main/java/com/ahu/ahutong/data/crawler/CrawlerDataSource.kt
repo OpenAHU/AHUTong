@@ -358,50 +358,62 @@ class CrawlerDataSource : BaseDataSource {
                 }
             } else {
                 val html = res.body()!!.string()
-                val regex = Regex("(?s)studentExamInfoVms\\s*=\\s*(\\[.*?]);")
-                val match = regex.find(html)
-                if (match == null) {
+
+                // Try new HTML table format first (post-redesign: server-rendered <tr> elements)
+                val tableExams = parseExamTableHtml(html)
+                if (tableExams.isNotEmpty()) {
                     AHUResponse<List<Exam>>().apply {
                         code = 0
-                        msg = "未发现考试信息"
-                        data = emptyList()
+                        data = tableExams
+                        msg = ""
                     }
                 } else {
-                    val jsonStr = match.groupValues[1]
-                    val fixedJson = jsonStr.replace("'", "\"")
-                    val jsonArray = JsonParser.parseString(fixedJson).asJsonArray
-                    val list = mutableListOf<Exam>()
-                    jsonArray.forEach { elem ->
-                        val obj = elem.asJsonObject
-                        val courseObj = obj.getAsJsonObject("course")
-                        val examTypeObj = obj.getAsJsonObject("examType")
-                        val courseName = courseObj?.get("nameZh")?.asString ?: ""
-                        val examTypeName = examTypeObj?.get("nameZh")?.asString ?: ""
-                        val courseDisplay = if (examTypeName.isNotEmpty()) "$courseName($examTypeName)" else courseName
-                        val time = obj.get("examTime")?.asString ?: ""
-                        val seatVal = obj.get("seatNo")
-                        val seatNum = when {
-                            seatVal == null || seatVal.isJsonNull -> ""
-                            seatVal.isJsonPrimitive && seatVal.asJsonPrimitive.isNumber -> seatVal.asNumber.toString()
-                            else -> seatVal.asString
+                    // Fallback: old format with studentExamInfoVms JS variable
+                    val regex = Regex("(?s)studentExamInfoVms\\s*=\\s*(\\[.*?]);")
+                    val match = regex.find(html)
+                    if (match == null) {
+                        AHUResponse<List<Exam>>().apply {
+                            code = 0
+                            msg = "未发现考试信息"
+                            data = emptyList()
                         }
-                        val campus = obj.getAsJsonObject("requiredCampus")?.get("nameZh")?.asString ?: ""
-                        val room = obj.get("room")?.asString ?: ""
-                        val location = if (campus.isNotEmpty() && room.isNotEmpty()) "$campus-$room" else campus + room
-                        val finished = obj.get("finished")?.asBoolean ?: false
-                        val exam = Exam().apply {
-                            setCourse(courseDisplay)
-                            setTime(time)
-                            setSeatNum(seatNum)
-                            setLocation(location)
-                            setFinished(finished)
+                    } else {
+                        val jsonStr = match.groupValues[1]
+                        val fixedJson = jsonStr.replace("'", "\"")
+                        val jsonArray = JsonParser.parseString(fixedJson).asJsonArray
+                        val list = mutableListOf<Exam>()
+                        jsonArray.forEach { elem ->
+                            val obj = elem.asJsonObject
+                            val courseObj = obj.getAsJsonObject("course")
+                            val examTypeObj = obj.getAsJsonObject("examType")
+                            val courseName = courseObj?.get("nameZh")?.asString ?: ""
+                            val examTypeName = examTypeObj?.get("nameZh")?.asString ?: ""
+                            val courseDisplay = if (examTypeName.isNotEmpty()) "$courseName($examTypeName)" else courseName
+                            val time = obj.get("examTime")?.asString ?: ""
+                            val seatVal = obj.get("seatNo")
+                            val seatNum = when {
+                                seatVal == null || seatVal.isJsonNull -> ""
+                                seatVal.isJsonPrimitive && seatVal.asJsonPrimitive.isNumber -> seatVal.asNumber.toString()
+                                else -> seatVal.asString
+                            }
+                            val campus = obj.getAsJsonObject("requiredCampus")?.get("nameZh")?.asString ?: ""
+                            val room = obj.get("room")?.asString ?: ""
+                            val location = if (campus.isNotEmpty() && room.isNotEmpty()) "$campus-$room" else campus + room
+                            val finished = obj.get("finished")?.asBoolean ?: false
+                            val exam = Exam().apply {
+                                setCourse(courseDisplay)
+                                setTime(time)
+                                setSeatNum(seatNum)
+                                setLocation(location)
+                                setFinished(finished)
+                            }
+                            list.add(exam)
                         }
-                        list.add(exam)
-                    }
-                    AHUResponse<List<Exam>>().apply {
-                        code = 0
-                        data = list
-                        msg = ""
+                        AHUResponse<List<Exam>>().apply {
+                            code = 0
+                            data = list
+                            msg = ""
+                        }
                     }
                 }
             }
@@ -410,6 +422,69 @@ class CrawlerDataSource : BaseDataSource {
                 code = -1
                 msg = "解析失败: ${e.message}"
                 data = emptyList()
+            }
+        }
+    }
+
+    /**
+     * Parse exam info from the new server-rendered HTML table format.
+     * The page renders exams as <tr> elements with seat data in a JS variable studentExamList.
+     */
+    private fun parseExamTableHtml(html: String): List<Exam> {
+        // 1. Parse studentExamList for seat number mapping (exam id -> seat number)
+        val seatMap = mutableMapOf<String, String>()
+        val seatListRegex = Regex("(?s)var\\s+studentExamList\\s*=\\s*(\\[.+?\\]);")
+        seatListRegex.find(html)?.let { match ->
+            val jsonStr = match.groupValues[1].replace("'", "\"")
+            try {
+                val arr = JsonParser.parseString(jsonStr).asJsonArray
+                arr.forEach {
+                    val obj = it.asJsonObject
+                    val id = obj.get("id")?.asString ?: obj.get("id")?.asLong?.toString() ?: ""
+                    val seat = obj.get("seatNo")?.asString ?: obj.get("seatNo")?.asLong?.toString() ?: ""
+                    if (id.isNotEmpty()) seatMap[id] = seat
+                }
+            } catch (_: Exception) { }
+        }
+
+        // 2. Parse HTML table rows
+        val doc = Jsoup.parse(html)
+        val rows = doc.select("tr[data-finished]")
+        if (rows.isEmpty()) return emptyList()
+
+        return rows.map { row ->
+            val finished = row.attr("data-finished") == "true"
+
+            // Time from <div class="time ...">
+            val time = row.select("div.time").first()?.text()?.trim() ?: ""
+
+            // Course name from bold <span>
+            val course = row.select("span[style*=font-weight]").firstOrNull { el ->
+                el.attr("style").contains("bold")
+            }?.text()?.trim() ?: ""
+
+            // Exam type from <span class="tag-span typeX">
+            val examType = row.select("span.tag-span").first()?.text()?.trim() ?: ""
+
+            // Seat exam ID from <span id="seat-NNN">
+            val seatId = row.select("span[id^=seat-]").first()?.id()?.removePrefix("seat-") ?: ""
+            val seatNum = seatMap[seatId] ?: ""
+
+            // Location: campus, building, room from spans in first <td>
+            val firstTd = row.select("td").first()
+            val locationSpans = firstTd?.select("span")?.filter {
+                !it.id().startsWith("seat-") && it.text().trim().isNotEmpty()
+            } ?: emptyList()
+            val location = locationSpans.joinToString("-") { it.text().trim() }
+
+            val courseDisplay = if (examType.isNotEmpty()) "$course($examType)" else course
+
+            Exam().apply {
+                setCourse(courseDisplay)
+                setTime(time)
+                setSeatNum(seatNum)
+                setLocation(location)
+                setFinished(finished)
             }
         }
     }
