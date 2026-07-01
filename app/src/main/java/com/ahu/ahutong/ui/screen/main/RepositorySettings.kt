@@ -2,6 +2,7 @@ package com.ahu.ahutong.ui.screen.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -113,6 +114,13 @@ private fun RepositoryAccelerationSourceRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
+    val descriptionColor = if (isDark) {
+        Color.White.copy(alpha = 0.72f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,7 +136,7 @@ private fun RepositoryAccelerationSourceRow(
             )
             Text(
                 text = source.description,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = descriptionColor,
                 style = MaterialTheme.typography.bodyMedium
             )
         }

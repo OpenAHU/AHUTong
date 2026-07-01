@@ -496,6 +496,11 @@ private fun RepositoryItemRow(
         fileAccentColor.copy(alpha = 0.14f)
     }
     val fileBadgeTextColor = if (isDark) Color.White else fileAccentColor
+    val secondaryTextColor = if (isDark) {
+        Color.White.copy(alpha = 0.72f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     Row(
         modifier = Modifier
@@ -570,7 +575,7 @@ private fun RepositoryItemRow(
                     formatSize(item.size)
                 },
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = secondaryTextColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -701,8 +706,13 @@ internal fun formatSize(bytes: Long): String {
 
 @Composable
 private fun RepositoryFooter() {
+    val isDark = isSystemInDarkTheme()
     val context = LocalContext.current
-    val textColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val textColor = if (isDark) {
+        Color.White.copy(alpha = 0.72f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     val linkColor = Color(0xFF42A5F5)
 
     Row(
