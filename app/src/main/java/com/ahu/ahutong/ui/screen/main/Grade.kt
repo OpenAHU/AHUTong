@@ -268,7 +268,6 @@ fun Grade(gradeViewModel: GradeViewModel = viewModel()) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     val infoList = listOf(
                         "本学期平均绩点" to gradeViewModel.termGradePointAverage,
-                        "本学年平均绩点" to gradeViewModel.yearGradePointAverage,
                         "全程平均绩点" to gradeViewModel.totalGradePointAverage,
                         "全程专业排名" to ((gpaRankInfo?.majorRank ?: "暂无").toString() + "/" + (gpaRankInfo?.majorHeadCount ?: "暂无")),
                         "该学期专业排名" to ((currentRank?.majorRank ?: "暂无").toString() + "/" + (gpaRankInfo?.majorHeadCount ?: "暂无")),
