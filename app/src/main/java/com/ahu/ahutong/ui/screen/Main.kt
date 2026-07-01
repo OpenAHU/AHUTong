@@ -25,7 +25,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.NavHostController
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import com.ahu.ahutong.appwidget.ScheduleAppWidgetReceiver
 import com.ahu.ahutong.data.gray.GrayFeatures
@@ -40,10 +42,14 @@ import com.ahu.ahutong.ui.screen.main.Home
 import com.ahu.ahutong.ui.screen.main.LostFound
 import com.ahu.ahutong.ui.screen.main.PhoneBook
 import com.ahu.ahutong.ui.screen.main.Schedule
+import com.ahu.ahutong.ui.screen.main.REPOSITORY_DIRECTORY_ROUTE
+import com.ahu.ahutong.ui.screen.main.REPOSITORY_PATH_ARG
+import com.ahu.ahutong.ui.screen.main.REPOSITORY_ROUTE
 import com.ahu.ahutong.ui.screen.main.SchoolCalendar
 import com.ahu.ahutong.ui.screen.main.Tools
 import com.ahu.ahutong.ui.screen.main.Repository
 import com.ahu.ahutong.ui.screen.main.RepositoryDownloads
+import com.ahu.ahutong.ui.screen.main.RepositorySettings
 import com.ahu.ahutong.ui.screen.main.Weather
 import com.ahu.ahutong.ui.screen.settings.Contributors
 import com.ahu.ahutong.ui.screen.settings.Debug
@@ -187,11 +193,32 @@ fun Main(
             animatedComposable("weather") {
                 Weather()
             }
-            animatedComposable("repository") {
-                Repository(navController = navController)
+            animatedComposable(REPOSITORY_ROUTE) {
+                Repository(
+                    navController = navController,
+                    path = ""
+                )
+            }
+            animatedComposable(
+                route = REPOSITORY_DIRECTORY_ROUTE,
+                arguments = listOf(
+                    navArgument(REPOSITORY_PATH_ARG) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = ""
+                    }
+                )
+            ) { backStackEntry ->
+                Repository(
+                    navController = navController,
+                    path = backStackEntry.arguments?.getString(REPOSITORY_PATH_ARG).orEmpty()
+                )
             }
             animatedComposable("repository_downloads") {
                 RepositoryDownloads(navController = navController)
+            }
+            animatedComposable("repository_settings") {
+                RepositorySettings(navController = navController)
             }
             animatedComposable("settings") {
                 Settings(

@@ -83,9 +83,15 @@ android {
     }
 }
 
+val rustSdkArm64Output = project.file("src/main/jniLibs/arm64-v8a/libahutong_rs.so")
+val rebuildRustSdk = providers.environmentVariable("AHUTONG_REBUILD_RUST")
+    .map { it == "1" || it.equals("true", ignoreCase = true) }
+    .orElse(false)
+val shouldBuildRustSdkArm64 = rebuildRustSdk.get() || !rustSdkArm64Output.exists()
+
 val buildRustSdkArm64 by tasks.registering(Exec::class) {
     group = "build"
-    description = "Build the Rust SDK arm64-v8a shared library into app jniLibs."
+    description = "Build the Rust SDK arm64-v8a shared library into app jniLibs when requested."
 
     workingDir = rootProject.file("sdk")
     inputs.dir(rootProject.file("sdk/src"))
@@ -93,7 +99,7 @@ val buildRustSdkArm64 by tasks.registering(Exec::class) {
     inputs.file(rootProject.file("GuiXu-Rust/Cargo.toml"))
     inputs.file(rootProject.file("GuiXu-Rust/Cargo.lock"))
     inputs.file(rootProject.file("sdk/Cargo.toml"))
-    outputs.file(project.file("src/main/jniLibs/arm64-v8a/libahutong_rs.so"))
+    outputs.file(rustSdkArm64Output)
 
     commandLine(
         "cargo",
@@ -111,7 +117,9 @@ val buildRustSdkArm64 by tasks.registering(Exec::class) {
 
 tasks.matching { it.name == "mergeDebugJniLibFolders" || it.name == "mergeReleaseJniLibFolders" }
     .configureEach {
-        dependsOn(buildRustSdkArm64)
+        if (shouldBuildRustSdkArm64) {
+            dependsOn(buildRustSdkArm64)
+        }
     }
 
 dependencies {
@@ -140,6 +148,7 @@ dependencies {
     implementation(libs.monet)
     implementation(libs.kyant0.backdrop)
     implementation(libs.kyant0.capsule)
+    implementation(libs.markwon.core)
 
     implementation(platform(libs.kotlin.bom))
     implementation(libs.kotlin.stdlib)

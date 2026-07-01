@@ -2,6 +2,7 @@ package com.ahu.ahutong.ui.screen.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +49,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.data.repository.DownloadedFile
+import com.ahu.ahutong.data.repository.RepositoryManager
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.RepositoryViewModel
 import com.kyant.monet.a1
@@ -57,14 +60,21 @@ import com.kyant.monet.withNight
 fun RepositoryDownloads(
     navController: NavHostController
 ) {
+    val isDark = isSystemInDarkTheme()
     val context = LocalContext.current
     val activity = context as androidx.activity.ComponentActivity
     val viewModel: RepositoryViewModel = viewModel(viewModelStoreOwner = activity)
+    val markdownState by viewModel.markdownState.collectAsState()
     var files by remember { mutableStateOf(viewModel.getDownloadedFiles()) }
     var deleteConfirmPath by remember { mutableStateOf<String?>(null) }
     var batchDeleteTargets by remember { mutableStateOf<List<String>?>(null) }
     var isManaging by remember { mutableStateOf(false) }
     var selectedPaths by remember { mutableStateOf(setOf<String>()) }
+    val secondaryTextColor = if (isDark) {
+        Color.White.copy(alpha = 0.72f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     fun refreshFiles() {
         files = viewModel.getDownloadedFiles()
@@ -113,10 +123,10 @@ fun RepositoryDownloads(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("暂无下载文件", style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        color = secondaryTextColor)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("浏览学习资料时可下载文件", style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        color = secondaryTextColor)
                 }
             }
         } else {
@@ -124,7 +134,7 @@ fun RepositoryDownloads(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 items(files, key = { it.path }) { file ->
                     val isSelected = file.path in selectedPaths
@@ -174,13 +184,18 @@ fun RepositoryDownloads(
                         Text(
                             "删除选中 (${selectedPaths.size})",
                             color = if (selectedPaths.isNotEmpty()) Color(0xFFFF5252)
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                    else secondaryTextColor
                         )
                     }
                 }
             }
         }
     }
+
+    RepositoryMarkdownReader(
+        markdownState = markdownState,
+        onDismiss = { viewModel.clearMarkdown() }
+    )
 
     // 单个删除确认
     deleteConfirmPath?.let { path ->
@@ -259,16 +274,39 @@ private fun DownloadedFileRow(
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
     val typeLabel = RepositoryViewModel.getFileTypeIcon(file.name)
+    val fileAccentColor = when (typeLabel) {
+        "PDF" -> Color(0xFFE53935)
+        "DOC" -> Color(0xFF1565C0)
+        "PPT" -> Color(0xFFE65100)
+        "XLS" -> Color(0xFF2E7D32)
+        else -> Color(0xFF757575)
+    }
+    val fileBadgeColor = if (isDark) {
+        fileAccentColor.copy(alpha = 0.88f)
+    } else {
+        fileAccentColor.copy(alpha = 0.14f)
+    }
+    val fileBadgeTextColor = if (isDark) Color.White else fileAccentColor
+    val secondaryTextColor = if (isDark) {
+        Color.White.copy(alpha = 0.72f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    val uncheckedCheckboxColor = if (isDark) {
+        Color.White.copy(alpha = 0.88f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-            .clip(SmoothRoundedCornerShape(16.dp))
-            .background(100.n1 withNight 30.n1)
+            .padding(horizontal = 18.dp)
+            .clip(RoundedCornerShape(24.dp))
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 6.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 管理模式：复选框
@@ -276,7 +314,7 @@ private fun DownloadedFileRow(
             Icon(
                 imageVector = if (isSelected) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
                 contentDescription = if (isSelected) "已选择" else "未选择",
-                tint = if (isSelected) 90.a1 withNight 90.a1 else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isSelected) 90.a1 withNight 90.a1 else uncheckedCheckboxColor,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -285,40 +323,32 @@ private fun DownloadedFileRow(
         // 类型标签
         Box(
             modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(
-                    when (typeLabel) {
-                        "PDF" -> Color(0xFFE53935)
-                        "DOC" -> Color(0xFF1565C0)
-                        "PPT" -> Color(0xFFE65100)
-                        "XLS" -> Color(0xFF2E7D32)
-                        else -> Color(0xFF757575)
-                    }
-                ),
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(fileBadgeColor),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = typeLabel,
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.White,
+                color = fileBadgeTextColor,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(18.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = file.name,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMedium,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "${formatSize(file.size)} · ${file.path}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = "${formatSize(file.size)} · ${RepositoryManager.formatDisplayPath(file.path)}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = secondaryTextColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
