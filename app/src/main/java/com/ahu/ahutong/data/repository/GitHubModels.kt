@@ -30,6 +30,21 @@ data class DownloadedFile(
 /**
  * 本地缓存的目录内容
  */
+/**
+ * 学院仓库配置
+ */
+data class RepoConfig(
+    val id: String,
+    val name: String,           // "计算机科学与技术学院"
+    val owner: String,
+    val repo: String,
+    val branch: String = "master"
+) {
+    val rawBase get() = "https://raw.githubusercontent.com/$owner/$repo/$branch"
+    val cdnBase get() = "https://cdn.jsdelivr.net/gh/$owner/$repo@$branch"
+    val githubUrl get() = "https://github.com/$owner/$repo"
+}
+
 data class CachedRepositoryContents(
     val items: List<GitHubContentItem>,
     val updateTime: Long
