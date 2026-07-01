@@ -13,7 +13,30 @@ data class GitHubContentItem(
     @SerializedName("download_url")
     val downloadUrl: String? = null,
     @SerializedName("html_url")
-    val htmlUrl: String? = null
+    val htmlUrl: String? = null,
+    val repositoryId: String? = null,
+    val repositoryPath: String? = null,
+    val containsOnlyUnsupportedFiles: Boolean = false
+)
+
+data class GitHubTreeResponse(
+    val tree: List<GitHubTreeItem> = emptyList(),
+    val truncated: Boolean = false
+)
+
+data class GitHubTreeItem(
+    val path: String,
+    val type: String,        // "blob" or "tree"
+    val size: Long = 0
+)
+
+data class JsDelivrFlatResponse(
+    val files: List<JsDelivrFlatFile> = emptyList()
+)
+
+data class JsDelivrFlatFile(
+    val name: String,
+    val size: Long = 0
 )
 
 /**
@@ -24,7 +47,8 @@ data class DownloadedFile(
     val path: String,         // GitHub 路径
     val localPath: String,    // 本地文件路径
     val size: Long = 0,
-    val downloadTime: Long = System.currentTimeMillis()
+    val downloadTime: Long = System.currentTimeMillis(),
+    val uri: String? = null
 )
 
 /**
@@ -48,4 +72,23 @@ data class RepoConfig(
 data class CachedRepositoryContents(
     val items: List<GitHubContentItem>,
     val updateTime: Long
+)
+
+data class RepositoryDirectorySummary(
+    val directoryCount: Int = 0,
+    val fileCount: Int = 0
+)
+
+data class RepositoryMarkdownDocument(
+    val title: String,
+    val path: String,
+    val content: String
+)
+
+data class RepositoryAccelerationSource(
+    val id: String,
+    val name: String,
+    val description: String,
+    val proxyPrefix: String? = null,
+    val useJsDelivr: Boolean = false
 )

@@ -18,6 +18,14 @@ interface GitHubApi {
         @Query("ref") ref: String = "master"
     ): List<GitHubContentItem>
 
+    @GET("repos/{owner}/{repo}/git/trees/{tree}")
+    suspend fun getTree(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String,
+        @Path("tree") tree: String,
+        @Query("recursive") recursive: String = "1"
+    ): GitHubTreeResponse
+
     companion object {
         private const val BASE_URL = "https://api.github.com/"
 

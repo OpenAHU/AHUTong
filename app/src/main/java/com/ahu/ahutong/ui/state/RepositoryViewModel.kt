@@ -12,7 +12,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahu.ahutong.data.repository.DownloadedFile
 import com.ahu.ahutong.data.repository.GitHubContentItem
-import com.ahu.ahutong.data.repository.RepoConfig
+import com.ahu.ahutong.data.repository.RepositoryDirectorySummary
+import com.ahu.ahutong.data.repository.RepositoryMarkdownDocument
 import com.ahu.ahutong.data.repository.RepositoryManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,211 +22,334 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 data class RepositoryUiState(
-    val selectedRepoId: String? = null,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val pendingPath: String? = null,
+    val isLoaded: Boolean = false,
     val items: List<GitHubContentItem> = emptyList(),
     val currentPath: String = "",
-    val pathStack: List<String> = emptyList(),
     val error: String? = null,
     val isShowingCachedContents: Boolean = false,
     val cacheUpdatedAt: Long? = null,
+    val directorySummaries: Map<String, RepositoryDirectorySummary> = emptyMap()
+)
+
+data class RepositorySharedUiState(
     val downloadedPaths: Set<String> = emptySet(),
     val downloadProgress: Map<String, Float> = emptyMap(),
-    val downloadingPaths: Set<String> = emptySet(),
+    val downloadingPath: String? = null,
+    val isCacheWarming: Boolean = false,
+    val cacheWarmUpCount: Int = 0
+)
+
+data class RepositoryScrollPosition(
+    val index: Int = 0,
+    val offset: Int = 0
+)
+
+data class RepositoryMarkdownUiState(
+    val isLoading: Boolean = false,
+    val document: RepositoryMarkdownDocument? = null,
+    val error: String? = null
 )
 
 class RepositoryViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context get() = getApplication()
     private var loadRequestId = 0
+    private val pathRequestIds = mutableMapOf<String, Int>()
+    private val scrollPositions = mutableMapOf<String, RepositoryScrollPosition>()
+    private var hasStartedWarmUp = false
 
-    private val _uiState = MutableStateFlow(RepositoryUiState())
-    val uiState: StateFlow<RepositoryUiState> = _uiState.asStateFlow()
+    private val _directoryStates = MutableStateFlow<Map<String, RepositoryUiState>>(emptyMap())
+    val directoryStates: StateFlow<Map<String, RepositoryUiState>> = _directoryStates.asStateFlow()
 
-    fun selectRepo(repoId: String) {
-        val state = _uiState.value
-        _uiState.value = state.copy(
-            selectedRepoId = repoId,
-            items = emptyList(),
-            currentPath = "",
-            pathStack = emptyList(),
-            pendingPath = null,
-            error = null
+    private val _sharedState = MutableStateFlow(
+        RepositorySharedUiState(downloadedPaths = refreshDownloadedSet())
+    )
+    val sharedState: StateFlow<RepositorySharedUiState> = _sharedState.asStateFlow()
+
+    private val _markdownState = MutableStateFlow(RepositoryMarkdownUiState())
+    val markdownState: StateFlow<RepositoryMarkdownUiState> = _markdownState.asStateFlow()
+
+    fun getInitialDirectoryState(path: String): RepositoryUiState {
+        return _directoryStates.value[path] ?: cachedDirectoryState(path) ?: RepositoryUiState(
+            currentPath = path,
+            isLoading = true
         )
-        loadContents()
     }
 
-    fun resetToRepoSelector() {
-        loadRequestId++
-        _uiState.value = RepositoryUiState()
+    fun getDirectoryState(path: String): RepositoryUiState {
+        return _directoryStates.value[path] ?: cachedDirectoryState(path) ?: RepositoryUiState(
+            currentPath = path,
+            isLoading = true
+        )
     }
 
-    fun loadContents(
-        path: String = "",
-        forceRefresh: Boolean = false,
-        targetPathStack: List<String>? = null
-    ) {
-        val repoId = _uiState.value.selectedRepoId ?: return
+    fun getSharedState(): RepositorySharedUiState = _sharedState.value
+
+    fun ensureLoaded(path: String) {
+        val state = _directoryStates.value[path]
+        if (state == null || !state.isLoaded && state.error == null) {
+            loadContents(path)
+        }
+    }
+
+    fun loadContents(path: String = "", forceRefresh: Boolean = false) {
         val requestId = ++loadRequestId
-        val startState = _uiState.value
-        val cached = if (forceRefresh) null else RepositoryManager.getCachedContents(repoId, path)
-        val isSameDisplayedPath = startState.currentPath == path
-        val hasDisplayedItems = startState.items.isNotEmpty()
-        val nextPathStack = targetPathStack ?: startState.pathStack
+        pathRequestIds[path] = requestId
+        val cached = if (forceRefresh) null else RepositoryManager.getCachedContents(path)
+        val startState = _directoryStates.value[path] ?: cachedDirectoryState(path)
 
         if (cached != null) {
-            _uiState.value = startState.copy(
-                isLoading = false,
-                isRefreshing = true,
-                pendingPath = null,
-                items = sortDisplayItems(cached.items),
-                currentPath = path,
-                pathStack = nextPathStack,
-                error = null,
-                isShowingCachedContents = true,
-                cacheUpdatedAt = cached.updateTime.takeIf { it > 0L },
-                downloadedPaths = refreshDownloadedSet()
-            )
-        } else {
-            _uiState.value = startState.copy(
-                isLoading = !hasDisplayedItems,
-                isRefreshing = hasDisplayedItems,
-                pendingPath = path.takeIf { !isSameDisplayedPath },
+            setDirectoryState(path, directoryStateFromCache(path, cached.items, cached.updateTime))
+            return
+        }
+
+        setDirectoryState(
+            path,
+            (startState ?: RepositoryUiState(currentPath = path)).copy(
+                isLoading = startState?.items.isNullOrEmpty(),
+                isRefreshing = !startState?.items.isNullOrEmpty(),
+                isLoaded = startState?.isLoaded == true,
                 error = null
             )
-        }
+        )
 
         viewModelScope.launch {
             try {
-                val items = RepositoryManager.getContents(repoId, path)
-                val downloads = refreshDownloadedSet()
-                if (requestId != loadRequestId) return@launch
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    isRefreshing = false,
-                    pendingPath = null,
-                    items = sortDisplayItems(items),
-                    currentPath = path,
-                    pathStack = nextPathStack,
-                    downloadedPaths = downloads,
-                    isShowingCachedContents = false,
-                    cacheUpdatedAt = System.currentTimeMillis(),
-                    error = null
+                val items = RepositoryManager.getContents(path, forceRefresh = forceRefresh)
+                if (pathRequestIds[path] != requestId) return@launch
+                val sortedItems = sortDisplayItems(path, items)
+                setDirectoryState(
+                    path,
+                    RepositoryUiState(
+                        isLoading = false,
+                        isRefreshing = false,
+                        isLoaded = true,
+                        items = sortedItems,
+                        currentPath = path,
+                        isShowingCachedContents = false,
+                        cacheUpdatedAt = System.currentTimeMillis(),
+                        directorySummaries = RepositoryManager.getDirectorySummaries(sortedItems)
+                    )
+                )
+                _sharedState.value = _sharedState.value.copy(
+                    downloadedPaths = refreshDownloadedSet()
                 )
             } catch (e: Exception) {
-                if (requestId != loadRequestId) return@launch
-                val currentState = _uiState.value
-                val canKeepDisplayedItems = currentState.items.isNotEmpty()
-                if (canKeepDisplayedItems) {
-                    val failedNavigation = !isSameDisplayedPath && cached == null
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        isRefreshing = false,
-                        pendingPath = null,
-                        isShowingCachedContents = if (failedNavigation) currentState.isShowingCachedContents else true,
-                        cacheUpdatedAt = cached?.updateTime?.takeIf { it > 0L } ?: currentState.cacheUpdatedAt,
-                        error = if (failedNavigation) "无法进入 ${path.substringAfterLast('/')}，仍停留在当前目录" else null
+                if (pathRequestIds[path] != requestId) return@launch
+                val fallback = RepositoryManager.getCachedContents(path)
+                if (fallback != null) {
+                    setDirectoryState(
+                        path,
+                        directoryStateFromCache(path, fallback.items, fallback.updateTime).copy(
+                            error = null
+                        )
                     )
                 } else {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        isRefreshing = false,
-                        pendingPath = null,
-                        error = "加载失败: ${e.message}"
+                    setDirectoryState(
+                        path,
+                        (_directoryStates.value[path] ?: RepositoryUiState(currentPath = path)).copy(
+                            isLoading = false,
+                            isRefreshing = false,
+                            error = "加载失败: ${e.message}"
+                        )
                     )
                 }
             }
         }
     }
 
-    fun refreshCurrentDirectory() {
-        loadContents(_uiState.value.currentPath, forceRefresh = true)
-    }
-
-    fun enterDirectory(item: GitHubContentItem) {
-        if (item.type != "dir") return
-        val state = _uiState.value
-        if (state.pendingPath != null) return
-        val newPath = item.path
-        if (newPath == state.currentPath) return
-        loadContents(newPath, targetPathStack = state.pathStack + state.currentPath)
-    }
-
-    fun goBack(): Boolean {
-        val state = _uiState.value
-        if (state.pendingPath != null) {
-            loadRequestId++
-            _uiState.value = state.copy(
-                isLoading = false, isRefreshing = false, pendingPath = null, error = null
-            )
-            return true
+    fun warmUpAllContentCaches(forceRefresh: Boolean = false) {
+        if (hasStartedWarmUp && !forceRefresh) return
+        hasStartedWarmUp = true
+        _sharedState.value = _sharedState.value.copy(
+            isCacheWarming = true,
+            cacheWarmUpCount = 0
+        )
+        viewModelScope.launch {
+            runCatching {
+                RepositoryManager.warmUpAllContentCaches(
+                    forceRefresh = forceRefresh,
+                    onProgress = { fetchedCount ->
+                        _sharedState.value = _sharedState.value.copy(
+                            isCacheWarming = true,
+                            cacheWarmUpCount = fetchedCount
+                        )
+                    }
+                )
+            }.onSuccess { updateTime ->
+                val states = _directoryStates.value.toMutableMap()
+                states.keys.toList().forEach { path ->
+                    RepositoryManager.getCachedContents(path)?.let { cached ->
+                        states[path] = directoryStateFromCache(path, cached.items, updateTime)
+                    }
+                }
+                _directoryStates.value = states
+                _sharedState.value = _sharedState.value.copy(
+                    isCacheWarming = false,
+                    cacheWarmUpCount = 0
+                )
+            }.onFailure {
+                _sharedState.value = _sharedState.value.copy(
+                    isCacheWarming = false,
+                    cacheWarmUpCount = 0
+                )
+            }
         }
-        val stack = state.pathStack
-        if (stack.isEmpty()) return false
-        val parentPath = stack.last()
-        loadContents(parentPath, targetPathStack = stack.dropLast(1))
-        return true
+    }
+
+    fun refreshDirectory(path: String) {
+        loadContents(path, forceRefresh = true)
+    }
+
+    fun saveScrollPosition(path: String, index: Int, offset: Int) {
+        scrollPositions[path] = RepositoryScrollPosition(index, offset)
+    }
+
+    fun getScrollPosition(path: String): RepositoryScrollPosition {
+        return scrollPositions[path] ?: RepositoryScrollPosition()
     }
 
     fun downloadFile(item: GitHubContentItem) {
-        val repoId = _uiState.value.selectedRepoId ?: return
         viewModelScope.launch {
             val path = item.path
-            _uiState.value = _uiState.value.copy(
-                downloadingPaths = _uiState.value.downloadingPaths + path,
-                downloadProgress = _uiState.value.downloadProgress + (path to 0f)
+            _sharedState.value = _sharedState.value.copy(
+                downloadingPath = path,
+                downloadProgress = _sharedState.value.downloadProgress + (path to 0f)
             )
             try {
-                val file = RepositoryManager.downloadFile(repoId, path, context) { progress ->
-                    _uiState.value = _uiState.value.copy(
-                        downloadProgress = _uiState.value.downloadProgress + (path to progress)
+                val file = RepositoryManager.downloadFile(path, context) { progress ->
+                    _sharedState.value = _sharedState.value.copy(
+                        downloadProgress = _sharedState.value.downloadProgress + (path to progress)
                     )
                 }
                 if (file != null) {
                     val downloads = refreshDownloadedSet()
-                    _uiState.value = _uiState.value.copy(
-                        downloadingPaths = _uiState.value.downloadingPaths - path,
+                    _sharedState.value = _sharedState.value.copy(
+                        downloadingPath = null,
                         downloadedPaths = downloads,
-                        downloadProgress = _uiState.value.downloadProgress - path
+                        downloadProgress = _sharedState.value.downloadProgress - path
                     )
                     Toast.makeText(context, "下载完成: ${item.name}", Toast.LENGTH_SHORT).show()
                 } else {
-                    _uiState.value = _uiState.value.copy(
-                        downloadingPaths = _uiState.value.downloadingPaths - path,
-                        downloadProgress = _uiState.value.downloadProgress - path,
-                        error = "下载失败: ${item.name}"
+                    _sharedState.value = _sharedState.value.copy(
+                        downloadingPath = null,
+                        downloadProgress = _sharedState.value.downloadProgress - path
                     )
+                    setPathError(item.parentPath(), buildDownloadErrorMessage(item.name))
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    downloadingPaths = _uiState.value.downloadingPaths - path,
-                    downloadProgress = _uiState.value.downloadProgress - path,
-                    error = "下载失败: ${e.message}"
+                _sharedState.value = _sharedState.value.copy(
+                    downloadingPath = null,
+                    downloadProgress = _sharedState.value.downloadProgress - path
                 )
+                setPathError(item.parentPath(), buildDownloadErrorMessage(e.message))
             }
         }
     }
 
     fun openFile(item: GitHubContentItem) {
-        val file = RepositoryManager.getLocalFile(item.path, context)
-        if (file != null) openWithSystemViewer(file)
-        else Toast.makeText(context, "文件不存在，请先下载", Toast.LENGTH_SHORT).show()
+        if (isMarkdownFile(item.name)) {
+            loadMarkdown(item.path)
+            return
+        }
+        val file = RepositoryManager.getDownloadedFile(item.path, context)
+        if (file != null) {
+            openDownloadedFile(file)
+        } else {
+            Toast.makeText(context, "文件不存在，请先下载", Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun deleteFile(path: String) {
         RepositoryManager.deleteFile(path, context)
-        _uiState.value = _uiState.value.copy(downloadedPaths = refreshDownloadedSet())
+        val downloads = refreshDownloadedSet()
+        _sharedState.value = _sharedState.value.copy(downloadedPaths = downloads)
     }
 
-    fun getDownloadedFiles(): List<DownloadedFile> = RepositoryManager.getDownloadedFiles(context)
+    fun getRawUrl(path: String): String = RepositoryManager.getRawUrl(path)
 
-    fun getLocalFile(path: String): File? = RepositoryManager.getLocalFile(path, context)
+    fun getGitHubUrl(path: String): String = RepositoryManager.getGitHubUrl(path)
+
+    fun shouldShowUnsupportedDirectoryMessage(path: String): Boolean {
+        return RepositoryManager.shouldShowUnsupportedDirectoryMessage(path)
+    }
+
+    fun loadMarkdown(path: String) {
+        _markdownState.value = RepositoryMarkdownUiState(isLoading = true)
+        viewModelScope.launch {
+            runCatching {
+                RepositoryManager.getMarkdownDocument(path)
+            }.onSuccess { document ->
+                _markdownState.value = RepositoryMarkdownUiState(document = document)
+            }.onFailure { e ->
+                _markdownState.value = RepositoryMarkdownUiState(
+                    error = "Markdown 加载失败: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun clearMarkdown() {
+        _markdownState.value = RepositoryMarkdownUiState()
+    }
+
+    private fun loadDownloadedMarkdown(file: DownloadedFile) {
+        _markdownState.value = RepositoryMarkdownUiState(isLoading = true)
+        viewModelScope.launch {
+            runCatching {
+                val uri = file.uri?.let { Uri.parse(it) }
+                val content = if (uri != null) {
+                    context.contentResolver.openInputStream(uri)?.bufferedReader()?.use {
+                        it.readText()
+                    } ?: throw IllegalStateException("无法读取本地 Markdown")
+                } else {
+                    val localFile = File(file.localPath)
+                    if (!localFile.exists()) {
+                        deleteFile(file.path)
+                        throw IllegalStateException("文件已被删除")
+                    }
+                    localFile.readText()
+                }
+                RepositoryMarkdownDocument(
+                    title = file.name,
+                    path = file.path,
+                    content = content
+                )
+            }.onSuccess { document ->
+                _markdownState.value = RepositoryMarkdownUiState(document = document)
+            }.onFailure { e ->
+                _markdownState.value = RepositoryMarkdownUiState(
+                    error = "Markdown 加载失败: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun getDownloadedFiles(): List<DownloadedFile> {
+        return RepositoryManager.getDownloadedFiles(context)
+    }
+
+    fun getLocalFile(path: String): File? {
+        return RepositoryManager.getLocalFile(path, context)
+    }
 
     fun openDownloadedFile(file: DownloadedFile) {
+        if (isMarkdownFile(file.name)) {
+            loadDownloadedMarkdown(file)
+            return
+        }
+
+        val uri = file.uri?.let { Uri.parse(it) }
+        if (uri != null) {
+            openUriWithSystemViewer(uri, file.name)
+            return
+        }
+
         val localFile = File(file.localPath)
-        if (localFile.exists()) openWithSystemViewer(localFile)
-        else {
+        if (localFile.exists()) {
+            openWithSystemViewer(localFile)
+        } else {
             deleteFile(file.path)
             Toast.makeText(context, "文件已被删除", Toast.LENGTH_SHORT).show()
         }
@@ -233,11 +357,32 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
 
     private fun openWithSystemViewer(file: File) {
         try {
-            if (!file.exists()) { Toast.makeText(context, "文件不存在", Toast.LENGTH_SHORT).show(); return }
-            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            if (!file.exists()) {
+                Toast.makeText(context, "文件不存在", Toast.LENGTH_SHORT).show()
+                return
+            }
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
             val mimeType = getMimeType(file.name)
             if (!startFileViewer(uri, file.name, mimeType) &&
                 (mimeType == "*/*" || !startFileViewer(uri, file.name, "*/*"))
+            ) {
+                Toast.makeText(context, "没有找到可打开此文件的软件", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("RepoViewer", "打开失败: ${e.message}", e)
+            Toast.makeText(context, "打开失败: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun openUriWithSystemViewer(uri: Uri, fileName: String) {
+        try {
+            val mimeType = getMimeType(fileName)
+            if (!startFileViewer(uri, fileName, mimeType) &&
+                (mimeType == "*/*" || !startFileViewer(uri, fileName, "*/*"))
             ) {
                 Toast.makeText(context, "没有找到可打开此文件的软件", Toast.LENGTH_SHORT).show()
             }
@@ -260,22 +405,88 @@ class RepositoryViewModel(application: Application) : AndroidViewModel(applicati
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        return try { context.startActivity(chooserIntent); true } catch (e: ActivityNotFoundException) { false }
+
+        return try {
+            context.startActivity(chooserIntent)
+            true
+        } catch (e: ActivityNotFoundException) {
+            false
+        }
     }
 
-    fun clearError() { _uiState.value = _uiState.value.copy(error = null) }
+    fun clearError(path: String) {
+        _directoryStates.value[path]?.let { state ->
+            setDirectoryState(path, state.copy(error = null))
+        }
+    }
+
+    private fun cachedDirectoryState(path: String): RepositoryUiState? {
+        val cached = RepositoryManager.getCachedContents(path) ?: return null
+        return directoryStateFromCache(path, cached.items, cached.updateTime)
+    }
+
+    private fun directoryStateFromCache(
+        path: String,
+        items: List<GitHubContentItem>,
+        updateTime: Long
+    ): RepositoryUiState {
+        val sortedItems = sortDisplayItems(path, items)
+        return RepositoryUiState(
+            isLoading = false,
+            isRefreshing = false,
+            isLoaded = true,
+            items = sortedItems,
+            currentPath = path,
+            isShowingCachedContents = true,
+            cacheUpdatedAt = updateTime.takeIf { it > 0L },
+            directorySummaries = RepositoryManager.getDirectorySummaries(sortedItems)
+        )
+    }
+
+    private fun setDirectoryState(path: String, state: RepositoryUiState) {
+        _directoryStates.value = _directoryStates.value + (path to state.copy(currentPath = path))
+    }
+
+    private fun setPathError(path: String, message: String) {
+        setDirectoryState(
+            path,
+            (_directoryStates.value[path] ?: cachedDirectoryState(path) ?: RepositoryUiState(
+                currentPath = path
+            )).copy(error = message)
+        )
+    }
+
+    private fun GitHubContentItem.parentPath(): String = path.substringBeforeLast('/', "")
 
     private fun refreshDownloadedSet(): Set<String> {
-        return RepositoryManager.getDownloadedFiles(context).map { it.path }.toSet()
+        val files = RepositoryManager.getDownloadedFiles(context)
+        return files.map { it.path }.toSet()
     }
 
-    private fun sortDisplayItems(items: List<GitHubContentItem>): List<GitHubContentItem> {
+    private fun buildDownloadErrorMessage(detail: String?): String {
+        val suffix = "，可前往学习资料设置更换下载源后重试"
+        val normalizedDetail = detail?.takeIf { it.isNotBlank() } ?: "未知原因"
+        return "下载失败: $normalizedDetail$suffix"
+    }
+
+    private fun sortDisplayItems(path: String, items: List<GitHubContentItem>): List<GitHubContentItem> {
+        if (path.isBlank()) {
+            return items.sortedWith(
+                compareBy<GitHubContentItem> { if (it.type == "dir") 0 else 1 }
+                    .thenBy { RepositoryManager.getRepositoryOrder(it.path) }
+                    .thenBy { it.name.lowercase() }
+            )
+        }
         val dirs = items.filter { it.type == "dir" }.sortedBy { it.name.lowercase() }
         val files = items.filter { it.type == "file" }.sortedBy { it.name.lowercase() }
         return dirs + files
     }
 
     companion object {
+        fun isMarkdownFile(name: String): Boolean {
+            return name.lowercase().endsWith(".md")
+        }
+
         fun getMimeType(fileName: String): String {
             val lower = fileName.lowercase()
             return when {

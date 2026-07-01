@@ -32,6 +32,10 @@ class PreferencesViewModel @Inject constructor(private val preferencesManager: P
     val courseReminderLiveCountdownEnabled: StateFlow<Boolean> =
         _courseReminderLiveCountdownEnabled.asStateFlow()
 
+    private val _repositoryAccelerationSource = MutableStateFlow("jsdelivr")
+    val repositoryAccelerationSource: StateFlow<String> =
+        _repositoryAccelerationSource.asStateFlow()
+
     init {
         viewModelScope.launch {
             preferencesManager.themeColor.collect {
@@ -61,6 +65,11 @@ class PreferencesViewModel @Inject constructor(private val preferencesManager: P
         viewModelScope.launch {
             preferencesManager.courseReminderLiveCountdownEnabled.collect {
                 _courseReminderLiveCountdownEnabled.value = it
+            }
+        }
+        viewModelScope.launch {
+            preferencesManager.repositoryAccelerationSource.collect {
+                _repositoryAccelerationSource.value = it
             }
         }
     }
@@ -98,6 +107,12 @@ class PreferencesViewModel @Inject constructor(private val preferencesManager: P
     fun setThemeColor(value: String?) {
         viewModelScope.launch {
             preferencesManager.setThemeColor(value)
+        }
+    }
+
+    fun setRepositoryAccelerationSource(value: String) {
+        viewModelScope.launch {
+            preferencesManager.setRepositoryAccelerationSource(value)
         }
     }
 }

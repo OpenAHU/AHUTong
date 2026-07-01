@@ -18,6 +18,7 @@ object PreferencesKeys {
     val COURSE_REMINDER_LIVE_COUNTDOWN_ENABLED =
         booleanPreferencesKey("course_reminder_live_countdown_enabled")
     val THEME_COLOR = stringPreferencesKey("theme_color_hex")
+    val REPOSITORY_ACCELERATION_SOURCE = stringPreferencesKey("repository_acceleration_source")
 }
 
 private val Context.dataStore by preferencesDataStore(name = "user_pref")
@@ -35,6 +36,16 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
             } else {
                 prefs[PreferencesKeys.THEME_COLOR] = value
             }
+        }
+    }
+
+    val repositoryAccelerationSource: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[PreferencesKeys.REPOSITORY_ACCELERATION_SOURCE] ?: "jsdelivr"
+    }
+
+    suspend fun setRepositoryAccelerationSource(value: String) {
+        context.dataStore.edit { prefs ->
+            prefs[PreferencesKeys.REPOSITORY_ACCELERATION_SOURCE] = value
         }
     }
 

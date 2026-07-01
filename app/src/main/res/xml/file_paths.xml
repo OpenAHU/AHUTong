@@ -3,4 +3,6 @@
     <external-files-path name="external_files" path="." />
     <external-files-path name="ext_repo" path="repository/" />
     <files-path name="repo_files" path="repository/" />
+    <external-path name="public_downloads" path="Download/" />
+    <external-path name="public_repository" path="Download/ahutong/" />
 </paths>

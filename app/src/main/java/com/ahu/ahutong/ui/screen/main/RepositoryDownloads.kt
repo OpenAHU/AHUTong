@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +48,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ahu.ahutong.data.repository.DownloadedFile
+import com.ahu.ahutong.data.repository.RepositoryManager
 import com.ahu.ahutong.ui.shape.SmoothRoundedCornerShape
 import com.ahu.ahutong.ui.state.RepositoryViewModel
 import com.kyant.monet.a1
@@ -60,6 +62,7 @@ fun RepositoryDownloads(
     val context = LocalContext.current
     val activity = context as androidx.activity.ComponentActivity
     val viewModel: RepositoryViewModel = viewModel(viewModelStoreOwner = activity)
+    val markdownState by viewModel.markdownState.collectAsState()
     var files by remember { mutableStateOf(viewModel.getDownloadedFiles()) }
     var deleteConfirmPath by remember { mutableStateOf<String?>(null) }
     var batchDeleteTargets by remember { mutableStateOf<List<String>?>(null) }
@@ -181,6 +184,11 @@ fun RepositoryDownloads(
             }
         }
     }
+
+    RepositoryMarkdownReader(
+        markdownState = markdownState,
+        onDismiss = { viewModel.clearMarkdown() }
+    )
 
     // 单个删除确认
     deleteConfirmPath?.let { path ->
@@ -316,7 +324,7 @@ private fun DownloadedFileRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "${formatSize(file.size)} · ${file.path}",
+                text = "${formatSize(file.size)} · ${RepositoryManager.formatDisplayPath(file.path)}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
