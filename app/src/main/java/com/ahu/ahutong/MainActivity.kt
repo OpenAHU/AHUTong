@@ -25,6 +25,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.ahu.ahutong.appwidget.WidgetUpdateScheduler
+import com.ahu.ahutong.BuildConfig
 import com.ahu.ahutong.data.dao.AHUCache
 import com.ahu.ahutong.ext.launchSafe
 import com.ahu.ahutong.sdk.LocalServiceClient
@@ -275,6 +276,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun validateApkBeforeInstall(apkFile: File): String? {
+
+        if (BuildConfig.DEBUG) return null
+        
         if (!apkFile.exists() || apkFile.length() <= 0L) {
             return "安装包不存在或为空"
         }
