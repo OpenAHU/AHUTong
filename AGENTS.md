@@ -6,7 +6,7 @@
 
 1. 克隆或更新 AIO 根仓时，默认只拉取根仓内容，不使用 `--recurse-submodules`，也不要执行无目标的 `git submodule update --init --recursive`。
 2. 仅修改根仓的 README、文档、图片或子模块配置时，不需要初始化任何客户端子仓。
-3. 只有当用户明确要求开发、构建、检查或修改某个平台客户端时，才按下方 Worktree 规范创建独立工作区，并在其中初始化对应子仓。子仓优先使用浅克隆，例如开发 Android 时执行：
+3. 只有当用户明确要求开发、构建、检查或修改客户端时，才按下方 Worktree 规范创建独立工作区，并在其中初始化任务涉及的一个或多个子仓。子仓优先使用浅克隆，例如开发 Android 时执行：
 
    ```bash
    git submodule sync -- Android
@@ -26,7 +26,7 @@
 ## Worktree 使用规范
 
 1. AIO 根仓的主工作区只用于仓库编排、公共文档和子模块指针维护，不直接在其中进行客户端开发。
-2. 每个客户端开发任务都必须从 AIO 根仓创建独立 worktree。AIO worktree 使用 detached HEAD，不为根仓额外创建功能分支；worktree 目录应位于根仓之外，并使用“平台-任务”命名。
+2. 每个客户端开发任务都必须从 AIO 根仓创建独立 worktree。AIO worktree 使用 detached HEAD，不为根仓额外创建功能分支；worktree 目录应位于根仓之外，并使用能表达平台范围和任务目标的名称。
 3. 创建 worktree 前先执行 `git worktree list` 检查现有工作区。以下命令以 Android 登录任务为例：
 
    ```bash
@@ -35,10 +35,17 @@
    git -C ../AHUTong-worktrees/android-login submodule update --init --depth 1 Android
    ```
 
-4. 一个 worktree 只服务一个明确任务，并且只初始化该任务需要的客户端子仓；不要在同一 worktree 中混合 Android、HarmonyOS 和 iOS 开发。
-5. 进入目标子仓后，先阅读该子仓的 `AGENTS.md` 和项目本地 Skills，再切换基线、创建子仓开发分支并开始修改。分支和提交规则属于目标子仓，不属于 detached 的 AIO worktree。
-6. 如果客户端开发完成后需要更新 AIO 的 gitlink，应先把客户端 commit 推送到子仓远端，再回到 AIO 根仓主工作区更新子模块指针。
-7. 清理 worktree 前必须确认目标子仓改动已经提交并推送，且根仓与子仓工作区均干净。然后从 AIO 根仓主工作区执行：
+4. 一个 worktree 只服务一个明确任务，但可以初始化该任务需要的多个客户端子仓。单端任务默认只拉取一个子仓；迁移、跨端对照或联调任务可以在同一 worktree 中浅拉所有相关子仓，但仍不得拉取无关子仓。例如把 Android 功能迁移到 iOS 时可以执行：
+
+   ```bash
+   git worktree add --detach ../AHUTong-worktrees/android-to-ios-schedule master
+   git -C ../AHUTong-worktrees/android-to-ios-schedule submodule sync -- Android iOS
+   git -C ../AHUTong-worktrees/android-to-ios-schedule submodule update --init --depth 1 Android iOS
+   ```
+
+5. 进入每个目标子仓后，先阅读该子仓的 `AGENTS.md` 和项目本地 Skills，再切换基线、创建子仓开发分支并开始修改。分支和提交规则属于目标子仓，不属于 detached 的 AIO worktree。
+6. 如果客户端开发完成后需要更新 AIO 的 gitlink，应先把涉及的客户端 commit 分别推送到对应子仓远端，再回到 AIO 根仓主工作区更新子模块指针。
+7. 清理 worktree 前必须确认所有目标子仓的改动已经提交并推送，且根仓与各子仓工作区均干净。然后从 AIO 根仓主工作区执行；多仓任务需要在子模块命令中列出全部已初始化的子仓：
 
    ```bash
    git -C ../AHUTong-worktrees/android-login submodule update --checkout Android
