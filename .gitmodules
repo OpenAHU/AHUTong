@@ -1,8 +1,8 @@
 [submodule "Android"]
 	path = Android
 	url = https://github.com/OpenAHU/AHUTong-Android.git
-[submodule "IOS"]
-	path = IOS
+[submodule "iOS"]
+	path = iOS
 	url = https://github.com/OpenAHU/AHUTong-iOS.git
 [submodule "HarmonyOS"]
 	path = HarmonyOS

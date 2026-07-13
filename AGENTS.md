@@ -1,6 +1,6 @@
 # AHUTong AIO 协作规范
 
-本仓库是 AHUTong 的 AIO（All in One）入口仓库，用于管理公共说明、资源以及各平台客户端子仓。当前包含 `Android`、`HarmonyOS` 和 `IOS` 子模块。
+本仓库是 AHUTong 的 AIO（All in One）入口仓库，用于管理公共说明、资源以及各平台客户端子仓。当前包含 `Android`、`HarmonyOS` 和 `iOS` 子模块。
 
 ## 子仓按需拉取
 
