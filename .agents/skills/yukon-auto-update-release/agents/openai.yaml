@@ -1,0 +1,6 @@
+interface:
+  display_name: "AHUTong AIO Release"
+  short_description: "选择客户端平台并执行受约束的生产发版"
+  default_prompt: "Use $yukon-auto-update-release to perform an AHUTong 发版."
+policy:
+  allow_implicit_invocation: true

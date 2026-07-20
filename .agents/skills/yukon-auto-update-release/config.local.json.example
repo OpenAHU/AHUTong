@@ -1,0 +1,18 @@
+{
+  "keystore": {
+    "path": null,
+    "store_password": null,
+    "key_alias": null,
+    "key_password": null
+  },
+  "server": {
+    "host": null,
+    "port": null,
+    "username": null,
+    "auth_method": null,
+    "known_hosts_path": null,
+    "password": null,
+    "private_key_path": null,
+    "private_key_passphrase": null
+  }
+}

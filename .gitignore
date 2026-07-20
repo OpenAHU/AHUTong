@@ -1,23 +1,15 @@
+# AIO task worktrees
+/.worktree/
+
+# Local release credentials
+/.agents/skills/yukon-auto-update-release/config.local.json
+
+# Local editor and OS state
+/.idea/
+/.vscode/
 *.iml
-.gradle
-.kotlin/
-/local.properties
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
-app/ahu.jks
-app/map.txt
-.idea
-.gradle-user-home/
-.gradle_user_home/
-.trae/
-*.txt
-.vscode/settings.json
-star.md
-.agents/skills/yukon-auto-update-release/config.local.json
-.agents/skills/yukon-auto-update-release/.work/
-.hermes/
-.work/
+Thumbs.db
+
+# Personal notes
+/star.md
