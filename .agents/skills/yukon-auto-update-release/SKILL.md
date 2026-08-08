@@ -55,7 +55,7 @@ SSH host keys must already be trusted through the operating-system `known_hosts`
 3. Confirm the release branch was pushed and the remote branch tip equals that SHA.
 4. Complete the platform's post-publish verification before changing the AIO gitlink.
 
-For Android the branch must be `release/<versionName>`. Do not substitute `master`, a tag, the current checkout, or an unpushed local ref.
+For Android the branch must be `release/<versionName>`. Do not substitute `master`, a tag, the current checkout, or an unpushed local ref. When the user explicitly requests the version already published by the server, accept the Android workflow's same-version hotfix result: it must keep `versionName`, increment `versionCode`, apply the complete linear work-branch commit range to the existing release branch, and atomically push that release branch with Android `master` before publishing.
 
 ## Update the AIO Gitlink
 
