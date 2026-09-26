@@ -7,3 +7,6 @@
 [submodule "HarmonyOS"]
 	path = HarmonyOS
 	url = https://github.com/OpenAHU/AHUTong-HarmonyOS.git
+[submodule "MacOS"]
+	path = MacOS
+	url = https://github.com/OpenAHU/AHUTong-MacOS.git
